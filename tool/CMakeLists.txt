@@ -5,6 +5,8 @@ set(CMAKE_CXX_STANDARD 14)
 
 include_directories(../include)
 
+message("BUILD TYPE: "${CMAKE_BUILD_TYPE}"\tBIN DIR: "${CMAKE_CURRENT_BINARY_DIR}"\tSOURCE_DIR: "${CMAKE_CURRENT_SOURCE_DIR}"\tCMAKE_SOURCE_DIR: "${CMAKE_SOURCE_DIR})
+
 add_custom_target(
   generated_tokens flex -s -o ${CMAKE_SOURCE_DIR}/include/token.cpp --header-file=${CMAKE_SOURCE_DIR}/include/token.h ${CMAKE_SOURCE_DIR}/src/gql.l
   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/tool
