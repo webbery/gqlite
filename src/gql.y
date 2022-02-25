@@ -138,8 +138,7 @@ utility_cmd: CMD_SHOW KW_GRAPH
             std::vector<std::string> vg = GSinglecton::get<GStorageEngine>()->getGraphs();
             gqlite_result results;
             results.count = vg.size();
-            printf("COUNT: %d\n", results.count);
-            results.graphs = (char**)malloc(results.count);
+            results.graphs = (char**)malloc(results.count * sizeof(char*));
             for (size_t idx = 0; idx < results.count; ++idx) {
               results.graphs[idx] = (char*)malloc(vg[idx].size() + 1);
               memcpy(results.graphs[idx], vg[idx].data(), vg[idx].size() + 1);

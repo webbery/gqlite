@@ -5,14 +5,6 @@ set(CMAKE_CXX_STANDARD 14)
 
 include_directories(../include)
 
-set(COMMANDLINE_SOURCE ./gqlcmd.cpp)
-set(EXPORT_SOURCE ./gqlexport.cpp)
-
-add_executable(gql ${COMMANDLINE_SOURCE})
-add_executable(gqldump ${EXPORT_SOURCE})
-target_link_libraries(gql PUBLIC gqlite)
-target_link_libraries(gqldump PUBLIC gqlite)
-
 add_custom_target(
   generated_tokens flex -s -o ${CMAKE_SOURCE_DIR}/include/token.cpp --header-file=${CMAKE_SOURCE_DIR}/include/token.h ${CMAKE_SOURCE_DIR}/src/gql.l
   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/tool
@@ -26,3 +18,11 @@ add_custom_target(
   COMMENT "Generating gql.cpp ..."
   DEPENDS generated_tokens
 )
+
+set(COMMANDLINE_SOURCE ./gqlcmd.cpp)
+set(EXPORT_SOURCE ./gqlexport.cpp)
+
+add_executable(gql ${COMMANDLINE_SOURCE})
+add_executable(gqldump ${EXPORT_SOURCE})
+target_link_libraries(gql PUBLIC gqlite)
+target_link_libraries(gqldump PUBLIC gqlite)

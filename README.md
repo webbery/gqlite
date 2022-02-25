@@ -8,7 +8,7 @@
   <img src="https://codecov.io/gh/webbery/gqlite/branch/master/graph/badge.svg?token=3S0K5GCIYC"/>
 </a>
 
-This is the expriments for testing boundery of graph database in embedding device.  
+This is the expriments for testing abilities of graph database in ending device.  
 
 <!-- vscode-markdown-toc -->
 * 1. [Designed](#Designed)

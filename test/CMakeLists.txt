@@ -28,7 +28,7 @@ add_executable(storage ${STORAGE_SOURCE})
 target_link_libraries(grammar PUBLIC gqlite)
 target_link_libraries(storage PUBLIC mdbx-static)
 
-find_package (Python3 COMPONENTS Interpreter Development)
+find_package(Python3 COMPONENTS Interpreter Development)
 
 add_custom_target(
  before_test ALL
