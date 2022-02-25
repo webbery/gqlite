@@ -18,11 +18,3 @@ add_custom_target(
   COMMENT "Generating gql.cpp ..."
   DEPENDS generated_tokens
 )
-
-set(COMMANDLINE_SOURCE ./gqlcmd.cpp)
-set(EXPORT_SOURCE ./gqlexport.cpp)
-
-add_executable(gql ${COMMANDLINE_SOURCE})
-add_executable(gqldump ${EXPORT_SOURCE})
-target_link_libraries(gql PUBLIC gqlite)
-target_link_libraries(gqldump PUBLIC gqlite)

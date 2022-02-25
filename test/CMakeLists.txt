@@ -3,6 +3,8 @@ project(GQLlite_Test)
 
 include_directories(../include)
 
+set(COMMANDLINE_SOURCE ../tool/gqlcmd.cpp)
+set(EXPORT_SOURCE ../tool/gqlexport.cpp)
 set(TEST_GRAMMAR_SOURCE ./grammar.cpp)
 set(STORAGE_SOURCE
 	./storage.cpp
@@ -24,7 +26,11 @@ set(PARSER_SOURCE
 
 add_executable(grammar ${TEST_GRAMMAR_SOURCE})
 add_executable(storage ${STORAGE_SOURCE})
+add_executable(gql ${COMMANDLINE_SOURCE})
+add_executable(gqldump ${EXPORT_SOURCE})
 
+target_link_libraries(gql PUBLIC gqlite)
+target_link_libraries(gqldump PUBLIC gqlite)
 target_link_libraries(grammar PUBLIC gqlite)
 target_link_libraries(storage PUBLIC mdbx-static)
 
