@@ -318,6 +318,13 @@ const GraphProperty& GGraph::property() const
   return _property;
 }
 
+GraphValueType GGraph::propertyType(const std::string& prop)
+{
+  auto itr = _property._types.find(prop);
+  if (itr == _property._types.end()) return GraphValueType::Undefined;
+  return itr->second;
+}
+
 std::string GGraph::vertexDBName(const char* name)
 {
   return std::string("V:") + name;

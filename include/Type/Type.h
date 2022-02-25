@@ -12,8 +12,11 @@ typedef std::string VertexID;
 #include "base/type.h"
 
 struct GPredition {
+  // function type such as gte/lt...
   std::string _fn;
+  // index name
   std::string _indx;
+  // type of value
   NodeType _type;
   std::any _value;
   std::shared_ptr < GPredition> _next;

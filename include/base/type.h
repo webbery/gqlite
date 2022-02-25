@@ -4,6 +4,7 @@ enum NodeType {
   Removable,
   // element type
   Number,
+  Integer,
   String,
   Binary,
   Vertex,

@@ -56,7 +56,6 @@ void traverse(struct gast* value, ASTVisitor* visitor)
   case NodeType::ObjectExpression:
   {
     struct gast* cur = (struct gast*)value->_value;
-    visitor->visit(value->_nodetype, cur);
     traverse(cur, visitor);
   }
   break;
@@ -89,7 +88,6 @@ void traverse(struct gast* value, ASTVisitor* visitor)
   }
 }
 
-
 std::string GET_STRING_VALUE(struct gast* ast) {
   char* pid = (char*)ast->_value;
   size_t len = strlen(pid);
@@ -101,65 +99,37 @@ double GET_NUMBER_VALUE(struct gast* ast) {
   return *d;
 }
 
-nlohmann::json GET_PROPERTY_VALUE(const std::string& key, struct gast* ast, bool& hasBinary) {
-  nlohmann::json result;
-  if (!ast) return result;
-  switch (ast->_nodetype)
-  {
-  case NodeType::Property:
-  {
-    std::string k = GET_STRING_VALUE(ast->_left);
-    result[key] = GET_PROPERTY_VALUE(k, ast->_right, hasBinary);
-  }
-  case NodeType::String:
-    result[key] = GET_STRING_VALUE(ast);
-    break;
-  case NodeType::Number:
-    result[key] = GET_NUMBER_VALUE(ast);
-    break;
-  case NodeType::Binary:
-    hasBinary = true;
-    break;
-  case NodeType::ArrayExpression:
-    result[key] = GET_ARRAY_VALUE(ast, hasBinary);
-    break;
-  default:
-    break;
-  }
-  return result;
+int32_t GET_INT_VALUE(struct gast* ast)
+{
+  int32_t* d = (int32_t*)ast->_value;
+  return *d;
 }
 
-nlohmann::json GET_ARRAY_VALUE(struct gast* ast, bool& hasBinary) {
-  nlohmann::json result;
-  gql_node* node = (gql_node*)ast->_value;
-  while (node)
-  {
-    gast* item = (gast*)node->_value;
-    switch (item->_nodetype)
-    {
-    case NodeType::Property:
-    {
-      std::string key = GET_STRING_VALUE(item->_left);
-      nlohmann::json value = GET_PROPERTY_VALUE(key, item->_right, hasBinary);
-      result.push_back(value);
-    }
-    break;
-    case NodeType::String:
-      result.push_back(GET_STRING_VALUE(item));
-      break;
-    case NodeType::Number:
-      result.push_back(GET_NUMBER_VALUE(item));
-      break;
-    case NodeType::Binary:
-      hasBinary = true;
-      break;
-    case NodeType::ArrayExpression:
-      result.push_back(GET_ARRAY_VALUE(item, hasBinary));
-      break;
-    default:
-      break;
-    }
-    node = node->_next;
-  }
-  return result;
+void ObjectVisitor::visit(Acceptor<NodeType::Property>& acceptor)
+{
+  _value.update(acceptor.value(), true);
+}
+
+void ObjectVisitor::visit(Acceptor<NodeType::Number>& acceptor)
+{
+  printf("Number: %f\n", acceptor.value());
+}
+
+void ObjectVisitor::visit(Acceptor<NodeType::ArrayExpression>& acceptor)
+{
+}
+
+void ObjectVisitor::visit(Acceptor<NodeType::String>& acceptor)
+{
+  printf("String: %s\n", acceptor.value().c_str());
+}
+
+void ObjectVisitor::visit(Acceptor<NodeType::ObjectExpression>& acceptor)
+{
+  printf("ObjectExpression: %s\n", acceptor.value().dump().c_str());
+}
+
+void ObjectVisitor::visit(Acceptor<NodeType::Integer>& acceptor)
+{
+  printf("Number: %d\n", acceptor.value());
 }

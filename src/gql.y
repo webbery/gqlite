@@ -17,6 +17,7 @@
 #include "Type/Binary.h"
 #include "base/ast.h"
 #include "base/VertexVisitor.h"
+#include "base/EdgeVisitor.h"
 #include "Singlecton.h"
 
 #define MAX_VARIANT_SIZE  32
@@ -108,7 +109,7 @@ nlohmann::json* get_or_create_json(nlohmann::json* item) {
 %token KW_CREATE KW_VERTEX KW_EDGE KW_DROP KW_IN KW_REMOVE KW_UPSET KW_LEFT_RELATION KW_RIGHT_RELATION KW_BIDIRECT_RELATION KW_PATH KW_REST KW_DELETE
 %token OP_QUERY OP_FROM KW_INDEX KW_GROUP OP_WHERE
 %token CMD_SHOW 
-%token OP_GREAT_THAN OP_LESS_THAN OP_GREAT_THAN_EQUAL OP_LESS_THAN_EQUAL OP_EQUAL
+%token OP_GREAT_THAN OP_LESS_THAN OP_GREAT_THAN_EQUAL OP_LESS_THAN_EQUAL OP_EQUAL OP_AND OP_OR
 %token FN_COUNT
 
 %type <__list> vertex_list vertexes string_list strings property_list edges edge_list
@@ -255,9 +256,10 @@ upset_edges: RANGE_BEGIN KW_UPSET COLON VAR_STRING COMMA KW_EDGE COLON edge_list
               {
                 GET_GRAPH($4);
                 gql_node* cur = $8;
+                ASTEdgeUpdateVisitor visitor;
                 while(cur) {
                   gast* pv = (gast*)(cur->_value);
-                  //upset::set(pGraph, pe->_from, pe->_to, pe->_bidirection);
+                  // traverse(pv, &visitor);
                   cur = cur->_next;
                 }
               };
@@ -420,25 +422,37 @@ property: VAR_STRING COLON value
         | OP_GREAT_THAN_EQUAL COLON VAR_INTEGER
               {
                 struct gast* key = INIT_STRING_AST("gte");
-                struct gast* value = INIT_LITERAL_AST($3, NodeType::Number);
+                struct gast* value = INIT_LITERAL_AST($3, NodeType::Integer);
                 $$ = newast(NodeType::Property, nullptr, key, value);
               }
         | OP_LESS_THAN_EQUAL COLON VAR_INTEGER
               {
                 struct gast* key = INIT_STRING_AST("lte");
-                struct gast* value = INIT_LITERAL_AST($3, NodeType::Number);
+                struct gast* value = INIT_LITERAL_AST($3, NodeType::Integer);
                 $$ = newast(NodeType::Property, nullptr, key, value);
               }
         | OP_GREAT_THAN COLON VAR_INTEGER
               {
                 struct gast* key = INIT_STRING_AST("gt");
-                struct gast* value = INIT_LITERAL_AST($3, NodeType::Number);
+                struct gast* value = INIT_LITERAL_AST($3, NodeType::Integer);
                 $$ = newast(NodeType::Property, nullptr, key, value);
               }
         | OP_LESS_THAN COLON VAR_INTEGER
               {
                 struct gast* key = INIT_STRING_AST("lt");
-                struct gast* value = INIT_LITERAL_AST($3, NodeType::Number);
+                struct gast* value = INIT_LITERAL_AST($3, NodeType::Integer);
+                $$ = newast(NodeType::Property, nullptr, key, value);
+              }
+        | OP_AND COLON array
+              {
+                struct gast* key = INIT_STRING_AST("and");
+                struct gast* value = INIT_LITERAL_AST($3, NodeType::ArrayExpression);
+                $$ = newast(NodeType::Property, nullptr, key, value);
+              }
+        | OP_OR COLON array
+              {
+                struct gast* key = INIT_STRING_AST("or");
+                struct gast* value = INIT_LITERAL_AST($3, NodeType::ArrayExpression);
                 $$ = newast(NodeType::Property, nullptr, key, value);
               };
 array: LEFT_SQUARE values RIGHT_SQUARE

@@ -49,6 +49,7 @@ public:
     switch (nt)
     {
     case NodeType::Number:
+      // index must be integer not double
       anchor_cursor(txn, std::any_cast<uint64_t>(pos), cursor);
       break;
     case NodeType::String:

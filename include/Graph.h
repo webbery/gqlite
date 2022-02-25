@@ -10,7 +10,8 @@
 #define IS_INVALID_VERTEX(v) \
   (v.empty() || v.is_null() || v.size() == 0 || v.is_string())
 
-enum class ValueType {
+enum class GraphValueType {
+  Undefined,
   Binary,
   Number,
   String,
@@ -33,7 +34,7 @@ struct GraphProperty {
   /**
    * @brief record value types.
    */
-  std::map<std::string, ValueType> _types;
+  std::map<std::string, GraphValueType> _types;
   /**
    * @brief query index
    **/
@@ -95,6 +96,7 @@ public:
   int finishUpdate(mdbx::txn_managed& txn);
 
   const GraphProperty& property() const;
+  GraphValueType propertyType(const std::string& prop);
 
 private:
   std::string vertexDBName(const char* name);
@@ -104,8 +106,8 @@ private:
   std::string schemaDBName(const char* name);
   int saveSchema();
 
-  void UpsetMetaType(const std::string& name, ValueType vtype);
-  ValueType GetMetaType(const std::string& name);
+  void UpsetMetaType(const std::string& name, GraphValueType vtype);
+  GraphValueType GetMetaType(const std::string& name);
   bool isIndexExist(const std::string& name);
   GVertexProptertyFeature* getFeature(const char* property);
 

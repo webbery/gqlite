@@ -1,4 +1,6 @@
-# GQLlite  
+<div align="center">
+<h1>GQLite</h1>
+</div> 
 
 [![Join the chat at https://gitter.im/webbery/gqlite](https://badges.gitter.im/webbery/gqlite.svg)](https://gitter.im/webbery/gqlite?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 <a href="https://github.com/webbery/gqlite/actions">
@@ -54,7 +56,7 @@ This is the expriments for testing abilities of graph database in ending device.
 | N-adjacent | | - | 0.1.0 |
 | walk of BFS | | - | 0.1.0 |
 | walk of DFS | | - | 0.1.0 |
-| walk of dijk | |  | 0.1.0 |
+| walk of dijk | | _ | 0.1.0 |
 | js support | implement a subset/extend of javasript for complex query. |  | 0.2.0 |
 | walk of A* | A* algrithm for graph search |  | 0.2.0 |
 | GiST index | boosting for more type search |  | 0.3.0 |

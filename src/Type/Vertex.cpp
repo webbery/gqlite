@@ -28,7 +28,10 @@ int GVertexStatment::Parse(struct gast* ast)
   if (left) _id = GET_STRING_VALUE(left->_right);
   struct gast* right = ast->_right;
   if (right) {
-    _json = GET_ARRAY_VALUE((gast*)right->_value, _binary);
+    ArrayVisitor av;
+    GET_VALUE((gast*)right->_value, _binary, av);
+    _json = av.value();
+    //_json = GET_ARRAY_VALUE((gast*)right->_value, _binary);
   }
   return ECode_Success;
 }

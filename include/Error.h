@@ -37,4 +37,5 @@ enum ErrorCode {
   ECode_GQL_Index_Not_Exist,
   ECode_GQL_Path_Not_Exist,
   ECode_GQL_Vertex_Not_Exist,
+  ECode_GQL_Edge_Type_Unknow,
 };

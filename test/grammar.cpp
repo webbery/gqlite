@@ -97,10 +97,10 @@ void successful_test(gqlite* pHandle, char* ptr, char* err) {
   TEST_QUERY("{query: '*', from: 'ga'}", 3);
   TEST_GRAMMAR("{remove: 'ga', vertex: ['v2']}");
   TEST_QUERY("{query: '*', from: 'ga'}", 2);
+  TEST_QUERY("{query: '*', from: 'ga', where: {create_time: {$gt: 1, $lt: 5}}}", 2);
   TEST_QUERY("{query: '*', from: 'ga', where: {id: 'v1'}}", 1);
   TEST_QUERY("{query: '*', from: 'ga', where: {keyword: 'b'}}", 1);
   TEST_QUERY("{query: '*', from: 'ga', where: {create_time: {$gt: 1}}}", 2);
-  TEST_QUERY("{query: '*', from: 'ga', where: {create_time: {$gt: 1, $lt: 5}}}", 2);
   TEST_QUERY("{query: '*', from: 'ga', where: {create_time: {$lt: 5}}}", 3);
   TEST_GRAMMAR("{query: ['class'], from: 'ga', where: {keyword: 'b'}}");
   TEST_GRAMMAR("{query: ['class'], from: 'ga', where: {keyword: 'b'}}");
