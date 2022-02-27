@@ -14,6 +14,16 @@ enum class FeatureType {
 template<typename T> struct slice_traits {
   static size_t size(T) { return sizeof(T); }
 };
+template<> struct slice_traits<std::string> {
+  static size_t size(const std::string& s) { return s.size(); }
+};
+
+template<typename T> struct address_traits {
+  static T* address(T& t) { return &t; }
+};
+template<> struct address_traits<std::string> {
+  static const char* address(const std::string& t) { return t.data(); }
+};
 
 template<typename T> struct feature_traits { static const FeatureType type = FeatureType::GTStringFeature; };
 template<> struct feature_traits<uint64_t> {
@@ -28,7 +38,7 @@ int move_cursor(mdbx::txn_managed& txn, mdbx::map_handle& handle, T pos, mdbx::c
   using namespace mdbx;
   cursor = txn.open_cursor(handle);
   if (cursor.on_last()) return ECode_GQL_Vertex_Not_Exist;
-  mdbx::slice key(&pos, slice_traits< T >::size(pos));
+  mdbx::slice key(address_traits<T>::address(pos), slice_traits< T >::size(pos));
   cursor.lower_bound(key);
   return ECode_Success;
 }
@@ -45,20 +55,7 @@ public:
   
   virtual ~GVertexProptertyFeature();
 
-  int get_cursor(mdbx::txn_managed& txn, const std::any& pos, NodeType nt, mdbx::cursor_managed& cursor) {
-    switch (nt)
-    {
-    case NodeType::Number:
-      // index must be integer not double
-      anchor_cursor(txn, std::any_cast<uint64_t>(pos), cursor);
-      break;
-    case NodeType::String:
-      break;
-    default:
-      break;
-    }
-    return ECode_Success;
-  }
+  virtual int get_cursor(mdbx::txn_managed& txn, const std::any& pos, NodeType nt, mdbx::cursor_managed& cursor);
 
   std::string indexName() {return _property;}
   std::string name() {return _idname;}
@@ -80,6 +77,13 @@ protected:
   std::string _idname;
   FeatureType _type;
   mdbx::map_handle _handle;
+};
+
+class GIDFeature : public GVertexProptertyFeature {
+public:
+  GIDFeature(mdbx::map_handle vertex);
+  virtual int apply(mdbx::txn_managed& txn, const std::string& id, const std::string& key, const nlohmann::json& value);
+  virtual int get_cursor(mdbx::txn_managed& txn, const std::any& pos, NodeType nt, mdbx::cursor_managed& cursor);
 };
 
 /**

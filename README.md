@@ -25,7 +25,7 @@ This is the expriments for testing abilities of graph database in ending device.
 	* 4.3. [Add Vertex & Edge](#AddVertexEdge)
 	* 4.4. [Remove Vertex & Edge](#RemoveVertexEdge)
 	* 4.5. [Query](#Query)
-		* 4.5.1. [embeded function](#embededfunction)
+		* 4.5.1. [intrinct function](#embededfunction)
 		* 4.5.2. [condition](#condition)
 	* 4.6. [Walk](#Walk)
 	* 4.7. [Inference](#Inference)

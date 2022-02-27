@@ -55,7 +55,7 @@ int gqlite_cmd_callback(gqlite_result* params )
 
 int gqlite_exec_assert_callback(gqlite_result* params)
 {
-  if (params && params->count) {
+  if (params) {
     if (result_count != params->count) {
       printf(RED"expect result count: %d, but recieved count: %d\n" NORMAL, result_count, params->count);
     }
@@ -67,6 +67,7 @@ void wrong_grammar_test(gqlite* pHandle, char* ptr, char* err) {
   TEST_GRAMMAR("{create: 'ga', noindex: 'keyword'}");
   TEST_GRAMMAR("{create: 'ga', index: b64'keyword'}");
   TEST_GRAMMAR("{create: b64'ga', index: 'keyword'}");
+  TEST_QUERY("{query: '*', from: 'ga', where: {create_time: {$gt: 1.2}}}", 2);
   TEST_QUERY("{query: '*', from: {query: '*', from: 'ga', where: {create_time: {$gt: 1}}}}", 2);
   TEST_GRAMMAR("{drop: 'ga'}");
 }
@@ -90,18 +91,19 @@ void successful_test(gqlite* pHandle, char* ptr, char* err) {
       "vertex: ["
         "['v1', {class: 'a/c', location: [131.24194, 37.12532], keyword: ['a', 'b'], create_time: 1}],"
         "['v2', {color: '#343e58', keyword: ['a'], create_time: 2}],"
-        "['v3', {text: b64'5Zyo57q/57yW56CB6Kej56CB', keyword: ['a'], create_time: 3}]"
+        "['v3', {text: b64'5Zyo57q/57yW56CB6Kej56CB', keyword: ['a'], create_time: 3}],"
         "['v4']"
       "]"
     "}");
-  TEST_QUERY("{query: '*', from: 'ga'}", 3);
+  TEST_QUERY("{query: '*', from: 'ga'}", 4);
   TEST_GRAMMAR("{remove: 'ga', vertex: ['v2']}");
-  TEST_QUERY("{query: '*', from: 'ga'}", 2);
-  TEST_QUERY("{query: '*', from: 'ga', where: {create_time: {$gt: 1, $lt: 5}}}", 2);
+  TEST_QUERY("{query: '*', from: 'ga'}", 3);
+  TEST_QUERY("{query: '*', from: 'ga', where: {create_time: {$gt: 1, $lt: 5}}}", 1);
+  TEST_QUERY("{query: '*', from: 'ga', where: {create_time: {$gte: 1, $lt: 5}}}", 2);
   TEST_QUERY("{query: '*', from: 'ga', where: {id: 'v1'}}", 1);
   TEST_QUERY("{query: '*', from: 'ga', where: {keyword: 'b'}}", 1);
-  TEST_QUERY("{query: '*', from: 'ga', where: {create_time: {$gt: 1}}}", 2);
-  TEST_QUERY("{query: '*', from: 'ga', where: {create_time: {$lt: 5}}}", 3);
+  TEST_QUERY("{query: '*', from: 'ga', where: {create_time: {$gt: 1}}}", 1);
+  TEST_QUERY("{query: '*', from: 'ga', where: {create_time: {$lt: 5}}}", 2);
   TEST_GRAMMAR("{query: ['class'], from: 'ga', where: {keyword: 'b'}}");
   TEST_GRAMMAR("{query: ['class'], from: 'ga', where: {keyword: 'b'}}");
   TEST_GRAMMAR("{dump: 'nogql.gql'}");

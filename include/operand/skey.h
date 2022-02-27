@@ -11,3 +11,9 @@ enum class BTScanStrategy {
   BTGreaterStrategy,
   BTMaxStrategy
 };
+
+#define STR_EQUAL             "eq"
+#define STR_LESS_THAN         "lt"
+#define STR_LESS_THAN_EQUAL   "lte"
+#define STR_GREATE_THAN       "gt"
+#define STR_GREATE_THAN_EQUAL "gte"

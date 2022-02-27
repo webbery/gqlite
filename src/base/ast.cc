@@ -112,7 +112,7 @@ void ObjectVisitor::visit(Acceptor<NodeType::Property>& acceptor)
 
 void ObjectVisitor::visit(Acceptor<NodeType::Number>& acceptor)
 {
-  printf("Number: %f\n", acceptor.value());
+  printf("ObjectVisitor Number: %f\n", acceptor.value());
 }
 
 void ObjectVisitor::visit(Acceptor<NodeType::ArrayExpression>& acceptor)
@@ -121,15 +121,15 @@ void ObjectVisitor::visit(Acceptor<NodeType::ArrayExpression>& acceptor)
 
 void ObjectVisitor::visit(Acceptor<NodeType::String>& acceptor)
 {
-  printf("String: %s\n", acceptor.value().c_str());
+  printf("ObjectVisitor String: %s\n", acceptor.value().c_str());
 }
 
 void ObjectVisitor::visit(Acceptor<NodeType::ObjectExpression>& acceptor)
 {
-  printf("ObjectExpression: %s\n", acceptor.value().dump().c_str());
+  printf("ObjectVisitor ObjectExpression: %s\n", acceptor.value().dump().c_str());
 }
 
 void ObjectVisitor::visit(Acceptor<NodeType::Integer>& acceptor)
 {
-  printf("Number: %d\n", acceptor.value());
+  printf("ObjectVisitor Number: %d\n", acceptor.value());
 }

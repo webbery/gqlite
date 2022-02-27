@@ -23,5 +23,5 @@ std::function<bool(T&, T&)> get_internal_predicate(const std::string& name) {
   else if (name == "lte") {
     return [](T& left, T& right)->bool {return left <= right; };
   }
-  return nullptr;
+  return [](T& left, T& right)->bool {return false; };;
 }

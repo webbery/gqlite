@@ -98,6 +98,8 @@ GGraph::GGraph(mdbx::txn_managed& txn, const char* name)
       saveSchema();
     }
   }
+  GVertexProptertyFeature* f = new GIDFeature(_vertexes);
+  _propertyFeatures.push_back(f);
 }
 
 GGraph::~GGraph()
@@ -170,7 +172,10 @@ int GGraph::queryVertex(std::set<VertexID>& ids, const GConditions& preds)
       std::set<VertexID> temp;
       using namespace mdbx;
       mdbx::cursor_managed cursor;
-      feature->get_cursor(_txn, pred->_value, pred->_type, cursor);
+      if (feature->get_cursor(_txn, pred->_value, pred->_type, cursor) == ECode_GQL_Vertex_Not_Exist) {
+        pred = pred->_next;
+        continue;
+      }
       while (true) {
         cursor::move_result item = cursor.current();
         if (!item.done) break;
@@ -184,6 +189,7 @@ int GGraph::queryVertex(std::set<VertexID>& ids, const GConditions& preds)
             temp.insert(id);
           }
         }
+        break;
         case NodeType::String:
         {
           std::string left((char*)item.key.byte_ptr(), item.key.size());
@@ -268,7 +274,6 @@ int GGraph::drop() {
   for (GVertexProptertyFeature* f : _propertyFeatures) {
     f->drop(_txn);
   }
-  _txn.drop_map(_vertexes);
   _txn.drop_map(_edges);
   _txn.drop_map(_schema);
   for (int idx = 0; idx < GK_Size; ++idx) {
