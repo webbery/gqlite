@@ -48,7 +48,7 @@ public:
   }
 
   void visit(Acceptor<NodeType::Property>& acceptor) {
-    auto& value = acceptor.value();
+    auto value = acceptor.value();
     std::shared_ptr<GPredition> curPred(new GPredition());
     std::shared_ptr<GPredition> root = curPred;
     printf("%s\n", acceptor.value().dump().c_str());
