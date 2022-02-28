@@ -18,6 +18,7 @@ enum NodeType {
   UpsetStatement,
   RemoveStatement,
   QueryStatement,
+  WalkStatement,
   DropStatement,
   // function
   Identifier,

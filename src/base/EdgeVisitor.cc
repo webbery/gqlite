@@ -16,4 +16,5 @@ void ASTEdgeUpdateVisitor::visit(NodeType type, void* value)
   if (data.size() == 0) return;
   GGraph* pGraph = GSinglecton::get<GStorageEngine>()->getGraph();
   if (!pGraph)return;
+  pGraph->updateEdge(statement.id(), data);
 }

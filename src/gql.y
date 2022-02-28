@@ -107,7 +107,7 @@ nlohmann::json* get_or_create_json(nlohmann::json* item) {
 %token <__int> VAR_DATETIME
 %token KW_DUMP KW_ID KW_GRAPH KW_COMMIT
 %token KW_CREATE KW_VERTEX KW_EDGE KW_DROP KW_IN KW_REMOVE KW_UPSET KW_LEFT_RELATION KW_RIGHT_RELATION KW_BIDIRECT_RELATION KW_PATH KW_REST KW_DELETE
-%token OP_QUERY OP_FROM KW_INDEX KW_GROUP OP_WHERE
+%token OP_QUERY OP_WALK OP_FROM KW_INDEX KW_GROUP OP_WHERE OP_TO
 %token CMD_SHOW 
 %token OP_GREAT_THAN OP_LESS_THAN OP_GREAT_THAN_EQUAL OP_LESS_THAN_EQUAL OP_EQUAL OP_AND OP_OR
 %token FN_COUNT
@@ -126,6 +126,7 @@ line_list: line
         | utility_cmd {};
     gql: creation  { printf("create graph success\n"); }
         | query {}
+        | walk {}
         | upset_vertexes { $$ = $1; }
         | upset_edges { $$ = $1; }
         | remove_vertexes {}
@@ -150,6 +151,15 @@ utility_cmd: CMD_SHOW KW_GRAPH
             }
             free(results.graphs);
           }
+        | CMD_SHOW KW_GRAPH VAR_STRING
+          {
+            GGraph* g = GSinglecton::get<GStorageEngine>()->getGraph($3);
+            const GraphProperty& props = g->property();
+            printf("show graph [%s]:\n", $3);
+            for (auto& name: props._indexes) {
+              printf("\tindex: %s\n", name.c_str());
+            }
+          }
           | KW_DUMP gql {};
 creation: RANGE_BEGIN KW_CREATE VAR_STRING RANGE_END
             {
@@ -161,8 +171,9 @@ creation: RANGE_BEGIN KW_CREATE VAR_STRING RANGE_END
               GGraph* g = GSinglecton::get<GStorageEngine>()->getGraph($3);
               gql_node* cur = $7;
               do {
-                char* s = (char*)(cur->_value);
-                creation::createInvertIndex(g, s);
+                gast* s = (struct gast*)(cur->_value);
+                std::string value = GET_STRING_VALUE(s);
+                creation::createInvertIndex(g, value.c_str());
                 cur = cur->_next;
               } while(cur);
             }
@@ -224,6 +235,8 @@ query: RANGE_BEGIN OP_QUERY COLON property_list COMMA from_graph_expr RANGE_END
                 stm._result_callback(&results);
                 query::release_vertexes(results);
               };
+walk: RANGE_BEGIN OP_WALK COLON VAR_STRING COMMA KW_IN COLON VAR_STRING COMMA OP_FROM COLON VAR_STRING COMMA OP_TO COLON VAR_STRING RANGE_END
+              {};
 where_expr: OP_WHERE COLON json { $$ = $3; };
 upset_vertexes: RANGE_BEGIN KW_UPSET COLON VAR_STRING COMMA KW_VERTEX COLON vertex_list RANGE_END
               {
@@ -259,7 +272,7 @@ upset_edges: RANGE_BEGIN KW_UPSET COLON VAR_STRING COMMA KW_EDGE COLON edge_list
                 ASTEdgeUpdateVisitor visitor;
                 while(cur) {
                   gast* pv = (gast*)(cur->_value);
-                  // traverse(pv, &visitor);
+                  traverse(pv, &visitor);
                   cur = cur->_next;
                 }
               };
@@ -358,7 +371,15 @@ edge: LEFT_SQUARE VAR_STRING COMMA KW_RIGHT_RELATION COMMA VAR_STRING RIGHT_SQUA
                 $$ = newast(NodeType::Edge, link, from, to);
               }
         | LEFT_SQUARE VAR_STRING RIGHT_SQUARE
-              {};
+              {
+                struct gast* id = INIT_STRING_AST("id");
+                struct gast* from_value = INIT_STRING_AST($2);
+                struct gast* from = newast(NodeType::Property, nullptr, id, from_value);
+                struct gast* to_value = INIT_STRING_AST($2);
+                struct gast* to = newast(NodeType::Property, nullptr, id, to_value);
+                struct gast* link = INIT_STRING_AST("--");
+                $$ = newast(NodeType::Edge, link, from, to);
+              };
 from_graph_expr: OP_FROM COLON VAR_STRING
               {
                 $$ = GSinglecton::get<GStorageEngine>()->getGraph($3);
@@ -453,6 +474,24 @@ property: VAR_STRING COLON value
               {
                 struct gast* key = INIT_STRING_AST("or");
                 struct gast* value = INIT_LITERAL_AST($3, NodeType::ArrayExpression);
+                $$ = newast(NodeType::Property, nullptr, key, value);
+              }
+        | KW_RIGHT_RELATION COLON VAR_INTEGER
+              {
+                struct gast* key = INIT_STRING_AST("->");
+                struct gast* value = INIT_LITERAL_AST($3, NodeType::WalkStatement);
+                $$ = newast(NodeType::Property, nullptr, key, value);
+              }
+        | KW_LEFT_RELATION COLON VAR_INTEGER
+              {
+                struct gast* key = INIT_STRING_AST("<-");
+                struct gast* value = INIT_LITERAL_AST($3, NodeType::WalkStatement);
+                $$ = newast(NodeType::Property, nullptr, key, value);
+              }
+        | KW_BIDIRECT_RELATION COLON VAR_INTEGER
+              {
+                struct gast* key = INIT_STRING_AST("--");
+                struct gast* value = INIT_LITERAL_AST($3, NodeType::WalkStatement);
                 $$ = newast(NodeType::Property, nullptr, key, value);
               };
 array: LEFT_SQUARE values RIGHT_SQUARE

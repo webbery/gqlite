@@ -113,6 +113,7 @@ GGraph::~GGraph()
 bool GGraph::registPropertyFeature(GVertexProptertyFeature* f)
 {
   std::string name = f->indexName();
+    printf("feature name %s\n", name.c_str());
   if (!isIndexExist(name)) {
     _property._indexes.push_back(name);
     saveSchema();
@@ -172,7 +173,8 @@ int GGraph::queryVertex(std::set<VertexID>& ids, const GConditions& preds)
       std::set<VertexID> temp;
       using namespace mdbx;
       mdbx::cursor_managed cursor;
-      if (feature->get_cursor(_txn, pred->_value, pred->_type, cursor) == ECode_GQL_Vertex_Not_Exist) {
+      int status = feature->get_cursor(_txn, pred->_value, pred->_type, cursor);
+      if (status == ECode_GQL_Vertex_Not_Exist || status == ECode_Fail) {
         pred = pred->_next;
         continue;
       }
@@ -255,6 +257,11 @@ int GGraph::updateVertex(const VertexID& id, const std::vector<uint8_t>& data)
 {
   mdbx::slice bin(data.data(), data.size());
   return put(_txn, _vertexes, id, bin);
+}
+
+int GGraph::updateEdge(const EdgeID& id, const std::vector<uint8_t>& data)
+{
+  return 0;
 }
 
 int GGraph::updateIndex(const VertexID& id, const std::string& index, const nlohmann::json& value)

@@ -1,4 +1,11 @@
 #include "Type/Hash.h"
+#ifdef __linux
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wwrite-strings"
+#else
+#pragma warning(push)
+#pragma warning(disable : 4101)
+#endif
 
 namespace gql {
 #define MIN_LATITUDE    -90.0
@@ -100,3 +107,9 @@ namespace gql {
       return getNeighbor(this->_hash, direction);
   }
 }
+
+#ifdef __linux
+#pragma GCC diagnostic pop
+#else
+#pragma warning(pop)
+#endif

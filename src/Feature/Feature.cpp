@@ -21,13 +21,13 @@ int GVertexProptertyFeature::get_cursor(mdbx::txn_managed& txn, const std::any& 
   case NodeType::Number:
     // index must be integer not double
     anchor_cursor(txn, std::any_cast<uint64_t>(pos), cursor);
-    break;
+    return ECode_Success;
   case NodeType::String:
     break;
   default:
     break;
   }
-  return ECode_Success;
+  return ECode_Fail;
 }
 
 mdbx::map_handle& GVertexProptertyFeature::create(mdbx::txn_managed& txn, FeatureType type) {

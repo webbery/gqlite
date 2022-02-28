@@ -56,9 +56,13 @@ public:
     for (auto itr = value.begin(), end = value.end(); itr != end; ++itr) {
       GPredition* pred = new GPredition();
       pred->_indx = itr.key();
+      if (getJsonType(itr.value()) == NodeType::ObjectExpression) { // {$gte: 1, $lt: 5}
+        // d
+      }
       pred->_fn = itr.key();
       pred->_type = getJsonType(itr.value());
       pred->_value = getJsonValue(itr.value());
+      printf("visit: %d\n", pred->_type);
       curPred->_next = std::shared_ptr<GPredition>(pred);
       curPred = curPred->_next;
     }

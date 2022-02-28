@@ -83,6 +83,7 @@ void successful_test(gqlite* pHandle, char* ptr, char* err) {
   TEST_GRAMMAR("{create: 'ga', index: 'keyword'}");
   TEST_COMMAND("show graph");
   TEST_GRAMMAR("{create: 'ga', index: ['keyword', 'color', 'create_time']}");
+  TEST_COMMAND("show graph 'ga'");
   TEST_GRAMMAR("{upset: 'ga', vertex: [['v1']]}");
   TEST_QUERY("{query: '*', from: 'ga'}", 1);
   TEST_GRAMMAR(
@@ -144,8 +145,8 @@ void successful_test(gqlite* pHandle, char* ptr, char* err) {
     "}"
   );
   // query 1'st order neighber
-  TEST_QUERY("{query: '*', from: 'ga', where: {id: 'v1', ->: 1}", 0);
-  TEST_QUERY("{query: '*', from: 'ga', where: {id: 'v1', --: 1}", 1);
+  TEST_QUERY("{query: '*', from: 'ga', where: {id: 'v1', ->: 1}}", 0);
+  TEST_QUERY("{query: '*', from: 'ga', where: {id: 'v1', --: 1}}", 1);
   // TEST_GRAMMAR("{create: 'prefix_tree'}");
   // TEST_GRAMMAR(
   //   "{"
