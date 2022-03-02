@@ -13,7 +13,16 @@ include(CodeCoverage.cmake)
 APPEND_COVERAGE_COMPILER_FLAGS()
 setup_target_for_coverage_gcovr_xml(
 	${PROJECT_NAME}_coverage NAME coverage
-	EXCLUDE "include/json.hpp" "tool/gqlcmd.cpp" "tool/gqlexport.cpp" "tool/linenoise.hpp" "include/gql.hpp" "include/gql.cpp")
+	EXCLUDE
+		"include/json.hpp"
+		"tool/gqlcmd.cpp"
+		"tool/gqlexport.cpp"
+		"tool/linenoise.hpp"
+		"include/gql.hpp"
+		"include/gql.cpp"
+		"tool/getopt.c"
+		"tool/getopt.h"
+)
 # ctest_coverage(BUILD test)
 ELSE ()
 ENDIF ()

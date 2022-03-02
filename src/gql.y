@@ -122,8 +122,10 @@ nlohmann::json* get_or_create_json(nlohmann::json* item) {
 line_list: line
           | line_list line
           ;
-    line: gql {}
-        | utility_cmd {};
+    line: gql
+        | utility_cmd
+        | {}
+        ;
     gql: creation  { printf("create graph success\n"); }
         | query {}
         | walk {}
