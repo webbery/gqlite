@@ -113,7 +113,7 @@ nlohmann::json* get_or_create_json(nlohmann::json* item) {
 %token FN_COUNT
 
 %type <__list> vertex_list vertexes string_list strings property_list edges edge_list
-%type <_g> from_graph_expr
+%type <_g> in_graph_expr
 %type <__node> json value values object array properties where_expr function_call property vertex edge gql upset_vertexes upset_edges
 
 %start line_list
@@ -211,7 +211,7 @@ dump: RANGE_BEGIN KW_DUMP COLON VAR_STRING RANGE_END
               fclose(f);
               gprint(LITE_DEBUG, "dump graph %s finish", $4);
             };
-query: RANGE_BEGIN OP_QUERY COLON property_list COMMA from_graph_expr RANGE_END
+query: RANGE_BEGIN OP_QUERY COLON property_list COMMA in_graph_expr RANGE_END
               {
                 if (!$6) break;
                 std::vector<VertexID> ids = GSinglecton::get<GStorageEngine>()->getNodes($6);
@@ -221,8 +221,8 @@ query: RANGE_BEGIN OP_QUERY COLON property_list COMMA from_graph_expr RANGE_END
                 stm._result_callback(&results);
                 query::release_vertexes(results);
               }
-        | RANGE_BEGIN OP_QUERY COLON property_list COMMA KW_PATH COLON array COMMA from_graph_expr RANGE_END {}
-        | RANGE_BEGIN OP_QUERY COLON property_list COMMA from_graph_expr COMMA where_expr RANGE_END
+        | RANGE_BEGIN OP_QUERY COLON property_list COMMA KW_PATH COLON array COMMA in_graph_expr RANGE_END {}
+        | RANGE_BEGIN OP_QUERY COLON property_list COMMA in_graph_expr COMMA where_expr RANGE_END
               {
                 if (!$6) break;
                 // check if index table exist or not
@@ -382,7 +382,7 @@ edge: LEFT_SQUARE VAR_STRING COMMA KW_RIGHT_RELATION COMMA VAR_STRING RIGHT_SQUA
                 struct gast* link = INIT_STRING_AST("--");
                 $$ = newast(NodeType::Edge, link, from, to);
               };
-from_graph_expr: OP_FROM COLON VAR_STRING
+in_graph_expr: KW_IN COLON VAR_STRING
               {
                 $$ = GSinglecton::get<GStorageEngine>()->getGraph($3);
                 if (!$$) {
@@ -480,20 +480,26 @@ property: VAR_STRING COLON value
               }
         | KW_RIGHT_RELATION COLON VAR_INTEGER
               {
-                struct gast* key = INIT_STRING_AST("->");
-                struct gast* value = INIT_LITERAL_AST($3, NodeType::WalkStatement);
+                struct gast* key = INIT_STRING_AST("rac"); // right array count
+                struct gast* value = INIT_LITERAL_AST($3, NodeType::Integer);
                 $$ = newast(NodeType::Property, nullptr, key, value);
               }
         | KW_LEFT_RELATION COLON VAR_INTEGER
               {
-                struct gast* key = INIT_STRING_AST("<-");
-                struct gast* value = INIT_LITERAL_AST($3, NodeType::WalkStatement);
+                struct gast* key = INIT_STRING_AST("lac");  // left arraw count
+                struct gast* value = INIT_LITERAL_AST($3, NodeType::Integer);
                 $$ = newast(NodeType::Property, nullptr, key, value);
               }
         | KW_BIDIRECT_RELATION COLON VAR_INTEGER
               {
-                struct gast* key = INIT_STRING_AST("--");
-                struct gast* value = INIT_LITERAL_AST($3, NodeType::WalkStatement);
+                struct gast* key = INIT_STRING_AST("ac"); // arraw count
+                struct gast* value = INIT_LITERAL_AST($3, NodeType::Integer);
+                $$ = newast(NodeType::Property, nullptr, key, value);
+              }
+        | OP_TO COLON VAR_STRING
+              {
+                struct gast* key = INIT_STRING_AST("->");
+                struct gast* value = INIT_LITERAL_AST($3, NodeType::String);
                 $$ = newast(NodeType::Property, nullptr, key, value);
               };
 array: LEFT_SQUARE values RIGHT_SQUARE

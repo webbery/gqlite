@@ -21,8 +21,16 @@ void freeast(struct gast* root) {
   free(root->_value);
 }
 
+void recusive_ast(struct gast* ast) {
+  if (!ast) return;
+}
+
 void dumpast(const char* filename, struct gast* root) {
   // dump ast to json
+  std::fstream fs;
+  fs.open(filename, std::ios_base::ate);
+  
+  fs.close();
 }
 
 struct gast* loadast(const char* filename) {

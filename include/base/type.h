@@ -9,8 +9,11 @@ enum NodeType {
   Binary,
   Vertex,
   Edge,
+  From,
+  To,
   ArrayExpression,
   ObjectExpression,
+  WalkExpression,
   Property,
   // graph managed type
   CreationStatement,
@@ -18,7 +21,6 @@ enum NodeType {
   UpsetStatement,
   RemoveStatement,
   QueryStatement,
-  WalkStatement,
   DropStatement,
   // function
   Identifier,

@@ -22,6 +22,7 @@ setup_target_for_coverage_gcovr_xml(
 		"include/gql.cpp"
 		"tool/getopt.c"
 		"tool/getopt.h"
+		"test/uint.hpp"
 )
 # ctest_coverage(BUILD test)
 ELSE ()

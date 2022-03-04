@@ -67,12 +67,13 @@ void wrong_grammar_test(gqlite* pHandle, char* ptr, char* err) {
   TEST_GRAMMAR("{create: 'ga', noindex: 'keyword'}");
   TEST_GRAMMAR("{create: 'ga', index: b64'keyword'}");
   TEST_GRAMMAR("{create: b64'ga', index: 'keyword'}");
-  TEST_QUERY("{query: '*', from: 'ga', where: {create_time: {$gt: 1.2}}}", 2);
-  TEST_QUERY("{query: '*', from: {query: '*', from: 'ga', where: {create_time: {$gt: 1}}}}", 2);
+  TEST_QUERY("{query: '*', in: 'ga', where: {create_time: {$gt: 1.2}}}", 2);
+  TEST_QUERY("{query: '*', in: {query: '*', in: 'ga', where: {create_time: {$gt: 1}}}}", 2);
   TEST_GRAMMAR("{drop: 'ga'}");
 }
 
 void successful_test(gqlite* pHandle, char* ptr, char* err) {
+  TEST_GRAMMAR("//{drop: 'ga'}");
   TEST_COMMAND("show graph");
   TEST_GRAMMAR("{drop: 'ga'}");
   TEST_COMMAND("show graph");
@@ -85,7 +86,7 @@ void successful_test(gqlite* pHandle, char* ptr, char* err) {
   TEST_GRAMMAR("{create: 'ga', index: ['keyword', 'color', 'create_time']}");
   TEST_COMMAND("show graph 'ga'");
   TEST_GRAMMAR("{upset: 'ga', vertex: [['v1']]}");
-  TEST_QUERY("{query: '*', from: 'ga'}", 1);
+  TEST_QUERY("{query: '*', in: 'ga'}", 1);
   TEST_GRAMMAR(
     "{"
       "upset: 'ga',"
@@ -96,17 +97,17 @@ void successful_test(gqlite* pHandle, char* ptr, char* err) {
         "['v4']"
       "]"
     "}");
-  TEST_QUERY("{query: '*', from: 'ga'}", 4);
+  TEST_QUERY("{query: '*', in: 'ga'}", 4);
   TEST_GRAMMAR("{remove: 'ga', vertex: ['v2']}");
-  TEST_QUERY("{query: '*', from: 'ga'}", 3);
-  TEST_QUERY("{query: '*', from: 'ga', where: {create_time: {$gt: 1, $lt: 5}}}", 1);
-  TEST_QUERY("{query: '*', from: 'ga', where: {create_time: {$gte: 1, $lt: 5}}}", 2);
-  TEST_QUERY("{query: '*', from: 'ga', where: {id: 'v1'}}", 1);
-  TEST_QUERY("{query: '*', from: 'ga', where: {keyword: 'b'}}", 1);
-  TEST_QUERY("{query: '*', from: 'ga', where: {create_time: {$gt: 1}}}", 1);
-  TEST_QUERY("{query: '*', from: 'ga', where: {create_time: {$lt: 5}}}", 2);
-  TEST_GRAMMAR("{query: ['class'], from: 'ga', where: {keyword: 'b'}}");
-  TEST_GRAMMAR("{query: ['class'], from: 'ga', where: {keyword: 'b'}}");
+  TEST_QUERY("{query: '*', in: 'ga'}", 3);
+  TEST_QUERY("{query: '*', in: 'ga', where: {create_time: {$gt: 1, $lt: 5}}}", 1);
+  TEST_QUERY("{query: '*', in: 'ga', where: {create_time: {$gte: 1, $lt: 5}}}", 2);
+  TEST_QUERY("{query: '*', in: 'ga', where: {id: 'v1'}}", 1);
+  TEST_QUERY("{query: '*', in: 'ga', where: {keyword: 'b'}}", 1);
+  TEST_QUERY("{query: '*', in: 'ga', where: {create_time: {$gt: 1}}}", 1);
+  TEST_QUERY("{query: '*', in: 'ga', where: {create_time: {$lt: 5}}}", 2);
+  TEST_GRAMMAR("{query: ['class'], in: 'ga', where: {keyword: 'b'}}");
+  TEST_GRAMMAR("{query: ['class'], in: 'ga', where: {keyword: 'b'}}");
   TEST_GRAMMAR("{dump: 'nogql.gql'}");
   /*
   * EDGES & LINKS
@@ -145,8 +146,8 @@ void successful_test(gqlite* pHandle, char* ptr, char* err) {
     "}"
   );
   // query 1'st order neighber
-  TEST_QUERY("{query: '*', from: 'ga', where: {id: 'v1', ->: 1}}", 0);
-  TEST_QUERY("{query: '*', from: 'ga', where: {id: 'v1', --: 1}}", 1);
+  TEST_QUERY("{query: '*', in: 'ga', where: {id: 'v1', ->: 1}}", 0);
+  TEST_QUERY("{query: '*', in: 'ga', where: {id: 'v1', --: 1}}", 1);
   // TEST_GRAMMAR("{create: 'prefix_tree'}");
   // TEST_GRAMMAR(
   //   "{"
@@ -168,7 +169,8 @@ void successful_test(gqlite* pHandle, char* ptr, char* err) {
   /*
   * search path from a to b
   */
-   TEST_GRAMMAR("{walk: 'dijk', in: 'ga', from: 'v1', to: 'v2'}");
+  TEST_GRAMMAR("{walk: '*', in: 'ga', from: 'v1', to: 'v2'}");
+  TEST_QUERY("{walk: type('*'), in: 'ga', where: {id: 'v1', --: 1}}", 1);
   // TEST_GRAMMAR("{walk: 'biBFS', in: 'ga', from: 'a', to: 'b'}");
   // TEST_GRAMMAR("{walk: 'AStar', in: 'ga', from: 'a', to: 'b', cost: () => {return random()}}");
 
@@ -176,6 +178,7 @@ void successful_test(gqlite* pHandle, char* ptr, char* err) {
   // TEST_GRAMMAR("{query: '*', from: 'ga', where: {neighbor: 1}");
 
   TEST_GRAMMAR("{drop: 'ga'}");
+  TEST_GRAMMAR("dump {query: '*', in: 'ga', where: {id: 'v1', --: 1}}");
 }
 
 void test_edges() {}

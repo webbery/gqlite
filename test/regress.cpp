@@ -3,6 +3,8 @@
 #include "../tool/getopt.h"
 #else
 #include <unistd.h>
+#include <getopt.h>
+#include <string.h>
 #endif
 #include <string>
 #include <filesystem>
@@ -77,19 +79,39 @@ static void parse_opt(int argc, char** argv) {
   }
 }
 
+int bengin_capture(const char* output_filename, FILE*& fp) {
+  fp = fopen(output_filename, "w");
+  int stdout_bk = dup(fileno(stdout));
+  dup2(fileno(fp), fileno(stdout));
+  
+  return stdout_bk;
+}
+
+void close_capture(int pipe, FILE* fp) {
+  fclose(fp);
+  dup2(pipe, fileno(stdout));
+}
+
 int main(int argc, char** argv) {
   parse_opt(argc, argv);
   std::filesystem::path inputs = std::filesystem::current_path();
   if (g_inputdir != ".") inputs = g_inputdir;
+
+  std::string outfile = g_inputdir + "/current.out";
+  std::cout<<" Result: "<<outfile.c_str()<<std::endl;
+  FILE* fp = nullptr;
+  int outfd = bengin_capture(outfile.c_str(), fp);
   gqlite* gHandle = nullptr;
   gqlite_open((g_inputdir + "_regress").c_str(), &gHandle);
 #define LINE_MAX_SIZE 1024
   char gql[LINE_MAX_SIZE] = { 0 };
   for (auto& file : std::filesystem::directory_iterator(inputs)) {
+    std::string curfile = file.path().u8string();
+    if (curfile.find("current.out") != std::string::npos || curfile.find("expect.out") != std::string::npos) continue;
     // load script
     std::cout << "***** EXECUTE GQL: " << file.path() << " *****" <<std::endl;
     std::ifstream fs;
-    fs.open(file.path(), std::ios_base::in);
+    fs.open(file.path().u8string().c_str(), std::ios_base::in);
     while (fs.getline(gql, LINE_MAX_SIZE)) {
       char err[256] = { 0 };
       char* ptr = err;
@@ -102,5 +124,22 @@ int main(int argc, char** argv) {
     std::cout << "***** EXECUTE FINISH: " << file.path() << " *****" << std::endl;
   }
   gqlite_close(gHandle);
-  return 0;
+  close_capture(outfd, fp);
+  // compare result
+  bool is_ok = true;
+  std::string expect_file{inputs.u8string()};
+  expect_file += "/expect.out";
+  if (!std::filesystem::exists(expect_file) || !std::filesystem::exists(outfile)) return 0;
+  std::string cmd("diff -T -u ");
+  cmd += outfile;
+  cmd += " " + expect_file;
+  pid_t status = system(cmd.c_str());
+  if(-1 != status && WIFEXITED(status) && WEXITSTATUS(status) == 0) {
+    // success and not diff
+  }
+  else {
+    // fprintf(stderr, "%s", (int)status);
+    // is_ok = false;
+  }
+  return !is_ok;
 }

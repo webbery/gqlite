@@ -16,6 +16,7 @@
 %option noinput nounput noyywrap never-interactive
 
 %%
+^\/\/[\w\W]*        { stm._errIndx += yyleng;}
 "("                 { stm._errIndx += 1; return PARAM_BEGIN;};
 ")"                 { stm._errIndx += 1; return PARAM_END;};
 "{"                 { stm._errIndx += 1; return RANGE_BEGIN;};
@@ -69,7 +70,9 @@ d[0-9]{10}$         {
 "show"              {stm._errIndx += yyleng; return CMD_SHOW;};
 "graph"             {stm._errIndx += yyleng; return KW_GRAPH;};
 "walk"              {stm._errIndx += yyleng; return OP_WALK; };
+"order"             {stm._errIndx += yyleng;}
 "start"             {stm._errIndx += yyleng;};
+"with"              {stm._errIndx += yyleng;};
 "id"                {stm._errIndx += yyleng; return KW_ID;};
 create(?:\:)        {stm._errIndx += yyleng; return KW_CREATE;};
 "drop"              { stm._errIndx += yyleng; return KW_DROP;};
