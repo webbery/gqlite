@@ -16,14 +16,25 @@ namespace upset
     gqlite_result results;
     query::get_vertexes(g, ids, results);
     std::string gqline;
-    for (size_t idx = 0; idx < results.count; ++idx) {
-      gqline += std::string("['") + results.nodes[idx].id + "'";
-      if (results.nodes[idx].properties && results.nodes[idx].len) {
-        gqline += "," + std::string(results.nodes[idx].properties, results.nodes[idx].len);
+    gqlite_node* node = results.nodes;
+    while (node)
+    {
+      switch (node->_type) {
+      case gqlite_node_type_vertex:
+        gqline += std::string("['") + node->_vertex->id + "'";
+        if (node->_vertex->properties && node->_vertex->len) {
+          gqline += "," + std::string(node->_vertex->properties, node->_vertex->len);
+        }
+        break;
+      case gqlite_node_type_edge:
+        break;
+      default:
+        break;
       }
       gqline += "]";
+      node = node->_next;
     }
-    if (results.count) gqline += "]}";
+    if (results.nodes) gqline += "]}";
     return gqline;
   }
 

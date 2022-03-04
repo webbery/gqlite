@@ -1,16 +1,20 @@
 #include <stdio.h>
 #ifdef WIN32
+#include <io.h>
 #include "../tool/getopt.h"
+#define SPLASH_WORD "\\"
 #else
 #include <unistd.h>
 #include <getopt.h>
 #include <string.h>
+#define SPLASH_WORD "/"
 #endif
 #include <string>
 #include <filesystem>
 #include <iostream>
 #include <fstream>
 #include "gqlite.h"
+#include "../tool/stdout.h"
 
 #define REGRESS_VERSION   "0.1.0"
 
@@ -81,8 +85,13 @@ static void parse_opt(int argc, char** argv) {
 
 int bengin_capture(const char* output_filename, FILE*& fp) {
   fp = fopen(output_filename, "w");
+#ifdef WIN32
+  int stdout_bk = _dup(fileno(stdout));
+  _dup2(fileno(fp), fileno(stdout));
+#else
   int stdout_bk = dup(fileno(stdout));
   dup2(fileno(fp), fileno(stdout));
+#endif
   
   return stdout_bk;
 }
@@ -96,8 +105,12 @@ int main(int argc, char** argv) {
   parse_opt(argc, argv);
   std::filesystem::path inputs = std::filesystem::current_path();
   if (g_inputdir != ".") inputs = g_inputdir;
+  if (!inputs.is_absolute()) {
+    inputs = std::filesystem::absolute(inputs);
+    g_inputdir = inputs.u8string();
+  }
 
-  std::string outfile = g_inputdir + "/current.out";
+  std::string outfile = g_inputdir + SPLASH_WORD +"current.out";
   std::cout<<" Result: "<<outfile.c_str()<<std::endl;
   FILE* fp = nullptr;
   int outfd = bengin_capture(outfile.c_str(), fp);
@@ -109,16 +122,21 @@ int main(int argc, char** argv) {
     std::string curfile = file.path().u8string();
     if (curfile.find("current.out") != std::string::npos || curfile.find("expect.out") != std::string::npos) continue;
     // load script
-    std::cout << "***** EXECUTE GQL: " << file.path() << " *****" <<std::endl;
+    std::cout << "***** EXECUTE: " << file.path() << " *****" <<std::endl;
     std::ifstream fs;
     fs.open(file.path().u8string().c_str(), std::ios_base::in);
+    int lineno = 0;
     while (fs.getline(gql, LINE_MAX_SIZE)) {
-      char err[256] = { 0 };
-      char* ptr = err;
+      char* ptr = nullptr;
       // execute script
-      gqlite_exec(gHandle, gql, [](gqlite_result*)-> int {
-        return 0;
-        }, nullptr, &ptr);
+      std::cout << "["<< lineno<<"]:\t" << gql << std::endl;
+      int value = gqlite_exec(gHandle, gql, gqlite_exec_callback, nullptr, &ptr);
+      char* msg = gqlite_error(gHandle, value);
+      if (msg) {
+        printf("%s\n", msg);
+        gqlite_free(msg);
+      }
+      lineno += 1;
       memset(gql, 0, LINE_MAX_SIZE);
     }
     std::cout << "***** EXECUTE FINISH: " << file.path() << " *****" << std::endl;
@@ -127,19 +145,53 @@ int main(int argc, char** argv) {
   close_capture(outfd, fp);
   // compare result
   bool is_ok = true;
-  std::string expect_file{inputs.u8string()};
-  expect_file += "/expect.out";
+  std::string expect_file{ inputs.u8string() };
+  
+  expect_file = expect_file + SPLASH_WORD + "expect.out";
   if (!std::filesystem::exists(expect_file) || !std::filesystem::exists(outfile)) return 0;
+#ifdef WIN32
+  std::string cmd("fc /N ");
+#else
   std::string cmd("diff -T -u ");
+#endif
   cmd += outfile;
   cmd += " " + expect_file;
-  pid_t status = system(cmd.c_str());
-  if(-1 != status && WIFEXITED(status) && WEXITSTATUS(status) == 0) {
+#ifdef WIN32
+  int status
+#else
+  pid_t status
+#endif
+    = system(cmd.c_str());
+  if(
+#ifdef WIN32
+    status == 0
+#else
+    - 1 != status && WIFEXITED(status) && WEXITSTATUS(status) == 0
+#endif
+    ) {
     // success and not diff
   }
   else {
+#ifdef WIN32
+    std::cout << "Run Command: " << cmd << std::endl;
+    if (status == -1) {
+      switch (errno) {
+      case E2BIG:
+      case ENOENT:
+      case ENOEXEC:
+      case ENOMEM:
+        break;
+      default:
+        break;
+      }
+    }
+    else {
+      //is_ok = false;
+    }
+#else
     // fprintf(stderr, "%s", (int)status);
-    // is_ok = false;
+// is_ok = false;
+#endif
   }
   return !is_ok;
 }

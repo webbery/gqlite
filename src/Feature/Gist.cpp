@@ -1,5 +1,5 @@
 #include "Feature/Gist.h"
-#include "Error.h"
+#include "gqlite.h"
 #include "Graph.h"
 #include <set>
 

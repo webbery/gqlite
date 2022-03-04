@@ -11,15 +11,6 @@ struct gql_node {
 template<typename T>
 void release_callback_default(T& item) {}
 
-template<typename T>
-gql_node* init_list(T& item, NodeType type) {
-  gql_node* node = (gql_node*)malloc(sizeof(gql_node));
-  node->_value = malloc(sizeof(T));
-  memcpy(node->_value, &item, sizeof(T));
-  node->_next = nullptr;
-  return node;
-}
-
 inline gql_node* init_list(struct gast* item) {
   gql_node* node = (gql_node*)malloc(sizeof(gql_node));
   node->_value = item;
@@ -40,10 +31,11 @@ void release_list(gql_node* p, Fn cb = release_callback_default) {
   }
 }
 
-inline gql_node* list_join(struct gql_node* first, struct gql_node* second) {
+template<typename Node>
+Node* list_join(Node* first, Node* second) {
   if (!first) return second;
   if (!second) return first;
-  gql_node* cur = first;
+  Node* cur = first;
   while (cur->_next) cur = cur->_next;
   cur->_next = second;
   return first;

@@ -2,7 +2,7 @@
 #include "json.hpp"
 #include "mdbx.h++"
 #include "Type/Type.h"
-#include "Error.h"
+#include "gqlite.h"
 #include <set>
 
 enum class FeatureType {

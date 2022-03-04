@@ -1,5 +1,5 @@
 #include "SubGraph.h"
-#include "Error.h"
+#include "gqlite.h"
 
 int GSubGraph::queryVertex(std::set<VertexID>& ids, const GConditions& pred)
 {

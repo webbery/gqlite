@@ -1,6 +1,6 @@
 #include "Type/QueryCondition.h"
-#include "Error.h"
 #include "base/ast.h"
+#include "gqlite.h"
 
 namespace {
   NodeType getJsonType(const nlohmann::json& js) {

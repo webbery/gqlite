@@ -37,7 +37,7 @@ GVirtualEngine::~GVirtualEngine()
   //_tInterpret.join();
 }
 
-void GVirtualEngine::test(GStatement& stm)
+void GVirtualEngine::exec_once(GStatement& stm)
 {
   // https://stackoverflow.com/questions/62820971/passing-an-argument-to-yylex
   //yydebug = 1;

@@ -1,5 +1,5 @@
 #include "Feature/InvertIndex.h"
-#include "Error.h"
+#include "gqlite.h"
 #include <set>
 
 GIndex::GIndex(const char* name)

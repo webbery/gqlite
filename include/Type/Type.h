@@ -22,9 +22,19 @@ struct GPredition {
   std::shared_ptr < GPredition> _next;
 };
 
+struct GWalkExpr {
+  // property of edge that will be used by expression
+  std::vector<std::string> _props;
+  // function type such as Astar/dijk..., or expression that can be envoked.
+  std::string _fn;
+  // if _isFunc is true, _fn is a function string. Other wise _fn is a normal string that is build in.
+  bool _isFunc;
+};
+
 struct GConditions {
   bool _isAnd;    // is and/or
   std::shared_ptr<GPredition> _preds;
+  std::shared_ptr<GWalkExpr> _walks;
   std::shared_ptr < GConditions> _next;
 };
 

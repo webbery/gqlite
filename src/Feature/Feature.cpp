@@ -1,4 +1,5 @@
 #include "Feature/Feature.h"
+#include "gqlite.h"
 
 GVertexProptertyFeature::GVertexProptertyFeature(const char* property)
   :_property(property)

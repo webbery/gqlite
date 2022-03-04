@@ -1,5 +1,6 @@
 #include "../include/gqlite.h"
 #include <stdio.h>
+#include "../tool/stdout.h"
 
 #define NORMAL "\033[m"
 #define RED "\033[0;32;31m"
@@ -7,50 +8,32 @@
 int test_id = 0;
 size_t result_count = 0;
 #define TEST_GRAMMAR(nogql) {\
+    ptr = nullptr;\
     printf(NORMAL"Test [%d]:\t%s\n", ++test_id, nogql); \
     if (gqlite_exec(pHandle, nogql, gqlite_exec_callback, nullptr, &ptr)) {\
-      printf(RED"exec error: %s\n", err);\
-    }}
+      printf(RED"exec error: %s\n", ptr);\
+    }\
+    if (ptr) gqlite_free(ptr);\
+}
 #define TEST_COMMAND(cmd) {\
+    ptr = nullptr;\
     printf(NORMAL"Test [%d]:\t%s\n", ++test_id, cmd); \
     if (gqlite_exec(pHandle, cmd, gqlite_cmd_callback, nullptr, &ptr)) {\
-      printf(RED"exec error: %s\n", err);\
+      printf(RED"exec error: %s\n", ptr);\
     }\
+    if (ptr) gqlite_free(ptr);\
 }
 
 #define TEST_BOOL(nogql, status)
 #define TEST_QUERY(nogql, count) \
 {\
+  ptr = nullptr;\
   printf(NORMAL"Test [%d]:\t%s\n", ++test_id, nogql);\
   result_count = count;\
   if (gqlite_exec(pHandle, nogql, gqlite_exec_assert_callback, nullptr, &ptr)) {\
-    printf(RED"exec error: %s\n"NORMAL, err);\
+    printf(RED"exec error: %s\n"NORMAL, ptr);\
   }\
-}
-#define TEST_WALK()
-
-int gqlite_exec_callback(gqlite_result* params )
-{
-    if (params && params->count) {
-        for (size_t idx = 0; idx < params->count; ++idx) {
-            printf("query result[%lu]: %s", idx, params->nodes[idx].id);
-            if (params->nodes[idx].properties) {
-              printf(", %s", params->nodes[idx].properties);
-            }
-            printf("\n");
-        }
-    }
-    return 0;
-}
-
-int gqlite_cmd_callback(gqlite_result* params )
-{
-    if (params && params->count) {
-        for (size_t idx = 0; idx < params->count; ++idx) {
-            printf("query result[%lu]: %s\n", idx, params->graphs[idx]);
-        }
-    }
-    return 0;
+  if (ptr) gqlite_free(ptr);\
 }
 
 int gqlite_exec_assert_callback(gqlite_result* params)
@@ -63,7 +46,7 @@ int gqlite_exec_assert_callback(gqlite_result* params)
   return 0;
 }
 
-void wrong_grammar_test(gqlite* pHandle, char* ptr, char* err) {
+void wrong_grammar_test(gqlite* pHandle, char* ptr) {
   TEST_GRAMMAR("{create: 'ga', noindex: 'keyword'}");
   TEST_GRAMMAR("{create: 'ga', index: b64'keyword'}");
   TEST_GRAMMAR("{create: b64'ga', index: 'keyword'}");
@@ -72,7 +55,7 @@ void wrong_grammar_test(gqlite* pHandle, char* ptr, char* err) {
   TEST_GRAMMAR("{drop: 'ga'}");
 }
 
-void successful_test(gqlite* pHandle, char* ptr, char* err) {
+void successful_test(gqlite* pHandle, char* ptr) {
   TEST_GRAMMAR("//{drop: 'ga'}");
   TEST_COMMAND("show graph");
   TEST_GRAMMAR("{drop: 'ga'}");
@@ -86,7 +69,12 @@ void successful_test(gqlite* pHandle, char* ptr, char* err) {
   TEST_GRAMMAR("{create: 'ga', index: ['keyword', 'color', 'create_time']}");
   TEST_COMMAND("show graph 'ga'");
   TEST_GRAMMAR("{upset: 'ga', vertex: [['v1']]}");
-  TEST_QUERY("{query: '*', in: 'ga'}", 1);
+  TEST_QUERY("{query: vertex, in: 'ga'}", 1);
+  //printf(NORMAL"Test [%d]:\t%s\n", ++test_id, "{query: vertex, in: 'ga'}");
+  //  if (gqlite_exec(pHandle, "{query: vertex, in: 'ga'}", gqlite_exec_assert_callback, nullptr, &ptr)) {
+  //      printf(RED"exec error: %s\n", ptr); 
+  //  }
+  //gqlite_free(ptr); 
   TEST_GRAMMAR(
     "{"
       "upset: 'ga',"
@@ -94,20 +82,27 @@ void successful_test(gqlite* pHandle, char* ptr, char* err) {
         "['v1', {class: 'a/c', location: [131.24194, 37.12532], keyword: ['a', 'b'], create_time: 1}],"
         "['v2', {color: '#343e58', keyword: ['a'], create_time: 2}],"
         "['v3', {text: b64'5Zyo57q/57yW56CB6Kej56CB', keyword: ['a'], create_time: 3}],"
-        "['v4']"
-      "]"
+        "['v4'],"
+        "['v5', {keyword: [], create_time: 1}]"
+    "]"
     "}");
-  TEST_QUERY("{query: '*', in: 'ga'}", 4);
+  TEST_QUERY("{query: vertex, in: 'ga'}", 4);
   TEST_GRAMMAR("{remove: 'ga', vertex: ['v2']}");
-  TEST_QUERY("{query: '*', in: 'ga'}", 3);
-  TEST_QUERY("{query: '*', in: 'ga', where: {create_time: {$gt: 1, $lt: 5}}}", 1);
-  TEST_QUERY("{query: '*', in: 'ga', where: {create_time: {$gte: 1, $lt: 5}}}", 2);
-  TEST_QUERY("{query: '*', in: 'ga', where: {id: 'v1'}}", 1);
-  TEST_QUERY("{query: '*', in: 'ga', where: {keyword: 'b'}}", 1);
-  TEST_QUERY("{query: '*', in: 'ga', where: {create_time: {$gt: 1}}}", 1);
-  TEST_QUERY("{query: '*', in: 'ga', where: {create_time: {$lt: 5}}}", 2);
-  TEST_GRAMMAR("{query: ['class'], in: 'ga', where: {keyword: 'b'}}");
-  TEST_GRAMMAR("{query: ['class'], in: 'ga', where: {keyword: 'b'}}");
+  //printf(NORMAL"Test [%d]:\t%s\n", ++test_id, "{remove: 'ga', vertex: ['v2']}");
+  //ptr = nullptr;
+  //  if (gqlite_exec(pHandle, "{remove: 'ga', vertex: ['v2']}", gqlite_exec_callback, nullptr, &ptr)) {
+  //      printf(RED"exec error: %s\n", ptr);
+  //  }
+  //if (ptr) gqlite_free(ptr);
+  TEST_QUERY("{query: vertex, in: 'ga'}", 3);
+  TEST_QUERY("{query: vertex, in: 'ga', where: {create_time: {$gt: 1, $lt: 5}}}", 1);
+  TEST_QUERY("{query: vertex, in: 'ga', where: {create_time: {$gte: 1, $lt: 5}}}", 2);
+  TEST_QUERY("{query: vertex, in: 'ga', where: {id: 'v1'}}", 1);
+  TEST_QUERY("{query: vertex, in: 'ga', where: {keyword: 'b'}}", 1);
+  TEST_QUERY("{query: vertex, in: 'ga', where: {create_time: {$gt: 1}}}", 1);
+  TEST_QUERY("{query: vertex, in: 'ga', where: {create_time: {$lt: 5}}}", 2);
+  TEST_GRAMMAR("{query: [vertex.class], in: 'ga', where: {keyword: 'b'}}");
+  TEST_GRAMMAR("{query: [vertex.class], in: 'ga', where: {keyword: 'b'}}");
   TEST_GRAMMAR("{dump: 'nogql.gql'}");
   /*
   * EDGES & LINKS
@@ -146,8 +141,8 @@ void successful_test(gqlite* pHandle, char* ptr, char* err) {
     "}"
   );
   // query 1'st order neighber
-  TEST_QUERY("{query: '*', in: 'ga', where: {id: 'v1', ->: 1}}", 0);
-  TEST_QUERY("{query: '*', in: 'ga', where: {id: 'v1', --: 1}}", 1);
+  TEST_QUERY("{query: vertex, in: 'ga', where: {id: 'v1', ->: 1}}", 0);
+  TEST_QUERY("{query: vertex, in: 'ga', where: {id: 'v1', --: 1}}", 1);
   // TEST_GRAMMAR("{create: 'prefix_tree'}");
   // TEST_GRAMMAR(
   //   "{"
@@ -169,8 +164,8 @@ void successful_test(gqlite* pHandle, char* ptr, char* err) {
   /*
   * search path from a to b
   */
-  TEST_GRAMMAR("{walk: '*', in: 'ga', from: 'v1', to: 'v2'}");
-  TEST_QUERY("{walk: type('*'), in: 'ga', where: {id: 'v1', --: 1}}", 1);
+  TEST_GRAMMAR("{query: path, in: 'ga', from: 'v1', to: 'v2', where: {--: 'dijk'}}");
+  TEST_QUERY("{query: edge.type('*'), in: 'ga', where: {id: 'v1', --: 1}}", 1);
   // TEST_GRAMMAR("{walk: 'biBFS', in: 'ga', from: 'a', to: 'b'}");
   // TEST_GRAMMAR("{walk: 'AStar', in: 'ga', from: 'a', to: 'b', cost: () => {return random()}}");
 
@@ -178,7 +173,7 @@ void successful_test(gqlite* pHandle, char* ptr, char* err) {
   // TEST_GRAMMAR("{query: '*', from: 'ga', where: {neighbor: 1}");
 
   TEST_GRAMMAR("{drop: 'ga'}");
-  TEST_GRAMMAR("dump {query: '*', in: 'ga', where: {id: 'v1', --: 1}}");
+  TEST_GRAMMAR("dump {query: vertex, in: 'ga', where: {id: 'v1', --: 1}}");
 }
 
 void test_edges() {}
@@ -186,10 +181,9 @@ void test_edges() {}
 int main() {
     gqlite* pHandle = 0;
     gqlite_open("gql_db", &pHandle);
-    char err[512] = { 0 };
-    char* ptr = err;
-    successful_test(pHandle, ptr, err);
-    wrong_grammar_test(pHandle, ptr, err);
+    char* ptr = nullptr;
+    successful_test(pHandle, ptr);
+    wrong_grammar_test(pHandle, ptr);
     gqlite_close(pHandle);
     return 0;
 }

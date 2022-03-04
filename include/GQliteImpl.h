@@ -8,18 +8,21 @@ class GStorageEngine;
 
 class GQLiteImpl {
 public:
-    GQLiteImpl();
-    ~GQLiteImpl();
+  GQLiteImpl();
+  ~GQLiteImpl();
 
-    int open(const char* filename, gqlite_open_mode mode);
+  int open(const char* filename, gqlite_open_mode mode);
 
-  int exec(GStatement& stm);
+  void exec(GStatement& stm);
 
   int close();
   
+  void set(GStatement* pStatement);
+  GStatement* statement() { return _statement; }
 private:
   int create(const char* filename, gqlite_open_mode mode);
 
 private:
+  GStatement* _statement = nullptr;
   GVirtualEngine* _pVirtualEngine = nullptr;
 };

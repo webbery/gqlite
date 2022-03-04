@@ -1,0 +1,5 @@
+{create: 'ga', noindex: 'keyword'}
+{create: 'ga', index: b64'keyword'}
+{create: b64'ga', index: 'keyword'}
+{query: '*', in: 'ga', where: {create_time: {$gt: 1.2}}}
+{query: '*', in: {query: '*', in: 'ga', where: {create_time: {$gt: 1}}}}

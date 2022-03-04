@@ -8,7 +8,7 @@
 
 template<typename T>
 std::function<bool(T&, T&)> get_internal_predicate(const std::string& name) {
-  if (name == "eq") {
+  if (name == "eq" || name == "id") {
     return [](T& left, T& right)->bool {return left == right; };
   }
   else if (name == "gt") {

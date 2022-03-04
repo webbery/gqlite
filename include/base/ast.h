@@ -151,6 +151,7 @@ private:
 
 template<typename Visitor>
 void GET_VALUE(struct gast* ast, bool& hasBinary, Visitor& visitor) {
+  if (!ast) return;
   switch (ast->_nodetype)
   {
   case NodeType::Property:

@@ -7,6 +7,20 @@
 #define SYMBOL_EXPORT __attribute__((visibility("default")))
 #endif
 
+#define ECode_Success               0
+#define ECode_Fail                  1
+#define ECODE_NULL_PTR              2
+#define ECode_No_Memory             3
+#define ECode_DB_Create_Fail        4
+#define ECode_Graph_Not_Exist       5
+#define ECode_BD_Wrong_Type         6
+#define ECode_GQL_Grammar_Error     7
+#define ECode_GQL_Index_Not_Exist   8
+#define ECode_GQL_Path_Not_Exist    9
+#define ECode_GQL_Vertex_Not_Exist  10
+#define ECode_GQL_Edge_Type_Unknow  11
+#define ECode_GQL_Parse_Fail        12
+
 typedef void* gqlite;
 
 typedef struct _gqlite_statement {
@@ -29,13 +43,13 @@ enum gqlite_primitive_type {
   gqlite_object
 };
 
-typedef struct _gqlite_node {
+typedef struct _gqlite_vertex {
   // nodeid, C-style string
   char* id;
   // node properties
   char* properties;
   uint32_t len;
-}gqlite_node;
+}gqlite_vertex;
 
 typedef struct _gqlite_edge {
   char* id;
@@ -43,19 +57,33 @@ typedef struct _gqlite_edge {
   uint32_t len;
 }gqlite_edge;
 
+typedef enum _gqlite_node_type {
+  gqlite_node_type_vertex,
+  gqlite_node_type_edge,
+}gqlite_node_type;
+
+typedef struct _gqlite_node {
+  gqlite_node_type _type;
+  union {
+    gqlite_vertex* _vertex;
+    gqlite_edge* _edge;
+  };
+  _gqlite_node* _next;
+}gqlite_node;
+
 enum gqlite_result_type {
-  gqlite_node_type,
-  gqlite_edge_type,
-  gqlite_name_type
+  gqlite_result_type_node,
+  gqlite_result_type_cmd,
+  gqlite_result_type_info
 };
 typedef struct _gqlite_result {
   union {
-    _gqlite_node* nodes;
-    _gqlite_edge* edges;
-    char** graphs;
+    gqlite_node* nodes;
+    char** infos;
   };
   uint32_t count;
   gqlite_result_type type;
+  int errcode;
 }gqlite_result;
 
 #ifdef __cplusplus
@@ -69,8 +97,9 @@ extern "C" {
   SYMBOL_EXPORT int gqlite_execute(gqlite* pDb, gqlite_statement* statement);
   SYMBOL_EXPORT int gqlite_next(gqlite* pDb, gqlite_statement* statement, gqlite_result** result);
 
-SYMBOL_EXPORT int gqlite_close(gqlite*);
-SYMBOL_EXPORT const char* gqlite_error(int error);
+  SYMBOL_EXPORT int gqlite_close(gqlite* pDb);
+  SYMBOL_EXPORT char* gqlite_error(gqlite* pDb, int error);
+  SYMBOL_EXPORT void gqlite_free(void* ptr);
 
 #ifdef __cplusplus
 }

@@ -74,20 +74,34 @@ struct gast* INIT_STRING_AST(const char* key) {
 }
 
 template<typename T>
+struct gast* INIT_BASIC_TYPE_AST(T v, NodeType type) {
+  T* value = (T*)malloc(sizeof(T));
+  *value = v;
+  return newast(type, value, nullptr, nullptr);
+}
+
+template<typename T>
 struct gast* INIT_LITERAL_AST(T& v, NodeType type) {
   void* value = malloc(sizeof(T));
   memcpy(value, &v, sizeof(T));
   return newast(type, value, nullptr, nullptr);
 }
 
-nlohmann::json* get_or_create_json_array(nlohmann::json* item) {
-  if (!item->is_array()) {
-    nlohmann::json* j = new nlohmann::json();
-    j->push_back(*item);
-    delete item;
-    return j;
+void init_result_info(gqlite_result& result, const std::vector<std::string>& info) {
+  result.count = info.size();
+  result.infos = (char**)malloc(result.count * sizeof(char*));
+  for (size_t idx = 0; idx < result.count; ++idx) {
+    result.infos[idx] = (char*)malloc(info[idx].size() + 1);
+    memcpy(result.infos[idx], info[idx].data(), info[idx].size() + 1);
   }
-  return item;
+  result.type = gqlite_result_type_cmd;
+}
+
+void release_result_info(gqlite_result& result) {
+  for (size_t idx = 0; idx < result.count; ++idx) {
+    free(result.infos[idx]);
+  }
+  free(result.infos);
 }
 
 nlohmann::json* get_or_create_json(nlohmann::json* item) {
@@ -106,15 +120,39 @@ nlohmann::json* get_or_create_json(nlohmann::json* item) {
 %token <__int> VAR_INTEGER
 %token <__int> VAR_DATETIME
 %token KW_DUMP KW_ID KW_GRAPH KW_COMMIT
-%token KW_CREATE KW_VERTEX KW_EDGE KW_DROP KW_IN KW_REMOVE KW_UPSET KW_LEFT_RELATION KW_RIGHT_RELATION KW_BIDIRECT_RELATION KW_PATH KW_REST KW_DELETE
-%token OP_QUERY OP_WALK OP_FROM KW_INDEX KW_GROUP OP_WHERE OP_TO
+%token KW_CREATE KW_DROP KW_IN KW_REMOVE KW_UPSET KW_LEFT_RELATION KW_RIGHT_RELATION KW_BIDIRECT_RELATION KW_REST KW_DELETE
+%token OP_QUERY OP_FROM KW_INDEX KW_GROUP OP_WHERE OP_TO
 %token CMD_SHOW 
 %token OP_GREAT_THAN OP_LESS_THAN OP_GREAT_THAN_EQUAL OP_LESS_THAN_EQUAL OP_EQUAL OP_AND OP_OR
 %token FN_COUNT
+%token dot
+%token <__node> KW_VERTEX
+%token <__node> KW_EDGE
+%token <__node> KW_PATH
 
 %type <__list> vertex_list vertexes string_list strings property_list edges edge_list
-%type <_g> in_graph_expr
-%type <__node> json value values object array properties where_expr function_call property vertex edge gql upset_vertexes upset_edges
+%type <_g> a_graph_expr
+%type <__node> json
+%type <__node> value
+%type <__node> values
+%type <__node> object
+%type <__node> array
+%type <__node> properties
+%type <__node> where_expr
+%type <__node> function_call
+%type <__node> property
+%type <__node> vertex
+%type <__node> edge
+%type <__node> gql
+%type <__node> upset_vertexes
+%type <__node> upset_edges
+%type <__node> a_simple_query
+%type <__node> query_kind_expr
+%type <__node> query_kind
+%type <__node> a_graph_properties
+%type <__node> a_edge
+%type <__node> a_link_condition
+%type <__node> a_value
 
 %start line_list
 
@@ -122,18 +160,17 @@ nlohmann::json* get_or_create_json(nlohmann::json* item) {
 line_list: line
           | line_list line
           ;
-    line: gql
-        | utility_cmd
+    line: gql {}
+        | utility_cmd { stm._cmdtype = GQL_Util; }
         | {}
         ;
-    gql: creation  { printf("create graph success\n"); }
-        | query {}
-        | walk {}
-        | upset_vertexes { $$ = $1; }
-        | upset_edges { $$ = $1; }
-        | remove_vertexes {}
-        | drop_graph {}
-        | dump {}
+    gql: creation  { stm._cmdtype = GQL_Creation; }
+        | a_simple_query { $$ = $1; stm._cmdtype = GQL_Query; }
+        | upset_vertexes { $$ = $1; stm._cmdtype = GQL_Upset;}
+        | upset_edges { $$ = $1; stm._cmdtype = GQL_Upset; }
+        | remove_vertexes { stm._cmdtype = GQL_Remove; }
+        | drop_graph { stm._cmdtype = GQL_Drop; }
+        | dump { stm._cmdtype = GQL_Util; }
         | test {}
         ;
 
@@ -141,31 +178,34 @@ utility_cmd: CMD_SHOW KW_GRAPH
           {
             std::vector<std::string> vg = GSinglecton::get<GStorageEngine>()->getGraphs();
             gqlite_result results;
-            results.count = vg.size();
-            results.graphs = (char**)malloc(results.count * sizeof(char*));
-            for (size_t idx = 0; idx < results.count; ++idx) {
-              results.graphs[idx] = (char*)malloc(vg[idx].size() + 1);
-              memcpy(results.graphs[idx], vg[idx].data(), vg[idx].size() + 1);
-            }
+            init_result_info(results, vg);
             stm._result_callback(&results);
-            for (size_t idx = 0; idx < results.count; ++idx) {
-              free(results.graphs[idx]);
-            }
-            free(results.graphs);
+            release_result_info(results);
+            stm._errorCode = ECode_Success;
           }
         | CMD_SHOW KW_GRAPH VAR_STRING
           {
             GGraph* g = GSinglecton::get<GStorageEngine>()->getGraph($3);
             const GraphProperty& props = g->property();
-            printf("show graph [%s]:\n", $3);
+            char buff[256] = {0};
+            sprintf(buff, "show graph [%s]:\n", $3);
+            std::string str(buff);
             for (auto& name: props._indexes) {
-              printf("\tindex: %s\n", name.c_str());
+              memset(buff, 0, 256);
+              sprintf(buff, "\tindex: %s\n", name.c_str());
+              str += buff;
             }
+            gqlite_result results;
+            init_result_info(results, {str});
+            stm._result_callback(&results);
+            release_result_info(results);
+            stm._errorCode = ECode_Success;
           }
           | KW_DUMP gql {};
 creation: RANGE_BEGIN KW_CREATE VAR_STRING RANGE_END
             {
               GSinglecton::get<GStorageEngine>()->openGraph($3);
+              stm._errorCode = ECode_Success;
             }
         | RANGE_BEGIN KW_CREATE VAR_STRING COMMA KW_INDEX COLON string_list RANGE_END
             {
@@ -178,6 +218,7 @@ creation: RANGE_BEGIN KW_CREATE VAR_STRING RANGE_END
                 creation::createInvertIndex(g, value.c_str());
                 cur = cur->_next;
               } while(cur);
+              stm._errorCode = ECode_Success;
             }
         | RANGE_BEGIN KW_CREATE VAR_STRING COMMA KW_INDEX COLON function_call RANGE_END {};
 dump: RANGE_BEGIN KW_DUMP COLON VAR_STRING RANGE_END
@@ -209,37 +250,9 @@ dump: RANGE_BEGIN KW_DUMP COLON VAR_STRING RANGE_END
               if (!f) break;
               fwrite(dump.c_str(), 1, dump.size(), f);
               fclose(f);
-              gprint(LITE_DEBUG, "dump graph %s finish", $4);
+              // gprint(LITE_DEBUG, "dump graph %s finish", $4);
+              stm._errorCode = ECode_Success;
             };
-query: RANGE_BEGIN OP_QUERY COLON property_list COMMA in_graph_expr RANGE_END
-              {
-                if (!$6) break;
-                std::vector<VertexID> ids = GSinglecton::get<GStorageEngine>()->getNodes($6);
-                gqlite_result results;
-                query::get_vertexes($6, ids, results);
-                query::filter_property(results, $4);
-                stm._result_callback(&results);
-                query::release_vertexes(results);
-              }
-        | RANGE_BEGIN OP_QUERY COLON property_list COMMA KW_PATH COLON array COMMA in_graph_expr RANGE_END {}
-        | RANGE_BEGIN OP_QUERY COLON property_list COMMA in_graph_expr COMMA where_expr RANGE_END
-              {
-                if (!$6) break;
-                // check if index table exist or not
-                const GraphProperty& properties = $6->property();
-                ASTVertexQueryVisitor visitor;
-                traverse($8, &visitor);
-                std::set<VertexID> sIds;
-                if(!$6->queryVertex(sIds, visitor.conditions()) && sIds.size() == 0) break;
-                gqlite_result results;
-                query::get_vertexes($6, sIds, results);
-                query::filter_property(results, $4);
-                stm._result_callback(&results);
-                query::release_vertexes(results);
-              };
-walk: RANGE_BEGIN OP_WALK COLON VAR_STRING COMMA KW_IN COLON VAR_STRING COMMA OP_FROM COLON VAR_STRING COMMA OP_TO COLON VAR_STRING RANGE_END
-              {};
-where_expr: OP_WHERE COLON json { $$ = $3; };
 upset_vertexes: RANGE_BEGIN KW_UPSET COLON VAR_STRING COMMA KW_VERTEX COLON vertex_list RANGE_END
               {
                 GET_GRAPH($4);
@@ -252,6 +265,7 @@ upset_vertexes: RANGE_BEGIN KW_UPSET COLON VAR_STRING COMMA KW_VERTEX COLON vert
                 }
                 release_list($8, release_vertex_callback);
                 GSinglecton::get<GStorageEngine>()->finishUpdate(pGraph);
+                stm._errorCode = ECode_Success;
               };
 remove_vertexes: RANGE_BEGIN KW_REMOVE COLON VAR_STRING COMMA KW_VERTEX COLON array RANGE_END
               {
@@ -266,6 +280,7 @@ remove_vertexes: RANGE_BEGIN KW_REMOVE COLON VAR_STRING COMMA KW_VERTEX COLON ar
                   current = current->_next;
                 }
                 GSinglecton::get<GStorageEngine>()->finishUpdate(pGraph);
+                stm._errorCode = ECode_Success;
               };
 upset_edges: RANGE_BEGIN KW_UPSET COLON VAR_STRING COMMA KW_EDGE COLON edge_list RANGE_END
               {
@@ -277,12 +292,64 @@ upset_edges: RANGE_BEGIN KW_UPSET COLON VAR_STRING COMMA KW_EDGE COLON edge_list
                   traverse(pv, &visitor);
                   cur = cur->_next;
                 }
+                stm._errorCode = ECode_Success;
               };
 drop_graph: RANGE_BEGIN KW_DROP COLON VAR_STRING RANGE_END
               {
                 GET_GRAPH($4);
                 GSinglecton::get<GStorageEngine>()->dropGraph(pGraph);
+                stm._errorCode = ECode_Success;
               };
+a_simple_query: 
+        | RANGE_BEGIN query_kind COMMA a_graph_expr RANGE_END
+                {
+                  if (!$4) break;
+                  std::vector<VertexID> ids = GSinglecton::get<GStorageEngine>()->getNodes($4);
+                  gqlite_result results;
+                  query::get_vertexes($4, ids, results);
+                  query::filter_property(results, $2);
+                  results.type = gqlite_result_type_node;
+                  stm._result_callback(&results);
+                  query::release_vertexes(results);
+                  stm._errorCode = ECode_Success;
+                  $$ = nullptr;
+                }
+        | RANGE_BEGIN query_kind COMMA a_graph_expr COMMA where_expr RANGE_END
+                {
+                  if (!$4) break;
+                  const GraphProperty& properties = $4->property();
+                  ASTVertexQueryVisitor visitor;
+                  traverse($6, &visitor);
+                  std::set<VertexID> sIds;
+                  stm._errorCode = $4->queryVertex(sIds, visitor.conditions());
+                  if(!stm._errorCode && sIds.size() == 0) break;
+                  gqlite_result results;
+                  results.type = gqlite_result_type_node;
+                  query::get_vertexes($4, sIds, results);
+                  query::filter_property(results, $2);
+                  stm._result_callback(&results);
+                  query::release_vertexes(results);
+                };
+        | RANGE_BEGIN query_kind COMMA a_graph_expr COMMA a_path_plan COMMA where_expr RANGE_END {};
+query_kind: OP_QUERY COLON query_kind_expr { $$ = $3; };
+query_kind_expr: 
+        | KW_VERTEX { $$ = INIT_STRING_AST("vertex"); }
+        | KW_EDGE { $$ = INIT_STRING_AST("edge"); }
+        | KW_PATH { $$ = INIT_STRING_AST("path");}
+        | a_graph_properties { $$ = $1; };
+a_graph_expr: /* empty */
+        | KW_IN COLON VAR_STRING
+                {
+                  $$ = GSinglecton::get<GStorageEngine>()->getGraph($3);
+                  stm._errorCode = ECode_Graph_Not_Exist;
+                  // if (!$$) {
+                  //   printf("graph '%s' is not exist\n", $3);
+                  // }
+                };
+a_path_plan:
+        | OP_FROM COLON VAR_STRING COMMA OP_TO COLON VAR_STRING {}
+        | OP_TO COLON VAR_STRING COMMA OP_FROM COLON VAR_STRING {};
+where_expr: OP_WHERE COLON json { $$ = $3; };
 string_list: VAR_STRING
               {
                 size_t len = strlen($1) + 1;
@@ -293,9 +360,10 @@ string_list: VAR_STRING
         | LEFT_SQUARE strings RIGHT_SQUARE
               {
                 $$ = $2;
-              };
-property_list: STAR { $$ = nullptr; }
-        | string_list { $$ = $1; };
+              }
+        | property {};
+// property_list: STAR { $$ = nullptr; }
+//         | string_list { $$ = $1; };
 strings:  VAR_STRING
               {
                 size_t len = strlen($1) + 1;
@@ -311,6 +379,17 @@ strings:  VAR_STRING
                 gql_node* node = init_list(newast(NodeType::String, p, nullptr, nullptr));
                 $$ = list_join($1, node);
               };
+a_graph_properties:
+        | graph_property {}
+        | LEFT_SQUARE graph_properties RIGHT_SQUARE {};
+graph_properties: 
+        | graph_property {}
+        | graph_properties COMMA graph_property {};
+graph_property:
+        | KW_VERTEX dot VAR_STRING {}
+        | KW_EDGE dot VAR_STRING {}
+        | KW_VERTEX dot function_call {}
+        | KW_EDGE dot function_call {};
 vertex_list: LEFT_SQUARE vertexes RIGHT_SQUARE
               {
                 $$ = $2;
@@ -381,13 +460,6 @@ edge: LEFT_SQUARE VAR_STRING COMMA KW_RIGHT_RELATION COMMA VAR_STRING RIGHT_SQUA
                 struct gast* to = newast(NodeType::Property, nullptr, id, to_value);
                 struct gast* link = INIT_STRING_AST("--");
                 $$ = newast(NodeType::Edge, link, from, to);
-              };
-in_graph_expr: KW_IN COLON VAR_STRING
-              {
-                $$ = GSinglecton::get<GStorageEngine>()->getGraph($3);
-                if (!$$) {
-                  printf("graph '%s' is not exist\n", $3);
-                }
               };
 json: value { $$ = $1; };
 value: object { $$ = $1; }
@@ -478,31 +550,34 @@ property: VAR_STRING COLON value
                 struct gast* value = INIT_LITERAL_AST($3, NodeType::ArrayExpression);
                 $$ = newast(NodeType::Property, nullptr, key, value);
               }
-        | KW_RIGHT_RELATION COLON VAR_INTEGER
-              {
-                struct gast* key = INIT_STRING_AST("rac"); // right array count
-                struct gast* value = INIT_LITERAL_AST($3, NodeType::Integer);
-                $$ = newast(NodeType::Property, nullptr, key, value);
-              }
-        | KW_LEFT_RELATION COLON VAR_INTEGER
-              {
-                struct gast* key = INIT_STRING_AST("lac");  // left arraw count
-                struct gast* value = INIT_LITERAL_AST($3, NodeType::Integer);
-                $$ = newast(NodeType::Property, nullptr, key, value);
-              }
-        | KW_BIDIRECT_RELATION COLON VAR_INTEGER
-              {
-                struct gast* key = INIT_STRING_AST("ac"); // arraw count
-                struct gast* value = INIT_LITERAL_AST($3, NodeType::Integer);
-                $$ = newast(NodeType::Property, nullptr, key, value);
-              }
-        | OP_TO COLON VAR_STRING
-              {
-                struct gast* key = INIT_STRING_AST("->");
-                struct gast* value = INIT_LITERAL_AST($3, NodeType::String);
-                $$ = newast(NodeType::Property, nullptr, key, value);
-              };
-array: LEFT_SQUARE values RIGHT_SQUARE
+        | a_link_condition {}
+        // | KW_RIGHT_RELATION COLON VAR_INTEGER
+        //       {
+        //         struct gast* key = INIT_STRING_AST("rac"); // right array count
+        //         struct gast* value = INIT_LITERAL_AST($3, NodeType::Integer);
+        //         $$ = newast(NodeType::Property, nullptr, key, value);
+        //       }
+        // | KW_LEFT_RELATION COLON VAR_INTEGER
+        //       {
+        //         struct gast* key = INIT_STRING_AST("lac");  // left arraw count
+        //         struct gast* value = INIT_LITERAL_AST($3, NodeType::Integer);
+        //         $$ = newast(NodeType::Property, nullptr, key, value);
+        //       }
+        // | KW_BIDIRECT_RELATION COLON VAR_INTEGER
+        //       {
+        //         struct gast* key = INIT_STRING_AST("ac"); // arraw count
+        //         struct gast* value = INIT_LITERAL_AST($3, NodeType::Integer);
+        //         $$ = newast(NodeType::Property, nullptr, key, value);
+        //       }
+        // | OP_TO COLON VAR_STRING
+        //       {
+        //         struct gast* key = INIT_STRING_AST("->");
+        //         struct gast* value = INIT_LITERAL_AST($3, NodeType::String);
+        //         $$ = newast(NodeType::Property, nullptr, key, value);
+        //       }
+        | ;
+array:    LEFT_SQUARE RIGHT_SQUARE { $$ = nullptr; }
+        | LEFT_SQUARE values RIGHT_SQUARE
               {
                 $$ = $2;
               };
@@ -518,7 +593,23 @@ values: value {
                 $$ = $1;
               }
         | values COMMA KW_REST {};
-function_call: VAR_STRING PARAM_BEGIN PARAM_END {}
-        | VAR_STRING PARAM_BEGIN string_list PARAM_END {};
+a_link_condition: 
+        | a_edge COLON a_value
+              {
+
+              };
+a_edge:
+        | KW_RIGHT_RELATION { $$ = INIT_STRING_AST("->");}
+        | KW_LEFT_RELATION { $$ = INIT_STRING_AST("<-"); }
+        | KW_BIDIRECT_RELATION { $$ = INIT_STRING_AST("--"); };
+a_value:
+        | VAR_STRING { $$ = INIT_STRING_AST($1); }
+        | VAR_INTEGER { $$ = INIT_BASIC_TYPE_AST($1, NodeType::Integer); };
+function_call:
+        | VAR_STRING function_params {};
+function_params:
+        | PARAM_BEGIN PARAM_END {}
+        | PARAM_BEGIN STAR PARAM_END {}
+        | PARAM_BEGIN string_list PARAM_END {}
 test: json {printf("Unknow Input\n");};
 %%

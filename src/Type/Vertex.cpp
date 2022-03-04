@@ -2,7 +2,7 @@
 #include "Error.h"
 #include "base/ast.h"
 #include "base/list.h"
-
+#include "gqlite.h"
 
 std::vector<uint8_t> GVertexStatment::serialize()
 {

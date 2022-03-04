@@ -24,18 +24,3 @@ printf(LEVEL "[%s:%d] [%s] " fmt "\033[22;0m\n",\
 #else
 #define gprint(fmt, ...)
 #endif
-
-enum ErrorCode {
-  ECode_Success = 0,
-  ECode_Fail,
-  ECODE_NULL_PTR,
-  ECode_No_Memory,
-  ECode_DB_Create_Fail,
-  ECode_DB_Exist,
-  ECode_BD_Wrong_Type,
-  ECode_GQL_Grammar_Error,
-  ECode_GQL_Index_Not_Exist,
-  ECode_GQL_Path_Not_Exist,
-  ECode_GQL_Vertex_Not_Exist,
-  ECode_GQL_Edge_Type_Unknow,
-};

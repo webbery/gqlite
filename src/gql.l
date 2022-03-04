@@ -69,7 +69,7 @@ d[0-9]{10}$         {
 "extension"         {stm._errIndx += yyleng;};
 "show"              {stm._errIndx += yyleng; return CMD_SHOW;};
 "graph"             {stm._errIndx += yyleng; return KW_GRAPH;};
-"walk"              {stm._errIndx += yyleng; return OP_WALK; };
+"walk"              {stm._errIndx += yyleng; };
 "order"             {stm._errIndx += yyleng;}
 "start"             {stm._errIndx += yyleng;};
 "with"              {stm._errIndx += yyleng;};
@@ -106,6 +106,7 @@ create(?:\:)        {stm._errIndx += yyleng; return KW_CREATE;};
 "in"                { stm._errIndx += yyleng; return KW_IN;};
 "to"                { stm._errIndx += yyleng; return OP_TO;}
 "..."               { stm._errIndx += yyleng; return KW_REST;};
+"."                 { stm._errIndx += 1; return dot;};
 "+"                 {stm._errIndx += yyleng;};
 "-"                 {stm._errIndx += yyleng;};
 "*"                 {stm._errIndx += yyleng;};

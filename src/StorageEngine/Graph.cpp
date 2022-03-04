@@ -4,6 +4,7 @@
 #include <set>
 #include "Type/Binary.h"
 #include "Predicate.h"
+#include "gqlite.h"
 
 #define GRAPH_EXCEPTION_CATCH(expr) try{\
   expr;\
@@ -167,7 +168,6 @@ int GGraph::queryVertex(std::set<VertexID>& ids, const GConditions& preds)
     while (pred) {
       GVertexProptertyFeature* feature = getFeature(pred->_indx.c_str());
       if (feature == nullptr) {
-        fprintf(stderr, "index %s is not exist\n", pred->_indx.c_str());
         return ECode_GQL_Index_Not_Exist;
       }
       std::set<VertexID> temp;
@@ -230,7 +230,7 @@ int GGraph::queryEdge(const nlohmann::json& pred)
   return ECode_Success;
 }
 
-int GGraph::walk()
+int GGraph::query()
 {
   return ECode_Success;
 }

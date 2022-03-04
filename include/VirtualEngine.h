@@ -25,7 +25,7 @@ public:
   GVirtualEngine();
   ~GVirtualEngine();
 
-  void test(GStatement&);
+  void exec_once(GStatement&);
   void addNoSQL(const NoSQLRoutine& instruction);
   void awaitExecute(NoSQLRoutine& instruction);
   void generateInternalRepresent(AST* pAst);

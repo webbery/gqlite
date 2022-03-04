@@ -3,10 +3,37 @@
 #include <atomic>
 #include "Statement.h"
 #include "Error.h"
+#include "Memory.h"
+#include "json.hpp"
 
 #define CHECK_NULL_PTR(p) {if (!p) return ECODE_NULL_PTR;}
 
+#define UNKNOWN_ERROR           "unknow error"
+#define Graph_Not_Exist_ERROR   "graph is not exist"
+#define Index_Not_Exist_ERROR   "index %s is not exist"
+
 std::atomic<bool> _gqlite_g_close_flag_(false);
+
+namespace {
+  std::string get_operation(GQL_Command_Type type, const std::string& gql) {
+    switch (type) {
+    case GQL_Creation: return "CREATE";
+    case GQL_Query: return "QUERY";
+    case GQL_Upset: return "UPSET";
+    case GQL_Drop: return "DROP";
+    case GQL_Remove: return "REMOVE";
+    default:
+      return gql;
+    }
+  }
+
+  char* simple_message(const char* message) {
+    size_t len = strlen(message) + 1;
+    char* msg = (char*)GMemory::allocate(len);
+    strncpy(msg, message, len);
+    return msg;
+  }
+}
 
 SYMBOL_EXPORT int gqlite_open_with_mode(const char* filename, gqlite** ppDb, gqlite_open_mode mode)
 {
@@ -33,13 +60,12 @@ SYMBOL_EXPORT int gqlite_close(gqlite* gql)
 SYMBOL_EXPORT int gqlite_exec(gqlite* pDb, const char* gql, int (*gqlite_callback)(gqlite_result*), void*, char** err)
 {
   CHECK_NULL_PTR(pDb);
-  GStatement stm(gql, gqlite_callback);
+  GStatement* stm = new GStatement(gql, gqlite_callback);
   GQLiteImpl* impl = (GQLiteImpl*)pDb;
-  int ret = impl->exec(stm);
-  if (ECode_Success != ret) {
-
-  }
-  return ret;
+  impl->exec(*stm);
+  char* msg = gqlite_error(pDb, stm->_errorCode);
+  *err = msg;
+  return stm->_errorCode;
 }
 
 SYMBOL_EXPORT int gqlite_create(gqlite* pDb, const char* gql, gqlite_statement** statement)
@@ -55,7 +81,40 @@ SYMBOL_EXPORT int gqlite_execute(gqlite* pDb, gqlite_statement* statement)
   return 0;
 }
 
-SYMBOL_EXPORT const char* gqlite_error(int error)
+SYMBOL_EXPORT char* gqlite_error(gqlite* pDb, int error)
 {
-  return 0;
+  char* msg = nullptr;
+  size_t len = 0;
+  char buff[256] = { 0 };
+  GQLiteImpl* impl = (GQLiteImpl*)pDb;
+  GStatement* stm = impl->statement();
+  std::string gql = stm->gql();
+  std::string operation = get_operation(stm->_cmdtype, gql);
+  switch (error)
+  {
+  case ECode_Success:
+    operation += " SUCCESS";
+    msg = simple_message(operation.c_str());
+    break;
+  case ECode_Graph_Not_Exist:
+  {
+    msg = simple_message(Graph_Not_Exist_ERROR);
+  }
+    break;
+  case ECode_GQL_Index_Not_Exist:
+    //sprintf(buff, Index_Not_Exist_ERROR, jsn["index"].dump().c_str());
+    break;
+  case ECode_GQL_Parse_Fail:
+    break;
+  case ECode_Fail:
+  default:
+    msg = simple_message(UNKNOWN_ERROR);
+    break;
+  }
+  return msg;
+}
+
+SYMBOL_EXPORT void gqlite_free(void* ptr)
+{
+  GMemory::deallocate(ptr);
 }

@@ -1,5 +1,5 @@
 #include "Type/Edge.h"
-#include "Error.h"
+#include "gqlite.h"
 #include "base/ast.h"
 
 edge_id::edge_id(const std::string& from, const std::string& to, GraphEdgeDirection direction)

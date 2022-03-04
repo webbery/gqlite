@@ -77,7 +77,7 @@ public:
 
   int queryVertex(std::set<VertexID>& ids, const GConditions& pred);
   int queryEdge(const nlohmann::json& pred);
-  int walk();
+  int query();
 
     // std::vector<Vertex> getVertex(mdbx::txn_managed& txn, EdgeID edge);
   GVertex getVertexById(const std::string& id);

@@ -25,13 +25,14 @@ This is the expriments for testing abilities of graph database in ending device.
 	* 4.3. [Add Vertex & Edge](#AddVertexEdge)
 	* 4.4. [Remove Vertex & Edge](#RemoveVertexEdge)
 	* 4.5. [Query](#Query)
-		* 4.5.1. [intrinct function](#embededfunction)
+		* 4.5.1. [intrinct function](#intrinctfunction)
 		* 4.5.2. [condition](#condition)
-	* 4.6. [Walk](#Walk)
-	* 4.7. [Inference](#Inference)
-	* 4.8. [Information Extract](#InformationExtract)
-	* 4.9. [Ceate Job](#CeateJob)
-	* 4.10. [Transition](#Transition)
+	* 4.6. [Inference](#Inference)
+	* 4.7. [Ceate Job](#CeateJob)
+	* 4.8. [Transition](#Transition)
+* 5. [Utility](#Utility)
+	* 5.1. [Show Graphs](#ShowGraphs)
+	* 5.2. [Extension](#Extension)
 
 <!-- vscode-markdown-toc-config
 	numbering=true
@@ -56,7 +57,7 @@ This is the expriments for testing abilities of graph database in ending device.
 | N-adjacent | | - | 0.1.0 |
 | walk of BFS | | - | 0.1.0 |
 | walk of DFS | | - | 0.1.0 |
-| walk of dijk | | _ | 0.1.0 |
+| walk of dijk | | - | 0.1.0 |
 | js support | implement a subset/extend of javasript for complex query. |  | 0.2.0 |
 | walk of A* | A* algrithm for graph search |  | 0.2.0 |
 | GiST index | boosting for more type search |  | 0.3.0 |
@@ -138,30 +139,28 @@ or simply use bidirection:
 {remove: 'graph', vertex: ['Tom']}
 ```
 ###  4.5. <a name='Query'></a>Query
-There are two kinds of query. First is `query` which is used to find vertexes instance. The second is `walk` which is used to find path.
-####  4.5.1. <a name='embededfunction'></a>intrinct function
+There are three kinds of query. First is `vertex` which is used to find vertexes instance.  Another one is `edge` which is used to find edges instance. The last one is `path` which is used to find a batch of path from some points to other points.
+####  4.5.1. <a name='intrinctfunction'></a>intrinct function
 ##### count()
 ```javascript
-{
-    query: count(),
-    from: 'vertex'
+{// this is used to count the number of vertex
+    query: count(vertex),
+    in: 'graph'
 }
 ```
 ####  4.5.2. <a name='condition'></a>condition
 ```javascript
 {
-    query: ['sex', 'age'],
-    from: 'vertex',
+    query: [vertex.sex, vertex.age],
     where: [
-        {relation: 'son'}
+        {<->: 'son'}
     ],
     in: 'graph'
 }
 ```
 ```javascript
 {
-    query: ['sex', 'age'],
-    from: 'vertex',
+    query: [vertex.sex, vertex.age],
     where: [
         {age: {$gt: 20}}
     ],
@@ -174,36 +173,37 @@ query a reverted-index:
 query points from graph by relationship:
 ```javascript
 {
-    query: '*',
-    from: 'vertex',
-    start: 'p',
-    '->': 'son',
+    query: vertex,
+    from: 'p',
+    where: {
+        ->: 'son'
+    },
     in: 'graph'
 }
 ```
 ```javascript
 {
-    query: '*',
-    from: 'vertex',
-    start: 'p',
-    '->': 'friend',
+    query: vertex,
+    from: 'p',
     where: [
-        {vertex: function(vertex) { return vertex.age > 10}}
+        {
+            ->: 'friend',
+            vertex: function(vertex) { return vertex.age > 10}
+        }
     ],
     in: 'graph'
 }
 ```
 query a list of neighbors, where `1` mean 1'st neighbors:
 ```javascript
-{query: '*', from: 'ga', where: {id: 'v1', ->: 1}
+{query: vertex, from: 'v1', where: {id: 'v1', --: 1}, in: 'graph'}
 ```
-###  4.6. <a name='Walk'></a>Walk
-In order to get a search way, you can use `walk` to archive it.
+In order to get a search way, you can use `path` to archive it.
 ```javascript
-{walk: 'dijk', in: 'ga', from: 'v1', to: 'v2'}
+{query: path, in: 'graph', from: 'v1', to: 'v2', where: {--: 'dijk'}}
 ```
 which `dijk` means dijk search.
-###  4.7. <a name='Inference'></a>Inference
+###  4.6. <a name='Inference'></a>Inference
 Here we define a kind of inference operator, and apply it to a graph.  
 First Order Logic:
 ```javascript
@@ -223,14 +223,14 @@ HMM:
     '->': function(from, to) {return 0.5;}
 }
 ```
-###  4.9. <a name='CeateJob'></a>Ceate Job
-###  4.10. <a name='Transition'></a>Transition
-## Utility
-### Show Graphs
+###  4.7. <a name='CeateJob'></a>Ceate Job
+###  4.8. <a name='Transition'></a>Transition
+##  5. <a name='Utility'></a>Utility
+###  5.1. <a name='ShowGraphs'></a>Show Graphs
 ```
 show graph
 ```
-### Extension
+###  5.2. <a name='Extension'></a>Extension
 ```
 install extension geo_bound
 ```

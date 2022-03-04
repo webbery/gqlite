@@ -7,6 +7,16 @@ struct _gqlite_result;
 
 typedef int (*gqlite_callback)(_gqlite_result*);
 
+enum GQL_Command_Type {
+  GQL_Creation,
+  GQL_Query,
+  GQL_Upset,
+  GQL_Drop,
+  GQL_Remove,
+  GQL_Util,
+  GQL_Command_Size
+};
+
 class GStatement {
 public:
   static uint32_t GenerateIndex();
@@ -19,6 +29,12 @@ public:
 
   gqlite_callback _result_callback;
   size_t _errIndx;
+  // result code of sql executing result
+  int _errorCode;
+  // message of sql executing result
+  //std::string _msg;
+  // gql type
+  GQL_Command_Type _cmdtype;
 private:
   static uint32_t _indx;
   std::string _gql;
