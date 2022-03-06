@@ -6,6 +6,7 @@
 #include "Memory.h"
 #include "base/ast.h"
 #include "base/list.h"
+#include "Singlecton.h"
 
 namespace query
 {
