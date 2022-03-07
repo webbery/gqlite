@@ -11,6 +11,7 @@ ASTVertexUpdateVisitor::~ASTVertexUpdateVisitor()
 
 void ASTVertexUpdateVisitor::visit(NodeType type, void* value)
 {
+  if (!value) return;
   GVertexStatment statement;
   statement.Parse((struct gast*)value);
   std::vector<uint8_t> data = statement.serialize();

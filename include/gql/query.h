@@ -7,6 +7,7 @@
 #include "base/ast.h"
 #include "base/list.h"
 #include "Singlecton.h"
+#include "StorageEngine.h"
 
 namespace query
 {

@@ -580,7 +580,8 @@ array:    LEFT_SQUARE RIGHT_SQUARE { $$ = nullptr; }
         | LEFT_SQUARE values RIGHT_SQUARE
               {
                 $$ = $2;
-              };
+              }
+        | LEFT_SQUARE RIGHT_SQUARE { $$ = nullptr; };
 values: value {
                 gql_node* list = init_list($1);
                 $$ = newast(NodeType::ArrayExpression, list, nullptr, nullptr);

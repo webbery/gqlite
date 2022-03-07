@@ -16,7 +16,7 @@
 %option noinput nounput noyywrap never-interactive
 
 %%
-^\/\/[\w\W]*        { stm._errIndx += yyleng;}
+^\/\/.*        { stm._errIndx += yyleng;}
 "("                 { stm._errIndx += 1; return PARAM_BEGIN;};
 ")"                 { stm._errIndx += 1; return PARAM_END;};
 "{"                 { stm._errIndx += 1; return RANGE_BEGIN;};
