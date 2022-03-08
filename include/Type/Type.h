@@ -35,7 +35,7 @@ struct GConditions {
   bool _isAnd;    // is and/or
   std::shared_ptr<GPredition> _preds;
   std::shared_ptr<GWalkExpr> _walks;
-  std::shared_ptr < GConditions> _next;
+  std::shared_ptr <GConditions> _next;
 };
 
 #include "Binary.h"

@@ -202,16 +202,16 @@ utility_cmd: CMD_SHOW KW_GRAPH
             stm._errorCode = ECode_Success;
           }
           | KW_DUMP gql {};
-creation: RANGE_BEGIN KW_CREATE VAR_STRING RANGE_END
+creation: RANGE_BEGIN KW_CREATE COLON VAR_STRING RANGE_END
             {
-              GSinglecton::get<GStorageEngine>()->openGraph($3);
+              GSinglecton::get<GStorageEngine>()->openGraph($4);
               stm._errorCode = ECode_Success;
             }
-        | RANGE_BEGIN KW_CREATE VAR_STRING COMMA KW_INDEX COLON string_list RANGE_END
+        | RANGE_BEGIN KW_CREATE COLON VAR_STRING COMMA KW_INDEX COLON string_list RANGE_END
             {
-              GSinglecton::get<GStorageEngine>()->openGraph($3);
-              GGraph* g = GSinglecton::get<GStorageEngine>()->getGraph($3);
-              gql_node* cur = $7;
+              GSinglecton::get<GStorageEngine>()->openGraph($4);
+              GGraph* g = GSinglecton::get<GStorageEngine>()->getGraph($4);
+              gql_node* cur = $8;
               do {
                 gast* s = (struct gast*)(cur->_value);
                 std::string value = GET_STRING_VALUE(s);
@@ -220,7 +220,7 @@ creation: RANGE_BEGIN KW_CREATE VAR_STRING RANGE_END
               } while(cur);
               stm._errorCode = ECode_Success;
             }
-        | RANGE_BEGIN KW_CREATE VAR_STRING COMMA KW_INDEX COLON function_call RANGE_END {};
+        | RANGE_BEGIN KW_CREATE COLON VAR_STRING COMMA KW_INDEX COLON function_call RANGE_END {};
 dump: RANGE_BEGIN KW_DUMP COLON VAR_STRING RANGE_END
             {
               if (strlen($4) == 0) {
@@ -580,8 +580,7 @@ array:    LEFT_SQUARE RIGHT_SQUARE { $$ = nullptr; }
         | LEFT_SQUARE values RIGHT_SQUARE
               {
                 $$ = $2;
-              }
-        | LEFT_SQUARE RIGHT_SQUARE { $$ = nullptr; };
+              };
 values: value {
                 gql_node* list = init_list($1);
                 $$ = newast(NodeType::ArrayExpression, list, nullptr, nullptr);

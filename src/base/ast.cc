@@ -99,6 +99,7 @@ void traverse(struct gast* value, ASTVisitor* visitor)
 std::string GET_STRING_VALUE(struct gast* ast) {
   char* pid = (char*)ast->_value;
   size_t len = strlen(pid);
+  // printf("\t%s\n", pid);
   return std::string(pid, len);
 }
 

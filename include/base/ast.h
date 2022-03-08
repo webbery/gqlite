@@ -46,6 +46,7 @@ public:
   template<typename Acceptor>
   void visit(Acceptor& acceptor) {
     _value[_name] = acceptor.value();
+    // printf("\tname: %s, value: %s\n", _name.c_str(), _value[_name].dump().c_str());
   }
 
   nlohmann::json value() { return _value; }
@@ -125,7 +126,9 @@ private:
 
 template<> class Acceptor<NodeType::ArrayExpression> {
 public:
-  Acceptor() {}
+  Acceptor(ArrayVisitor& av) {
+    this->_value = av.value();
+  }
 
   template<typename Visitor>
   void accept(Visitor& visitor) {
@@ -152,6 +155,7 @@ private:
 template<typename Visitor>
 void GET_VALUE(struct gast* ast, bool& hasBinary, Visitor& visitor) {
   if (!ast) return;
+  // printf("\tType: %d", ast->_nodetype);
   switch (ast->_nodetype)
   {
   case NodeType::Property:
@@ -189,14 +193,16 @@ void GET_VALUE(struct gast* ast, bool& hasBinary, Visitor& visitor) {
     break;
   case NodeType::ArrayExpression:
   {
-    Acceptor<NodeType::ArrayExpression> acceptor;
     gql_node* node = (gql_node*)ast->_value;
     if (!node) break;
+    ArrayVisitor av;
     while (node)
     {
-      GET_VALUE((gast*)node->_value, hasBinary, visitor);
+      GET_VALUE((gast*)node->_value, hasBinary, av);
       node = node->_next;
     }
+    // printf("ARRAY: %s\n", av.value().dump().c_str());
+    Acceptor<NodeType::ArrayExpression> acceptor(av);
     acceptor.accept(visitor);
   }
     break;

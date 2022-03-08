@@ -61,3 +61,5 @@ add_test(NAME regress_walk COMMAND regress --inputdir=./walk --outputdir=./walk
   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 add_test(NAME regress_util COMMAND regress --inputdir=./util --outputdir=./util
   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+add_test(NAME regress_error COMMAND regress --inputdir=./error --outputdir=./error
+  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
