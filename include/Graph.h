@@ -75,9 +75,7 @@ public:
   // std::vector<Edge> getEdges(mdbx::txn_managed& txn, VertexID vertex);
   std::vector<std::pair<VertexID, nlohmann::json>> getVertex(mdbx::txn_managed& txn);
 
-  int queryVertex(std::set<VertexID>& ids, const GConditions& pred);
-  int queryEdge(const nlohmann::json& pred);
-  int query();
+  int query(gqlite_node*& nodes, const GConditions& pred);
 
     // std::vector<Vertex> getVertex(mdbx::txn_managed& txn, EdgeID edge);
   GVertex getVertexById(const std::string& id);
@@ -97,6 +95,9 @@ public:
 
   const GraphProperty& property() const;
   GraphValueType propertyType(const std::string& prop);
+
+private:
+  int queryVertex(std::set<VertexID>& ids, const GConditions& pred);
 
 private:
   std::string vertexDBName(const char* name);

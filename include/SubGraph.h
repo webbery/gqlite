@@ -6,7 +6,5 @@
  */
 class GSubGraph : public GGraphInterface {
 public:
-  virtual int queryVertex(std::set<VertexID>& ids,const GConditions& pred);
-  virtual int queryEdge(const nlohmann::json& pred);
-  virtual int walk();
+  virtual int query(gqlite_node*& nodes, const GConditions& pred);
 };

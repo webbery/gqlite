@@ -32,7 +32,7 @@ namespace {
 class ConditionVisitor {
 public:
   ConditionVisitor() {
-    _value._isAnd = true;
+    //_value._isAnd = true;
   }
 
   void visit(Acceptor<NodeType::String>& acceptor) {
@@ -49,8 +49,8 @@ public:
 
   void visit(Acceptor<NodeType::Property>& acceptor) {
     auto value = acceptor.value();
-    std::shared_ptr<GPredition> curPred(new GPredition());
-    std::shared_ptr<GPredition> root = curPred;
+    GPredition* curPred = new GPredition();
+    GPredition* root = curPred;
     printf("%s\n", acceptor.value().dump().c_str());
     if (acceptor.value().size() == 0) return;
     for (auto itr = value.begin(), end = value.end(); itr != end; ++itr) {
@@ -62,11 +62,15 @@ public:
       pred->_fn = itr.key();
       pred->_type = getJsonType(itr.value());
       pred->_value = getJsonValue(itr.value());
-      printf("visit: %d\n", pred->_type);
-      curPred->_next = std::shared_ptr<GPredition>(pred);
+      //printf("visit: %d\n", pred->_type);
+      curPred->_next = pred;
       curPred = curPred->_next;
     }
-    _value._preds = root->_next;
+    GVertexCondition* vc = new GVertexCondition;
+    vc->_isAnd = true;
+    vc->_preds = root->_next;
+    _value._vertex_condition = vc;
+    delete root;
     printf("Property: %s\n", acceptor.value().dump().c_str());
   }
 

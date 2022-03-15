@@ -162,8 +162,9 @@ std::vector<std::pair<VertexID, nlohmann::json>> GGraph::getVertex(mdbx::txn_man
 int GGraph::queryVertex(std::set<VertexID>& ids, const GConditions& preds)
 {
   const GConditions* cur = &preds;
-  while (cur) {
-    std::shared_ptr<GPredition> pred = cur->_preds;
+  //while (cur) {
+    GVertexCondition* verCond = cur->_vertex_condition;
+    GPredition* pred = verCond->_preds;
     std::set<VertexID> lastResult;
     while (pred) {
       GVertexProptertyFeature* feature = getFeature(pred->_indx.c_str());
@@ -212,7 +213,7 @@ int GGraph::queryVertex(std::set<VertexID>& ids, const GConditions& preds)
         break;
       }
       std::set<VertexID> out;
-      if (cur->_isAnd) {
+      if (verCond->_isAnd) {
         std::set_intersection(lastResult.begin(), lastResult.end(), temp.begin(), temp.end(), std::inserter(out, out.begin()));
       }
       else {
@@ -220,18 +221,23 @@ int GGraph::queryVertex(std::set<VertexID>& ids, const GConditions& preds)
       }
       lastResult = out;
     }
-    cur = cur->_next.get();
+    //cur = cur->_next;
+  //}
+  return ECode_Success;
+}
+
+int GGraph::query(gqlite_node*& nodes, const GConditions& preds)
+{
+  // match vertex
+  const GVertexCondition* curVertex = preds._vertex_condition;
+  gqlite_node* startVertexes = nullptr;
+  while (curVertex) {
+    curVertex = curVertex->_next;
   }
-  return ECode_Success;
-}
-
-int GGraph::queryEdge(const nlohmann::json& pred)
-{
-  return ECode_Success;
-}
-
-int GGraph::query()
-{
+  // match path
+  const GWalkExpr* curWalk = preds._walk_expression;
+  
+  // match edge
   return ECode_Success;
 }
 

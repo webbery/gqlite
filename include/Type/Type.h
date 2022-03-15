@@ -19,23 +19,39 @@ struct GPredition {
   // type of value
   NodeType _type;
   std::any _value;
-  std::shared_ptr < GPredition> _next;
+  GPredition* _next;
+};
+
+struct GVertexCondition {
+  bool _isAnd;    // is and/or
+  GPredition* _preds;
+  GVertexCondition* _next;
+};
+
+struct GEdgeCondition {
+  GPredition* _preds;
+  GEdgeCondition* _next;
 };
 
 struct GWalkExpr {
   // property of edge that will be used by expression
-  std::vector<std::string> _props;
+  std::string _props;
   // function type such as Astar/dijk..., or expression that can be envoked.
   std::string _fn;
   // if _isFunc is true, _fn is a function string. Other wise _fn is a normal string that is build in.
   bool _isFunc;
 };
 
+enum ConditionType {
+  CondType_Vertex,
+  CondType_Edge,
+  CondType_Walk,
+};
+
 struct GConditions {
-  bool _isAnd;    // is and/or
-  std::shared_ptr<GPredition> _preds;
-  std::shared_ptr<GWalkExpr> _walks;
-  std::shared_ptr <GConditions> _next;
+  GVertexCondition* _vertex_condition;
+  GEdgeCondition* _edge_condition;
+  GWalkExpr* _walk_expression;
 };
 
 #include "Binary.h"

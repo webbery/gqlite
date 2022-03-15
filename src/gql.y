@@ -320,12 +320,10 @@ a_simple_query:
                   const GraphProperty& properties = $4->property();
                   ASTVertexQueryVisitor visitor;
                   traverse($6, &visitor);
-                  std::set<VertexID> sIds;
-                  stm._errorCode = $4->queryVertex(sIds, visitor.conditions());
-                  if(!stm._errorCode && sIds.size() == 0) break;
                   gqlite_result results;
+                  //stm._errorCode = $4->queryVertex(results.nodes, visitor.conditions());
+                  if(!stm._errorCode) break;
                   results.type = gqlite_result_type_node;
-                  query::get_vertexes($4, sIds, results);
                   query::filter_property(results, $2);
                   stm._result_callback(&results);
                   query::release_vertexes(results);
