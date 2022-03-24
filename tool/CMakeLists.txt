@@ -24,5 +24,5 @@ set(EXPORT_SOURCE ./gqlexport.cpp)
 
 add_executable(gql ${COMMANDLINE_SOURCE})
 add_executable(gqldump ${EXPORT_SOURCE})
-target_link_libraries(gql PUBLIC gqlite)
-target_link_libraries(gqldump PUBLIC gqlite)
+target_link_libraries(gql PUBLIC gqlite fmt-header-only)
+target_link_libraries(gqldump PUBLIC gqlite fmt-header-only)

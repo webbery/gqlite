@@ -10,7 +10,12 @@
 {upset: 'edge_test', edge: [ ['v5', --, 'v2'], ['v6', <-, 'v3'], ['v6', ->, 'v2'], ['v13', ->, 'v1'], ['v11', --, 'v6'] ] }
 {query: vertex, in: 'edge_test'}
 {query: vertex, in: 'edge_test', where: {keyword: 'b'}}
-{query: vertex, in: 'edge_test', where: {id: 'v1', ->: 1}}
 // query v1's neighbor
-{query: '*', from: 'ga', where: {id: 'v1', ->: 1}}
+{query: vertex, in: 'edge_test', where: {id: 'v1', ->: 1}}
+// query edges with direction in edge_test
+{query: {->: 'alias'}, in: 'edge_test'}
+// query a pattern 'from ---> to' which 'from' id is 'v5'
+{query: {vertex: 'from', ->: 'alias', vertex: 'to'}, in: 'edge_test', where: {id(from): 'v5'}}
+// query a path from 'v5' to 'v6'
+{query: {vertex: 'from', ->: 'alias', vertex: 'to'}, in: 'edge_test', where: {id(from): 'v5', id(to): 'v6'}}
 {drop: 'edge_test'}

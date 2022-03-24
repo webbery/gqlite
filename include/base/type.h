@@ -22,6 +22,7 @@ enum NodeType {
   RemoveStatement,
   QueryStatement,
   DropStatement,
+  ConditionStatement,
   // function
   Identifier,
   Literal,

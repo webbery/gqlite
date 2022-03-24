@@ -25,8 +25,8 @@ jobs:
 
     strategy:
       matrix:
-        os: [windows-latest, ubuntu-latest]
-        # os: [ubuntu-latest, macos-latest, windows-latest]
+        # os: [windows-latest, ubuntu-latest]
+        os: [ubuntu-latest, macos-latest, windows-latest]
 
     steps:
     - name: checkout
@@ -40,14 +40,11 @@ jobs:
         git fetch --unshallow --tags --prune --force
         git branch
 
-    # - name: update bison
-    #   run: |
-    #     wget http://ftp.gnu.org/gnu/bison/bison-3.6.tar.gz
-    #     tar -zxvf bison-3.6.tar.gz
-    #     cd bison
-    #     ./configure
-    #     make
-    #     sudo make install
+    - name: update flex/bison
+      if: matrix.os == 'macos-latest'
+      run: |
+        sudo port install flex
+        sudo port install bison
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
       # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type

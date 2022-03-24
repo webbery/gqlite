@@ -30,11 +30,13 @@ static const char* help[] = {
 
 std::string g_inputdir = ".";
 std::string g_outputdir = ".";
+std::string g_dbfile;
 
 enum opt_type {
   inputdir = 1,
   outputdir,
   load_ext,
+  dbfile,
   dlpath,
   version
 };
@@ -43,6 +45,7 @@ static struct option lopts[] = {
   {"inputdir",        required_argument,  0, inputdir},
   {"outputdir",       required_argument,  0, outputdir},
   {"load-extension",  required_argument,  0, load_ext},
+  {"dbfile",          required_argument,  0, dbfile},
   {"dlpath",          required_argument,  0, dlpath},
   {"version",         no_argument,        0, version},
   {0, 0, 0, 100}
@@ -70,6 +73,9 @@ static void parse_opt(int argc, char** argv) {
       g_outputdir = optarg;
       break;
     case load_ext:
+      break;
+    case dbfile:
+      g_dbfile = "_regress.gdb";
       break;
     case dlpath:
       break;
@@ -115,7 +121,12 @@ int main(int argc, char** argv) {
   FILE* fp = nullptr;
   int outfd = bengin_capture(outfile.c_str(), fp);
   gqlite* gHandle = nullptr;
-  gqlite_open((g_inputdir + "_regress").c_str(), &gHandle);
+  if (g_dbfile.size()) {
+    g_dbfile = g_inputdir + g_dbfile;
+    gqlite_open(&gHandle, g_dbfile.c_str());
+  } else {
+    gqlite_open(&gHandle);
+  }
 #define LINE_MAX_SIZE 1024
   char gql[LINE_MAX_SIZE] = { 0 };
   for (auto& file : std::filesystem::directory_iterator(inputs)) {

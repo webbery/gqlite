@@ -1,45 +1,50 @@
 #pragma once
-#include "ParserEngine.h"
-#include "StorageEngine.h"
-#include <thread>
-#include <mutex>
-#include <condition_variable>
+#include <stdint.h>
+#include <string>
+#include "base/MemoryPool.h"
+#include "SubGraph.h"
 
-#define PROGRAM_Start   1
-#define PROGRAM_Finish  2
+struct _gqlite_result;
 
-class NoSQLRoutine {
+typedef int (*gqlite_callback)(_gqlite_result*);
 
+enum GQL_Command_Type {
+  GQL_Creation,
+  GQL_Query,
+  GQL_Upset,
+  GQL_Drop,
+  GQL_Remove,
+  GQL_Util,
+  GQL_Command_Size
 };
 
-class GStatement;
-class AST;
-
-enum OptimizerLevel {
-  O_Normal,
-  O_Speed
-};
-
-class GVirtualEngine{
+class GStorageEngine;
+class GVirtualEngine {
 public:
+  static uint32_t GenerateIndex();
+
   GVirtualEngine();
+  GVirtualEngine( const char* gql, gqlite_callback cb);
   ~GVirtualEngine();
+  
+  const std::string& gql() const {return _gql;}
 
-  void exec_once(GStatement&);
-  void addNoSQL(const NoSQLRoutine& instruction);
-  void awaitExecute(NoSQLRoutine& instruction);
-  void generateInternalRepresent(AST* pAst);
+  void* alloc(size_t size);
 
+  int execAST(gast* ast);
+
+  gqlite_callback _result_callback;
+  std::string _gql;
+  size_t _errIndx;
+  // result code of sql executing result
+  int _errorCode;
+  // message of sql executing result
+  //std::string _msg;
+  // gql type
+  GQL_Command_Type _cmdtype;
+  GSubGraph* _graph = nullptr;
+  GStorageEngine* _storage = nullptr;
 private:
-  void execute();
-  void interpret(NoSQLRoutine& i);
-  void generateInstructions(OptimizerLevel level);
-
-private:
-  NoSQLRoutine _nosqls[512];
-  int _top;
-  std::thread _tInterpret;
-  std::mutex _m;
-  std::condition_variable _cv;
-  void* _pParser;
+  static uint32_t _indx;
+  MemoryPool<char> _memory;
 };

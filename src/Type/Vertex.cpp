@@ -4,7 +4,7 @@
 #include "base/list.h"
 #include "gqlite.h"
 
-std::vector<uint8_t> GVertexStatment::serialize()
+std::vector<uint8_t> GVertexStmt::serialize()
 {
   std::vector<uint8_t> v;
   if (_json.empty()) return v;
@@ -17,12 +17,12 @@ std::vector<uint8_t> GVertexStatment::serialize()
   return v;
 }
 
-void GVertexStatment::deserialize(uint8_t* data, size_t len)
+void GVertexStmt::deserialize(uint8_t* data, size_t len)
 {
 
 }
 
-int GVertexStatment::Parse(struct gast* ast)
+int GVertexStmt::Parse(struct gast* ast)
 {
   struct gast* left = ast->_left;
   if (left) _id = GET_STRING_VALUE(left->_right);
@@ -34,17 +34,17 @@ int GVertexStatment::Parse(struct gast* ast)
     //_json = GET_ARRAY_VALUE((gast*)right->_value, _binary);
   }
   else {
-    _json[_id] = "";
+    _json[this->_id] = "";
   }
   return ECode_Success;
 }
 
-int GVertexStatment::Dump()
+int GVertexStmt::Dump()
 {
   return ECode_Success;
 }
 
-nlohmann::json GVertexStatment::value(const std::string& key)
+nlohmann::json GVertexStmt::value(const std::string& key)
 {
   if (!_json.contains(key)) return nlohmann::json();
   return _json[key];

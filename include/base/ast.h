@@ -1,6 +1,7 @@
 #pragma once
 #include "type.h"
 #include "json.hpp"
+#include "list.h"
 
 struct gast {
   enum NodeType _nodetype;
@@ -11,7 +12,7 @@ struct gast {
 
 struct gast* newast(enum NodeType type, void* value, struct gast* left, struct gast* right);
 void freeast(struct gast* root);
-void dumpast(const char* filename, struct gast* root);
+void dumpast(struct gast* root);
 struct gast* loadast(const char* filename);
 
 struct gql_node* as_array(struct gast* root);

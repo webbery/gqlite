@@ -1,7 +1,7 @@
 #include "gqlite.h"
 #include "GQliteImpl.h"
 #include <atomic>
-#include "Statement.h"
+#include "VirtualEngine.h"
 #include "Error.h"
 #include "Memory.h"
 #include "json.hpp"
@@ -38,14 +38,20 @@ namespace {
 SYMBOL_EXPORT int gqlite_open_with_mode(const char* filename, gqlite** ppDb, gqlite_open_mode mode)
 {
   GQLiteImpl* impl = new GQLiteImpl();
+  GVirtualEngine* stm = new GVirtualEngine();
+  impl->set(stm);
   *ppDb = (gqlite*)impl;
   return impl->open(filename, mode);
 }
 
-SYMBOL_EXPORT int gqlite_open(const char* filename, gqlite** ppDb)
+SYMBOL_EXPORT int gqlite_open(gqlite** ppDb, const char* filename)
 {
   gqlite_open_mode mode;
-  mode.st_schema = gqlite_disk;
+  if (filename) {
+    mode.st_schema = gqlite_disk;
+  } else {
+    mode.st_schema = gqlite_memory;
+  }
   return gqlite_open_with_mode(filename, ppDb, mode);
 }
 
@@ -60,8 +66,10 @@ SYMBOL_EXPORT int gqlite_close(gqlite* gql)
 SYMBOL_EXPORT int gqlite_exec(gqlite* pDb, const char* gql, int (*gqlite_callback)(gqlite_result*), void*, char** err)
 {
   CHECK_NULL_PTR(pDb);
-  GStatement* stm = new GStatement(gql, gqlite_callback);
   GQLiteImpl* impl = (GQLiteImpl*)pDb;
+  GVirtualEngine* stm = impl->statement();
+  stm->_result_callback = gqlite_callback;
+  stm->_gql = gql;
   impl->exec(*stm);
   char* msg = gqlite_error(pDb, stm->_errorCode);
   *err = msg;
@@ -87,7 +95,7 @@ SYMBOL_EXPORT char* gqlite_error(gqlite* pDb, int error)
   size_t len = 0;
   char buff[256] = { 0 };
   GQLiteImpl* impl = (GQLiteImpl*)pDb;
-  GStatement* stm = impl->statement();
+  GVirtualEngine* stm = impl->statement();
   std::string gql = stm->gql();
   std::string operation = get_operation(stm->_cmdtype, gql);
   switch (error)

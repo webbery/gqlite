@@ -35,9 +35,9 @@ add_executable(grammar ${TEST_GRAMMAR_SOURCE})
 add_executable(storage ${STORAGE_SOURCE})
 add_executable(regress ${REGRESS_SOURCE})
 
-target_link_libraries(grammar PUBLIC gqlite)
-target_link_libraries(regress PUBLIC gqlite)
-target_link_libraries(storage PUBLIC mdbx-static)
+target_link_libraries(grammar PUBLIC gqlite fmt-header-only)
+target_link_libraries(regress PUBLIC gqlite fmt-header-only)
+target_link_libraries(storage PUBLIC mdbx-static fmt-header-only)
 
 # find_package(Python3 COMPONENTS Interpreter Development)
 

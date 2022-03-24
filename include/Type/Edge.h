@@ -22,16 +22,26 @@ private:
   GraphEdgeDirection _direction;
 };
 
-class GEdgeStatment: public GSerializer, public GStatement {
+class GLiteralEdge {};
+
+class GAttributeEdge {};
+
+class GEdge {
 public:
+  GEdge(const std::string& from, const std::string& to, GraphEdgeDirection direction);
+  virtual ~GEdge() {}
+
+  std::string id();
+protected:
+  edge_id _id;
+  nlohmann::json _json;
+};
+
+class GEdgeStatment: public GSerializer, public GStatement, public GEdge {
+public:
+  GEdgeStatment();
   virtual int Parse(struct gast* ast);
   virtual int Dump();
   virtual std::vector<uint8_t> serialize();
   virtual void deserialize(uint8_t* data, size_t len);
-
-  std::string id();
-
-private:
-  std::string _id;
-  nlohmann::json _json;
 };

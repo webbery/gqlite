@@ -31,7 +31,7 @@ size_t result_count = 0;
   printf(NORMAL"Test [%d]:\t%s\n", ++test_id, nogql);\
   result_count = count;\
   if (gqlite_exec(pHandle, nogql, gqlite_exec_assert_callback, nullptr, &ptr)) {\
-    printf(RED"exec error: %s\n"NORMAL, ptr);\
+    printf(RED"exec error: %s\n" NORMAL, ptr);\
   }\
   if (ptr) gqlite_free(ptr);\
 }
@@ -56,7 +56,7 @@ void wrong_grammar_test(gqlite* pHandle, char* ptr) {
 }
 
 void successful_test(gqlite* pHandle, char* ptr) {
-  TEST_GRAMMAR("//{drop: 'ga'}");
+  TEST_GRAMMAR("// {drop: 'ga'}");
   TEST_COMMAND("show graph");
   TEST_GRAMMAR("{drop: 'ga'}");
   TEST_COMMAND("show graph");
@@ -180,7 +180,7 @@ void test_edges() {}
 
 int main() {
     gqlite* pHandle = 0;
-    gqlite_open("gql_db", &pHandle);
+    gqlite_open(&pHandle);
     char* ptr = nullptr;
     successful_test(pHandle, ptr);
     wrong_grammar_test(pHandle, ptr);

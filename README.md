@@ -40,7 +40,12 @@ This is the expriments for testing abilities of graph database in ending device.
 	/vscode-markdown-toc-config -->
 <!-- /vscode-markdown-toc -->
 ##  1. <a name='Designed'></a>Designed
-
+In order to get more inflexibility, we try to impliment graph database on this paper: GRAD: On Graph Database Modeling. But not strict.
+### Operator
+#### Graph Matching <img src="https://render.githubusercontent.com/render/math?math=P">
+This operator is not extactly a graph matching. It can be a fuzzy matching.
+#### Walking <img src="https://render.githubusercontent.com/render/math?math=W">
+Walking is used to be through graph. So it's best to select a well walking method. Such as `Random Walk`, `A*` and so on.
 ##  2. <a name='TheSpecofImplements'></a>The Spec of Implements
 | Feature | Description | Implements | Version |
 | :--------:  | :--------: | :--------: | :--------: |
@@ -74,7 +79,7 @@ An version of flex&bison is placed in dir `tool`. So it's not need to install de
 
 ##  4. <a name='GraphQueryLanguage'></a>Graph Query Language
 ###  4.1. <a name='CreateGraph'></a>Create Graph
-Create a graph is simply use `create` keyword`. If we want to search vertex by some property, `index` keyword will regist it.
+Create a graph is simply use `create` keyword. If we want to search vertex by some property, `index` keyword will regist it.
 ```javascript
 {
     create: 'graph',
@@ -229,8 +234,13 @@ HMM:
 ###  5.1. <a name='ShowGraphs'></a>Show Graphs
 ```
 show graph
+show graph 'xxx'
 ```
 ###  5.2. <a name='Extension'></a>Extension
 ```
 install extension geo_bound
+```
+### Use Graph
+```
+use graph 'xxx'
 ```

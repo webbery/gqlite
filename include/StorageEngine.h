@@ -66,8 +66,6 @@ public:
     //template<typename T>
     //int makeDirection(GGraph* graph, const VertexID& from, const VertexID& to, const char* name, T&& value){}
 
-    template<typename T>
-    int makeDirection(GGraph* graph, const char* id, const char* from, const char* to, const char* name, T&& value){}
     int makeDirection(GGraph* graph, const EdgeID& id, const VertexID& from, const VertexID& to, const char* name);
 
     int injectCostFunc();

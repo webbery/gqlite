@@ -55,6 +55,15 @@ edge_id::operator std::string()
   return "";
 }
 
+GEdge::GEdge(const std::string& from, const std::string& to, GraphEdgeDirection direction)
+:_id(from, to, direction)
+{
+
+}
+
+GEdgeStatment::GEdgeStatment()
+:GEdge("", "", GraphEdgeDirection::Bidrection) {}
+
 int GEdgeStatment::Parse(struct gast* ast)
 {
   struct gast* arraw = (struct gast*)ast->_value;
@@ -100,7 +109,7 @@ void GEdgeStatment::deserialize(uint8_t* data, size_t len)
 
 }
 
-std::string GEdgeStatment::id()
+std::string GEdge::id()
 {
   return _id;
 }

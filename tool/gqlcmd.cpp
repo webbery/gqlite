@@ -30,7 +30,7 @@
 #define HISTORY_FILENAME  ".gql_history"
 
 int main(int argc, char** argv) {
-  std::string dbfile = "default.gdb";
+  std::string dbfile = "";
   if (argc > 1) {
     dbfile = argv[1];
   }
@@ -47,7 +47,14 @@ int main(int argc, char** argv) {
 
   std::string input;
   gqlite* pHandle = 0;
-  gqlite_open(dbfile.c_str(), &pHandle);
+  int ret = 0;
+  if (dbfile.size()) {
+    ret = gqlite_open(&pHandle, dbfile.c_str());
+  } else {
+    ret = gqlite_open(&pHandle);
+  }
+  if (ret) return ret;
+  printf("GQLite Version %s, build from: %s\n", PROJECT_VERSION, GIT_REVISION_SHA);
   do {
     bool quit = linenoise::Readline("gqlite> ", input);
     if (quit || input == "exit") break;

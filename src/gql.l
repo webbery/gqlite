@@ -16,7 +16,7 @@
 %option noinput nounput noyywrap never-interactive
 
 %%
-^\/\/.*        { stm._errIndx += yyleng;}
+^\/\/.*             { stm._errIndx += yyleng;}
 "("                 { stm._errIndx += 1; return PARAM_BEGIN;};
 ")"                 { stm._errIndx += 1; return PARAM_END;};
 "{"                 { stm._errIndx += 1; return RANGE_BEGIN;};
@@ -74,6 +74,7 @@ d[0-9]{10}$         {
 "start"             {stm._errIndx += yyleng;};
 "with"              {stm._errIndx += yyleng;};
 "id"                {stm._errIndx += yyleng; return KW_ID;};
+"use"               { stm._errIndx += yyleng; };
 create              {stm._errIndx += yyleng; return KW_CREATE;};
 "drop"              { stm._errIndx += yyleng; return KW_DROP;};
 "remove"            { stm._errIndx += yyleng; return KW_REMOVE;};
@@ -83,12 +84,13 @@ create              {stm._errIndx += yyleng; return KW_CREATE;};
 "edge"              { stm._errIndx += yyleng; return KW_EDGE;};
 "dump"              { stm._errIndx += yyleng; return KW_DUMP;};
 "query"             { stm._errIndx += yyleng; return OP_QUERY;};
-"from"              { stm._errIndx += yyleng; return OP_FROM;};
 "where"             { stm._errIndx += yyleng; return OP_WHERE;};
 "index"             { stm._errIndx += yyleng; return KW_INDEX;};
 "group"             { stm._errIndx += yyleng; return KW_GROUP;};
 "path"              { stm._errIndx += yyleng; return KW_PATH;};
 "commit"            { stm._errIndx += yyleng; return KW_COMMIT;};
+"limit"             { stm._errIndx += yyleng; return limit;};
+"profile"           { stm._errIndx += yyleng; return profile;};
 (\bf)unction        { stm._errIndx += yyleng;};
 (\bi)f              { stm._errIndx += yyleng;};
 "else"              { stm._errIndx += yyleng;};
@@ -104,7 +106,6 @@ create              {stm._errIndx += yyleng; return KW_CREATE;};
 "->"                { stm._errIndx += yyleng; return KW_RIGHT_RELATION;};
 "--"                { stm._errIndx += yyleng; return KW_BIDIRECT_RELATION;};
 "in"                { stm._errIndx += yyleng; return KW_IN;};
-"to"                { stm._errIndx += yyleng; return OP_TO;}
 "..."               { stm._errIndx += yyleng; return KW_REST;};
 "."                 { stm._errIndx += 1; return dot;};
 "+"                 {stm._errIndx += yyleng;};

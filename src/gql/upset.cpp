@@ -5,36 +5,35 @@
 #include "base/ast.h"
 #include "base/list.h"
 #include "base/visitor.h"
-#include "Singlecton.h"
 
 namespace upset
 {
 
   std::string exportVertexes(GGraph* g)
   {
-    std::vector<VertexID> ids = GSinglecton::get<GStorageEngine>()->getNodes(g);
-    gqlite_result results;
-    query::get_vertexes(g, ids, results);
+    // std::vector<VertexID> ids = GSinglecton::get<GStorageEngine>()->getNodes(g);
+    // gqlite_result results;
     std::string gqline;
-    gqlite_node* node = results.nodes;
-    while (node)
-    {
-      switch (node->_type) {
-      case gqlite_node_type_vertex:
-        gqline += std::string("['") + node->_vertex->id + "'";
-        if (node->_vertex->properties && node->_vertex->len) {
-          gqline += "," + std::string(node->_vertex->properties, node->_vertex->len);
-        }
-        break;
-      case gqlite_node_type_edge:
-        break;
-      default:
-        break;
-      }
-      gqline += "]";
-      node = node->_next;
-    }
-    if (results.nodes) gqline += "]}";
+    // query::get_vertexes(g, ids, results);
+    // gqlite_node* node = results.nodes;
+    // while (node)
+    // {
+    //   switch (node->_type) {
+    //   case gqlite_node_type_vertex:
+    //     gqline += std::string("['") + node->_vertex->id + "'";
+    //     if (node->_vertex->properties && node->_vertex->len) {
+    //       gqline += "," + std::string(node->_vertex->properties, node->_vertex->len);
+    //     }
+    //     break;
+    //   case gqlite_node_type_edge:
+    //     break;
+    //   default:
+    //     break;
+    //   }
+    //   gqline += "]";
+    //   node = node->_next;
+    // }
+    // if (results.nodes) gqline += "]}";
     return gqline;
   }
 

@@ -162,9 +162,8 @@ std::vector<std::pair<VertexID, nlohmann::json>> GGraph::getVertex(mdbx::txn_man
 int GGraph::queryVertex(std::set<VertexID>& ids, const GConditions& preds)
 {
   const GConditions* cur = &preds;
-  //while (cur) {
-    GVertexCondition* verCond = cur->_vertex_condition;
-    GPredition* pred = verCond->_preds;
+  while (cur) {
+    std::shared_ptr<GPredition> pred = cur->_preds;
     std::set<VertexID> lastResult;
     while (pred) {
       GVertexProptertyFeature* feature = getFeature(pred->_indx.c_str());
@@ -213,7 +212,7 @@ int GGraph::queryVertex(std::set<VertexID>& ids, const GConditions& preds)
         break;
       }
       std::set<VertexID> out;
-      if (verCond->_isAnd) {
+      if (cur->_isAnd) {
         std::set_intersection(lastResult.begin(), lastResult.end(), temp.begin(), temp.end(), std::inserter(out, out.begin()));
       }
       else {
@@ -221,35 +220,31 @@ int GGraph::queryVertex(std::set<VertexID>& ids, const GConditions& preds)
       }
       lastResult = out;
     }
-    //cur = cur->_next;
-  //}
-  return ECode_Success;
-}
-
-int GGraph::query(gqlite_node*& nodes, const GConditions& preds)
-{
-  // match vertex
-  const GVertexCondition* curVertex = preds._vertex_condition;
-  gqlite_node* startVertexes = nullptr;
-  while (curVertex) {
-    curVertex = curVertex->_next;
+    cur = cur->_next.get();
   }
-  // match path
-  const GWalkExpr* curWalk = preds._walk_expression;
-  
-  // match edge
   return ECode_Success;
 }
 
-GVertex GGraph::getVertexById(const std::string& id)
+int GGraph::queryEdge(const nlohmann::json& pred)
 {
-  GVertex vertex;
+  return ECode_Success;
+}
+
+// int GGraph::query(const GMatchPattern& pattern)
+// {
+//   return ECode_Success;
+// }
+
+GVertexStmt GGraph::getVertexById(const std::string& id)
+{
+  GVertexStmt vertex;
   mdbx::slice data = get(_txn, _vertexes, id);
   if (data.empty()) return vertex;
-  vertex._vertex = nlohmann::json::from_cbor(data.byte_ptr(), data.byte_ptr() + data.size() - 1);
+  vertex.property() = nlohmann::json::from_cbor(data.byte_ptr(), data.byte_ptr() + data.size() - 1);
   size_t offset = data.size();
   mdbx::byte extra = *(data.byte_ptr() + offset - 1);
-  vertex._hasBinary = (extra & EXTERN_BINARY_BIT);
+  // vertex.setBinaryFlag(extra & EXTERN_BINARY_BIT);
+  vertex.setBinaryFlag(true);
   return vertex;
 }
 
@@ -329,11 +324,6 @@ int GGraph::saveSchema()
   std::vector<uint8_t> v = serialize(_property);
   auto data = mdbx::slice(v.data(), v.data() + v.size());
   return put(_txn, _schema, _property._name, data);
-}
-
-const GraphProperty& GGraph::property() const
-{
-  return _property;
 }
 
 GraphValueType GGraph::propertyType(const std::string& prop)

@@ -1,7 +1,15 @@
 #pragma once
 #include "VirtualEngine.h"
 #include "gqlite.h"
-#include "Statement.h"
+
+enum gqlite_storage_schema {
+  gqlite_disk,
+  gqlite_memory,
+};
+typedef struct _gqlite_open_mode {
+  gqlite_storage_schema st_schema;
+}gqlite_open_mode;
+
 
 class GQueryEngine;
 class GStorageEngine;
@@ -13,16 +21,15 @@ public:
 
   int open(const char* filename, gqlite_open_mode mode);
 
-  void exec(GStatement& stm);
+  void exec(GVirtualEngine& stm);
 
   int close();
   
-  void set(GStatement* pStatement);
-  GStatement* statement() { return _statement; }
+  void set(GVirtualEngine* pStatement);
+  GVirtualEngine* statement() { return _statement; }
 private:
   int create(const char* filename, gqlite_open_mode mode);
 
 private:
-  GStatement* _statement = nullptr;
-  GVirtualEngine* _pVirtualEngine = nullptr;
+  GVirtualEngine* _statement = nullptr;
 };

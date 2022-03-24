@@ -5,41 +5,11 @@
 #include "operand/skey.h"
 #include "Feature/Gist.h"
 #include "IGraph.h"
+#include "Type/Vertex.h"
 
 #define BIN_FLAG  ":bin"
 #define IS_INVALID_VERTEX(v) \
   (v.empty() || v.is_null() || v.size() == 0 || v.is_string())
-
-enum class GraphValueType {
-  Undefined,
-  Binary,
-  Number,
-  String,
-  Datetime,
-  Vector,
-};
-
-struct GVertex {
-  bool _hasBinary;
-  nlohmann::json _vertex;
-};
-
-struct GraphProperty {
-  VertexID _maxDegreeID;
-  VertexID _maxInID;
-  VertexID _maxOutID;
-  uint32_t _vertexCount = 0;
-  uint32_t _edgeCount = 0;
-  std::string _name;
-  /**
-   * @brief record value types.
-   */
-  std::map<std::string, GraphValueType> _types;
-  /**
-   * @brief query index
-   **/
-  std::vector<std::string> _indexes;
-};
 
 mdbx::slice get(mdbx::txn_managed& txn, mdbx::map_handle& map, const std::string& key);
 mdbx::slice get(mdbx::txn_managed& txn, mdbx::map_handle& map, int32_t key);
@@ -75,10 +45,12 @@ public:
   // std::vector<Edge> getEdges(mdbx::txn_managed& txn, VertexID vertex);
   std::vector<std::pair<VertexID, nlohmann::json>> getVertex(mdbx::txn_managed& txn);
 
-  int query(gqlite_node*& nodes, const GConditions& pred);
+  int queryVertex(std::set<VertexID>& ids, const GConditions& pred);
+  int queryEdge(const nlohmann::json& pred);
+  // int query(const GMatchPattern& pattern);
 
     // std::vector<Vertex> getVertex(mdbx::txn_managed& txn, EdgeID edge);
-  GVertex getVertexById(const std::string& id);
+  GVertexStmt getVertexById(const std::string& id);
 
   int bind(const EdgeID& eid, const VertexID& from, const VertexID& to);
 
@@ -93,11 +65,7 @@ public:
   int drop();
   int finishUpdate(mdbx::txn_managed& txn);
 
-  const GraphProperty& property() const;
   GraphValueType propertyType(const std::string& prop);
-
-private:
-  int queryVertex(std::set<VertexID>& ids, const GConditions& pred);
 
 private:
   std::string vertexDBName(const char* name);
@@ -119,7 +87,6 @@ private:
   mdbx::map_handle _graph[GK_Size];
   mdbx::map_handle _edges;
   mdbx::map_handle _vertexes;
-  GraphProperty _property;
   std::map<std::string, nlohmann::json> _updateVertexes;
   std::map<std::string, nlohmann::json> _updateEdges;
   struct Link {

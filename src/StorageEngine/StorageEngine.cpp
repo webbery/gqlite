@@ -26,6 +26,7 @@ int GStorageEngine::create(const char* filename) {
     operator_param.max_maps = DEFAULT_MAX_MAPS;
 
     _env = env_managed(std::string(filename), create_param, operator_param);
+    printf("3333333333\n");
     return startTrans();
 }
 
@@ -79,6 +80,7 @@ GGraph* GStorageEngine::getGraph(const char* name)
 std::vector<std::string> GStorageEngine::getGraphs()
 {
   mdbx::map_handle handle = open_schema(_txn);
+  if (!handle) printf("222222222\n");
   std::vector<std::string> v;
   mdbx::cursor_managed cursor = _txn.open_cursor(handle);
   mdbx::cursor::move_result result = cursor.to_first(false);
@@ -128,8 +130,8 @@ int GStorageEngine::finishUpdate(GGraph* graph)
 int GStorageEngine::getNode(GGraph* graph, const VertexID& nodeid, std::function<int(const char*, void*, int, void*)> f)
 {
   GVertex vertex = graph->getVertexById(nodeid);
-  if (IS_INVALID_VERTEX(vertex._vertex)) return ECode_Success;
-  for (auto itr = vertex._vertex.begin(), end = vertex._vertex.end(); itr != end; ++itr) {
+  if (IS_INVALID_VERTEX(vertex.property())) return ECode_Success;
+  for (auto itr = vertex.property().begin(), end = vertex.property().end(); itr != end; ++itr) {
     std::string k = itr.key();
     auto v = itr.value();
     //auto data = json_cast<v.type()>(v);
@@ -168,10 +170,10 @@ int GStorageEngine::getNode(GGraph* graph, const VertexID& nodeid, std::function
 
 int GStorageEngine::getNode(GGraph* graph, const VertexID& nodeid, std::function<int(const char*, void*)> f)
 {
-  GVertex vertex = graph->getVertexById(nodeid);
-  if (IS_INVALID_VERTEX(vertex._vertex)) return ECode_Success;
-  if (vertex._hasBinary) {
-    for (auto& item : vertex._vertex)
+  GVertexStmt vertex = graph->getVertexById(nodeid);
+  if (IS_INVALID_VERTEX(vertex.property())) return ECode_Success;
+  if (vertex.hasBinary()) {
+    for (auto& item : vertex.property())
     {
       if (item.type() == nlohmann::json::value_t::binary) {
         nlohmann::json::binary_t bin = item;
@@ -179,7 +181,7 @@ int GStorageEngine::getNode(GGraph* graph, const VertexID& nodeid, std::function
       }
     }
   }
-  std::string out = vertex._vertex.dump();
+  std::string out = vertex.property().dump();
   out = std::regex_replace(out, std::regex("\"b64'([\\s\\S]+)'\"", std::regex_constants::ECMAScript), "b64'$1'");
   f(out.c_str(), nullptr);
   return ECode_Success;

@@ -1,6 +1,5 @@
 #pragma once
 #include "type.h"
-#include "ast.h"
 #include <memory>
 
 struct gql_node {

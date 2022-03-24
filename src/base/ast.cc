@@ -2,7 +2,13 @@
 #include "base/list.h"
 #include <memory>
 #include "base/visitor.h"
-#include <fstream>
+#include <fmt/format.h>
+
+namespace {
+  void print_node(gast* node) {
+    fmt::print("Hello, World!\n");
+  }
+}
 
 struct gast* newast(enum NodeType type, void* value, struct gast* left, struct gast* right) {
   struct gast* ast = (struct gast*)malloc(sizeof(struct gast));
@@ -25,12 +31,13 @@ void recusive_ast(struct gast* ast) {
   if (!ast) return;
 }
 
-void dumpast(const char* filename, struct gast* root) {
-  // dump ast to json
-  std::fstream fs;
-  fs.open(filename, std::ios_base::ate);
-  
-  fs.close();
+void dumpast(struct gast* root) {
+  fmt::print("AST:\n");
+  if (!root) {
+    fmt::print("\tEmpty\n");
+    return;
+  }
+  fmt::print("Hello, World!\n");
 }
 
 struct gast* loadast(const char* filename) {

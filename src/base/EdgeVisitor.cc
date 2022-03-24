@@ -1,7 +1,6 @@
 #include "base/EdgeVisitor.h"
 #include "Type/Edge.h"
 #include "StorageEngine.h"
-#include "Singlecton.h"
 
 ASTEdgeUpdateVisitor::~ASTEdgeUpdateVisitor()
 {
@@ -14,7 +13,7 @@ void ASTEdgeUpdateVisitor::visit(NodeType type, void* value)
   statement.Parse((struct gast*)value);
   std::vector<uint8_t> data = statement.serialize();
   if (data.size() == 0) return;
-  GGraph* pGraph = GSinglecton::get<GStorageEngine>()->getGraph();
-  if (!pGraph)return;
-  pGraph->updateEdge(statement.id(), data);
+  // GGraph* pGraph = GSinglecton::get<GStorageEngine>()->getGraph();
+  // if (!pGraph)return;
+  // pGraph->updateEdge(statement.id(), data);
 }
