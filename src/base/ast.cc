@@ -5,8 +5,41 @@
 #include <fmt/format.h>
 
 namespace {
-  void print_node(gast* node) {
-    fmt::print("Hello, World!\n");
+  void print_node(gast* node, int level) {
+    // fmt::print("\t");
+    switch(node->_nodetype) {
+    case NodeType::Number:
+      fmt::print("{1}: {0:\t^{1}}Type: Number\n", "",level);
+      break;
+    case NodeType::String:
+      fmt::print("{1}: {0:\t^{1}}Type: String, Value: {2}\n", "", level, (char*)node->_value);
+      break;
+    case NodeType::Property:
+      fmt::print("{1}: {0:\t^{1}}Type: Property\n", "", level);
+      break;
+    case NodeType::ArrayExpression:
+      fmt::print("{1}: {0:\t^{1}}Type: ArrayExpression\n", "", level);
+      break;
+    case NodeType::UpsetStatement:
+      fmt::print("{1}: {0:\t^{1}}Type: UpsetStatement\n", "", level);
+      {
+        gql_node* cur = (gql_node*)node->_value;
+        level += 1;
+        while(cur) {
+          dumpast((gast*)cur->_value, level);
+          cur = cur->_next;
+        }
+      }
+      break;
+    case NodeType::Vertex:
+      fmt::print("{1}: {0:\t^{1}}Type: Vertex\n", "", level);
+      break;
+    case NodeType::Binary:
+      break;
+    default:
+      fmt::print("{1}: {0:\t^{1}}Type: Undefined[{2}]\n", "", level, node->_nodetype);
+      break;
+    }
   }
 }
 
@@ -31,13 +64,14 @@ void recusive_ast(struct gast* ast) {
   if (!ast) return;
 }
 
-void dumpast(struct gast* root) {
-  fmt::print("AST:\n");
+void dumpast(struct gast* root, int level) {
   if (!root) {
-    fmt::print("\tEmpty\n");
     return;
   }
-  fmt::print("Hello, World!\n");
+  print_node(root, level);
+  level += 1;
+  dumpast(root->_left, level);
+  dumpast(root->_right, level);
 }
 
 struct gast* loadast(const char* filename) {

@@ -10,6 +10,7 @@
 %code top{
 #include <stdio.h>
 #include <set>
+#include <fmt/format.h>
 #include "Error.h"
 #include "gql/creation.h"
 #include "gql/query.h"
@@ -175,7 +176,6 @@ line_list: line
         | remove_vertexes { $$ = $1; stm._cmdtype = GQL_Remove; }
         | drop_graph { $$ = $1; stm._cmdtype = GQL_Drop; }
         | dump { stm._cmdtype = GQL_Util; }
-        | test {}
         ;
 
 utility_cmd: CMD_SHOW KW_GRAPH
@@ -207,7 +207,9 @@ utility_cmd: CMD_SHOW KW_GRAPH
           }
         | KW_DUMP gql
           {
+            fmt::print("AST:\n");
             dumpast($2);
+            stm._cmdtype = GQL_Util;
           }
         | profile gql {};
 creation: RANGE_BEGIN KW_CREATE COLON VAR_STRING RANGE_END
@@ -619,5 +621,5 @@ function_params:
         | PARAM_BEGIN PARAM_END {}
         | PARAM_BEGIN STAR PARAM_END {}
         | PARAM_BEGIN string_list PARAM_END {}
-test: json {printf("Unknow Input\n");};
+        ;
 %%

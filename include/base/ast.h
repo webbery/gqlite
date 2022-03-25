@@ -12,7 +12,7 @@ struct gast {
 
 struct gast* newast(enum NodeType type, void* value, struct gast* left, struct gast* right);
 void freeast(struct gast* root);
-void dumpast(struct gast* root);
+void dumpast(struct gast* root, int level = 0);
 struct gast* loadast(const char* filename);
 
 struct gql_node* as_array(struct gast* root);

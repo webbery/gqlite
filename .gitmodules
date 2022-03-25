@@ -1,9 +1,9 @@
-[submodule "libmdbx"]
+[submodule "third_party/libmdbx"]
 	path = third_party/libmdbx
 	url = https://github.com/erthink/libmdbx.git
-[submodule "eigen"]
-	path = third_party/eigen
-	url = https://gitlab.com/libeigen/eigen.git
 [submodule "third_party/fmt"]
 	path = third_party/fmt
 	url = https://github.com/fmtlib/fmt.git
+[submodule "third_party/eigen"]
+	path = third_party/eigen
+	url = https://gitlab.com/libeigen/eigen.git

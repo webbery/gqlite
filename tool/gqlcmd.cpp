@@ -54,7 +54,7 @@ int main(int argc, char** argv) {
     ret = gqlite_open(&pHandle);
   }
   if (ret) return ret;
-  printf("GQLite Version %s, build from: %s\n", PROJECT_VERSION, GIT_REVISION_SHA);
+  printf("GQLite Version %s\nWritting by Webberg.\n\nMIT License. Build: %s\n", PROJECT_VERSION, GIT_REVISION_SHA);
   do {
     bool quit = linenoise::Readline("gqlite> ", input);
     if (quit || input == "exit") break;

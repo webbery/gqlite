@@ -34,9 +34,15 @@ jobs:
       with:
         submodules: recursive
 
-    - name: mdbx
+    - name: third_party
       run: |
-        cd ${{github.workspace}}/libmdbx
+        cd ${{github.workspace}}/third_party/libmdbx
+        git fetch --unshallow --tags --prune --force
+        git branch
+        cd ${{github.workspace}}/third_party/fmt
+        git fetch --unshallow --tags --prune --force
+        git branch
+        cd ${{github.workspace}}/third_party/eigen
         git fetch --unshallow --tags --prune --force
         git branch
 
