@@ -1,6 +1,4 @@
 #pragma once
-#include "base/Serializer.h"
-#include "base/Statement.h"
 #include "json.hpp"
 
 enum class GraphEdgeDirection {
@@ -14,13 +12,27 @@ public:
   edge_id(const std::string& eid);
 
   bool operator == (const edge_id& other);
+  bool operator == (const edge_id& other) const;
+  bool operator != (const edge_id& other);
+  bool operator != (const edge_id& other) const;
+  bool operator < (const edge_id& other);
+  bool operator < (const edge_id& other) const;
 
   operator std::string();
+  operator std::string()const;
+
+private:
+  std::string str()const;
+  bool equal(const edge_id& other) const;
+  bool lt(const edge_id& other)const;
 private:
   std::string _from;
   std::string _to;
   GraphEdgeDirection _direction;
 };
+
+//bool operator<(const edge_id& e1, const edge_id& e2);
+//bool operator!=(const edge_id& e1, const edge_id& e2);
 
 class GLiteralEdge {};
 
@@ -35,13 +47,4 @@ public:
 protected:
   edge_id _id;
   nlohmann::json _json;
-};
-
-class GEdgeStatment: public GSerializer, public GStatement, public GEdge {
-public:
-  GEdgeStatment();
-  virtual int Parse(struct gast* ast);
-  virtual int Dump();
-  virtual std::vector<uint8_t> serialize();
-  virtual void deserialize(uint8_t* data, size_t len);
 };

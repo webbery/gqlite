@@ -1,5 +1,5 @@
 #include "base/EdgeVisitor.h"
-#include "Type/Edge.h"
+#include "Type/EdgeStmt.h"
 #include "StorageEngine.h"
 
 ASTEdgeUpdateVisitor::~ASTEdgeUpdateVisitor()

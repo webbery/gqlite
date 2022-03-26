@@ -1,0 +1,5 @@
+graph G3_LOOP{
+    A--B;
+    B--C;
+    C--A;
+}

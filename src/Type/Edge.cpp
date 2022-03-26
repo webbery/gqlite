@@ -18,12 +18,26 @@ edge_id::edge_id(const std::string& from, const std::string& to, GraphEdgeDirect
   }
 }
 
-edge_id::edge_id(const std::string& eid)
+bool edge_id::operator!=(const edge_id& other) const
 {
-
+  return !equal(other);
 }
 
-bool edge_id::operator == (const edge_id& other)
+std::string edge_id::str()const
+{
+  switch (_direction)
+  {
+  case GraphEdgeDirection::Bidrection:
+    return _from + "--" + _to;
+  case GraphEdgeDirection::To:
+    return _from + "->" + _to;
+  default:
+    break;
+  }
+  return "";
+}
+
+bool edge_id::equal(const edge_id& other) const
 {
   if (_direction != other._direction) return false;
   switch (_direction)
@@ -41,18 +55,48 @@ bool edge_id::operator == (const edge_id& other)
   return false;
 }
 
+bool edge_id::lt(const edge_id& other) const
+{
+  return std::string(*this) < (std::string)other;
+}
+
+bool edge_id::operator==(const edge_id& other) const
+{
+  return equal(other);
+}
+
+bool edge_id::operator!=(const edge_id& other)
+{
+  return !equal(other);
+}
+
+bool edge_id::operator<(const edge_id& other)
+{
+  return lt(other);
+}
+
+bool edge_id::operator<(const edge_id& other)const
+{
+  return lt(other);
+}
+
+edge_id::edge_id(const std::string& eid)
+{
+}
+
+bool edge_id::operator == (const edge_id& other)
+{
+  return equal(other);
+}
+
 edge_id::operator std::string()
 {
-  switch (_direction)
-  {
-  case GraphEdgeDirection::Bidrection:
-    return _from + "--" + _to;
-  case GraphEdgeDirection::To:
-    return _from + "->" + _to;
-  default:
-    break;
-  }
-  return "";
+  return str();
+}
+
+edge_id::operator std::string() const
+{
+  return str();
 }
 
 GEdge::GEdge(const std::string& from, const std::string& to, GraphEdgeDirection direction)
@@ -61,55 +105,8 @@ GEdge::GEdge(const std::string& from, const std::string& to, GraphEdgeDirection 
 
 }
 
-GEdgeStatment::GEdgeStatment()
-:GEdge("", "", GraphEdgeDirection::Bidrection) {}
-
-int GEdgeStatment::Parse(struct gast* ast)
-{
-  struct gast* arraw = (struct gast*)ast->_value;
-  gast* property = (struct gast*)ast->_left;
-  std::string left = GET_STRING_VALUE((struct gast*)property->_right);
-  property = (struct gast*)ast->_right;
-  std::string right = GET_STRING_VALUE((struct gast*)property->_right);
-  std::string direction = GET_STRING_VALUE(arraw);
-  if (direction == "--") {
-    edge_id eid(left, right);
-    _id = (std::string)eid;
-  }
-  else if (direction == "->") {
-    edge_id eid(left, right, GraphEdgeDirection::To);
-    _id = (std::string)eid;
-  }
-  else if (direction == "<-") {
-    edge_id eid(right, left, GraphEdgeDirection::To);
-    _id = (std::string)eid;
-  }
-  else {
-    return ECode_GQL_Edge_Type_Unknow;
-  }
-  _json[_id] = "";
-  return ECode_Success;
-}
-
-int GEdgeStatment::Dump()
-{
-  return ECode_Success;
-}
-
-std::vector<uint8_t> GEdgeStatment::serialize()
-{
-  std::vector<uint8_t> v;
-  if (_json.empty()) return v;
-  v = nlohmann::json::to_cbor(_json);
-  return v;
-}
-
-void GEdgeStatment::deserialize(uint8_t* data, size_t len)
-{
-
-}
-
 std::string GEdge::id()
 {
   return _id;
 }
+

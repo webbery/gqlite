@@ -92,8 +92,8 @@ static void parse_opt(int argc, char** argv) {
 int bengin_capture(const char* output_filename, FILE*& fp) {
   fp = fopen(output_filename, "w");
 #ifdef WIN32
-  int stdout_bk = _dup(fileno(stdout));
-  _dup2(fileno(fp), fileno(stdout));
+  int stdout_bk = _dup(_fileno(stdout));
+  _dup2(_fileno(fp), _fileno(stdout));
 #else
   int stdout_bk = dup(fileno(stdout));
   dup2(fileno(fp), fileno(stdout));

@@ -17,3 +17,8 @@ enum class BTScanStrategy {
 #define STR_LESS_THAN_EQUAL   "lte"
 #define STR_GREATE_THAN       "gt"
 #define STR_GREATE_THAN_EQUAL "gte"
+
+/**
+ * GED_MAX_SIZE is the max vertex count which is used to check GED algorithm enable
+ */
+#define GED_MAX_SIZE          10

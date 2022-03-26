@@ -4,12 +4,6 @@
 #include "Type/Type.h"
 #include "operand/MatchPattern.h"
 
-struct GLink {
-  std::string _from;
-  std::string _to;
-  bool _isDirection;
-};
-
 enum class GraphValueType {
   Undefined,
   Binary,

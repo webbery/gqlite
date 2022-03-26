@@ -31,13 +31,23 @@ set(REGRESS_SOURCE
 	${OPTION_SOURCE}
 	./regress.cpp)
 
+set(OLGRITHM_SOURCE ./algorithm.cpp
+	../src/operand/MatchPattern.cpp
+	../src/operand/SimilarityOp.cpp
+	../src/operand/match/CTreeStrategy.cpp
+	../src/StorageEngine/SubGraph.cpp
+	../src/Type/Edge.cpp
+)
 add_executable(grammar ${TEST_GRAMMAR_SOURCE})
 add_executable(storage ${STORAGE_SOURCE})
 add_executable(regress ${REGRESS_SOURCE})
+add_executable(algorithm ${OLGRITHM_SOURCE})
 
+set_property(TARGET algorithm PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}")
 target_link_libraries(grammar PUBLIC gqlite fmt-header-only)
 target_link_libraries(regress PUBLIC gqlite fmt-header-only)
 target_link_libraries(storage PUBLIC mdbx-static fmt-header-only)
+target_link_libraries(algorithm fmt-header-only)
 
 # find_package(Python3 COMPONENTS Interpreter Development)
 
@@ -50,6 +60,7 @@ target_link_libraries(storage PUBLIC mdbx-static fmt-header-only)
 # add_dependencies(storage before_test)
 
 add_test(NAME storage COMMAND storage)
+add_test(NAME algorithm COMMAND algorithm)
 add_test(NAME grammar COMMAND grammar)
 add_test(NAME regress_vertex COMMAND regress --inputdir=./vertex --outputdir=./vertex
 	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
