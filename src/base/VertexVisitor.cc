@@ -1,5 +1,5 @@
 #include "base/VertexVisitor.h"
-#include "Type/Vertex.h"
+#include "Type/VertexStmt.h"
 #include "VirtualEngine.h"
 #include "StorageEngine.h"
 

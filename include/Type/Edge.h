@@ -21,6 +21,10 @@ public:
   operator std::string();
   operator std::string()const;
 
+  std::string from()const;
+  std::string to()const;
+  bool isDirection()const;
+
 private:
   std::string str()const;
   bool equal(const edge_id& other) const;
@@ -44,6 +48,11 @@ public:
   virtual ~GEdge() {}
 
   std::string id();
+  std::string from()const;
+  std::string to()const;
+  void set(const nlohmann::json& prop) {
+    _json = prop;
+  }
 protected:
   edge_id _id;
   nlohmann::json _json;

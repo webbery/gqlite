@@ -1,52 +1,20 @@
 #include "Type/Vertex.h"
-#include "Error.h"
-#include "base/ast.h"
-#include "base/list.h"
-#include "gqlite.h"
+#include "Type/Edge.h"
 
-std::vector<uint8_t> GVertexStmt::serialize()
+void GVertex::eraseEdge(GEdge* edge)
 {
-  std::vector<uint8_t> v;
-  if (_json.empty()) return v;
-  v = nlohmann::json::to_cbor(_json);
-  uint8_t extra = 0;
-  if (_binary) {
-    extra |= EXTERN_BINARY_BIT;
+  auto ptr = std::lower_bound(_edges.begin(), _edges.end(), edge);
+  if (ptr != _edges.end() && *ptr == edge) {
+    _edges.erase(ptr);
   }
-  v.emplace_back(extra);
-  return v;
-}
-
-void GVertexStmt::deserialize(uint8_t* data, size_t len)
-{
-
-}
-
-int GVertexStmt::Parse(struct gast* ast)
-{
-  struct gast* left = ast->_left;
-  if (left) _id = GET_STRING_VALUE(left->_right);
-  struct gast* right = ast->_right;
-  if (right) {
-    ArrayVisitor av;
-    GET_VALUE((gast*)right->_value, _binary, av);
-    _json[_id] = av.value();
-    //_json = GET_ARRAY_VALUE((gast*)right->_value, _binary);
+  std::string rmVertex = edge->from();
+  if (rmVertex == _id) {
+    rmVertex = edge->to();
   }
-  else {
-    _json[this->_id] = "";
+  for (auto itr = _vertexes.begin(), end = _vertexes.end(); itr != end; ++itr) {
+    if ((*itr)->id() == rmVertex) {
+      _vertexes.erase(itr);
+      break;
+    }
   }
-  return ECode_Success;
 }
-
-int GVertexStmt::Dump()
-{
-  return ECode_Success;
-}
-
-nlohmann::json GVertexStmt::value(const std::string& key)
-{
-  if (!_json.contains(key)) return nlohmann::json();
-  return _json[key];
-}
-

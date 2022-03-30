@@ -74,12 +74,16 @@ int main()
   int ret = 0;
   GSubGraph* g1 = createGraph("./test/graphs/simple_g.dot");
   GSubGraph* gs = createGraph("./test/graphs/simple_g.dot");
-  ASSERT_EQ(*g1==*gs, true);
   GSubGraph* g2 = createGraph("./test/graphs/g4.dot");
   GSubGraph* g3 = createGraph("./test/graphs/simple_g_2.dot");
   GSubGraph* g4 = createGraph("./test/graphs/g4_2.dot");
   GSubGraph* g5 = createGraph("./test/graphs/simple_g_3.dot");
-  ASSERT_EQ(distance(g1, g2)==1, true);
+  GSubGraph* bg = createGraph("./test/graphs/bipartite.dot");
+  ASSERT_EQ(*g1 == *gs, true);
+  ASSERT_EQ(g1->isBipartite(), false);
+  ASSERT_EQ(g4->isBipartite(), false);
+  ASSERT_EQ(bg->isBipartite(), true);
+  //ASSERT_EQ(distance(g1, g2) == 1, true);
   releaseGraph(g1);
   releaseGraph(g2);
   releaseGraph(g3);

@@ -5,7 +5,7 @@
 #include "operand/skey.h"
 #include "Feature/Gist.h"
 #include "IGraph.h"
-#include "Type/Vertex.h"
+#include "Type/VertexStmt.h"
 
 #define BIN_FLAG  ":bin"
 #define IS_INVALID_VERTEX(v) \

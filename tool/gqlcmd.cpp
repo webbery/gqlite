@@ -17,6 +17,7 @@
 #pragma warning(disable : 4306)
 #pragma warning(disable : 4702)
 #pragma warning(disable : 4706)
+#pragma warning(disable : 4819)
 #else
 #include <unistd.h>
 #include <termios.h>

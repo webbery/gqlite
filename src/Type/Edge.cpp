@@ -18,6 +18,21 @@ edge_id::edge_id(const std::string& from, const std::string& to, GraphEdgeDirect
   }
 }
 
+std::string edge_id::from() const
+{
+  return _from;
+}
+
+std::string edge_id::to() const
+{
+  return _to;
+}
+
+bool edge_id::isDirection() const
+{
+  return _direction == GraphEdgeDirection::To;
+}
+
 bool edge_id::operator!=(const edge_id& other) const
 {
   return !equal(other);
@@ -108,5 +123,15 @@ GEdge::GEdge(const std::string& from, const std::string& to, GraphEdgeDirection 
 std::string GEdge::id()
 {
   return _id;
+}
+
+std::string GEdge::from() const
+{
+  return _id.from();
+}
+
+std::string GEdge::to() const
+{
+  return _id.to();
 }
 

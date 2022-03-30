@@ -1,0 +1,14 @@
+graph G3_LOOP{
+    A--B;
+    B--C;
+    C--D;
+    A--D;
+    E--F;
+    F--G;
+    G--H;
+    H--E;
+    A--E;
+    B--F;
+    C--G;
+    D--H;
+}

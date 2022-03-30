@@ -11,6 +11,7 @@ private:
   std::vector<GLiteralVertex> _names;
 };
 
+class GEdge;
 class GVertex {
 public:
   virtual ~GVertex() {}
@@ -25,23 +26,42 @@ public:
     return 0;
   }
 
+  void addNeighbor(GVertex* neighbor) {
+    auto ptr = std::lower_bound(_vertexes.begin(), _vertexes.end(), neighbor);
+    if (ptr == _vertexes.end() || *ptr != neighbor) {
+      _vertexes.insert(ptr, neighbor);
+    }
+  }
+
+  void addEdge(GEdge* edge) {
+    auto ptr = std::lower_bound(_edges.begin(), _edges.end(), edge);
+    if (ptr == _edges.end() || *ptr != edge) {
+      _edges.insert(ptr, edge);
+    }
+  }
+
+  void eraseEdge(GEdge* edge);
+
+  typedef std::vector< GEdge* >::const_iterator edge_iterator;
+  typedef std::vector< GVertex* >::const_iterator vertex_iterator;
+
+  edge_iterator edge_begin()const {
+    return _edges.begin();
+  }
+  edge_iterator edge_end()const {
+    return _edges.end();
+  }
+
+  vertex_iterator neighbor_begin()const {
+    return _vertexes.begin();
+  }
+  vertex_iterator neighbor_end() const {
+    return _vertexes.end();
+  }
+
 protected:
   std::string _id;
   nlohmann::json _json;
-};
-
-class GVertexStmt: public GSerializer, public GStatement, public GVertex {
-public:
-  // virtual ~GVertexStmt() { printf("~GVertexStmt\n"); }
-  virtual std::vector<uint8_t> serialize();
-  virtual void deserialize(uint8_t* data, size_t len);
-  virtual int Parse(struct gast* ast);
-  virtual int Dump();
-
-  nlohmann::json value(const std::string& key);
-  bool setBinaryFlag(bool flag) { _binary = flag; return true; }
-  bool hasBinary() { return _binary; }
-
-private:
-  bool _binary = false;
+  std::vector< GEdge* > _edges;
+  std::vector< GVertex* > _vertexes;
 };

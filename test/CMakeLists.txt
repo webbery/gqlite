@@ -10,7 +10,7 @@ set(STORAGE_SOURCE
 	../src/StorageEngine/Graph.cpp
 	../src/Type/Hash.cpp
 	../src/Type/Binary.cpp
-	../src/Type/Vertex.cpp
+	../src/Type/VertexStmt.cpp
 	../src/Feature/Gist.cpp
 	../src/Feature/Feature.cpp
 	../src/base/VertexVisitor.cc
@@ -34,9 +34,12 @@ set(REGRESS_SOURCE
 set(OLGRITHM_SOURCE ./algorithm.cpp
 	../src/operand/MatchPattern.cpp
 	../src/operand/SimilarityOp.cpp
+	../src/operand/GraphType.cpp
 	../src/operand/match/CTreeStrategy.cpp
 	../src/StorageEngine/SubGraph.cpp
+	../src/Type/Vertex.cpp
 	../src/Type/Edge.cpp
+	../src/operand/distance/EditDistance.cpp
 )
 add_executable(grammar ${TEST_GRAMMAR_SOURCE})
 add_executable(storage ${STORAGE_SOURCE})
