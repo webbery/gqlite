@@ -70,9 +70,24 @@ bool GSubGraph::isBipartite()
   return true;
 }
 
-Eigen::MatrixXd GSubGraph::toMatrix()
+Eigen::MatrixXd GSubGraph::toMatrix(const char* weight)
 {
-  Eigen::MatrixXd m;
+  size_t cnt = _vertexes.size();
+  Eigen::MatrixXd m = Eigen::MatrixXd::Zero(cnt, cnt);
+  std::map<std::string, size_t> keys;
+  auto i = _vertexes.begin();
+  for (size_t idx = 0; idx < cnt; ++idx,++i) {
+    keys[i->first] = idx;
+  }
+  if (!weight) {
+    for (auto itr = _vertexes.begin(), end = _vertexes.end(); itr!=end; ++itr) {
+      const std::string& vertex = itr->first;
+      size_t col = 0;
+      for (auto nitr = itr->second->neighbor_begin(), nend = itr->second->neighbor_end(); nitr != nend; ++nitr, ++col) {
+        m(keys[vertex], keys[(*nitr)->id()]) = 1;
+      }
+    }
+  }
   return m;
 }
 

@@ -103,7 +103,7 @@ void successful_test(gqlite* pHandle, char* ptr) {
   TEST_QUERY("{query: vertex, in: 'ga', where: {create_time: {$lt: 5}}}", 2);
   TEST_GRAMMAR("{query: [vertex.class], in: 'ga', where: {keyword: 'b'}}");
   TEST_GRAMMAR("{query: [vertex.class], in: 'ga', where: {keyword: 'b'}}");
-  TEST_GRAMMAR("{dump: 'nogql.gql'}");
+  // TEST_GRAMMAR("{dump: 'nogql.gql'}");
   /*
   * EDGES & LINKS
   */
@@ -173,7 +173,7 @@ void successful_test(gqlite* pHandle, char* ptr) {
   // TEST_GRAMMAR("{query: '*', from: 'ga', where: {neighbor: 1}");
 
   TEST_GRAMMAR("{drop: 'ga'}");
-  TEST_GRAMMAR("dump {query: vertex, in: 'ga', where: {id: 'v1', --: 1}}");
+  // TEST_GRAMMAR("dump {query: vertex, in: 'ga', where: {id: 'v1', --: 1}}");
 }
 
 void test_edges() {}

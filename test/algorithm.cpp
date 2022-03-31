@@ -4,6 +4,7 @@
 #include <fmt/printf.h>
 #include <chrono>
 #include <fmt/color.h>
+#include <catch.hpp>
 #define ASSERT_EQ(result, bool_result) \
   {\
     auto start = std::chrono::high_resolution_clock::now();\
@@ -40,9 +41,9 @@ std::string last_vertex(char* end) {
 }
 
 #define MAX_READ_SIZE 512
-GSubGraph* createGraph(const char* dotfile) {
+GSubGraph* createGraph(const std::string& dotfile) {
   std::ifstream fs;
-  fs.open(dotfile);
+  fs.open(dotfile.c_str());
   GSubGraph* g = new GSubGraph();
   char line[MAX_READ_SIZE] = { 0 };
   while (fs.getline(line, MAX_READ_SIZE)) {
@@ -71,14 +72,21 @@ void releaseGraph(GSubGraph*g) {
 
 int main()
 {
+#ifdef __linux
+  std::string working_directory = "./../test/graphs/";
+#else
+  std::string working_directory = "./test/graphs/";
+#endif
   int ret = 0;
-  GSubGraph* g1 = createGraph("./test/graphs/simple_g.dot");
-  GSubGraph* gs = createGraph("./test/graphs/simple_g.dot");
-  GSubGraph* g2 = createGraph("./test/graphs/g4.dot");
-  GSubGraph* g3 = createGraph("./test/graphs/simple_g_2.dot");
-  GSubGraph* g4 = createGraph("./test/graphs/g4_2.dot");
-  GSubGraph* g5 = createGraph("./test/graphs/simple_g_3.dot");
-  GSubGraph* bg = createGraph("./test/graphs/bipartite.dot");
+  GSubGraph* g1 = createGraph(working_directory + "simple_g.dot");
+  GSubGraph* gs = createGraph(working_directory + "simple_g.dot");
+  GSubGraph* g2 = createGraph(working_directory + "g4.dot");
+  GSubGraph* g3 = createGraph(working_directory + "simple_g_2.dot");
+  GSubGraph* g4 = createGraph(working_directory + "g4_2.dot");
+  GSubGraph* g5 = createGraph(working_directory + "simple_g_3.dot");
+  GSubGraph* bg = createGraph(working_directory + "bipartite.dot");
+    auto m1 = bg->toMatrix();
+  fmt::print("simple_g:\n{}\n", m1);
   ASSERT_EQ(*g1 == *gs, true);
   ASSERT_EQ(g1->isBipartite(), false);
   ASSERT_EQ(g4->isBipartite(), false);

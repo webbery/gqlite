@@ -16,7 +16,7 @@ class GVertex {
 public:
   virtual ~GVertex() {}
 
-  std::string id() { return _id; }
+  std::string id()const { return _id; }
   const nlohmann::json& property() const { return _json; }
   nlohmann::json& property() { return _json; }
 
