@@ -10,11 +10,17 @@ env:
 
 jobs:
   pre-install:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     steps:
     - name: install-flex
+      if: matrix.os == 'ubuntu-latest'
       run: |
         sudo apt-get install -y flex bison
+    - name: update flex/bison
+      if: matrix.os == 'macos-latest'
+      run: |
+        sudo brew install flex
+        sudo brew install bison
         
   build:
     # The CMake configure and build commands are platform agnostic and should work equally
@@ -45,12 +51,6 @@ jobs:
         cd ${{github.workspace}}/third_party/eigen
         git fetch --unshallow --tags --prune --force
         git branch
-
-    - name: update flex/bison
-      if: matrix.os == 'macos-latest'
-      run: |
-        sudo port install flex
-        sudo port install bison
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
       # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
