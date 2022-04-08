@@ -32,9 +32,13 @@ struct GraphProperty {
 
 class GGraphInterface {
 public:
+  virtual ~GGraphInterface() {}
   // virtual int query(const GMatchPattern& pattern) = 0;
 
   const GraphProperty& property() const {return _property;}
 protected:
   GraphProperty _property;
 };
+
+class GSubGraph;
+template <typename T> T graph_cast(const GSubGraph& g);

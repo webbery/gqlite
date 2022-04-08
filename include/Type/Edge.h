@@ -50,9 +50,14 @@ public:
   std::string id();
   std::string from()const;
   std::string to()const;
+  std::string to(const std::string& from)const;
   void set(const nlohmann::json& prop) {
     _json = prop;
   }
+  nlohmann::json prop(const std::string& name) {
+    return _json[name];
+  }
+  std::string toString();
 protected:
   edge_id _id;
   nlohmann::json _json;

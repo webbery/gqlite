@@ -29,6 +29,7 @@ public:
   void addNeighbor(GVertex* neighbor) {
     auto ptr = std::lower_bound(_vertexes.begin(), _vertexes.end(), neighbor);
     if (ptr == _vertexes.end() || *ptr != neighbor) {
+      // printf("vertex[%s] add neighbor[%s]\n", _id.c_str(), neighbor->id().c_str());
       _vertexes.insert(ptr, neighbor);
     }
   }

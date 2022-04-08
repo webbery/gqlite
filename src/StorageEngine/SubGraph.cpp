@@ -2,6 +2,36 @@
 #include "gqlite.h"
 #include <deque>
 #include <unordered_map>
+#include <Graph/BipartiteGraph.h>
+#include <exception>
+
+namespace {
+//   bool BFSForBipartite(const std::map<std::string, GVertex*>& vertexes, ) {
+// #define COLORED_RED 1
+//     std::unordered_map<std::string, short> colored;
+//     std::deque<std::string> qvertexes;
+//     const std::string& first = vertexes.begin()->first;
+//     colored[first] = COLORED_RED;
+//     qvertexes.push_back(first);
+//     while (qvertexes.size())
+//     {
+//       std::string& v = qvertexes.front();
+//       for (auto itr = vertexes[v]->neighbor_begin(), end = vertexes[v]->neighbor_end();
+//         itr != end; ++itr) {
+//         std::string neighbor = (*itr)->id();
+//         if (colored.count(neighbor)) {
+//           if (colored[neighbor] == colored[v]) return false;
+//         }
+//         else {
+//           colored[neighbor] = -colored[v];
+//           qvertexes.push_back(neighbor);
+//         }
+//       }
+//       qvertexes.pop_front();
+//     }
+//     return true;
+//   }
+}
 
 GSubGraph::~GSubGraph() {}
 
@@ -18,12 +48,15 @@ int GSubGraph::addVertex(const std::string& id, const nlohmann::json& props) {
 
 int GSubGraph::addEdge(const std::string& from, const std::string& to, GraphEdgeDirection direction, const nlohmann::json& props) {
   edge_id eid(from, to, direction);
+  // printf("from %s to %s\n", from.c_str(), to.c_str());
   if (_edges.count(eid) > 0) {
     _edges[eid]->set(props);
     return ECode_GQL_Edge_Exist;
   }
   GEdge* edge = new GEdge(from, to, direction);
   _edges[eid] = edge;
+  // printf("add edge: %s\n", std::string(eid).c_str());
+  _edges[eid]->set(props);
   _vertexes[from]->addEdge(edge);
   _vertexes[from]->addNeighbor(_vertexes[to]);
   _vertexes[to]->addEdge(edge);
@@ -45,7 +78,6 @@ bool GSubGraph::isBipartite()
 {
   if (_vertexes.size() == 0) return true;
   // 0 means uninitialized, 1 means red and -1 means green
-#define COLORED_RED 1
   std::unordered_map<std::string, short> colored;
   std::deque<std::string> qvertexes;
   const std::string& first = _vertexes.begin()->first;
@@ -82,9 +114,17 @@ Eigen::MatrixXd GSubGraph::toMatrix(const char* weight)
   if (!weight) {
     for (auto itr = _vertexes.begin(), end = _vertexes.end(); itr!=end; ++itr) {
       const std::string& vertex = itr->first;
-      size_t col = 0;
-      for (auto nitr = itr->second->neighbor_begin(), nend = itr->second->neighbor_end(); nitr != nend; ++nitr, ++col) {
+      for (auto nitr = itr->second->neighbor_begin(), nend = itr->second->neighbor_end(); nitr != nend; ++nitr) {
         m(keys[vertex], keys[(*nitr)->id()]) = 1;
+      }
+    }
+  }
+  else {
+    for (auto itr = _vertexes.begin(), end = _vertexes.end(); itr!=end; ++itr) {
+      const std::string& vertex = itr->first;
+      for (auto nitr = itr->second->neighbor_begin(), nend = itr->second->neighbor_end(); nitr != nend; ++nitr) {
+        edge_id eid(vertex, (*nitr)->id(), GraphEdgeDirection::Bidrection);
+        m(keys[vertex], keys[(*nitr)->id()]) = (double)_edges[eid]->prop(weight);
       }
     }
   }
@@ -106,4 +146,8 @@ bool GSubGraph::operator==(const GSubGraph& other)
     if (eitr->first != oeitr->first) return false;
   }
   return true;
+}
+
+GVertex* GSubGraph::operator[] (const std::string& vertex) {
+  return _vertexes.operator[](vertex);
 }

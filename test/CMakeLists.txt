@@ -3,6 +3,9 @@ project(GQLlite_Test)
 
 include_directories(../include ../third_party/catch2)
 
+add_definitions(-DCATCH_CONFIG_MAIN -DCATCH_CONFIG_ENABLE_BENCHMARKING)
+add_definitions(-D_WORKING_DIR_=\"${CMAKE_SOURCE_DIR}\")
+
 set(TEST_GRAMMAR_SOURCE ./grammar.cpp)
 set(STORAGE_SOURCE
 	./storage.cpp
@@ -40,6 +43,8 @@ set(OLGRITHM_SOURCE ./algorithm.cpp
 	../src/Type/Vertex.cpp
 	../src/Type/Edge.cpp
 	../src/operand/distance/EditDistance.cpp
+	../src/operand/algorithms/Hungarian.cpp
+	../src/Graph/BipartiteGraph.cpp
 )
 add_executable(grammar ${TEST_GRAMMAR_SOURCE})
 add_executable(storage ${STORAGE_SOURCE})

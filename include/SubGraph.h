@@ -10,6 +10,7 @@
 #include <fmt/format.h>
 #include <strstream>
 #endif
+#define COLORED_RED 1
 
 class GSubGraph : public GGraphInterface {
 public:
@@ -25,13 +26,18 @@ public:
   bool isBipartite();
 
   typedef std::map<std::string, double> VectorSd;
-  VectorSd operator[] (const std::string& vertex) const;
+  GVertex* operator[] (const std::string& vertex);
 
   /**
    * @params weight Specify which property to weight. If null, default weight is 1.
    **/
   Eigen::MatrixXd toMatrix(const char* weight=nullptr);
-private:
+
+  typedef std::map<std::string, GVertex*>::const_iterator vertex_iterator;
+  vertex_iterator vertex_begin() const { return _vertexes.begin();}
+  vertex_iterator vertex_end()const { return _vertexes.end();}
+
+protected:
   std::map<std::string, GVertex*> _vertexes;
   std::map<edge_id, GEdge*> _edges;
 };

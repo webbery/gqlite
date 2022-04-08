@@ -2,14 +2,30 @@
 #include "gqlite.h"
 #include "base/ast.h"
 
+namespace {
+  std::string mix(const std::string& left, const std::string& right) {
+    std::string result;
+    result.resize(std::max(left.size(), right.size()));
+    std::string s1(left), s2(right);
+    if (s1.size() > s2.size()) s2 += std::string(s1.size() - s2.size(), 0);
+    else if (s2.size() > s1.size()) s1 += std::string(s2.size() - s1.size(), 0);
+
+    for (size_t idx = 0; idx < s2.size(); ++idx) {
+      result[idx] = (s2[idx]|s1[idx]);
+    }
+    // printf("MIX: %s\n", result.c_str());
+    return result;
+  }
+}
+
 edge_id::edge_id(const std::string& from, const std::string& to, GraphEdgeDirection direction)
 :_direction(direction)
 {
+  _from = from;
+  _to = to;
   switch (direction)
   {
   case GraphEdgeDirection::Bidrection:
-    _from = from;
-    _to = to;
     break;
   case GraphEdgeDirection::To:
     break;
@@ -43,7 +59,7 @@ std::string edge_id::str()const
   switch (_direction)
   {
   case GraphEdgeDirection::Bidrection:
-    return _from + "--" + _to;
+    return mix(_from, _to);
   case GraphEdgeDirection::To:
     return _from + "->" + _to;
   default:
@@ -58,8 +74,7 @@ bool edge_id::equal(const edge_id& other) const
   switch (_direction)
   {
   case GraphEdgeDirection::Bidrection:
-    if (_from == other._from && _to == other._to) return true;
-    if (_from == other._to && _to == other._from) return true;
+    if (mix(_from, _to) == mix(other._from, other._to)) return true;
     break;
   case GraphEdgeDirection::To:
     if (_from == other._from && _to == other._to) return true;
@@ -135,3 +150,12 @@ std::string GEdge::to() const
   return _id.to();
 }
 
+std::string GEdge::to(const std::string& from)const {
+  if (from == _id.from()) return _id.to();
+  return _id.from();
+}
+
+std::string GEdge::toString() {
+  // printf("stringify: %s", std::string(_id).c_str());
+  return std::string(_id) + ": " + _json.dump();
+}

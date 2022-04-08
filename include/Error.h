@@ -24,3 +24,13 @@ printf(LEVEL "[%s:%d] [%s] " fmt "\033[22;0m\n",\
 #else
 #define gprint(fmt, ...)
 #endif
+
+class graph_bad_cast : public std::bad_cast {
+public:
+  graph_bad_cast(const char* msg): _info(msg){}
+
+  virtual const char* what() const _GLIBCXX_USE_NOEXCEPT { return _info.c_str();}
+
+private:
+  std::string _info;
+};
