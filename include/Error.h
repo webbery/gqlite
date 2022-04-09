@@ -30,7 +30,11 @@ class graph_bad_cast : public std::bad_cast {
 public:
   graph_bad_cast(const char* msg): _info(msg){}
 
-  virtual const char* what() const { return _info.c_str();}
+  virtual const char* what() const
+#ifdef __linux__
+  _GLIBCXX_USE_NOEXCEPT
+#endif
+  { return _info.c_str();}
 
 private:
   std::string _info;

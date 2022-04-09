@@ -67,20 +67,25 @@ void releaseGraph(GSubGraph*g) {
 TEST_CASE("basic operation", "[member function]") {
   GSubGraph* g1 = createGraph(working_directory + "simple_g.dot");
   GSubGraph* bg = createGraph(working_directory + "bipartite.dot");
-  GSubGraph* wg = createGraph(working_directory + "bipartile_weight.dot");
 
   CHECK(g1->isBipartite() == false);
   CHECK(bg->isBipartite() == true);
-  GBipartiteGraph bipart = graph_cast<GBipartiteGraph>(*wg);
-  auto m = bipart.toMatrix("weight");
-  fmt::print("simple_g:\n{}\n", m);
-  HungorianAlgorithm alg;
-  // BENCHMARK("hunorian algorithm") {
-    alg.solve(m);
-  // }
+  
 
   releaseGraph(g1);
   releaseGraph(bg);
+}
+
+TEST_CASE("algorithm", "[hungarian]") {
+  GSubGraph* wg = createGraph(working_directory + "bipartile_weight.dot");
+  GBipartiteGraph bipart = graph_cast<GBipartiteGraph>(*wg);
+  auto m = bipart.toMatrix("weight");
+  fmt::print("hungarian input matrix:\n{}\n", m);
+  HungorianAlgorithm alg;
+  Eigen::MatrixXd out;
+  // BENCHMARK("hungarian algorithm[4x4]") {
+    alg.solve(m, out);
+  // };
   releaseGraph(wg);
 }
 
