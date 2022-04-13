@@ -79,12 +79,16 @@ TEST_CASE("basic operation", "[member function]") {
 TEST_CASE("algorithm", "[hungarian]") {
   GSubGraph* wg = createGraph(working_directory + "bipartile_weight.dot");
   GBipartiteGraph bipart = graph_cast<GBipartiteGraph>(*wg);
+  GSubGraph* wg2 = createGraph(working_directory + "bipartile_weight_2.dot");
+  GBipartiteGraph bipart2 = graph_cast<GBipartiteGraph>(*wg2);
   auto m = bipart.toMatrix("weight");
-  fmt::print("hungarian input matrix:\n{}\n", m);
+  // auto m2 = bipart2.toMatrix("weight");
+  // fmt::print("hungarian input matrix:\n{}\n", m2);
   HungorianAlgorithm alg;
-  Eigen::MatrixXd out;
+  std::list<std::pair<size_t, size_t>> out;
   // BENCHMARK("hungarian algorithm[4x4]") {
     alg.solve(m, out);
+    // alg.solve(m2, out);
   // };
   releaseGraph(wg);
 }

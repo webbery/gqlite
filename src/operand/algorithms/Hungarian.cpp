@@ -1,13 +1,14 @@
 #include "operand/algorithms/Hungarian.h"
 #include "gqlite.h"
 #include <numeric>
-#include "Graph/BipartiteGraph.h"
 #include <algorithm>
+#include <functional>
 #ifdef _PRINT_FORMAT_
 #include <iostream>
 #include <fmt/printf.h>
 #include <fmt/ranges.h>
 #endif
+#include "Graph/BipartiteGraph.h"
 
 namespace {
   template< typename T >
@@ -19,8 +20,48 @@ namespace {
     });
     return indx;
   }
+
+  bool is_exist(size_t col, const std::set<size_t>& cols, size_t N) {
+    if (cols.find(col) != cols.end()) return true;
+    return false;
+  }
+
+  bool find_new(
+    const Eigen::MatrixXd& input,
+    size_t row,
+    std::set<size_t> usedCols,
+    std::list<std::pair<size_t, size_t>>& result)
+  {
+    // fmt::print("row: {}, new: {}\n", row, usedCols);
+    if (row == input.rows() && usedCols.size() == input.cols()) return true;
+    for (size_t col = 0; col < input.cols(); ++col) {
+      if (usedCols.count(col)) continue;
+      if (input(row, col) == 0) {
+        auto status = usedCols.insert(col);
+        if (find_new(input, row + 1, usedCols, result)) {
+          // fmt::print("get it: {}, {}; {}\n", row, col, usedCols);
+          result.push_back({row, col});
+          return true;
+        } else {
+          usedCols.erase(status.first);
+          // fmt::print("try: {}, {}\n", row, col);
+        }
+      }
+    }
+    return false;
+  }
+  // find valid index
+  std::list<std::pair<size_t, size_t>> get_valid_indexes(const Eigen::MatrixXd& input) {
+    std::set<size_t> usedCols;
+    std::list<std::pair<size_t, size_t>> result;
+    find_new(input, 0, usedCols, result);
+    return result;
+  }
 }
-int HungorianAlgorithm::solve(Eigen::MatrixXd& m, Eigen::MatrixXd& out) {
+int HungorianAlgorithm::solve(Eigen::MatrixXd& m, std::list<std::pair<size_t, size_t>>& matched) {
+  // step 0:
+  // TODO: 转换为最大图匹配, 所有值乘-1,然后将输入矩阵转为方阵,新增链接填充权值为0
+
   const auto minRow = m.rowwise().minCoeff();
   // std::cout<< minMat<<std::endl;
   Eigen::MatrixXd m1 = m.colwise() - minRow;
@@ -67,7 +108,9 @@ int HungorianAlgorithm::solve(Eigen::MatrixXd& m, Eigen::MatrixXd& out) {
       mTempLineCross.col(vCols[cidx]) += Eigen::VectorXd::Ones(m2.cols());
       cidx += 1;
     }
-    // fmt::print("replaced: {}, {}\n", mTemp, mTemp.size());
+#ifdef _PRINT_FORMAT_
+    fmt::print("replaced: {}\n{}\n", mTempInf, mTempInf.size());
+#endif
   } while (mTempInf.count() < mTempInf.size());
   double minimal = mTempInf.minCoeff();
   double maximal = mTempLineCross.maxCoeff();
@@ -87,9 +130,16 @@ int HungorianAlgorithm::solve(Eigen::MatrixXd& m, Eigen::MatrixXd& out) {
   fmt::print("line:\n{}\n", mTempLine);
   std::cout<< pluss<<std::endl;
 #endif
-  out = mTempInf + mTempLine + pluss;
+  Eigen::MatrixXd result = mTempInf + mTempLine + pluss;
+      result(1,2) = 0;
+    result(2, 3) = 1;
 #ifdef _PRINT_FORMAT_
-  fmt::print("out:\n{}\n", out);
+  fmt::print("out:\n{}\n", result);
+#endif
+  // get position of matched
+  matched = get_valid_indexes(result);
+#ifdef _PRINT_FORMAT_
+  fmt::print("result:\n{}\n", matched);
 #endif
   return ECode_Success;
 }

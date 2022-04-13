@@ -46,9 +46,8 @@ jobs:
     - name: update flex/bison
       if: matrix.os == 'macos-latest'
       run: |
-        brew install flex
         brew install bison
-        flex --version
+        echo 'export PATH="/usr/local/opt/bison/bin:$PATH"' >> /Users/runner/.bash_profile
         bison --version
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.

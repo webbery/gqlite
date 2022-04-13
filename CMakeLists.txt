@@ -34,8 +34,10 @@ message(GIT: ${GIT_REFSPEC}, commit: ${GIT_REVISION_SHA})
 
 add_definitions(-DPROJECT_VERSION="0.1.0")
 add_definitions(-DGIT_REFSPEC=${GIT_REFSPEC} "-DGIT_REVISION_SHA=\"${GIT_REVISION_SHA}\"")
+if (${ENABLE_PRINT})
 add_definitions(-DGQL_LEVEL_DEBUG)
 add_definitions(-D_PRINT_FORMAT_)
+endif (${ENABLE_PRINT})
 
 add_definitions(-DTHREAD_COUNT=4)
 

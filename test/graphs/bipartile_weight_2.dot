@@ -1,0 +1,17 @@
+graph G{
+    W1 -- T1 [weight = 82];
+    W1 -- T2 [weight=83];
+    W1 -- T3 [weight= 69];
+    W2 -- T1 [weight= 92];
+    W2 -- T2 [weight= 77];
+    W2 -- T3 [weight= 37];
+    W3 -- T1 [weight= 49];
+    W3 -- T2 [weight= 92];
+    W3 -- T3 [weight= 11];
+    W4 -- T1 [weight= 69];
+    W4 -- T2 [weight= 5];
+    W4 -- T3 [weight= 86];
+    W5 -- T1 [weight= 8];
+    W5 -- T2 [weight= 9];
+    W5 -- T3 [weight= 98];
+}
