@@ -82,14 +82,17 @@ TEST_CASE("algorithm", "[hungarian]") {
   GSubGraph* wg2 = createGraph(working_directory + "bipartile_weight_2.dot");
   GBipartiteGraph bipart2 = graph_cast<GBipartiteGraph>(*wg2);
   auto m = bipart.toMatrix("weight");
-  // auto m2 = bipart2.toMatrix("weight");
+  auto m2 = bipart2.toMatrix("weight");
   // fmt::print("hungarian input matrix:\n{}\n", m2);
+  double weight = 0;
   HungorianAlgorithm alg;
+  alg.solve(m, weight);
+  CHECK(weight == 140.0);
   std::list<std::pair<size_t, size_t>> out;
-  // BENCHMARK("hungarian algorithm[4x4]") {
-    alg.solve(m, out);
-    // alg.solve(m2, out);
-  // };
+    alg.solve(m2, out);
+  BENCHMARK("hungarian algorithm[4x4]") {
+    alg.solve(m, weight);
+  };
   releaseGraph(wg);
 }
 

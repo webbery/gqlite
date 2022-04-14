@@ -1,5 +1,7 @@
 #pragma once
 
+typedef double REAL;
+
 enum NodeType {
   Removable,
   // element type

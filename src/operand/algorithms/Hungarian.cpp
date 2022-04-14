@@ -40,7 +40,7 @@ namespace {
         auto status = usedCols.insert(col);
         if (find_new(input, row + 1, usedCols, result)) {
           // fmt::print("get it: {}, {}; {}\n", row, col, usedCols);
-          result.push_back({row, col});
+          result.push_front({row, col});
           return true;
         } else {
           usedCols.erase(status.first);
@@ -58,10 +58,28 @@ namespace {
     return result;
   }
 }
-int HungorianAlgorithm::solve(Eigen::MatrixXd& m, std::list<std::pair<size_t, size_t>>& matched) {
-  // step 0:
-  // TODO: 转换为最大图匹配, 所有值乘-1,然后将输入矩阵转为方阵,新增链接填充权值为0
-
+int HungorianAlgorithm::solve(const Eigen::MatrixXd& input, std::list<std::pair<size_t, size_t>>& matched) {
+  // step 0: weight must positive
+  Eigen::MatrixXd m(input);
+#ifdef _PRINT_FORMAT_
+  fmt::print("prepare:\n{}\n", m);
+#endif
+  if (input.rows() > input.cols()) {
+    auto maxValue = input.maxCoeff() + 1;
+    Eigen::MatrixXd slice = Eigen::MatrixXd::Constant(m.rows(), m.rows() - m.cols(), maxValue);
+    m.resize(input.rows(), input.rows());
+    m << input, slice;
+  }
+  else if (input.cols() > input.rows()) {
+    auto maxValue = input.maxCoeff() + 1;
+    Eigen::MatrixXd slice = Eigen::MatrixXd::Constant(m.cols() - m.rows(), m.cols(), maxValue);
+    m.resize(input.cols(), input.cols());
+    m << input,
+         slice;
+  }
+#ifdef _PRINT_FORMAT_
+  fmt::print("input:\n{}\n", m);
+#endif
   const auto minRow = m.rowwise().minCoeff();
   // std::cout<< minMat<<std::endl;
   Eigen::MatrixXd m1 = m.colwise() - minRow;
@@ -137,9 +155,24 @@ int HungorianAlgorithm::solve(Eigen::MatrixXd& m, std::list<std::pair<size_t, si
   fmt::print("out:\n{}\n", result);
 #endif
   // get position of matched
-  matched = get_valid_indexes(result);
+  auto indexes = get_valid_indexes(result);
+  auto itr = indexes.begin();
+  for (size_t offset = 0; offset < input.rows(); ++itr, ++offset);
+  matched.assign(indexes.begin(), itr);
 #ifdef _PRINT_FORMAT_
   fmt::print("result:\n{}\n", matched);
 #endif
   return ECode_Success;
+}
+
+int HungorianAlgorithm::solve(const Eigen::MatrixXd& m, double& weight) {
+  std::list<std::pair<size_t, size_t>> indexes;
+  int ret = this->solve(m, indexes);
+  if (ret == ECode_Success) {
+    weight = 0;
+    for (auto indx = indexes.begin(); indx != indexes.end(); ++indx) {
+      weight += m(indx->first, indx->second);
+    }
+  }
+  return ret;
 }
