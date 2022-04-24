@@ -3,7 +3,7 @@
 
 namespace query
 {
-  void get_vertexes(GGraph* pGraph, const std::vector<VertexID>& ids, gqlite_result& results) {
+  void get_vertexes(GGraphInstance* pGraph, const std::vector<VertexID>& ids, gqlite_result& results) {
     // results.count = ids.size();
     // gqlite_node* node = nullptr;
     // results.nodes = node;

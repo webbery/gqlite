@@ -43,7 +43,7 @@ int move_cursor(mdbx::txn_managed& txn, mdbx::map_handle& handle, T pos, mdbx::c
   return ECode_Success;
 }
 
-class GGraph;
+class GGraphInstance;
 /**
  * @brief vertex property feature is apply when this property of vertex is upset
  */

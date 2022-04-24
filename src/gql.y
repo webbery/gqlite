@@ -42,7 +42,7 @@
   float __f;
   gql_node* __list;
   char* __c;
-  GGraph* _g;
+  GGraphInstance* _g;
   size_t __offset;
   time_t __datetime;
   int32_t __int;

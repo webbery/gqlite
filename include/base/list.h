@@ -39,3 +39,16 @@ Node* list_join(Node* first, Node* second) {
   cur->_next = second;
   return first;
 }
+
+template <typename T>
+struct GNode {
+  GNode* _next;
+};
+
+// template<typename T>
+// GNode<T>* init_list(GNode<T>* item) {
+//   GNode<T>* node = (GNode<T>*)malloc(sizeof(GNode<T>));
+//   // node->_value = item;
+//   node->_next = nullptr;
+//   return node;
+// }

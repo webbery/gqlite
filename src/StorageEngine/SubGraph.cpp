@@ -33,7 +33,47 @@ namespace {
 //   }
 }
 
-GSubGraph::~GSubGraph() {}
+GSubGraph::GSubGraph(): _cnt(1) {}
+
+GSubGraph::GSubGraph(const GSubGraph& other)
+  : _vertexes(other._vertexes)
+  , _edges(other._edges)
+  , _cnt(other._cnt + 1)
+{
+}
+
+GSubGraph::GSubGraph(GSubGraph&& other)
+  : _vertexes(other._vertexes)
+  , _edges(other._edges)
+  , _cnt(other._cnt + 1)
+{
+  other.DeRef();
+  other._vertexes.clear();
+  other._edges.clear();
+}
+
+GSubGraph& GSubGraph::operator = (const GSubGraph& other) {
+  if (this != &other) {
+    _vertexes = other._vertexes;
+    _edges = other._edges;
+    _cnt = other._cnt + 1;
+  }
+  return *this;
+}
+GSubGraph& GSubGraph::operator = (GSubGraph&& other) {
+  if (this != &other) {
+    _vertexes = other._vertexes;
+    _edges = other._edges;
+    _cnt = other.Ref();
+    other._vertexes.clear();
+    other._edges.clear();
+  }
+  return *this;
+}
+
+GSubGraph::~GSubGraph() {
+  DeRef();
+}
 
 int GSubGraph::addVertex(const std::string& id, const nlohmann::json& props) {
   if (_vertexes.count(id) > 0) {
@@ -100,6 +140,25 @@ bool GSubGraph::isBipartite()
     qvertexes.pop_front();
   }
   return true;
+}
+
+Eigen::MatrixXd GSubGraph::toMatrix(const GSubGraph& from, const GSubGraph& to, MatrixType type) {
+  size_t fcnt = from._vertexes.size();
+  size_t tcnt = to._vertexes.size();
+  Eigen::MatrixXd m;
+  switch (type)
+  {
+  case Concat:
+    break;
+  case Extend:
+    {
+      m = Eigen::MatrixXd::Zero(fcnt + tcnt, tcnt + fcnt);
+    }
+    break;
+  default:
+    break;
+  }
+  return m;
 }
 
 Eigen::MatrixXd GSubGraph::toMatrix(const char* weight)

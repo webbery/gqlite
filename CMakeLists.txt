@@ -55,6 +55,7 @@ aux_source_directory(src/operand Operand_SOURCES)
 aux_source_directory(src/operand/match Match_SOURCES)
 aux_source_directory(src/operand/distance Distance_SOURCES)
 aux_source_directory(src/Graph Graph_SOURCES)
+aux_source_directory(src/Path Path_SOURCES)
 
 # set(FMT_CAN_MODULE ON CACHE BOOL "Build a module instead of a traditional library." FORCE)
 enable_testing()
@@ -68,7 +69,7 @@ add_definitions(-DYY_NO_UNISTD_H)
 add_library(gqlite
 	${BASE_SOURCES} ${ParserEngine_SOURCES} ${StorageEngine_SOURCES} ${Struct_SOURCES}
 	${Type_SOURCES} ${Memory_SOURCES} ${Feature_SOURCES} ${GQL_SOURCES} ${Operand_SOURCES}
-	${Match_SOURCES} ${Distance_SOURCES} ${Graph_SOURCES})
+	${Match_SOURCES} ${Distance_SOURCES} ${Graph_SOURCES} ${Path_SOURCES})
 target_link_libraries(gqlite mdbx-static fmt::fmt)
 
 add_dependencies(gqlite generated_tokens generated_grammar)

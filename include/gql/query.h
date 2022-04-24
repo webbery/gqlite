@@ -11,7 +11,7 @@
 namespace query
 {
   template<typename Container>
-  void get_vertexes(GGraph* pGraph, const Container& ids, gqlite_result& results) {
+  void get_vertexes(GGraphInstance* pGraph, const Container& ids, gqlite_result& results) {
     // results.count = ids.size();
     // gqlite_node* node = nullptr;
     // gqlite_node* root = node;

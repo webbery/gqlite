@@ -30,11 +30,11 @@ int GStorageEngine::create(const char* filename) {
     return startTrans();
 }
 
-int GStorageEngine::openGraph(const char* name, GGraph*& pGraph) {
+int GStorageEngine::openGraph(const char* name, GGraphInstance*& pGraph) {
   if (!name) return ECODE_NULL_PTR;
   auto ptr = _mHandle.find(name);
   if (ptr == _mHandle.end()) {
-      pGraph = new GGraph(_txn, name);
+      pGraph = new GGraphInstance(_txn, name);
   }
   return ECode_Success;
 }
@@ -42,7 +42,7 @@ int GStorageEngine::openGraph(const char* name, GGraph*& pGraph) {
 int GStorageEngine::openGraph(const char* name)
 {
   if (_mHandle.find(name) == _mHandle.end()) {
-    GGraph* pGraph = nullptr;
+    GGraphInstance* pGraph = nullptr;
     int ret = this->openGraph(name, pGraph);
     if (pGraph) {
       _mHandle[name] = pGraph;
@@ -54,12 +54,12 @@ int GStorageEngine::openGraph(const char* name)
   return ECode_Success;
 }
 
-void GStorageEngine::registGraphFeature(GGraph* pGraph, GVertexProptertyFeature* feature)
+void GStorageEngine::registGraphFeature(GGraphInstance* pGraph, GVertexProptertyFeature* feature)
 {
   pGraph->registPropertyFeature(feature);
 }
 
-GGraph* GStorageEngine::getGraph(const char* name)
+GGraphInstance* GStorageEngine::getGraph(const char* name)
 {
   std::string gname;
   if (!name) gname = _usedgraph;
@@ -104,14 +104,14 @@ int GStorageEngine::finishTrans() {
   return ECode_Success;
 }
 
-int GStorageEngine::closeGraph(GGraph* pGraph) {
+int GStorageEngine::closeGraph(GGraphInstance* pGraph) {
   if (pGraph) {
     delete pGraph;
   }
   return ECode_Success;
 }
 
-int GStorageEngine::dropGraph(GGraph* pGraph) {
+int GStorageEngine::dropGraph(GGraphInstance* pGraph) {
   int res = pGraph->drop();
   if (!res) {
     delete pGraph;
@@ -122,12 +122,12 @@ int GStorageEngine::dropGraph(GGraph* pGraph) {
   return ECode_Fail;
 }
 
-int GStorageEngine::finishUpdate(GGraph* graph)
+int GStorageEngine::finishUpdate(GGraphInstance* graph)
 {
   return graph->finishUpdate(_txn);
 }
 
-int GStorageEngine::getNode(GGraph* graph, const VertexID& nodeid, std::function<int(const char*, void*, int, void*)> f)
+int GStorageEngine::getNode(GGraphInstance* graph, const VertexID& nodeid, std::function<int(const char*, void*, int, void*)> f)
 {
   GVertex vertex = graph->getVertexById(nodeid);
   if (IS_INVALID_VERTEX(vertex.property())) return ECode_Success;
@@ -168,7 +168,7 @@ int GStorageEngine::getNode(GGraph* graph, const VertexID& nodeid, std::function
   return ECode_Success;
 }
 
-int GStorageEngine::getNode(GGraph* graph, const VertexID& nodeid, std::function<int(const char*, void*)> f)
+int GStorageEngine::getNode(GGraphInstance* graph, const VertexID& nodeid, std::function<int(const char*, void*)> f)
 {
   GVertexStmt vertex = graph->getVertexById(nodeid);
   if (IS_INVALID_VERTEX(vertex.property())) return ECode_Success;
@@ -187,7 +187,7 @@ int GStorageEngine::getNode(GGraph* graph, const VertexID& nodeid, std::function
   return ECode_Success;
 }
 
-std::vector<VertexID> GStorageEngine::getNodes(GGraph* graph)
+std::vector<VertexID> GStorageEngine::getNodes(GGraphInstance* graph)
 {
   auto vertexes = graph->getVertex(_txn);
   std::vector<VertexID> ids;
@@ -198,13 +198,13 @@ std::vector<VertexID> GStorageEngine::getNodes(GGraph* graph)
   return ids;
 }
 
-int GStorageEngine::dropNode(GGraph* graph, const VertexID& nodeid)
+int GStorageEngine::dropNode(GGraphInstance* graph, const VertexID& nodeid)
 {
   graph->dropVertex(nodeid);
   return ECode_Success;
 }
 
-int GStorageEngine::makeDirection(GGraph* graph, const EdgeID& id, const VertexID& from, const VertexID& to, const char* name)
+int GStorageEngine::makeDirection(GGraphInstance* graph, const EdgeID& id, const VertexID& from, const VertexID& to, const char* name)
 {
   // graph->updateEdge(id, name, "");
   // make relation and then save it

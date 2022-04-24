@@ -10,3 +10,8 @@ public:
   double measure(const GSubGraph& g1, const GSubGraph& g2, Metric metric = WeightedBipartite);
 private:
 };
+
+class GEdgeEditDistance {
+public:
+  
+};

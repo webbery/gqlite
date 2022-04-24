@@ -9,7 +9,7 @@
 namespace upset
 {
 
-  std::string exportVertexes(GGraph* g)
+  std::string exportVertexes(GGraphInstance* g)
   {
     // std::vector<VertexID> ids = GSinglecton::get<GStorageEngine>()->getNodes(g);
     // gqlite_result results;
@@ -37,7 +37,7 @@ namespace upset
     return gqline;
   }
 
-  std::string exportEdges(GGraph* g)
+  std::string exportEdges(GGraphInstance* g)
   {
     std::string gqline;
     return gqline;

@@ -90,9 +90,9 @@ TEST_CASE("algorithm", "[hungarian]") {
   CHECK(weight == 140.0);
   std::list<std::pair<size_t, size_t>> out;
     alg.solve(m2, out);
-  BENCHMARK("hungarian algorithm[4x4]") {
-    alg.solve(m, weight);
-  };
+  // BENCHMARK("hungarian algorithm[4x4]") {
+  //   alg.solve(m, weight);
+  // };
   releaseGraph(wg);
 }
 

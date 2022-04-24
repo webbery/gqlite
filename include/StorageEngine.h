@@ -21,13 +21,13 @@ public:
 
     int openGraph(const char* name);
 
-    void registGraphFeature(GGraph*, GVertexProptertyFeature* feature);
+    void registGraphFeature(GGraphInstance*, GVertexProptertyFeature* feature);
 
-    GGraph* getGraph(const char* name = nullptr);
+    GGraphInstance* getGraph(const char* name = nullptr);
     std::vector<std::string> getGraphs();
 
-    int dropGraph(GGraph* pGraph);
-    int closeGraph(GGraph* pGraph);
+    int dropGraph(GGraphInstance* pGraph);
+    int closeGraph(GGraphInstance* pGraph);
 
     int startTrans();
 
@@ -41,16 +41,16 @@ public:
      * generate edge id or vertex id
      * @param type 0-vertex, 1-edge
      */
-    int generateID(GGraph* graph, char type, char*& id);
+    int generateID(GGraphInstance* graph, char type, char*& id);
 
-    int finishUpdate(GGraph* graph);
+    int finishUpdate(GGraphInstance* graph);
 
-    int getNode(GGraph* graph, const VertexID& nodeid, std::function<int(const char*, void*, int, void*)>);
-    int getNode(GGraph* graph, const VertexID& nodeid, std::function<int(const char*, void*)>);
+    int getNode(GGraphInstance* graph, const VertexID& nodeid, std::function<int(const char*, void*, int, void*)>);
+    int getNode(GGraphInstance* graph, const VertexID& nodeid, std::function<int(const char*, void*)>);
 
-    std::vector<VertexID> getNodes(GGraph* graph);
+    std::vector<VertexID> getNodes(GGraphInstance* graph);
 
-    int dropNode(GGraph* graph, const VertexID& nodeid);
+    int dropNode(GGraphInstance* graph, const VertexID& nodeid);
 
     int dropRelationship();
 
@@ -66,13 +66,13 @@ public:
     //template<typename T>
     //int makeDirection(GGraph* graph, const VertexID& from, const VertexID& to, const char* name, T&& value){}
 
-    int makeDirection(GGraph* graph, const EdgeID& id, const VertexID& from, const VertexID& to, const char* name);
+    int makeDirection(GGraphInstance* graph, const EdgeID& id, const VertexID& from, const VertexID& to, const char* name);
 
     int injectCostFunc();
     int injectNodeUpdateFunc();
 
 private:
-    int openGraph(const char* name, GGraph*& pGraph);
+    int openGraph(const char* name, GGraphInstance*& pGraph);
     /*
      * @brief schema is used to record all the graph's name
      */
@@ -80,6 +80,6 @@ private:
 private:
     mdbx::env_managed _env;
     mdbx::txn_managed _txn;
-    std::map<std::string, GGraph*> _mHandle;
+    std::map<std::string, GGraphInstance*> _mHandle;
     std::string _usedgraph;
 };

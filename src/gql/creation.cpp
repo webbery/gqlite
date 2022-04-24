@@ -9,7 +9,7 @@ namespace creation {
     return storage->openGraph(name.c_str());
   }
 
-  int createInvertIndex(GStorageEngine* storage, GGraph* g, const std::string& name) {
+  int createInvertIndex(GStorageEngine* storage, GGraphInstance* g, const std::string& name) {
     createGraph(storage, name);
     GIndex* gi = new GIndex(name.c_str());
     storage->registGraphFeature(g, gi);

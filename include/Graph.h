@@ -23,7 +23,7 @@ mdbx::map_handle open_schema(mdbx::txn_managed& txn);
 
 class GVertexProptertyFeature;
 class IGist;
-class GGraph : public GGraphInterface {
+class GGraphInstance : public GGraphInterface {
 public:
   // this schema save all database schema info, which key is graph name
   /**
@@ -36,8 +36,8 @@ public:
    **/
   static mdbx::map_handle _schema;
 
-  GGraph(mdbx::txn_managed& txn, const char* name);
-  ~GGraph();
+  GGraphInstance(mdbx::txn_managed& txn, const char* name);
+  ~GGraphInstance();
 
   bool registPropertyFeature(GVertexProptertyFeature* f);
 

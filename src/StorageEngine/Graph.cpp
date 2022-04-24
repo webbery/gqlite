@@ -67,7 +67,7 @@ GraphProperty deserialize(const std::vector<uint8_t>& value)
   return property;
 }
 
-mdbx::map_handle GGraph::_schema;
+mdbx::map_handle GGraphInstance::_schema;
 mdbx::map_handle open_schema(mdbx::txn_managed& txn)
 {
   mdbx::map_handle schema;
@@ -76,7 +76,7 @@ mdbx::map_handle open_schema(mdbx::txn_managed& txn)
 }
 
 
-GGraph::GGraph(mdbx::txn_managed& txn, const char* name)
+GGraphInstance::GGraphInstance(mdbx::txn_managed& txn, const char* name)
   :_txn(txn)
 {
   std::string vName = vertexDBName(name);
@@ -103,7 +103,7 @@ GGraph::GGraph(mdbx::txn_managed& txn, const char* name)
   _propertyFeatures.push_back(f);
 }
 
-GGraph::~GGraph()
+GGraphInstance::~GGraphInstance()
 {
   for (GVertexProptertyFeature*& f : _propertyFeatures)
   {
@@ -111,7 +111,7 @@ GGraph::~GGraph()
   }
 }
 
-bool GGraph::registPropertyFeature(GVertexProptertyFeature* f)
+bool GGraphInstance::registPropertyFeature(GVertexProptertyFeature* f)
 {
   std::string name = f->indexName();
     printf("feature name %s\n", name.c_str());
@@ -134,7 +134,7 @@ bool GGraph::registPropertyFeature(GVertexProptertyFeature* f)
 //   return vEdges;
 // }
 
-std::vector<std::pair<VertexID, nlohmann::json>> GGraph::getVertex(mdbx::txn_managed& txn)
+std::vector<std::pair<VertexID, nlohmann::json>> GGraphInstance::getVertex(mdbx::txn_managed& txn)
 {
   std::vector<std::pair<VertexID, nlohmann::json>> result;
   using namespace mdbx;
@@ -159,7 +159,7 @@ std::vector<std::pair<VertexID, nlohmann::json>> GGraph::getVertex(mdbx::txn_man
   return result;
 }
 
-int GGraph::queryVertex(std::set<VertexID>& ids, const GConditions& preds)
+int GGraphInstance::queryVertex(std::set<VertexID>& ids, const GConditions& preds)
 {
   const GConditions* cur = &preds;
   while (cur) {
@@ -225,7 +225,7 @@ int GGraph::queryVertex(std::set<VertexID>& ids, const GConditions& preds)
   return ECode_Success;
 }
 
-int GGraph::queryEdge(const nlohmann::json& pred)
+int GGraphInstance::queryEdge(const nlohmann::json& pred)
 {
   return ECode_Success;
 }
@@ -235,7 +235,7 @@ int GGraph::queryEdge(const nlohmann::json& pred)
 //   return ECode_Success;
 // }
 
-GVertexStmt GGraph::getVertexById(const std::string& id)
+GVertexStmt GGraphInstance::getVertexById(const std::string& id)
 {
   GVertexStmt vertex;
   mdbx::slice data = get(_txn, _vertexes, id);
@@ -248,37 +248,37 @@ GVertexStmt GGraph::getVertexById(const std::string& id)
   return vertex;
 }
 
-int GGraph::bind(const EdgeID& eid, const VertexID& from, const VertexID& to)
+int GGraphInstance::bind(const EdgeID& eid, const VertexID& from, const VertexID& to)
 {
   this->_updateRelations.push_back({ eid, from, to });
   return 0;
 }
 
-int GGraph::updateVertex(const VertexID& id, const std::vector<uint8_t>& data)
+int GGraphInstance::updateVertex(const VertexID& id, const std::vector<uint8_t>& data)
 {
   mdbx::slice bin(data.data(), data.size());
   return put(_txn, _vertexes, id, bin);
 }
 
-int GGraph::updateEdge(const EdgeID& id, const std::vector<uint8_t>& data)
+int GGraphInstance::updateEdge(const EdgeID& id, const std::vector<uint8_t>& data)
 {
   return 0;
 }
 
-int GGraph::updateIndex(const VertexID& id, const std::string& index, const nlohmann::json& value)
+int GGraphInstance::updateIndex(const VertexID& id, const std::string& index, const nlohmann::json& value)
 {
   GVertexProptertyFeature* f = getFeature(index.c_str());
   if (!f) return ECode_GQL_Index_Not_Exist;
   return f->apply(_txn, id, index, value);
 }
 
-int GGraph::dropVertex(const std::string& id)
+int GGraphInstance::dropVertex(const std::string& id)
 {
   _removeVertexes.push_back(id);
   return 0;
 }
 
-int GGraph::drop() {
+int GGraphInstance::drop() {
   for (GVertexProptertyFeature* f : _propertyFeatures) {
     f->drop(_txn);
   }
@@ -290,7 +290,7 @@ int GGraph::drop() {
   return 0;
 }
 
-int GGraph::finishUpdate(mdbx::txn_managed& txn)
+int GGraphInstance::finishUpdate(mdbx::txn_managed& txn)
 {
   // delete vertexes
   std::for_each(_removeVertexes.begin(), _removeVertexes.end(), [&](auto item)
@@ -305,7 +305,7 @@ int GGraph::finishUpdate(mdbx::txn_managed& txn)
   return 0;
 }
 
-bool GGraph::isIndexExist(const std::string& name)
+bool GGraphInstance::isIndexExist(const std::string& name)
 {
   for (std::string& index: _property._indexes) {
     if (index == name) return true;
@@ -313,42 +313,42 @@ bool GGraph::isIndexExist(const std::string& name)
   return false;
 }
 
-GVertexProptertyFeature* GGraph::getFeature(const char* property) {
+GVertexProptertyFeature* GGraphInstance::getFeature(const char* property) {
   for (GVertexProptertyFeature* feature : _propertyFeatures) {
     if (feature->indexName() == property) return feature;
   }
   return nullptr;
 }
-int GGraph::saveSchema()
+int GGraphInstance::saveSchema()
 {
   std::vector<uint8_t> v = serialize(_property);
   auto data = mdbx::slice(v.data(), v.data() + v.size());
   return put(_txn, _schema, _property._name, data);
 }
 
-GraphValueType GGraph::propertyType(const std::string& prop)
+GraphValueType GGraphInstance::propertyType(const std::string& prop)
 {
   auto itr = _property._types.find(prop);
   if (itr == _property._types.end()) return GraphValueType::Undefined;
   return itr->second;
 }
 
-std::string GGraph::vertexDBName(const char* name)
+std::string GGraphInstance::vertexDBName(const char* name)
 {
   return std::string("V:") + name;
 }
 
-std::string GGraph::edgeDBName(const char* name)
+std::string GGraphInstance::edgeDBName(const char* name)
 {
   return std::string("E:") + name;
 }
 
-std::string GGraph::vertexGraphName(const char* name)
+std::string GGraphInstance::vertexGraphName(const char* name)
 {
   return std::string("gv:") + name;
 }
 
-std::string GGraph::edgeGraphName(const char* name)
+std::string GGraphInstance::edgeGraphName(const char* name)
 {
   return std::string("ge:") + name;
 }

@@ -3,10 +3,10 @@
 #include "json.hpp"
 #include "Graph.h"
 
-class GGraph;
+class GGraphInstance;
 struct gast;
 namespace upset
 {
-  std::string exportVertexes(GGraph* g);
-  std::string exportEdges(GGraph* g);
+  std::string exportVertexes(GGraphInstance* g);
+  std::string exportEdges(GGraphInstance* g);
 } // namespace upset  
