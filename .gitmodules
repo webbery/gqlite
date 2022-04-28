@@ -1,6 +1,6 @@
 [submodule "third_party/libmdbx"]
 	path = third_party/libmdbx
-	url = https://github.com/erthink/libmdbx.git
+	url = https://gitflic.ru/project/erthink/libmdbx.git
 [submodule "third_party/fmt"]
 	path = third_party/fmt
 	url = https://github.com/fmtlib/fmt.git
