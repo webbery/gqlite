@@ -23,6 +23,7 @@ setup_target_for_coverage_gcovr_xml(
 		"tool/getopt.c"
 		"tool/getopt.h"
 		"test/uint.hpp"
+		"third_party/catch2/catch.hpp"
 )
 # ctest_coverage(BUILD test)
 ELSE ()
@@ -34,6 +35,8 @@ message(GIT: ${GIT_REFSPEC}, commit: ${GIT_REVISION_SHA})
 
 add_definitions(-DPROJECT_VERSION="0.1.0")
 add_definitions(-DGIT_REFSPEC=${GIT_REFSPEC} "-DGIT_REVISION_SHA=\"${GIT_REVISION_SHA}\"")
+
+option(ENABLE_PRINT "print debug info" false)
 if (${ENABLE_PRINT})
 add_definitions(-DGQL_LEVEL_DEBUG)
 add_definitions(-D_PRINT_FORMAT_)
@@ -41,7 +44,7 @@ endif (${ENABLE_PRINT})
 
 add_definitions(-DTHREAD_COUNT=4)
 
-include_directories(./include ./third_party/libmdbx ./third_party/eigen ./third_party/fmt/include ./third_party/boost_1_78_0/include)
+include_directories(./include ./third_party/libmdbx ./third_party/eigen ./third_party/fmt/include)
 
 file(GLOB BASE_SOURCES "src/*.cpp")
 aux_source_directory(src/ParserEngine ParserEngine_SOURCES)

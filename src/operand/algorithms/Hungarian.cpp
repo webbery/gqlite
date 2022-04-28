@@ -64,96 +64,108 @@ int HungorianAlgorithm::solve(const Eigen::MatrixXd& input, std::list<std::pair<
 #ifdef _PRINT_FORMAT_
   fmt::print("prepare:\n{}\n", m);
 #endif
-  if (input.rows() > input.cols()) {
-    auto maxValue = input.maxCoeff() + 1;
-    Eigen::MatrixXd slice = Eigen::MatrixXd::Constant(m.rows(), m.rows() - m.cols(), maxValue);
-    m.resize(input.rows(), input.rows());
-    m << input, slice;
-  }
-  else if (input.cols() > input.rows()) {
-    auto maxValue = input.maxCoeff() + 1;
-    Eigen::MatrixXd slice = Eigen::MatrixXd::Constant(m.cols() - m.rows(), m.cols(), maxValue);
-    m.resize(input.cols(), input.cols());
-    m << input,
-         slice;
-  }
+  //if (input.rows() > input.cols()) {
+  //  auto maxValue = input.maxCoeff() + 1;
+  //  Eigen::MatrixXd slice = Eigen::MatrixXd::Constant(m.rows(), m.rows() - m.cols(), maxValue);
+  //  m.resize(input.rows(), input.rows());
+  //  m << input, slice;
+  //}
+  //else if (input.cols() > input.rows()) {
+  //  auto maxValue = input.maxCoeff() + 1;
+  //  Eigen::MatrixXd slice = Eigen::MatrixXd::Constant(m.cols() - m.rows(), m.cols(), maxValue);
+  //  m.resize(input.cols(), input.cols());
+  //  m << input,
+  //       slice;
+  //}
 #ifdef _PRINT_FORMAT_
   fmt::print("input:\n{}\n", m);
 #endif
   const auto minRow = m.rowwise().minCoeff();
-  // std::cout<< minMat<<std::endl;
   Eigen::MatrixXd m1 = m.colwise() - minRow;
 #ifdef _PRINT_FORMAT_
   fmt::print("step 1:\n{}\n", m1);
 #endif
   const auto minCol = m1.colwise().minCoeff();
-  Eigen::MatrixXd m2 = m1.rowwise() - minCol;
+  Eigen::MatrixXd result = m1.rowwise() - minCol;
 #ifdef _PRINT_FORMAT_
-  fmt::print("step 2:\n{}\n", m2);
+  fmt::print("step 2:\n{}\n", result);
 #endif
-  // get zero count of each row and col, then sort it by count
-  size_t total = std::count(m2.data(), m2.data() + m2.size(), 0);
-  // fmt::print("step 2:\ntotal {}\n", total);
-  std::vector<size_t> vRowCounts, vColCounts;
-  for (size_t row = 0; row<m2.rows(); ++row) {
-    const auto& r = m2.row(row);
-    size_t c = r.size() - r.count();
-    vRowCounts.push_back(c);
-  }
-  for (size_t col = 0; col < m2.cols(); ++col) {
-    const auto& c = m2.col(col);
-    size_t value = c.size() - c.count();
-    vColCounts.push_back(value);
-  }
-  // sort
-  std::vector<size_t> vRows = sort_indexes(vRowCounts);
-  std::vector<size_t> vCols = sort_indexes(vColCounts);
-  size_t ridx = 0, cidx = 0;
-  Eigen::MatrixXd mTempInf = m2;
-  Eigen::MatrixXd mTempLine = Eigen::MatrixXd::Zero(m2.rows(), m2.cols());
-  Eigen::MatrixXd mTempLineCross = Eigen::MatrixXd::Zero(m2.rows(), m2.cols());
   do {
-    size_t rValue = vRowCounts[vRows[ridx]];
-    size_t cValue = vColCounts[vCols[cidx]];
-    if (rValue > cValue) {
-      mTempInf.row(vRows[ridx]).fill(INFINITY);
-      mTempLine.row(vRows[ridx]) = m2.row(vRows[ridx]);
-      mTempLineCross.row(vRows[ridx]) += Eigen::VectorXd::Ones(m2.cols());
-      ridx += 1;
-    } else if (cValue > rValue) {
-      mTempInf.col(vCols[cidx]).fill(INFINITY);
-      mTempLine.col(vCols[cidx]) = m2.col(vCols[cidx]);
-      mTempLineCross.col(vCols[cidx]) += Eigen::VectorXd::Ones(m2.cols());
-      cidx += 1;
-    }
+    // get zero count of each row and col, then sort it by count
+    size_t total = std::count(result.data(), result.data() + result.size(), 0);
+    // fmt::print("step 2:\ntotal {}\n", total);
+    size_t times = 0;
+    Eigen::MatrixXd mTempInf = result;
+    Eigen::MatrixXd mTempLine = Eigen::MatrixXd::Zero(result.rows(), result.cols());
+    Eigen::MatrixXd mTempLineCross = Eigen::MatrixXd::Zero(result.rows(), result.cols());
+    do {
+      size_t ridx = 0, cidx = 0;
+      std::vector<size_t> vRowCounts, vColCounts;
+      for (size_t row = 0; row < mTempInf.rows(); ++row) {
+        const auto& r = mTempInf.row(row);
+        size_t c = r.size() - r.count();
+        vRowCounts.push_back(c);
+      }
+      for (size_t col = 0; col < mTempInf.cols(); ++col) {
+        const auto& c = mTempInf.col(col);
+        size_t value = c.size() - c.count();
+        vColCounts.push_back(value);
+      }
+      // sort
+      std::vector<size_t> vRows = sort_indexes(vRowCounts);
+      std::vector<size_t> vCols = sort_indexes(vColCounts);
+#ifdef _PRINT_FORMAT_
+      fmt::print("rows: {}\ncols: {}\n", vRowCounts, vColCounts);
+#endif
+      size_t rValue = vRowCounts[vRows[ridx]];
+      size_t cValue = vColCounts[vCols[cidx]];
+      if (rValue > cValue) {
+        auto& rows = mTempInf.row(vRows[ridx]);
+        rows = (rows.array() == 0).select(INFINITY, rows);
+        mTempLine.row(vRows[ridx]) = result.row(vRows[ridx]);
+        mTempLineCross.row(vRows[ridx]) += Eigen::VectorXd::Ones(result.cols());
+        ridx += 1;
+      } else {
+        auto& cols = mTempInf.col(vCols[cidx]);
+        cols = (cols.array() == 0).select(INFINITY, cols);
+        mTempLine.col(vCols[cidx]) = result.col(vCols[cidx]);
+        mTempLineCross.col(vCols[cidx]) += Eigen::VectorXd::Ones(result.cols());
+        cidx += 1;
+      }
+      times += 1;
 #ifdef _PRINT_FORMAT_
     fmt::print("replaced: {}\n{}\n", mTempInf, mTempInf.size());
 #endif
-  } while (mTempInf.count() < mTempInf.size());
-  double minimal = mTempInf.minCoeff();
-  double maximal = mTempLineCross.maxCoeff();
+    } while (mTempInf.count() < mTempInf.size());
+    if (times >= input.rows()) {
+#ifdef _PRINT_FORMAT_
+      fmt::print("out:\n{}\n{}\n", result, mTempInf);
+#endif
+      break;
+    }
+    double minimal = mTempInf.minCoeff();
+    double maximal = mTempLineCross.maxCoeff();
 #ifdef _PRINT_FORMAT_
   // fmt::print("{}", minial);
   // fmt::print("step 2:\nsort rows {}, cols {}\n", vRows, vCols);
   step4:
   fmt::print("before:\n{}\n", mTempInf);
 #endif
-  mTempInf -= Eigen::MatrixXd::Ones(mTempInf.rows(), mTempInf.cols()) * minimal;
-  mTempInf = (mTempInf.array() == INFINITY).select(0, mTempInf);
+    mTempInf -= Eigen::MatrixXd::Ones(mTempInf.rows(), mTempInf.cols()) * minimal;
+    mTempInf = (mTempInf.array() == INFINITY).select(0, mTempInf);
 #ifdef _PRINT_FORMAT_
   fmt::print("after:\n{}\n", mTempInf);
 #endif
-  auto pluss = (mTempLineCross.array() == maximal).select(minimal, Eigen::MatrixXd::Zero(m2.rows(), m2.cols()));
+    auto pluss = (mTempLineCross.array() == maximal).select(minimal, Eigen::MatrixXd::Zero(result.rows(), result.cols()));
 #ifdef _PRINT_FORMAT_
   fmt::print("line:\n{}\n", mTempLine);
   std::cout<< pluss<<std::endl;
 #endif
-  Eigen::MatrixXd result = mTempInf + mTempLine + pluss;
-      result(1,2) = 0;
-    result(2, 3) = 1;
+    result = mTempInf + mTempLine + pluss;
 #ifdef _PRINT_FORMAT_
-  fmt::print("out:\n{}\n", result);
+  fmt::print("result:\n{}\n", result);
 #endif
+  } while (true);
   // get position of matched
   auto indexes = get_valid_indexes(result);
   auto itr = indexes.begin();

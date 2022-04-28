@@ -6,7 +6,7 @@
 #include "base/list.h"
 
 namespace {
-  struct CostNode: public GList<CostNode> {
+  struct CostNode: public GNode<CostNode> {
     CostNode(GVertex* replaced, GVertex* vertex, float cost, CostNode* next)
       : _replaced(replaced), _vertex(vertex), _cost(cost){ _next = next;}
     // vertex that will be replaced

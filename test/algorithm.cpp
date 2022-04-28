@@ -82,17 +82,37 @@ TEST_CASE("algorithm", "[hungarian]") {
   GSubGraph* wg2 = createGraph(working_directory + "bipartile_weight_2.dot");
   GBipartiteGraph bipart2 = graph_cast<GBipartiteGraph>(*wg2);
   auto m = bipart.toMatrix("weight");
-  auto m2 = bipart2.toMatrix("weight");
+  //auto m2 = bipart2.toMatrix("weight");
   // fmt::print("hungarian input matrix:\n{}\n", m2);
   double weight = 0;
   HungorianAlgorithm alg;
   alg.solve(m, weight);
   CHECK(weight == 140.0);
-  std::list<std::pair<size_t, size_t>> out;
-    alg.solve(m2, out);
-  // BENCHMARK("hungarian algorithm[4x4]") {
-  //   alg.solve(m, weight);
-  // };
+  //std::list<std::pair<size_t, size_t>> out;
+  //alg.solve(m2, out);
+  Eigen::MatrixXd m33(3, 3);
+  m33 << 8, 25, 50,
+        50, 35, 75,
+        22, 48, 150;
+  alg.solve(m33, weight);
+  CHECK(weight == 107.0);
+  Eigen::MatrixXd m88(8, 8);
+  m88 << 18, 45, 10, 23, 71, 34, 1, 39,
+    5, 135, 75, 81, 73, 49, 16, 98,
+    22, 48, 150, 12, 25, 62, 14, 61,
+    42, 53, 102, 15, 165, 68, 11, 3,
+    9, 48, 150, 9, 77, 62, 14, 61,
+    88, 48, 151, 72, 25, 62, 14, 61,
+    78, 33, 130, 10, 25, 62, 14, 61,
+    18, 67, 110, 12, 25, 62, 14, 61;
+  alg.solve(m88, weight);
+  CHECK(weight == 155.0);
+   BENCHMARK("hungarian algorithm[4x4]") {
+     alg.solve(m, weight);
+   };
+   BENCHMARK("hungarian algorithm[8x8]") {
+     alg.solve(m88, weight);
+   };
   releaseGraph(wg);
 }
 
