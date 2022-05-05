@@ -120,13 +120,13 @@ int HungorianAlgorithm::solve(const Eigen::MatrixXd& input, std::list<std::pair<
       size_t rValue = vRowCounts[vRows[ridx]];
       size_t cValue = vColCounts[vCols[cidx]];
       if (rValue > cValue) {
-        auto& rows = mTempInf.row(vRows[ridx]);
+        auto rows = mTempInf.row(vRows[ridx]);
         rows = (rows.array() == 0).select(INFINITY, rows);
         mTempLine.row(vRows[ridx]) = result.row(vRows[ridx]);
         mTempLineCross.row(vRows[ridx]) += Eigen::VectorXd::Ones(result.cols());
         ridx += 1;
       } else {
-        auto& cols = mTempInf.col(vCols[cidx]);
+        auto cols = mTempInf.col(vCols[cidx]);
         cols = (cols.array() == 0).select(INFINITY, cols);
         mTempLine.col(vCols[cidx]) = result.col(vCols[cidx]);
         mTempLineCross.col(vCols[cidx]) += Eigen::VectorXd::Ones(result.cols());

@@ -60,6 +60,10 @@ public:
     return _vertexes.end();
   }
 
+  size_t edge_size() const {
+    return _edges.size();
+  }
+
 protected:
   std::string _id;
   nlohmann::json _json;

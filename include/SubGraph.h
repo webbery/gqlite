@@ -52,10 +52,12 @@ public:
   typedef std::map<std::string, GVertex*>::const_iterator vertex_iterator;
   vertex_iterator vertex_begin() const { return _vertexes.begin();}
   vertex_iterator vertex_end()const { return _vertexes.end();}
+  size_t vertex_size() const { return _vertexes.size(); }
 
   typedef std::map<edge_id, GEdge*>::const_iterator edge_iterator;
   edge_iterator edge_begin() const { return _edges.begin(); }
   edge_iterator edge_end() const { return _edges.end(); }
+  size_t edge_size() const { return _edges.size(); }
 
 protected:
   uint32_t Ref(uint32_t cnt = 1) {
