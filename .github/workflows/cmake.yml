@@ -34,15 +34,7 @@ jobs:
         submodules: recursive
     - name: third_party
       run: |
-        cd ${{github.workspace}}/third_party/libmdbx
-        git fetch --unshallow --tags --prune --force
-        git branch
-        cd ${{github.workspace}}/third_party/fmt
-        git fetch --unshallow --tags --prune --force
-        git branch
-        cd ${{github.workspace}}/third_party/eigen
-        git fetch --unshallow --tags --prune --force
-        git branch
+        git submodule foreach 'git fetch origin; git checkout $(git describe --tags `git rev-list --tags --max-count=1`);'
     - name: update flex/bison
       if: matrix.os == 'macos-latest'
       run: |
