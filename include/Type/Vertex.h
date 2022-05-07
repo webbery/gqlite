@@ -64,6 +64,10 @@ public:
     return _edges.size();
   }
 
+  GVertex* operator[](size_t index) {
+    return _vertexes[index];
+  }
+  
 protected:
   std::string _id;
   nlohmann::json _json;

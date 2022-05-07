@@ -35,6 +35,7 @@ set(REGRESS_SOURCE
 	./regress.cpp)
 
 set(OLGRITHM_SOURCE ./algorithm.cpp
+	../src/Platform.cpp
 	../src/operand/MatchPattern.cpp
 	../src/operand/SimilarityOp.cpp
 	../src/operand/GraphType.cpp
@@ -44,6 +45,7 @@ set(OLGRITHM_SOURCE ./algorithm.cpp
 	../src/Type/Edge.cpp
 	../src/operand/distance/EditDistance.cpp
 	../src/operand/algorithms/Hungarian.cpp
+	../src/operand/algorithms/RandomWalk.cpp
 	../src/Graph/BipartiteGraph.cpp
 )
 add_executable(grammar ${TEST_GRAMMAR_SOURCE})

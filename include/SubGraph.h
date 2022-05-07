@@ -84,6 +84,8 @@ protected:
 protected:
   std::map<std::string, GVertex*> _vertexes;
   std::map<edge_id, GEdge*> _edges;
+  // for random walk by index
+  std::vector<GVertex*> _vertex_view;
 private:
   std::atomic_uint32_t _cnt;
 };

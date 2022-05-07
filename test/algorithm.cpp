@@ -2,11 +2,14 @@
 #include "SubGraph.h"
 #include <fstream>
 #include <fmt/printf.h>
-#include <chrono>
 #include <fmt/color.h>
+#include <fmt/ranges.h>
+#include <chrono>
 #include <catch.hpp>
 #include "operand/algorithms/Hungarian.h"
+#include "operand/algorithms/RandomWalk.h"
 #include "Graph/BipartiteGraph.h"
+#include "Platform.h"
 #include <regex>
 #include <iostream>
     
@@ -76,7 +79,7 @@ TEST_CASE("basic operation", "[member function]") {
   releaseGraph(bg);
 }
 
-TEST_CASE("algorithm", "[hungarian]") {
+TEST_CASE("hungarian algorithm") {
   GSubGraph* wg = createGraph(working_directory + "bipartile_weight.dot");
   GBipartiteGraph bipart = graph_cast<GBipartiteGraph>(*wg);
   GSubGraph* wg2 = createGraph(working_directory + "bipartile_weight_2.dot");
@@ -107,13 +110,28 @@ TEST_CASE("algorithm", "[hungarian]") {
     18, 67, 110, 12, 25, 62, 14, 61;
   alg.solve(m88, weight);
   CHECK(weight == 155.0);
-   BENCHMARK("hungarian algorithm[4x4]") {
-     alg.solve(m, weight);
-   };
-   BENCHMARK("hungarian algorithm[8x8]") {
-     alg.solve(m88, weight);
-   };
+  BENCHMARK("hungarian algorithm[4x4]") {
+    alg.solve(m, weight);
+  };
+  BENCHMARK("hungarian algorithm[8x8]") {
+    alg.solve(m88, weight);
+  };
   releaseGraph(wg);
+}
+
+/**
+ * https://people.math.osu.edu/husen.1/teaching/571/random_walks.pdf
+ */
+TEST_CASE("random walk algorithm") {
+  // enableStackTrace(true);
+  GSubGraph* basic = createGraph(working_directory + "random_walk.dot");
+  GRandomWalk rw(*basic);
+  std::list<std::string> vnames;
+  for (size_t cnt = 0; cnt < 5000; ++cnt) {
+    GVertex* v = rw.next();
+    vnames.push_back(v->id());
+  }
+  fmt::print("walk: {}\n", vnames);
 }
 
 TEST_CASE("distance", "[distance]") {
@@ -124,27 +142,3 @@ TEST_CASE("distance", "[distance]") {
   //   distance(g1, g2);
   // };
 }
-// int main()
-// {
-//   int ret = 0;
-//   GSubGraph* g1 = createGraph(working_directory + "simple_g.dot");
-//   GSubGraph* gs = createGraph(working_directory + "simple_g.dot");
-//   GSubGraph* g2 = createGraph(working_directory + "g4.dot");
-//   GSubGraph* g3 = createGraph(working_directory + "simple_g_2.dot");
-//   GSubGraph* g4 = createGraph(working_directory + "g4_2.dot");
-//   GSubGraph* g5 = createGraph(working_directory + "simple_g_3.dot");
-//   GSubGraph* bg = createGraph(working_directory + "bipartite.dot");
-//   auto m1 = bg->toMatrix();
-//   fmt::print("simple_g:\n{}\n", m1);
-//   ASSERT_EQ(*g1 == *gs, true);
-//   ASSERT_EQ(g1->isBipartite(), false);
-//   ASSERT_EQ(g4->isBipartite(), false);
-//   ASSERT_EQ(bg->isBipartite(), true);
-//   //ASSERT_EQ(distance(g1, g2) == 1, true);
-//   releaseGraph(g1);
-//   releaseGraph(g2);
-//   releaseGraph(g3);
-//   releaseGraph(g4);
-//   releaseGraph(g5);
-//   return ret;
-// }
