@@ -39,14 +39,15 @@ set(OLGRITHM_SOURCE ./algorithm.cpp
 	../src/operand/MatchPattern.cpp
 	../src/operand/SimilarityOp.cpp
 	../src/operand/GraphType.cpp
-	../src/operand/match/CTreeStrategy.cpp
 	../src/StorageEngine/SubGraph.cpp
 	../src/Type/Vertex.cpp
 	../src/Type/Edge.cpp
+	../src/Graph/BipartiteGraph.cpp
 	../src/operand/distance/EditDistance.cpp
 	../src/operand/algorithms/Hungarian.cpp
 	../src/operand/algorithms/RandomWalk.cpp
-	../src/Graph/BipartiteGraph.cpp
+	../src/operand/match/CTreeStrategy.cpp
+	../src/operand/analysis/DegreeCentrality.cpp
 )
 add_executable(grammar ${TEST_GRAMMAR_SOURCE})
 add_executable(storage ${STORAGE_SOURCE})

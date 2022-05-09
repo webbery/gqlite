@@ -1,4 +1,3 @@
-#include "operand/SimilarityOp.h"
 #include "SubGraph.h"
 #include <fstream>
 #include <fmt/printf.h>
@@ -6,12 +5,14 @@
 #include <fmt/ranges.h>
 #include <chrono>
 #include <catch.hpp>
+#include <regex>
+#include <iostream>
+#include "operand/SimilarityOp.h"
 #include "operand/algorithms/Hungarian.h"
 #include "operand/algorithms/RandomWalk.h"
 #include "Graph/BipartiteGraph.h"
 #include "Platform.h"
-#include <regex>
-#include <iostream>
+#include "operand/analysis/DegreeCentrality.h"
     
 std::string working_directory = _WORKING_DIR_ "/test/graphs/";
 
@@ -131,7 +132,16 @@ TEST_CASE("random walk algorithm") {
     GVertex* v = rw.next();
     vnames.push_back(v->id());
   }
-  fmt::print("walk: {}\n", vnames);
+  // fmt::print("walk: {}\n", vnames);
+}
+
+TEST_CASE("analysis algorithm") {
+  GSubGraph* g1 = createGraph(working_directory + "simple_g.dot");
+  GSubGraph* g2 = createGraph(working_directory + "g4.dot");
+  DegreeCentrality leftDC, rightDC;
+  leftDC.analysis(*g1);
+  rightDC.analysis(*g2);
+  auto m = leftDC - rightDC;
 }
 
 TEST_CASE("distance", "[distance]") {
