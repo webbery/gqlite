@@ -1,6 +1,7 @@
 #pragma once
 #include "base/Serializer.h"
 #include "base/Statement.h"
+#include "IGraph.h"
 #include "json.hpp"
 
 typedef std::string GLiteralVertex;
@@ -12,7 +13,7 @@ private:
 };
 
 class GEdge;
-class GVertex {
+class GVertex : public GGroupInterface<GVertex> {
 public:
   virtual ~GVertex() {}
 
@@ -40,6 +41,8 @@ public:
       _edges.insert(ptr, edge);
     }
   }
+
+  bool addChild(GVertex* pVertex);
 
   void eraseEdge(GEdge* edge);
 

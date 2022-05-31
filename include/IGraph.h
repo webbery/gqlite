@@ -40,5 +40,16 @@ protected:
   GraphProperty _property;
 };
 
+/**
+ * @brief an interface that has ability of containing children vertex
+ * 
+ */
+template<typename Child>
+class GGroupInterface {
+public:
+  typename typedef Child type;
+  bool addChild(Child* pGroup) const;
+};
+
 class GSubGraph;
 template <typename T> T graph_cast(const GSubGraph& g);

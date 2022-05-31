@@ -244,3 +244,6 @@ install extension geo_bound
 ```
 use graph 'xxx'
 ```
+
+## Papers  
+[向量索引算法HNSW和NSG的比较](https://zhuanlan.zhihu.com/p/105594786)

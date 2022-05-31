@@ -18,3 +18,8 @@ void GVertex::eraseEdge(GEdge* edge)
     }
   }
 }
+
+bool GVertex::addChild(GVertex* pVertex) {
+  return false;
+}
+
