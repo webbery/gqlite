@@ -47,7 +47,7 @@ protected:
 template<typename Child>
 class GGroupInterface {
 public:
-  typename typedef Child type;
+  typedef Child type;
   bool addChild(Child* pGroup) const;
 };
 
