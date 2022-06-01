@@ -33,6 +33,8 @@ public:
   virtual const char* what() const
 #ifdef __linux__
   _GLIBCXX_USE_NOEXCEPT
+#elif __APPLE__
+  _NOEXCEPT
 #endif
   { return _info.c_str();}
 
