@@ -17,11 +17,12 @@ int main() {
     }
     std::string key = std::to_string(idx + 1);
     //fmt::print("upset: 'vertex_db', vertex: [['{}', @filename: '{}.jpg', feature_name: {}$]\n", key, key, vec);
-     instance->add(std::to_string(idx + 1), vec);
+     instance->add(idx, vec);
   }
-  //std::vector< std::vector<float> > cond;
-  //instance->get({ "1" }, cond);
-  //std::vector<std::string> ids;
-  //instance->query(cond[0], 1, ids);
+  std::vector< std::vector<float> > cond;
+  instance->get({ 1 }, cond);
+  std::vector<size_t> ids;
+  instance->query(cond[0], 1, ids);
+  assert(ids.size() >= 1);
   delete instance;
 }

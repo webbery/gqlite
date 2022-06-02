@@ -17,10 +17,10 @@ public:
   static GHNSW* load(NSWDistance dis = Descart);
   static int save();
   static void release(GHNSW* hnsw);
-  int add(const std::string& sid, const std::vector<float>& vec);
-  int erase(const std::string& sid);
-  int query(const std::vector<float>& vec, size_t topK, std::vector<std::string>& ids);
-  int get(const std::vector<std::string>& ids, std::vector<std::vector<float> >& vecs);
+  int add(size_t sid, const std::vector<float>& vec);
+  int erase(size_t sid);
+  int query(const std::vector<float>& vec, size_t topK, std::vector<size_t>& ids);
+  int get(const std::vector<size_t>& ids, std::vector<std::vector<float> >& vecs);
 
 private:
   GHNSW(NSWDistance dis);
@@ -42,5 +42,6 @@ private:
   NSWDistance _distype;
   std::array<LayerVertex*, MAX_LAYER_SIZE> _layers;
   std::array<size_t, MAX_LAYER_SIZE> _sizes;
+  hnswlib::L2Space* _pSpace;
   hnswlib::HierarchicalNSW<float>* _instance;
 };
