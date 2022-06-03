@@ -160,7 +160,7 @@ std::vector<std::pair<VertexID, nlohmann::json>> GGraphInstance::getVertex(mdbx:
 }
 
 int GGraphInstance::queryVertex(std::set<VertexID>& ids, const GConditions& preds)
-{
+{/*
   const GConditions* cur = &preds;
   while (cur) {
     std::shared_ptr<GPredition> pred = cur->_preds;
@@ -182,7 +182,7 @@ int GGraphInstance::queryVertex(std::set<VertexID>& ids, const GConditions& pred
         cursor::move_result item = cursor.current();
         if (!item.done) break;
         switch (pred->_type) {
-        case NodeType::Number:
+        case PropertyKind::Number:
         {
           uint64_t value = *(uint64_t*)item.key.byte_ptr();
           uint64_t right = std::any_cast<uint64_t>(pred->_value);
@@ -192,7 +192,7 @@ int GGraphInstance::queryVertex(std::set<VertexID>& ids, const GConditions& pred
           }
         }
         break;
-        case NodeType::String:
+        case PropertyKind::String:
         {
           std::string left((char*)item.key.byte_ptr(), item.key.size());
           std::string right = std::any_cast<std::string>(pred->_value);
@@ -221,7 +221,7 @@ int GGraphInstance::queryVertex(std::set<VertexID>& ids, const GConditions& pred
       lastResult = out;
     }
     cur = cur->_next.get();
-  }
+  }*/
   return ECode_Success;
 }
 

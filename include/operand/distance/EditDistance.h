@@ -2,7 +2,6 @@
 #include <queue>
 #include "SubGraph.h"
 #include "operand/algorithms/Hungarian.h"
-#include "base/list.h"
 
 class GSubGraph;
 enum GraphMetric {
@@ -11,6 +10,11 @@ enum GraphMetric {
 };
 
 namespace {
+  template <typename T>
+  struct GNode {
+    GNode* _next;
+  };
+
   struct CostNode: public GNode<CostNode> {
     CostNode(GVertex* replaced, GVertex* vertex, float cost, CostNode* next)
       : _replaced(replaced), _vertex(vertex), _cost(cost){ _next = next;}

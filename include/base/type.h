@@ -4,17 +4,6 @@ typedef double REAL;
 
 enum NodeType {
   Removable,
-  // element type
-  Number,
-  Integer,
-  String,
-  Binary,
-  Vertex,
-  Edge,
-  From,
-  To,
-  ArrayExpression,
-  ObjectExpression,
   WalkExpression,
   Property,
   // graph managed type
@@ -25,15 +14,36 @@ enum NodeType {
   QueryStatement,
   DropStatement,
   ConditionStatement,
-  // function
-  Identifier,
-  Literal,
-  Variant,
   IfStatement,
   // prediction
   GreaterThan,
   GreaterThanEqual,
   Equal,
   LessThan,
-  LessThanEqual
+  LessThanEqual,
+  // Language
+  Program,
+  FunctionDeclaration,
+  VariableDeclaration,
+  VariableDeclarator,
+  Identifier,
+  Literal,
+  BlockStatement,
+  ReturnStatement,
+  BinaryExpression,
+  ArrayExpression,
+  ObjectExpression,
+  GQLExpression,
+  CallExpression,
+};
+
+enum PropertyKind {
+  Number,
+  Integer,
+  String,
+  Binary,
+  Vertex,
+  Edge,
+  From,
+  To,
 };

@@ -6,10 +6,10 @@
 /* 3. minimal usage for embedding device
 /************************************************************************/
 #ifdef WIN32
-#include "memory/memwin.h"
+#include "base/system/memory/memwin.h"
 #elif defined(__APPLE__)
-#include "memory/memmac.h"
+#include "base/system/memory/memmac.h"
 #else
-#include "memory/memlin.h"
+#include "base/system/memory/memlin.h"
 #endif
 

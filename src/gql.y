@@ -7,7 +7,7 @@
   typedef void* yyscan_t;
 }
 
-%code top{
+%code top {
 #include <stdio.h>
 #include <set>
 #include <fmt/format.h>
@@ -16,7 +16,16 @@
 #include "gql/query.h"
 #include "gql/upset.h"
 #include "Type/Binary.h"
-#include "base/ast.h"
+#include "base/lang/ASTNode.h"
+#include "base/lang/LiteralString.h"
+#include "base/lang/LiteralNumber.h"
+#include "base/lang/LiteralBinary.h"
+#include "base/lang/GQLExpression.h"
+#include "base/lang/CreateStmt.h"
+#include "base/lang/UpsetStmt.h"
+#include "base/lang/ArrayExpression.h"
+#include "base/lang/IndexStmt.h"
+#include "base/lang/Property.h"
 #include "base/VertexVisitor.h"
 #include "base/EdgeVisitor.h"
 
@@ -26,21 +35,14 @@
   if (!pGraph) {\
     break;\
   }
-#define INIT_ITEM(key, value, type) \
-  size_t len = strlen(key) + 1;\
-  void* s = malloc(len);\
-  memcpy(s, key, len);\
-  struct gast* k = newast(NodeType::String, s, nullptr, nullptr);\
-  struct gast* root = newast(type, nullptr, k, value)
-}
+} // top
 
 %lex-param {GVirtualEngine& stm}
 %parse-param {GVirtualEngine& stm}
 %union {
-  struct gast* __node;
+  struct GASTNode* __node;
   char var_name[MAX_VARIANT_SIZE];
   float __f;
-  gql_node* __list;
   char* __c;
   GGraphInstance* _g;
   size_t __offset;
@@ -65,26 +67,26 @@ void yyerror(YYLTYPE* yyllocp, yyscan_t unused, GVirtualEngine& stm, const char*
 
 void release_vertex_callback(gql::vertex*& v) {}
 
-struct gast* INIT_STRING_AST(const char* key) {
+struct GASTNode* INIT_STRING_AST(const char* key) {
   size_t len = strlen(key) + 1;
-  void* s = malloc(len);
-  memcpy(s, key, len);
+  // void* s = malloc(len);
+  // memcpy(s, key, len);
   // printf("|-> %s\n", key);
-  return newast(NodeType::String, s, nullptr, nullptr);
+  GLiteral* str = new GLiteralString(key, len);
+  return NewAst(NodeType::Literal, str, nullptr, 0);
 }
 
 template<typename T>
-struct gast* INIT_BASIC_TYPE_AST(T v, NodeType type) {
+struct GASTNode* INIT_NUMBER_AST(T& v) {
+  GLiteral* number = new GLiteralNumber(v);
+  return NewAst(NodeType::Literal, number, nullptr, 0);
+}
+
+template<typename T>
+struct GASTNode* INIT_BASIC_TYPE_AST(T v, NodeType type) {
   T* value = (T*)malloc(sizeof(T));
   *value = v;
-  return newast(type, value, nullptr, nullptr);
-}
-
-template<typename T>
-struct gast* INIT_LITERAL_AST(T& v, NodeType type) {
-  void* value = malloc(sizeof(T));
-  memcpy(value, &v, sizeof(T));
-  return newast(type, value, nullptr, nullptr);
+  return NewAst(type, value, nullptr, nullptr);
 }
 
 void init_result_info(gqlite_result& result, const std::vector<std::string>& info) {
@@ -131,7 +133,6 @@ nlohmann::json* get_or_create_json(nlohmann::json* item) {
 %token <__node> KW_EDGE
 %token <__node> KW_PATH
 
-%type <__list> vertex_list vertexes string_list strings property_list edges edge_list
 %type <_g> a_graph_expr
 %type <__node> json
 %type <__node> value
@@ -145,6 +146,7 @@ nlohmann::json* get_or_create_json(nlohmann::json* item) {
 %type <__node> vertex
 %type <__node> edge
 %type <__node> gql
+%type <__node> creation
 %type <__node> upset_vertexes
 %type <__node> upset_edges
 %type <__node> a_simple_query
@@ -156,6 +158,7 @@ nlohmann::json* get_or_create_json(nlohmann::json* item) {
 %type <__node> a_value
 %type <__node> drop_graph
 %type <__node> remove_vertexes
+%type <__node> vertex_list vertexes string_list strings property_list edges edge_list
 
 %start line_list
 
@@ -169,7 +172,12 @@ line_list: line
         | utility_cmd { stm._cmdtype = GQL_Util; }
         | {}
         ;
-    gql: creation  { stm._cmdtype = GQL_Creation; }
+    gql: creation
+          {
+            GGQLExpression* expr = new GGQLExpression();
+            $$ = NewAst(NodeType::GQLExpression, expr, $1, 1);
+            stm._cmdtype = GQL_Creation;
+          }
         | a_simple_query { $$ = $1; stm._cmdtype = GQL_Query; }
         | upset_vertexes { $$ = $1; stm._cmdtype = GQL_Upset;}
         | upset_edges { $$ = $1; stm._cmdtype = GQL_Upset; }
@@ -177,7 +185,6 @@ line_list: line
         | drop_graph { $$ = $1; stm._cmdtype = GQL_Drop; }
         | dump { stm._cmdtype = GQL_Util; }
         ;
-
 utility_cmd: CMD_SHOW KW_GRAPH
           {
             // std::vector<std::string> vg = stm._graph->getGraphs();
@@ -208,13 +215,15 @@ utility_cmd: CMD_SHOW KW_GRAPH
         | KW_DUMP gql
           {
             fmt::print("AST:\n");
-            dumpast($2);
+            DumpAst($2);
             stm._cmdtype = GQL_Util;
           }
         | profile gql {};
 creation: RANGE_BEGIN KW_CREATE COLON VAR_STRING RANGE_END
             {
               // stm._graph->openGraph($4);
+              GCreateStmt* createStmt = new GCreateStmt($4, nullptr);
+              $$ = NewAst(NodeType::CreationStatement, createStmt, nullptr, 0);
               stm._errorCode = ECode_Success;
             }
         | RANGE_BEGIN KW_CREATE COLON VAR_STRING COMMA KW_INDEX COLON string_list RANGE_END
@@ -223,11 +232,14 @@ creation: RANGE_BEGIN KW_CREATE COLON VAR_STRING RANGE_END
               // GGraph* g = stm._graph->getGraph($4);
               // gql_node* cur = $8;
               // do {
-              //   gast* s = (struct gast*)(cur->_value);
+              //   GASTNode* s = (struct GASTNode*)(cur->_value);
               //   std::string value = GET_STRING_VALUE(s);
               //   creation::createInvertIndex(stm._graph, g, value.c_str());
               //   cur = cur->_next;
               // } while(cur);
+
+              GCreateStmt* createStmt = new GCreateStmt($4, $8);
+              $$ = NewAst(NodeType::CreationStatement, createStmt, nullptr, 0);
               stm._errorCode = ECode_Success;
             }
         | RANGE_BEGIN KW_CREATE COLON VAR_STRING COMMA KW_INDEX COLON function_call RANGE_END {};
@@ -265,28 +277,31 @@ dump: RANGE_BEGIN KW_DUMP COLON VAR_STRING RANGE_END
             };
 upset_vertexes: RANGE_BEGIN KW_UPSET COLON VAR_STRING COMMA KW_VERTEX COLON vertex_list RANGE_END
               {
-                struct gast* g = INIT_STRING_AST($4);
-                $$ = newast(NodeType::UpsetStatement, $8, g, nullptr);
+                // struct GASTNode* g = INIT_STRING_AST($4);
+                // $$ = NewAst(NodeType::UpsetStatement, $8, g, nullptr);
                 // GET_GRAPH($4);
                 // gql_node* cur = $8;
                 // ASTVertexUpdateVisitor visitor;
                 // while(cur) {
-                //   gast* pv = (gast*)(cur->_value);
+                //   GASTNode* pv = (GASTNode*)(cur->_value);
                 //   traverse(pv, &visitor);
                 //   cur = cur->_next;
                 // }
                 // release_list($8, release_vertex_callback);
                 // stm._graph->finishUpdate(pGraph);
+
+                GUpsetStmt* upsetStmt = new GUpsetStmt($4);
+                $$ = NewAst(NodeType::UpsetStatement, upsetStmt, $8, 1);
               };
 remove_vertexes: RANGE_BEGIN KW_REMOVE COLON VAR_STRING COMMA KW_VERTEX COLON array RANGE_END
               {
-                struct gast* g = INIT_STRING_AST($4);
-                $$ = newast(NodeType::RemoveStatement, $8, g, nullptr);
+                struct GASTNode* g = INIT_STRING_AST($4);
+                // $$ = NewAst(NodeType::RemoveStatement, $8, g, nullptr);
                 // GET_GRAPH($4);
                 // gql_node* list = as_array($8);
                 // gql_node* current = list;
                 // while(current) {
-                //   gast* node = (struct gast*)current->_value;
+                //   GASTNode* node = (struct GASTNode*)current->_value;
                 //   // if (node->)
                 //   char* nodeid = (char*)node->_value;
                 //   stm._graph->dropNode(pGraph, nodeid);
@@ -296,21 +311,21 @@ remove_vertexes: RANGE_BEGIN KW_REMOVE COLON VAR_STRING COMMA KW_VERTEX COLON ar
               };
 upset_edges: RANGE_BEGIN KW_UPSET COLON VAR_STRING COMMA KW_EDGE COLON edge_list RANGE_END
               {
-                struct gast* g = INIT_STRING_AST($4);
-                $$ = newast(NodeType::UpsetStatement, $8, g, nullptr);
+                struct GASTNode* g = INIT_STRING_AST($4);
+                // $$ = NewAst(NodeType::UpsetStatement, $8, g, nullptr);
                 // GET_GRAPH($4);
                 // gql_node* cur = $8;
                 // ASTEdgeUpdateVisitor visitor;
                 // while(cur) {
-                //   gast* pv = (gast*)(cur->_value);
+                //   GASTNode* pv = (GASTNode*)(cur->_value);
                 //   traverse(pv, &visitor);
                 //   cur = cur->_next;
                 // }
               };
 drop_graph: RANGE_BEGIN KW_DROP COLON VAR_STRING RANGE_END
               {
-                struct gast* g = INIT_STRING_AST($4);
-                $$ = newast(NodeType::UpsetStatement, g, nullptr, nullptr);
+                struct GASTNode* g = INIT_STRING_AST($4);
+                // $$ = NewAst(NodeType::UpsetStatement, g, nullptr, nullptr);
                 // GET_GRAPH($4);
                 // stm._graph->dropGraph(pGraph);
               };
@@ -331,9 +346,9 @@ a_simple_query:
         | RANGE_BEGIN query_kind COMMA a_graph_expr COMMA where_expr RANGE_END
                 {
                   if (!$4) break;
-                  const GraphProperty& properties = $4->property();
-                  ASTVertexQueryVisitor visitor;
-                  traverse($6, &visitor);
+                  // const GraphProperty& properties = $4->property();
+                  // ASTVertexQueryVisitor visitor;
+                  // traverse($6, &visitor);
                   // std::set<VertexID> sIds;
                   // stm._errorCode = $4->queryVertex(sIds, visitor.conditions());
                   // if(!stm._errorCode && sIds.size() == 0) break;
@@ -344,12 +359,20 @@ a_simple_query:
                   // stm._result_callback(&results);
                   // query::release_vertexes(results);
                 };
-query_kind: OP_QUERY COLON query_kind_expr { $$ = $3; };
+query_kind: OP_QUERY COLON query_kind_expr { $$ = $3; }
+        |   OP_QUERY COLON match_expr {};
 query_kind_expr: 
           KW_VERTEX { $$ = INIT_STRING_AST("vertex"); }
         | KW_EDGE { $$ = INIT_STRING_AST("edge"); }
         | KW_PATH { $$ = INIT_STRING_AST("path");}
         | a_graph_properties { $$ = $1; };
+match_expr: //{->: 'alias'}
+          RANGE_BEGIN a_match RANGE_END {};
+a_match:  a_relation_match {}
+        | a_vertex_match COMMA a_relation_match COMMA a_vertex_match {};
+a_relation_match: KW_RIGHT_RELATION COLON VAR_STRING {}
+        | KW_LEFT_RELATION COLON VAR_STRING {};
+a_vertex_match: KW_VERTEX COLON VAR_STRING {};
 a_graph_expr:
           KW_IN COLON VAR_STRING
                 {
@@ -362,10 +385,8 @@ a_graph_expr:
 where_expr: OP_WHERE COLON json { $$ = $3; };
 string_list: VAR_STRING
               {
-                size_t len = strlen($1) + 1;
-                char* p = (char*)malloc(len);
-                memcpy(p, $1, len);
-                $$ = init_list(newast(NodeType::String, p, nullptr, nullptr));
+                struct GASTNode* node = INIT_STRING_AST($1);
+                $$ = NewAst(NodeType::ArrayExpression, node, nullptr, 0);
               }
         | LEFT_SQUARE strings RIGHT_SQUARE
               {
@@ -376,18 +397,13 @@ string_list: VAR_STRING
 //         | string_list { $$ = $1; };
 strings:  VAR_STRING
               {
-                size_t len = strlen($1) + 1;
-                char* p = (char*)malloc(len);
-                memcpy(p, $1, len);
-                $$ = init_list(newast(NodeType::String, p, nullptr, nullptr));
+                struct GASTNode* node = INIT_STRING_AST($1);
+                $$ = NewAst(NodeType::ArrayExpression, node, nullptr, 0);
               }
         | strings COMMA VAR_STRING
               {
-                size_t len = strlen($3) + 1;
-                char* p = (char*)malloc(len);
-                memcpy(p, $3, len);
-                gql_node* node = init_list(newast(NodeType::String, p, nullptr, nullptr));
-                $$ = list_join($1, node);
+                GASTNode* node = NewAst(NodeType::ArrayExpression, INIT_STRING_AST($3), nullptr, 0);
+                $$ = ListJoin($1, node);
               };
 a_graph_properties:
           graph_property {}
@@ -404,186 +420,171 @@ vertex_list: LEFT_SQUARE vertexes RIGHT_SQUARE
               {
                 $$ = $2;
               };
-vertexes: vertex { $$ = init_list($1); }
+vertexes: vertex
+              {
+                $$ = $1;
+              }
         | vertexes COMMA vertex
               {
-                gql_node* node = init_list($3);
-                $$ = list_join($1, node);
+                $$ = ListJoin($1, $3);
               };
 vertex: LEFT_SQUARE VAR_STRING RIGHT_SQUARE
               {
-                struct gast* id = INIT_STRING_AST("id");
-                struct gast* value = INIT_STRING_AST($2);
-                struct gast* left = newast(NodeType::Property, nullptr, id, value);
-                $$ = newast(NodeType::Vertex, nullptr, left, nullptr);
+                struct GASTNode* value = INIT_STRING_AST($2);
+                $$ = NewAst(NodeType::ArrayExpression, value, nullptr, 0);
               }
         | LEFT_SQUARE VAR_STRING COMMA json RIGHT_SQUARE
               {
-                struct gast* id = INIT_STRING_AST("id");
-                struct gast* value = INIT_STRING_AST($2);
-                struct gast* left = newast(NodeType::Property, nullptr, id, value);
-                $$ = newast(NodeType::Vertex, nullptr, left, $4);
+                struct GASTNode* value = INIT_STRING_AST($2);
+                $$ = NewAst(NodeType::ArrayExpression, value, $4, 1);
               };
 edge_list: LEFT_SQUARE edges RIGHT_SQUARE {$$ = $2;};
-edges: edge { $$ = init_list($1); }
+edges: edge { /*$$ = init_list($1);*/ }
         | edges COMMA edge
               {
-                gql_node* node = init_list($3);
-                $$ = list_join($1, node);
+                // gql_node* node = init_list($3);
+                // $$ = list_join($1, node);
               };
 edge: LEFT_SQUARE VAR_STRING COMMA KW_RIGHT_RELATION COMMA VAR_STRING RIGHT_SQUARE
               {
-                struct gast* id = INIT_STRING_AST("id");
-                struct gast* from_value = INIT_STRING_AST($2);
-                struct gast* from = newast(NodeType::Property, nullptr, id, from_value);
-                struct gast* to_value = INIT_STRING_AST($6);
-                struct gast* to = newast(NodeType::Property, nullptr, id, to_value);
-                struct gast* link = INIT_STRING_AST("->");
-                $$ = newast(NodeType::Edge, link, from, to);
+                struct GASTNode* id = INIT_STRING_AST("id");
+                struct GASTNode* from_value = INIT_STRING_AST($2);
+                // struct GASTNode* from = NewAst(NodeType::Property, nullptr, id, from_value);
+                struct GASTNode* to_value = INIT_STRING_AST($6);
+                // struct GASTNode* to = NewAst(NodeType::Property, nullptr, id, to_value);
+                struct GASTNode* link = INIT_STRING_AST("->");
+                // $$ = NewAst(NodeType::Edge, link, from, to);
               }
         | LEFT_SQUARE VAR_STRING COMMA KW_LEFT_RELATION COMMA VAR_STRING RIGHT_SQUARE
               {
-                struct gast* id = INIT_STRING_AST("id");
-                struct gast* from_value = INIT_STRING_AST($6);
-                struct gast* from = newast(NodeType::Property, nullptr, id, from_value);
-                struct gast* to_value = INIT_STRING_AST($2);
-                struct gast* to = newast(NodeType::Property, nullptr, id, to_value);
-                struct gast* link = INIT_STRING_AST("<-");
-                $$ = newast(NodeType::Edge, link, from, to);
+                struct GASTNode* id = INIT_STRING_AST("id");
+                struct GASTNode* from_value = INIT_STRING_AST($6);
+                // struct GASTNode* from = NewAst(NodeType::Property, nullptr, id, from_value);
+                struct GASTNode* to_value = INIT_STRING_AST($2);
+                // struct GASTNode* to = NewAst(NodeType::Property, nullptr, id, to_value);
+                struct GASTNode* link = INIT_STRING_AST("<-");
+                // $$ = NewAst(NodeType::Edge, link, from, to);
               }
         | LEFT_SQUARE VAR_STRING COMMA KW_BIDIRECT_RELATION COMMA VAR_STRING RIGHT_SQUARE
               {
-                struct gast* id = INIT_STRING_AST("id");
-                struct gast* from_value = INIT_STRING_AST($2);
-                struct gast* from = newast(NodeType::Property, nullptr, id, from_value);
-                struct gast* to_value = INIT_STRING_AST($6);
-                struct gast* to = newast(NodeType::Property, nullptr, id, to_value);
-                struct gast* link = INIT_STRING_AST("--");
-                $$ = newast(NodeType::Edge, link, from, to);
+                struct GASTNode* id = INIT_STRING_AST("id");
+                struct GASTNode* from_value = INIT_STRING_AST($2);
+                // struct GASTNode* from = NewAst(NodeType::Property, nullptr, id, from_value);
+                struct GASTNode* to_value = INIT_STRING_AST($6);
+                // struct GASTNode* to = NewAst(NodeType::Property, nullptr, id, to_value);
+                struct GASTNode* link = INIT_STRING_AST("--");
+                // $$ = NewAst(NodeType::Edge, link, from, to);
               }
         | LEFT_SQUARE VAR_STRING RIGHT_SQUARE
               {
-                struct gast* id = INIT_STRING_AST("id");
-                struct gast* from_value = INIT_STRING_AST($2);
-                struct gast* from = newast(NodeType::Property, nullptr, id, from_value);
-                struct gast* to_value = INIT_STRING_AST($2);
-                struct gast* to = newast(NodeType::Property, nullptr, id, to_value);
-                struct gast* link = INIT_STRING_AST("--");
-                $$ = newast(NodeType::Edge, link, from, to);
+                struct GASTNode* id = INIT_STRING_AST("id");
+                struct GASTNode* from_value = INIT_STRING_AST($2);
+                // struct GASTNode* from = NewAst(NodeType::Property, nullptr, id, from_value);
+                struct GASTNode* to_value = INIT_STRING_AST($2);
+                // struct GASTNode* to = NewAst(NodeType::Property, nullptr, id, to_value);
+                struct GASTNode* link = INIT_STRING_AST("--");
+                // $$ = NewAst(NodeType::Edge, link, from, to);
               };
 json: value { $$ = $1; };
 value: object { $$ = $1; }
         | VAR_DECIMAL
               {
-                double* val = (double*)malloc(sizeof(double));
-                *val = $1;
-                $$ = newast(NodeType::Number, val, nullptr, nullptr);
+                $$ = INIT_NUMBER_AST($1);
               }
         | VAR_INTEGER
               {
-                double* val = (double*)malloc(sizeof(double));
-                *val = $1;
-                $$ = newast(NodeType::Number, val, nullptr, nullptr);
+                $$ = INIT_NUMBER_AST($1);
               }
         | array { $$ = $1; }
         | VAR_BASE64
               {
-                std::vector<uint8_t> bin = gql::base64_decode($1);
-                free($1);
-                uint8_t* p = (uint8_t*)malloc(sizeof(uint8_t)*bin.size() + sizeof(size_t));
-                size_t* size = (size_t*)p;
-                *size = bin.size();
-                memcpy(p + sizeof(size_t), bin.data(), bin.size());
-                $$ = newast(NodeType::Binary, p, nullptr, nullptr);
+                GLiteralBinary* bin = new GLiteralBinary($1, "b64");
+                $$ = NewAst(NodeType::Literal, bin, nullptr, 0);
               }
         | VAR_DATETIME {}
         | VAR_STRING { $$ = INIT_STRING_AST($1); };
 object: RANGE_BEGIN properties RANGE_END
             {
-              $$ = newast(NodeType::ObjectExpression, $2, nullptr, nullptr);
+              $$ = NewAst(NodeType::ObjectExpression, $2, nullptr, 0);
             };
 properties: property {
-              gql_node* list = init_list($1);
-              $$ = newast(NodeType::ArrayExpression, list, nullptr, nullptr);
+              $$ = NewAst(NodeType::ArrayExpression, $1, nullptr, 0);
             }
         | properties COMMA property
               {
-                gql_node* list = init_list($3);
-                gql_node* head = list_join((gql_node*)($1->_value), list);
-                $1->_value = head;
-                $$ = $1;
+                $$ = ListJoin($1, $3);
               };
 property: VAR_STRING COLON value
               {
-                INIT_ITEM($1, $3, NodeType::Property);
-                $$ = root;
+                GProperty* prop = new GProperty($1, $3);
+                $$ = NewAst(NodeType::Property, prop, nullptr, 0);
               }
         | KW_ID COLON VAR_STRING
               {
-                struct gast* key = INIT_STRING_AST("id");
-                struct gast* value = INIT_STRING_AST($3);
-                $$ = newast(NodeType::Property, nullptr, key, value);
+                struct GASTNode* value = INIT_STRING_AST($3);
+                GProperty* prop = new GProperty("id", value);
+                $$ = NewAst(NodeType::Property, prop, nullptr, 0);
               }
         | OP_GREAT_THAN_EQUAL COLON VAR_INTEGER
               {
-                struct gast* key = INIT_STRING_AST("gte");
-                struct gast* value = INIT_LITERAL_AST($3, NodeType::Integer);
-                $$ = newast(NodeType::Property, nullptr, key, value);
+                struct GASTNode* value = INIT_NUMBER_AST($3);
+                GProperty* prop = new GProperty("gte", value);
+                $$ = NewAst(NodeType::Property, prop, nullptr, 0);
               }
         | OP_LESS_THAN_EQUAL COLON VAR_INTEGER
               {
-                struct gast* key = INIT_STRING_AST("lte");
-                struct gast* value = INIT_LITERAL_AST($3, NodeType::Integer);
-                $$ = newast(NodeType::Property, nullptr, key, value);
+                struct GASTNode* value = INIT_NUMBER_AST($3);
+                GProperty* prop = new GProperty("lte", value);
+                $$ = NewAst(NodeType::Property, prop, nullptr, 0);
               }
         | OP_GREAT_THAN COLON VAR_INTEGER
               {
-                struct gast* key = INIT_STRING_AST("gt");
-                struct gast* value = INIT_LITERAL_AST($3, NodeType::Integer);
-                $$ = newast(NodeType::Property, nullptr, key, value);
+                struct GASTNode* value = INIT_NUMBER_AST($3);
+                GProperty* prop = new GProperty("gt", value);
+                $$ = NewAst(NodeType::Property, prop, nullptr, 0);
               }
         | OP_LESS_THAN COLON VAR_INTEGER
               {
-                struct gast* key = INIT_STRING_AST("lt");
-                struct gast* value = INIT_LITERAL_AST($3, NodeType::Integer);
-                $$ = newast(NodeType::Property, nullptr, key, value);
+                struct GASTNode* value = INIT_NUMBER_AST($3);
+                GProperty* prop = new GProperty("lt", value);
+                $$ = NewAst(NodeType::Property, prop, nullptr, 0);
               }
         | OP_AND COLON array
               {
-                struct gast* key = INIT_STRING_AST("and");
-                struct gast* value = INIT_LITERAL_AST($3, NodeType::ArrayExpression);
-                $$ = newast(NodeType::Property, nullptr, key, value);
+                struct GASTNode* key = INIT_STRING_AST("and");
+                // struct GASTNode* value = INIT_NUMBER_AST($3, NodeType::ArrayExpression);
+                // $$ = NewAst(NodeType::Property, nullptr, key, value);
               }
         | OP_OR COLON array
               {
-                struct gast* key = INIT_STRING_AST("or");
-                struct gast* value = INIT_LITERAL_AST($3, NodeType::ArrayExpression);
-                $$ = newast(NodeType::Property, nullptr, key, value);
+                struct GASTNode* key = INIT_STRING_AST("or");
+                // struct GASTNode* value = INIT_NUMBER_AST($3, NodeType::ArrayExpression);
+                // $$ = NewAst(NodeType::Property, nullptr, key, value);
               }
         | a_link_condition {}
         // | KW_RIGHT_RELATION COLON VAR_INTEGER
         //       {
-        //         struct gast* key = INIT_STRING_AST("rac"); // right array count
-        //         struct gast* value = INIT_LITERAL_AST($3, NodeType::Integer);
-        //         $$ = newast(NodeType::Property, nullptr, key, value);
+        //         struct GASTNode* key = INIT_STRING_AST("rac"); // right array count
+        //         struct GASTNode* value = INIT_LITERAL_AST($3, NodeType::Integer);
+        //         $$ = NewAst(NodeType::Property, nullptr, key, value);
         //       }
         // | KW_LEFT_RELATION COLON VAR_INTEGER
         //       {
-        //         struct gast* key = INIT_STRING_AST("lac");  // left arraw count
-        //         struct gast* value = INIT_LITERAL_AST($3, NodeType::Integer);
-        //         $$ = newast(NodeType::Property, nullptr, key, value);
+        //         struct GASTNode* key = INIT_STRING_AST("lac");  // left arraw count
+        //         struct GASTNode* value = INIT_LITERAL_AST($3, NodeType::Integer);
+        //         $$ = NewAst(NodeType::Property, nullptr, key, value);
         //       }
         // | KW_BIDIRECT_RELATION COLON VAR_INTEGER
         //       {
-        //         struct gast* key = INIT_STRING_AST("ac"); // arraw count
-        //         struct gast* value = INIT_LITERAL_AST($3, NodeType::Integer);
-        //         $$ = newast(NodeType::Property, nullptr, key, value);
+        //         struct GASTNode* key = INIT_STRING_AST("ac"); // arraw count
+        //         struct GASTNode* value = INIT_LITERAL_AST($3, NodeType::Integer);
+        //         $$ = NewAst(NodeType::Property, nullptr, key, value);
         //       }
         // | OP_TO COLON VAR_STRING
         //       {
-        //         struct gast* key = INIT_STRING_AST("->");
-        //         struct gast* value = INIT_LITERAL_AST($3, NodeType::String);
-        //         $$ = newast(NodeType::Property, nullptr, key, value);
+        //         struct GASTNode* key = INIT_STRING_AST("->");
+        //         struct GASTNode* value = INIT_LITERAL_AST($3, NodeType::String);
+        //         $$ = NewAst(NodeType::Property, nullptr, key, value);
         //       }
         | ;
 array:    LEFT_SQUARE RIGHT_SQUARE { $$ = nullptr; }
@@ -592,15 +593,12 @@ array:    LEFT_SQUARE RIGHT_SQUARE { $$ = nullptr; }
                 $$ = $2;
               };
 values: value {
-                gql_node* list = init_list($1);
-                $$ = newast(NodeType::ArrayExpression, list, nullptr, nullptr);
+                $$ = NewAst(NodeType::ArrayExpression, $1, nullptr, 0);
               }
         | values COMMA value
               {
-                gql_node* list = init_list($3);
-                gql_node* head = list_join((gql_node*)($1->_value), list);
-                $1->_value = head;
-                $$ = $1;
+                GASTNode* node = NewAst(NodeType::ArrayExpression, $3, nullptr, 0);
+                $$ = ListJoin($1, node);
               }
         | values COMMA KW_REST {};
 a_link_condition: 
@@ -614,7 +612,7 @@ a_edge:
         | KW_BIDIRECT_RELATION { $$ = INIT_STRING_AST("--"); };
 a_value:
         | VAR_STRING { $$ = INIT_STRING_AST($1); }
-        | VAR_INTEGER { $$ = INIT_BASIC_TYPE_AST($1, NodeType::Integer); };
+        | VAR_INTEGER { $$ = INIT_NUMBER_AST($1); };
 function_call:
         | VAR_STRING function_params {};
 function_params:

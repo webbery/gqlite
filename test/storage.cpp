@@ -3,7 +3,6 @@
 #include <cassert>
 #include "Feature/Gist.h"
 #include "Type/Vertex.h"
-#include "base/ast.h"
 #include "base/VertexVisitor.h"
 
 #define GRAPH_NAME  "g1"
@@ -44,11 +43,11 @@ int main() {
   assert(engine.openGraph(GRAPH_NAME) == 0);
   auto* pGraph = engine.getGraph(GRAPH_NAME);
   assert(pGraph != nullptr);
-  gast* root = loadast("storage.ast");
-  if (root) {
-    ASTVertexUpdateVisitor visitor;
-    traverse(root, &visitor);
-  }
+  //gast* root = loadast("storage.ast");
+  //if (root) {
+  //  ASTVertexUpdateVisitor visitor;
+  //  traverse(root, &visitor);
+  //}
   
   engine.makeDirection(pGraph, "id1", "father", "mother", "wife");
   engine.dropNode(pGraph, "mother");

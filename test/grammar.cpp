@@ -56,6 +56,7 @@ void wrong_grammar_test(gqlite* pHandle, char* ptr) {
 }
 
 void successful_test(gqlite* pHandle, char* ptr) {
+  TEST_GRAMMAR("dump {create: 'ga'}");
   TEST_GRAMMAR("// {drop: 'ga'}");
   TEST_COMMAND("show graph");
   TEST_GRAMMAR("{drop: 'ga'}");

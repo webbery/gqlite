@@ -15,15 +15,15 @@ GVertexProptertyFeature::~GVertexProptertyFeature()
   }
 }
 
-int GVertexProptertyFeature::get_cursor(mdbx::txn_managed& txn, const std::any& pos, NodeType nt, mdbx::cursor_managed& cursor)
+int GVertexProptertyFeature::get_cursor(mdbx::txn_managed& txn, const std::any& pos, PropertyKind nt, mdbx::cursor_managed& cursor)
 {
   switch (nt)
   {
-  case NodeType::Number:
+  case PropertyKind::Number:
     // index must be integer not double
     anchor_cursor(txn, std::any_cast<uint64_t>(pos), cursor);
     return ECode_Success;
-  case NodeType::String:
+  case PropertyKind::String:
     break;
   default:
     break;
@@ -58,7 +58,7 @@ int GIDFeature::apply(mdbx::txn_managed& txn, const std::string& id, const std::
   return ECode_Success;
 }
 
-int GIDFeature::get_cursor(mdbx::txn_managed& txn, const std::any& pos, NodeType nt, mdbx::cursor_managed& cursor)
+int GIDFeature::get_cursor(mdbx::txn_managed& txn, const std::any& pos, PropertyKind nt, mdbx::cursor_managed& cursor)
 {
   std::string s = std::any_cast<std::string>(pos);
   std::addressof(s);

@@ -17,7 +17,6 @@ set(STORAGE_SOURCE
 	../src/Feature/Gist.cpp
 	../src/Feature/Feature.cpp
 	../src/base/VertexVisitor.cc
-	../src/base/ast.cc
 	../src/Type/QueryCondition.cpp
 	)
 set(PARSER_SOURCE
@@ -35,7 +34,7 @@ set(REGRESS_SOURCE
 	./regress.cpp)
 
 set(OLGRITHM_SOURCE ./algorithm.cpp
-	../src/Platform.cpp
+	../src/base/system/Platform.cpp
 	../src/operand/MatchPattern.cpp
 	../src/operand/SimilarityOp.cpp
 	../src/operand/GraphType.cpp
@@ -54,6 +53,8 @@ set(QUERY_SOURCE ./query.cpp
 	../src/operand/query/HNSW.cpp
 	../src/operand/query/HNSW/space_l2.cpp
 	../src/operand/query/HNSW/space_ip.cpp
+	../src/gutil.cpp
+	../src/base/system/Platform.cpp
 )
 
 add_executable(grammar ${TEST_GRAMMAR_SOURCE})

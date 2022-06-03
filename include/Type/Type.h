@@ -10,6 +10,7 @@ typedef std::string VertexID;
 #endif
 #include <any>
 #include <vector>
+#include <memory>
 #include "base/type.h"
 
 struct GPredition {

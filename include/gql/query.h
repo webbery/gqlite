@@ -4,8 +4,6 @@
 #include "gqlite.h"
 #include "Graph.h"
 #include "Memory.h"
-#include "base/ast.h"
-#include "base/list.h"
 #include "StorageEngine.h"
 
 namespace query

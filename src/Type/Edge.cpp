@@ -1,6 +1,5 @@
 #include "Type/Edge.h"
 #include "gqlite.h"
-#include "base/ast.h"
 
 namespace {
   std::string mix(const std::string& left, const std::string& right) {

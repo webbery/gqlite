@@ -11,7 +11,7 @@
 #include "operand/algorithms/Hungarian.h"
 #include "operand/algorithms/RandomWalk.h"
 #include "Graph/BipartiteGraph.h"
-#include "Platform.h"
+#include "base/system/Platform.h"
 #include "operand/analysis/DegreeCentrality.h"
     
 std::string working_directory = _WORKING_DIR_ "/test/graphs/";

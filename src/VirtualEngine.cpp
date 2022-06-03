@@ -23,6 +23,6 @@ GVirtualEngine::~GVirtualEngine() {
   }
 }
 
-int GVirtualEngine::execAST(gast* ast) {
+int GVirtualEngine::execAST(GASTNode* ast) {
   return ECode_Success;
 }

@@ -1,6 +1,6 @@
 #include "GQliteImpl.h"
 #include "ParserEngine.h"
-#include "Platform.h"
+#include "base/system/Platform.h"
 #include "VirtualEngine.h"
 #include "Error.h"
 #include "Memory.h"
@@ -16,7 +16,6 @@
 
 union YYSTYPE;
 struct YYLTYPE;
-#include "base/list.h"
 int yylex(YYSTYPE* yylval_param, YYLTYPE* yylloc_param, void* yyscanner, GVirtualEngine& stm);
 #include "./gql.cpp"
 #include "./token.cpp"

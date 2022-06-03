@@ -17,6 +17,7 @@
 #define ECode_GQL_Grammar_Error     7
 #define ECode_GQL_Index_Not_Exist   8
 #define ECode_GQL_Path_Not_Exist    9
+#define ECode_Index_File_Not_Exist  10
 #define ECode_GQL_Vertex_Not_Exist  50
 #define ECode_GQL_Vertex_Exist      51
 #define ECode_GQL_Edge_Exist        100

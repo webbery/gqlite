@@ -54,7 +54,9 @@ aux_source_directory(src/StorageEngine StorageEngine_SOURCES)
 aux_source_directory(src/Type Type_SOURCES)
 aux_source_directory(src/Feature Feature_SOURCES)
 aux_source_directory(src/gql GQL_SOURCES)
-aux_source_directory(src/memory Memory_SOURCES)
+aux_source_directory(src/base/system System_SOURCES)
+aux_source_directory(src/base/system/memory Memory_SOURCES)
+aux_source_directory(src/base/lang Language_SOURCES)
 aux_source_directory(src/base Struct_SOURCES)
 aux_source_directory(src/operand Operand_SOURCES)
 aux_source_directory(src/operand/match Match_SOURCES)
@@ -76,9 +78,9 @@ message("USE COMPILER: " ${CMAKE_CXX_COMPILER_ID})
 add_definitions(-DYY_NO_UNISTD_H)
 add_library(gqlite
 	${BASE_SOURCES} ${ParserEngine_SOURCES} ${StorageEngine_SOURCES} ${Struct_SOURCES}
-	${Type_SOURCES} ${Memory_SOURCES} ${Feature_SOURCES} ${GQL_SOURCES} ${Operand_SOURCES}
+	${Type_SOURCES} ${System_SOURCES} ${Feature_SOURCES} ${GQL_SOURCES} ${Operand_SOURCES}
 	${Match_SOURCES} ${Distance_SOURCES} ${Graph_SOURCES} ${Path_SOURCES} ${Analysis_SOURCES}
-	${Query_SOURCES} ${HNSW_SOURCES})
+	${Query_SOURCES} ${HNSW_SOURCES} ${Language_SOURCES} ${Memory_SOURCES})
 target_link_libraries(gqlite mdbx-static fmt::fmt)
 
 add_dependencies(gqlite generated_tokens generated_grammar)

@@ -1,9 +1,7 @@
 #pragma once
-#include "base/Clause.h"
-#include "base/list.h"
 #include "Type/Type.h"
 
-class GQueryConditionClause: public GClause {
+class GQueryConditionClause {
 public:
   virtual int Parse(struct gast* ast);
 

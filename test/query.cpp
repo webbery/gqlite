@@ -7,7 +7,7 @@ const int dim = 128;
 const int num_elements = 20;
 
 int main() {
-  GHNSW* instance = GHNSW::load();
+  GHNSWManager* instance = new GHNSWManager("default");
   std::default_random_engine random;
   std::uniform_real_distribution<float> dis;
   for (int idx = 0; idx < num_elements; ++idx) {
@@ -24,5 +24,6 @@ int main() {
   std::vector<size_t> ids;
   instance->query(cond[0], 1, ids);
   assert(ids.size() >= 1);
+  instance->save("query.indx");
   delete instance;
 }

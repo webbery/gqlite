@@ -19,6 +19,7 @@ enum GQL_Command_Type {
 };
 
 class GStorageEngine;
+struct GASTNode;
 class GVirtualEngine {
 public:
   static uint32_t GenerateIndex();
@@ -31,7 +32,7 @@ public:
 
   void* alloc(size_t size);
 
-  int execAST(gast* ast);
+  int execAST(GASTNode* ast);
 
   gqlite_callback _result_callback;
   std::string _gql;

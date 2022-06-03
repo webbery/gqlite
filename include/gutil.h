@@ -1,4 +1,6 @@
 #pragma once
+#include <vector>
+#include <string>
 
 #if defined(_MSC_VER)
 
@@ -18,3 +20,5 @@
 #define DISABLE_WARNING_PUSH
 #define DISABLE_WARNING_POP
 #endif
+
+std::vector<std::string> split(const char* str, const char* delim);

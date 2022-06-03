@@ -55,7 +55,7 @@ public:
   
   virtual ~GVertexProptertyFeature();
 
-  virtual int get_cursor(mdbx::txn_managed& txn, const std::any& pos, NodeType nt, mdbx::cursor_managed& cursor);
+  virtual int get_cursor(mdbx::txn_managed& txn, const std::any& pos, PropertyKind nt, mdbx::cursor_managed& cursor);
 
   std::string indexName() {return _property;}
   std::string name() {return _idname;}
@@ -83,7 +83,7 @@ class GIDFeature : public GVertexProptertyFeature {
 public:
   GIDFeature(mdbx::map_handle vertex);
   virtual int apply(mdbx::txn_managed& txn, const std::string& id, const std::string& key, const nlohmann::json& value);
-  virtual int get_cursor(mdbx::txn_managed& txn, const std::any& pos, NodeType nt, mdbx::cursor_managed& cursor);
+  virtual int get_cursor(mdbx::txn_managed& txn, const std::any& pos, PropertyKind nt, mdbx::cursor_managed& cursor);
 };
 
 /**
