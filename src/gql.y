@@ -16,16 +16,7 @@
 #include "gql/query.h"
 #include "gql/upset.h"
 #include "Type/Binary.h"
-#include "base/lang/ASTNode.h"
-#include "base/lang/LiteralString.h"
-#include "base/lang/LiteralNumber.h"
-#include "base/lang/LiteralBinary.h"
-#include "base/lang/GQLExpression.h"
-#include "base/lang/CreateStmt.h"
-#include "base/lang/UpsetStmt.h"
-#include "base/lang/ArrayExpression.h"
-#include "base/lang/IndexStmt.h"
-#include "base/lang/Property.h"
+#include "base/lang/lang.h"
 #include "base/VertexVisitor.h"
 #include "base/EdgeVisitor.h"
 
@@ -44,7 +35,6 @@
   char var_name[MAX_VARIANT_SIZE];
   float __f;
   char* __c;
-  GGraphInstance* _g;
   size_t __offset;
   time_t __datetime;
   int32_t __int;
@@ -82,13 +72,6 @@ struct GASTNode* INIT_NUMBER_AST(T& v) {
   return NewAst(NodeType::Literal, number, nullptr, 0);
 }
 
-template<typename T>
-struct GASTNode* INIT_BASIC_TYPE_AST(T v, NodeType type) {
-  T* value = (T*)malloc(sizeof(T));
-  *value = v;
-  return NewAst(type, value, nullptr, nullptr);
-}
-
 void init_result_info(gqlite_result& result, const std::vector<std::string>& info) {
   result.count = info.size();
   result.infos = (char**)malloc(result.count * sizeof(char*));
@@ -121,7 +104,7 @@ nlohmann::json* get_or_create_json(nlohmann::json* item) {
 %token <__c> VAR_BASE64
 %token <__int> VAR_INTEGER
 %token <__int> VAR_DATETIME
-%token KW_DUMP KW_ID KW_GRAPH KW_COMMIT
+%token KW_AST KW_ID KW_GRAPH KW_COMMIT
 %token KW_CREATE KW_DROP KW_IN KW_REMOVE KW_UPSET KW_LEFT_RELATION KW_RIGHT_RELATION KW_BIDIRECT_RELATION KW_REST KW_DELETE
 %token OP_QUERY KW_INDEX KW_GROUP OP_WHERE
 %token CMD_SHOW 
@@ -133,7 +116,7 @@ nlohmann::json* get_or_create_json(nlohmann::json* item) {
 %token <__node> KW_EDGE
 %token <__node> KW_PATH
 
-%type <_g> a_graph_expr
+%type <__node> a_graph_expr
 %type <__node> json
 %type <__node> value
 %type <__node> values
@@ -179,10 +162,25 @@ line_list: line
             stm._cmdtype = GQL_Creation;
           }
         | a_simple_query { $$ = $1; stm._cmdtype = GQL_Query; }
-        | upset_vertexes { $$ = $1; stm._cmdtype = GQL_Upset;}
-        | upset_edges { $$ = $1; stm._cmdtype = GQL_Upset; }
+        | upset_vertexes
+          {
+            GGQLExpression* expr = new GGQLExpression();
+            $$ = NewAst(NodeType::GQLExpression, expr, $1, 1);
+            stm._cmdtype = GQL_Upset;
+          }
+        | upset_edges
+          {
+            GGQLExpression* expr = new GGQLExpression();
+            $$ = NewAst(NodeType::GQLExpression, expr, $1, 1);
+            stm._cmdtype = GQL_Upset;
+          }
         | remove_vertexes { $$ = $1; stm._cmdtype = GQL_Remove; }
-        | drop_graph { $$ = $1; stm._cmdtype = GQL_Drop; }
+        | drop_graph
+          {
+            GGQLExpression* expr = new GGQLExpression();
+            $$ = NewAst(NodeType::GQLExpression, expr, $1, 1);
+            stm._cmdtype = GQL_Drop;
+          }
         | dump { stm._cmdtype = GQL_Util; }
         ;
 utility_cmd: CMD_SHOW KW_GRAPH
@@ -212,7 +210,7 @@ utility_cmd: CMD_SHOW KW_GRAPH
             // release_result_info(results);
             stm._errorCode = ECode_Success;
           }
-        | KW_DUMP gql
+        | KW_AST gql
           {
             fmt::print("AST:\n");
             DumpAst($2);
@@ -243,7 +241,7 @@ creation: RANGE_BEGIN KW_CREATE COLON VAR_STRING RANGE_END
               stm._errorCode = ECode_Success;
             }
         | RANGE_BEGIN KW_CREATE COLON VAR_STRING COMMA KW_INDEX COLON function_call RANGE_END {};
-dump: RANGE_BEGIN KW_DUMP COLON VAR_STRING RANGE_END
+dump: RANGE_BEGIN KW_AST COLON VAR_STRING RANGE_END
             {
               // if (strlen($4) == 0) {
               //   break;
@@ -311,7 +309,7 @@ remove_vertexes: RANGE_BEGIN KW_REMOVE COLON VAR_STRING COMMA KW_VERTEX COLON ar
               };
 upset_edges: RANGE_BEGIN KW_UPSET COLON VAR_STRING COMMA KW_EDGE COLON edge_list RANGE_END
               {
-                struct GASTNode* g = INIT_STRING_AST($4);
+                // struct GASTNode* g = INIT_STRING_AST($4);
                 // $$ = NewAst(NodeType::UpsetStatement, $8, g, nullptr);
                 // GET_GRAPH($4);
                 // gql_node* cur = $8;
@@ -321,6 +319,8 @@ upset_edges: RANGE_BEGIN KW_UPSET COLON VAR_STRING COMMA KW_EDGE COLON edge_list
                 //   traverse(pv, &visitor);
                 //   cur = cur->_next;
                 // }
+                GUpsetStmt* upsetStmt = new GUpsetStmt($4);
+                $$ = NewAst(NodeType::UpsetStatement, upsetStmt, $8, 1);
               };
 drop_graph: RANGE_BEGIN KW_DROP COLON VAR_STRING RANGE_END
               {
@@ -332,7 +332,7 @@ drop_graph: RANGE_BEGIN KW_DROP COLON VAR_STRING RANGE_END
 a_simple_query: 
           RANGE_BEGIN query_kind COMMA a_graph_expr RANGE_END
                 {
-                  if (!$4) break;
+                  // if (!$4) break;
                   // std::vector<VertexID> ids = GSinglecton::get<GStorageEngine>()->getNodes($4);
                   // gqlite_result results;
                   // query::get_vertexes($4, ids, results);
@@ -340,12 +340,12 @@ a_simple_query:
                   // results.type = gqlite_result_type_node;
                   // stm._result_callback(&results);
                   // query::release_vertexes(results);
+                  GQueryStmt* queryStmt = new GQueryStmt($2, $4, nullptr);
+                  $$ = NewAst(NodeType::QueryStatement, queryStmt, nullptr, 0);
                   stm._errorCode = ECode_Success;
-                  $$ = nullptr;
                 }
         | RANGE_BEGIN query_kind COMMA a_graph_expr COMMA where_expr RANGE_END
                 {
-                  if (!$4) break;
                   // const GraphProperty& properties = $4->property();
                   // ASTVertexQueryVisitor visitor;
                   // traverse($6, &visitor);
@@ -358,6 +358,9 @@ a_simple_query:
                   // query::filter_property(results, $2);
                   // stm._result_callback(&results);
                   // query::release_vertexes(results);
+                  GQueryStmt* queryStmt = new GQueryStmt($2, $4, $6);
+                  $$ = NewAst(NodeType::QueryStatement, queryStmt, nullptr, 0);
+                  stm._errorCode = ECode_Success;
                 };
 query_kind: OP_QUERY COLON query_kind_expr { $$ = $3; }
         |   OP_QUERY COLON match_expr {};
@@ -376,11 +379,8 @@ a_vertex_match: KW_VERTEX COLON VAR_STRING {};
 a_graph_expr:
           KW_IN COLON VAR_STRING
                 {
-                  // $$ = stm._graph->getGraph($3);
-                  stm._errorCode = ECode_Graph_Not_Exist;
-                  // if (!$$) {
-                  //   printf("graph '%s' is not exist\n", $3);
-                  // }
+                  // stm._errorCode = ECode_Graph_Not_Exist;
+                  $$ = INIT_STRING_AST($3);
                 };
 where_expr: OP_WHERE COLON json { $$ = $3; };
 string_list: VAR_STRING
@@ -436,7 +436,9 @@ vertex: LEFT_SQUARE VAR_STRING RIGHT_SQUARE
         | LEFT_SQUARE VAR_STRING COMMA json RIGHT_SQUARE
               {
                 struct GASTNode* value = INIT_STRING_AST($2);
-                $$ = NewAst(NodeType::ArrayExpression, value, $4, 1);
+                GASTNode* node = NewAst(NodeType::ArrayExpression, value, nullptr, 0);
+                GASTNode* jsn = NewAst(NodeType::ArrayExpression, $4, nullptr, 0);
+                $$ = ListJoin(node, jsn);
               };
 edge_list: LEFT_SQUARE edges RIGHT_SQUARE {$$ = $2;};
 edges: edge { /*$$ = init_list($1);*/ }
@@ -487,6 +489,7 @@ edge: LEFT_SQUARE VAR_STRING COMMA KW_RIGHT_RELATION COMMA VAR_STRING RIGHT_SQUA
               };
 json: value { $$ = $1; };
 value: object { $$ = $1; }
+        | array { $$ = $1; }
         | VAR_DECIMAL
               {
                 $$ = INIT_NUMBER_AST($1);
@@ -495,14 +498,15 @@ value: object { $$ = $1; }
               {
                 $$ = INIT_NUMBER_AST($1);
               }
-        | array { $$ = $1; }
         | VAR_BASE64
               {
                 GLiteralBinary* bin = new GLiteralBinary($1, "b64");
                 $$ = NewAst(NodeType::Literal, bin, nullptr, 0);
               }
         | VAR_DATETIME {}
-        | VAR_STRING { $$ = INIT_STRING_AST($1); };
+        | VAR_STRING
+              {
+                $$ = INIT_STRING_AST($1); };
 object: RANGE_BEGIN properties RANGE_END
             {
               $$ = NewAst(NodeType::ObjectExpression, $2, nullptr, 0);
@@ -512,7 +516,8 @@ properties: property {
             }
         | properties COMMA property
               {
-                $$ = ListJoin($1, $3);
+                GASTNode* node = NewAst(NodeType::ArrayExpression, $3, nullptr, 0);
+                $$ = ListJoin($1, node);
               };
 property: VAR_STRING COLON value
               {

@@ -1,13 +1,11 @@
-#include "base/lang/ASTNode.h"
-#include "base/lang/GQLExpression.h"
-#include "base/lang/Literal.h"
-#include "base/lang/CreateStmt.h"
+#include "base/lang/lang.h"
 #include <map>
 #include <functional>
 #include <string>
 #include <fmt/printf.h>
 
 #define RETURN_CASE_NODE_TYPE(node_type) case NodeType::node_type: return #node_type
+#define RETURN_CASE_PROP_KIND(prop_kind) case PropertyKind::prop_kind: return #prop_kind
 #define FREE_NODE(node) case 
 
 template <NodeType T> struct GTypeTraits {};
@@ -21,6 +19,22 @@ template <> struct GTypeTraits<NodeType::Literal> {
 
 template <> struct GTypeTraits<NodeType::CreationStatement> {
   typedef GCreateStmt type;
+};
+
+template <> struct GTypeTraits<NodeType::UpsetStatement> {
+  typedef GUpsetStmt type;
+};
+
+template <> struct GTypeTraits<NodeType::ArrayExpression> {
+  typedef GASTNode type;
+};
+
+template <> struct GTypeTraits<NodeType::Property> {
+  typedef GProperty type;
+};
+
+template <> struct GTypeTraits<NodeType::QueryStatement> {
+  typedef GQueryStmt type;
 };
 
 GASTNode* ListJoin(GASTNode* first, GASTNode* second) {
@@ -60,6 +74,7 @@ std::string NodeType2String(NodeType nt) {
   switch (nt) {
     RETURN_CASE_NODE_TYPE(Literal);
     RETURN_CASE_NODE_TYPE(Identifier);
+    RETURN_CASE_NODE_TYPE(Property);
     RETURN_CASE_NODE_TYPE(Program);
     RETURN_CASE_NODE_TYPE(FunctionDeclaration);
     RETURN_CASE_NODE_TYPE(VariableDeclaration);
@@ -72,7 +87,18 @@ std::string NodeType2String(NodeType nt) {
     RETURN_CASE_NODE_TYPE(GQLExpression);
     RETURN_CASE_NODE_TYPE(CallExpression);
     RETURN_CASE_NODE_TYPE(CreationStatement);
-  default: return "Unknow: " + std::to_string((int)nt);
+    RETURN_CASE_NODE_TYPE(UpsetStatement);
+    RETURN_CASE_NODE_TYPE(QueryStatement);
+  default: return "Unknow Node Type: " + std::to_string((int)nt);
+  }
+}
+
+std::string PropertyKind2String(PropertyKind kind) {
+  switch (kind) {
+    RETURN_CASE_PROP_KIND(Binary);
+    RETURN_CASE_PROP_KIND(Number);
+    RETURN_CASE_PROP_KIND(String);
+  default: return "Unknow Property Kind: " + std::to_string((int)kind);
   }
 }
 
@@ -92,6 +118,7 @@ void DumpAst(GASTNode* root, int level /* = 0 */) {
     {
       GTypeTraits<NodeType::Literal>::type* ptr = reinterpret_cast<GTypeTraits<NodeType::Literal>::type*>(root->_value);
       printLine("|- raw: {}\n", ptr->raw(), level);
+      printLine("|- kind: {}\n", PropertyKind2String(ptr->kind()), level);
     }
       break;
     case NodeType::GQLExpression:
@@ -110,6 +137,50 @@ void DumpAst(GASTNode* root, int level /* = 0 */) {
         GASTNode* node = (GASTNode*)list->_value;
         DumpAst(node, level + 1);
         list = list->_children;
+      }
+    }
+      break;
+    case NodeType::UpsetStatement:
+    {
+      GTypeTraits<NodeType::UpsetStatement>::type* ptr = reinterpret_cast<GTypeTraits<NodeType::UpsetStatement>::type*>(root->_value);
+      printLine("|- name: {}\n", ptr->name(), level);
+    }
+      break;
+    case NodeType::ArrayExpression:
+    {
+      GASTNode* ptr = root;
+      size_t cnt = 1;
+      while (ptr) {
+        printLine("|- #{}\n", std::to_string(cnt++), level + 1);
+        DumpAst((GASTNode*)ptr->_value, level + 2);
+        // next 
+        ptr = ptr->_children;
+      }
+    }
+      break;
+    case NodeType::ObjectExpression:
+    {
+      DumpAst((GASTNode*)root->_value, level + 1);
+    }
+      break;
+    case NodeType::Property:
+    {
+      GTypeTraits<NodeType::Property>::type* ptr = reinterpret_cast<GTypeTraits<NodeType::Property>::type*>(root->_value);
+      printLine("|- key: {}\n", ptr->key(), level);
+      printLine("|- value:\n", "", level);
+      DumpAst(ptr->value(), level + 1);
+    }
+      break;
+    case NodeType::QueryStatement:
+    {
+      GTypeTraits<NodeType::QueryStatement>::type* ptr = reinterpret_cast<GTypeTraits<NodeType::QueryStatement>::type*>(root->_value);
+      printLine("|- query:\n", "", level);
+      DumpAst(ptr->query(), level + 1);
+      printLine("|- graph:\n", "", level);
+      DumpAst(ptr->graph(), level + 1);
+      if (ptr->where()) {
+        printLine("|- where:\n", "", level);
+        DumpAst(ptr->where(), level + 1);
       }
     }
       break;
