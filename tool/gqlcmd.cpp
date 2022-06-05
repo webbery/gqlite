@@ -25,7 +25,7 @@
 #include <vector>
 #include <string>
 #include "gqlite.h"
-#include "linenoise.hpp"
+#include "linenoise.h"
 #include "stdout.h"
 #define MAX_HISTORY_SIZE  100
 #define HISTORY_FILENAME  ".gql_history"
@@ -35,16 +35,11 @@ int main(int argc, char** argv) {
   if (argc > 1) {
     dbfile = argv[1];
   }
-  // enable multiline
-  linenoise::SetMultiLine(true);
-  linenoise::LoadHistory(HISTORY_FILENAME);
-  linenoise::SetHistoryMaxLen(MAX_HISTORY_SIZE);
-  linenoise::SetCompletionCallback([](const char* editBuffer, std::vector<std::string>& completions)
-    {
-      //if (editBuffer[0] == '\n') {
-      //}
-    }
-  );
+  linenoiseInstallWindowChangeHandler();
+  linenoiseHistoryLoad(HISTORY_FILENAME);
+  linenoiseSetCompletionCallback([](char const* prefix, linenoiseCompletions* lc) {
+
+  });
 
   std::string input;
   gqlite* pHandle = 0;
@@ -57,20 +52,24 @@ int main(int argc, char** argv) {
   if (ret) return ret;
   printf("GQLite Version %s\nWritting by Webberg.\n\nMIT License. Build: %s\n", PROJECT_VERSION, GIT_REVISION_SHA);
   do {
-    bool quit = linenoise::Readline("gqlite> ", input);
-    if (quit || input == "exit") break;
-    linenoise::AddHistory(input.c_str());
-    linenoise::SaveHistory(HISTORY_FILENAME);
+    char* result = linenoise("gqlite> ");
+    if (result == nullptr) break;
+    std::string input(result);
+    free(result);
+    if (*result == '\0' || input == "exit") break;
+    linenoiseHistoryAdd(input.c_str());
     char* ptr = nullptr;
     auto start = std::chrono::high_resolution_clock::now();
     int error = gqlite_exec(pHandle, input.c_str(), gqlite_exec_callback, nullptr, &ptr);
     auto elapsed = std::chrono::high_resolution_clock::now() - start;
     if (ptr) {
-      auto microseconds = std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count()/1000.0;
+      auto microseconds = std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count() / 1000.0;
       printf("%s, COST %gs\n", ptr, microseconds);
       gqlite_free(ptr);
     }
   } while (true);
+  linenoiseHistorySave(HISTORY_FILENAME);
+  linenoiseHistoryFree();
   gqlite_close(pHandle);
   return 0;
 }

@@ -19,7 +19,7 @@ add_custom_target(
   DEPENDS generated_tokens
 )
 
-set(COMMANDLINE_SOURCE ./gqlcmd.cpp)
+set(COMMANDLINE_SOURCE ./gqlcmd.cpp ./wcwidth.cpp ./ConvertUTF.cpp ./linenoise.cpp)
 set(EXPORT_SOURCE ./gqlexport.cpp)
 
 add_executable(gql ${COMMANDLINE_SOURCE})
