@@ -1,5 +1,6 @@
 #pragma once
 #include "../type.h"
+#include <stddef.h>
 
 struct GASTNode {
   enum NodeType _nodetype;

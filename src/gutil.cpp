@@ -1,4 +1,5 @@
 #include "gutil.h"
+#include <string.h>
 
 std::vector<std::string> split(const char* str, const char* delim) {
   std::vector<std::string> result;
