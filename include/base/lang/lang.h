@@ -10,3 +10,5 @@
 #include "base/lang/LiteralBinary.h"
 #include "base/lang/LiteralNumber.h"
 #include "base/lang/LiteralString.h"
+#include "base/lang/VertexDeclaration.h"
+#include "base/lang/EdgeDeclaration.h"

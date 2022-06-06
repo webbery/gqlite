@@ -26,6 +26,8 @@ enum NodeType {
   FunctionDeclaration,
   VariableDeclaration,
   VariableDeclarator,
+  VertexDeclaration,
+  EdgeDeclaration,
   Identifier,
   Literal,
   BlockStatement,
@@ -42,8 +44,6 @@ enum PropertyKind {
   Integer,
   String,
   Binary,
-  Vertex,
-  Edge,
   From,
   To,
 };

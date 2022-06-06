@@ -33,8 +33,20 @@ template <> struct GTypeTraits<NodeType::Property> {
   typedef GProperty type;
 };
 
+template <> struct GTypeTraits<NodeType::BinaryExpression> {
+  typedef GProperty type;
+};
+
 template <> struct GTypeTraits<NodeType::QueryStatement> {
   typedef GQueryStmt type;
+};
+
+template <> struct GTypeTraits<NodeType::VertexDeclaration> {
+  typedef GVertexDeclaration type;
+};
+
+template <> struct GTypeTraits<NodeType::EdgeDeclaration> {
+  typedef GEdgeDeclaration type;
 };
 
 GASTNode* ListJoin(GASTNode* first, GASTNode* second) {
@@ -89,6 +101,8 @@ std::string NodeType2String(NodeType nt) {
     RETURN_CASE_NODE_TYPE(CreationStatement);
     RETURN_CASE_NODE_TYPE(UpsetStatement);
     RETURN_CASE_NODE_TYPE(QueryStatement);
+    RETURN_CASE_NODE_TYPE(VertexDeclaration);
+    RETURN_CASE_NODE_TYPE(EdgeDeclaration);
   default: return "Unknow Node Type: " + std::to_string((int)nt);
   }
 }
@@ -181,6 +195,37 @@ void DumpAst(GASTNode* root, int level /* = 0 */) {
       if (ptr->where()) {
         printLine("|- where:\n", "", level);
         DumpAst(ptr->where(), level + 1);
+      }
+    }
+      break;
+    case NodeType::BinaryExpression:
+    {
+      GTypeTraits<NodeType::BinaryExpression>::type* ptr = reinterpret_cast<GTypeTraits<NodeType::BinaryExpression>::type*>(root->_value);
+      printLine("|- name: {}\n", ptr->key(), level);
+      printLine("|- value:\n", "", level);
+      DumpAst(ptr->value(), level + 1);
+    }
+      break;
+    case NodeType::VertexDeclaration:
+    {
+      GTypeTraits<NodeType::VertexDeclaration>::type* ptr = reinterpret_cast<GTypeTraits<NodeType::VertexDeclaration>::type*>(root->_value);
+      DumpAst(ptr->vertex(), level + 1);
+    }
+      break;
+    case NodeType::EdgeDeclaration:
+    {
+      GASTNode* ptr = root;
+      size_t cnt = 1;
+      while (ptr) {
+        GTypeTraits<NodeType::EdgeDeclaration>::type* edge = reinterpret_cast<GTypeTraits<NodeType::EdgeDeclaration>::type*>(ptr->_value);
+        printLine("|- #{}\n", std::to_string(cnt++), level);
+        printLine("|- #from\n", "", level + 1);
+        DumpAst(edge->from(), level + 2);
+        printLine("|- #\n", "", level + 1);
+        DumpAst(edge->link(), level + 2);
+        printLine("|- #to\n", "", level + 1);
+        DumpAst(edge->to(), level + 2);
+        ptr = ptr->_children;
       }
     }
       break;

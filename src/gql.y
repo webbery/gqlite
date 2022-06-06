@@ -118,7 +118,7 @@ nlohmann::json* get_or_create_json(nlohmann::json* item) {
 
 %type <__node> a_graph_expr
 %type <__node> json
-%type <__node> value
+%type <__node> value number
 %type <__node> values
 %type <__node> object
 %type <__node> array
@@ -405,6 +405,8 @@ strings:  VAR_STRING
                 GASTNode* node = NewAst(NodeType::ArrayExpression, INIT_STRING_AST($3), nullptr, 0);
                 $$ = ListJoin($1, node);
               };
+number: VAR_DECIMAL { $$ = INIT_NUMBER_AST($1); }
+        | VAR_INTEGER { $$ = INIT_NUMBER_AST($1); };
 a_graph_properties:
           graph_property {}
         | LEFT_SQUARE graph_properties RIGHT_SQUARE {};
@@ -438,66 +440,33 @@ vertex: LEFT_SQUARE VAR_STRING RIGHT_SQUARE
                 struct GASTNode* value = INIT_STRING_AST($2);
                 GASTNode* node = NewAst(NodeType::ArrayExpression, value, nullptr, 0);
                 GASTNode* jsn = NewAst(NodeType::ArrayExpression, $4, nullptr, 0);
-                $$ = ListJoin(node, jsn);
+                GASTNode* vertex = ListJoin(node, jsn);
+                GVertexDeclaration* decl = new GVertexDeclaration(vertex);
+                $$ = NewAst(NodeType::VertexDeclaration, decl, nullptr, 0);
               };
 edge_list: LEFT_SQUARE edges RIGHT_SQUARE {$$ = $2;};
-edges: edge { /*$$ = init_list($1);*/ }
+edges: edge { $$ = $1; }
         | edges COMMA edge
               {
-                // gql_node* node = init_list($3);
-                // $$ = list_join($1, node);
+                $$ = ListJoin($1, $3);
               };
-edge: LEFT_SQUARE VAR_STRING COMMA KW_RIGHT_RELATION COMMA VAR_STRING RIGHT_SQUARE
+edge: LEFT_SQUARE VAR_STRING COMMA a_edge COMMA VAR_STRING RIGHT_SQUARE
               {
-                struct GASTNode* id = INIT_STRING_AST("id");
                 struct GASTNode* from_value = INIT_STRING_AST($2);
-                // struct GASTNode* from = NewAst(NodeType::Property, nullptr, id, from_value);
                 struct GASTNode* to_value = INIT_STRING_AST($6);
-                // struct GASTNode* to = NewAst(NodeType::Property, nullptr, id, to_value);
-                struct GASTNode* link = INIT_STRING_AST("->");
-                // $$ = NewAst(NodeType::Edge, link, from, to);
-              }
-        | LEFT_SQUARE VAR_STRING COMMA KW_LEFT_RELATION COMMA VAR_STRING RIGHT_SQUARE
-              {
-                struct GASTNode* id = INIT_STRING_AST("id");
-                struct GASTNode* from_value = INIT_STRING_AST($6);
-                // struct GASTNode* from = NewAst(NodeType::Property, nullptr, id, from_value);
-                struct GASTNode* to_value = INIT_STRING_AST($2);
-                // struct GASTNode* to = NewAst(NodeType::Property, nullptr, id, to_value);
-                struct GASTNode* link = INIT_STRING_AST("<-");
-                // $$ = NewAst(NodeType::Edge, link, from, to);
-              }
-        | LEFT_SQUARE VAR_STRING COMMA KW_BIDIRECT_RELATION COMMA VAR_STRING RIGHT_SQUARE
-              {
-                struct GASTNode* id = INIT_STRING_AST("id");
-                struct GASTNode* from_value = INIT_STRING_AST($2);
-                // struct GASTNode* from = NewAst(NodeType::Property, nullptr, id, from_value);
-                struct GASTNode* to_value = INIT_STRING_AST($6);
-                // struct GASTNode* to = NewAst(NodeType::Property, nullptr, id, to_value);
-                struct GASTNode* link = INIT_STRING_AST("--");
-                // $$ = NewAst(NodeType::Edge, link, from, to);
+                GEdgeDeclaration* edge = new GEdgeDeclaration(from_value, to_value, $4);
+                $$ = NewAst(NodeType::EdgeDeclaration, edge, nullptr, 0);
               }
         | LEFT_SQUARE VAR_STRING RIGHT_SQUARE
               {
-                struct GASTNode* id = INIT_STRING_AST("id");
                 struct GASTNode* from_value = INIT_STRING_AST($2);
-                // struct GASTNode* from = NewAst(NodeType::Property, nullptr, id, from_value);
-                struct GASTNode* to_value = INIT_STRING_AST($2);
-                // struct GASTNode* to = NewAst(NodeType::Property, nullptr, id, to_value);
-                struct GASTNode* link = INIT_STRING_AST("--");
-                // $$ = NewAst(NodeType::Edge, link, from, to);
+                GEdgeDeclaration* edge = new GEdgeDeclaration(from_value, from_value, INIT_STRING_AST("--"));
+                $$ = NewAst(NodeType::EdgeDeclaration, edge, nullptr, 0);
               };
 json: value { $$ = $1; };
 value: object { $$ = $1; }
         | array { $$ = $1; }
-        | VAR_DECIMAL
-              {
-                $$ = INIT_NUMBER_AST($1);
-              }
-        | VAR_INTEGER
-              {
-                $$ = INIT_NUMBER_AST($1);
-              }
+        | number { $$ = $1; }
         | VAR_BASE64
               {
                 GLiteralBinary* bin = new GLiteralBinary($1, "b64");
@@ -530,29 +499,25 @@ property: VAR_STRING COLON value
                 GProperty* prop = new GProperty("id", value);
                 $$ = NewAst(NodeType::Property, prop, nullptr, 0);
               }
-        | OP_GREAT_THAN_EQUAL COLON VAR_INTEGER
+        | OP_GREAT_THAN_EQUAL COLON number
               {
-                struct GASTNode* value = INIT_NUMBER_AST($3);
-                GProperty* prop = new GProperty("gte", value);
-                $$ = NewAst(NodeType::Property, prop, nullptr, 0);
+                GProperty* prop = new GProperty("gte", $3);
+                $$ = NewAst(NodeType::BinaryExpression, prop, nullptr, 0);
               }
-        | OP_LESS_THAN_EQUAL COLON VAR_INTEGER
+        | OP_LESS_THAN_EQUAL COLON number
               {
-                struct GASTNode* value = INIT_NUMBER_AST($3);
-                GProperty* prop = new GProperty("lte", value);
-                $$ = NewAst(NodeType::Property, prop, nullptr, 0);
+                GProperty* prop = new GProperty("lte", $3);
+                $$ = NewAst(NodeType::BinaryExpression, prop, nullptr, 0);
               }
-        | OP_GREAT_THAN COLON VAR_INTEGER
+        | OP_GREAT_THAN COLON number
               {
-                struct GASTNode* value = INIT_NUMBER_AST($3);
-                GProperty* prop = new GProperty("gt", value);
-                $$ = NewAst(NodeType::Property, prop, nullptr, 0);
+                GProperty* prop = new GProperty("gt", $3);
+                $$ = NewAst(NodeType::BinaryExpression, prop, nullptr, 0);
               }
-        | OP_LESS_THAN COLON VAR_INTEGER
+        | OP_LESS_THAN COLON number
               {
-                struct GASTNode* value = INIT_NUMBER_AST($3);
-                GProperty* prop = new GProperty("lt", value);
-                $$ = NewAst(NodeType::Property, prop, nullptr, 0);
+                GProperty* prop = new GProperty("lt", $3);
+                $$ = NewAst(NodeType::BinaryExpression, prop, nullptr, 0);
               }
         | OP_AND COLON array
               {
@@ -617,6 +582,7 @@ a_edge:
         | KW_BIDIRECT_RELATION { $$ = INIT_STRING_AST("--"); };
 a_value:
         | VAR_STRING { $$ = INIT_STRING_AST($1); }
+        | VAR_DECIMAL { $$ = INIT_NUMBER_AST($1); }
         | VAR_INTEGER { $$ = INIT_NUMBER_AST($1); };
 function_call:
         | VAR_STRING function_params {};
