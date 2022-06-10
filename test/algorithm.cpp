@@ -138,10 +138,13 @@ TEST_CASE("random walk algorithm") {
 TEST_CASE("analysis algorithm") {
   GSubGraph* g1 = createGraph(working_directory + "simple_g.dot");
   GSubGraph* g2 = createGraph(working_directory + "g4.dot");
-  DegreeCentrality leftDC, rightDC;
+  GDegreeCentrality leftDC, rightDC;
   leftDC.analysis(*g1);
+  CHECK(leftDC.value() == std::vector<double>({2, 2, 2}));
   rightDC.analysis(*g2);
+  CHECK(rightDC.value() == std::vector<double>({2, 3, 2, 1}));
   auto m = leftDC - rightDC;
+  std::cout<<m<<std::endl;
 }
 
 TEST_CASE("distance", "[distance]") {

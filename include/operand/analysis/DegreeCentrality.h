@@ -2,7 +2,7 @@
 #include <Eigen/Core>
 #include "SubGraph.h"
 
-class DegreeCentrality {
+class GDegreeCentrality {
 public:
   void analysis(const GSubGraph& g);
 
@@ -11,4 +11,4 @@ private:
   std::vector<double> _value;
 };
 
-Eigen::MatrixXd operator - (const DegreeCentrality& left, const DegreeCentrality& right);
+Eigen::MatrixXd operator - (const GDegreeCentrality& left, const GDegreeCentrality& right);
