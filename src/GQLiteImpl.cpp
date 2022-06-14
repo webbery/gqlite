@@ -1,12 +1,10 @@
 #include "GQliteImpl.h"
-#include "ParserEngine.h"
 #include "base/system/Platform.h"
 #include "VirtualEngine.h"
 #include "Error.h"
 #include "Memory.h"
 #include "StorageEngine.h"
 #include "SubGraph.h"
-#include "ISymbol.h"
 #ifdef _WIN32
 #include <io.h>
 #define isatty(x) _isatty(x)

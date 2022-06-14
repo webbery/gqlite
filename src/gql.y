@@ -55,8 +55,6 @@ void yyerror(YYLTYPE* yyllocp, yyscan_t unused, GVirtualEngine& stm, const char*
     msg, stm.gql().c_str(), err_index.c_str());
 }
 
-void release_vertex_callback(gql::vertex*& v) {}
-
 struct GASTNode* INIT_STRING_AST(const char* key) {
   size_t len = strlen(key) + 1;
   // void* s = malloc(len);

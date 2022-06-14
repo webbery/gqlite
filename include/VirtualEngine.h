@@ -20,6 +20,8 @@ enum GQL_Command_Type {
 
 class GStorageEngine;
 struct GASTNode;
+class GPlan;
+class GVirtualNetwork;
 class GVirtualEngine {
 public:
   static uint32_t GenerateIndex();
@@ -45,7 +47,14 @@ public:
   GQL_Command_Type _cmdtype;
   GSubGraph* _graph = nullptr;
   GStorageEngine* _storage = nullptr;
+
+private:
+  GPlan* makePlans(GASTNode* ast);
+  int executePlans(GPlan*);
+  void cleanPlans(GPlan*);
+
 private:
   static uint32_t _indx;
   MemoryPool<char> _memory;
+  GVirtualNetwork* _network;
 };
