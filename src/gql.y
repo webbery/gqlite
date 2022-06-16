@@ -291,7 +291,7 @@ upset_vertexes: RANGE_BEGIN KW_UPSET COLON VAR_STRING COMMA KW_VERTEX COLON vert
               };
 remove_vertexes: RANGE_BEGIN KW_REMOVE COLON VAR_STRING COMMA KW_VERTEX COLON array RANGE_END
               {
-                struct GASTNode* g = INIT_STRING_AST($4);
+                // struct GASTNode* g = INIT_STRING_AST($4);
                 // $$ = NewAst(NodeType::RemoveStatement, $8, g, nullptr);
                 // GET_GRAPH($4);
                 // gql_node* list = as_array($8);
@@ -304,6 +304,8 @@ remove_vertexes: RANGE_BEGIN KW_REMOVE COLON VAR_STRING COMMA KW_VERTEX COLON ar
                 //   current = current->_next;
                 // }
                 // stm._graph->finishUpdate(pGraph);
+                GRemoveStmt* rmStmt = new GRemoveStmt($4);
+                $$ = NewAst(NodeType::RemoveStatement, rmStmt, $8, 1);
               };
 upset_edges: RANGE_BEGIN KW_UPSET COLON VAR_STRING COMMA KW_EDGE COLON edge_list RANGE_END
               {
@@ -322,10 +324,12 @@ upset_edges: RANGE_BEGIN KW_UPSET COLON VAR_STRING COMMA KW_EDGE COLON edge_list
               };
 drop_graph: RANGE_BEGIN KW_DROP COLON VAR_STRING RANGE_END
               {
-                struct GASTNode* g = INIT_STRING_AST($4);
+                // struct GASTNode* g = INIT_STRING_AST($4);
                 // $$ = NewAst(NodeType::UpsetStatement, g, nullptr, nullptr);
                 // GET_GRAPH($4);
                 // stm._graph->dropGraph(pGraph);
+                GDropStmt* dropStmt = new GDropStmt($4);
+                $$ = NewAst(NodeType::DropStatement, dropStmt, nullptr, 0);
               };
 a_simple_query: 
           RANGE_BEGIN query_kind COMMA a_graph_expr RANGE_END

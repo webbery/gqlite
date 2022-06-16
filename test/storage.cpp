@@ -33,41 +33,15 @@
 
 int main() {
   GStorageEngine engine;
-  engine.create("testdb");
-  auto graphs = engine.getGraphs();
-
-  std::cout << "show graphs:" << std::endl;
-  for (auto name : graphs) {
-    std::cout << name << std::endl;
-  }
-  assert(engine.openGraph(GRAPH_NAME) == 0);
-  auto* pGraph = engine.getGraph(GRAPH_NAME);
-  assert(pGraph != nullptr);
-  //gast* root = loadast("storage.ast");
-  //if (root) {
-  //  ASTVertexUpdateVisitor visitor;
-  //  traverse(root, &visitor);
-  //}
-  
-  engine.makeDirection(pGraph, "id1", "father", "mother", "wife");
-  engine.dropNode(pGraph, "mother");
-  engine.finishUpdate(pGraph);
-  std::vector<VertexID> ids = engine.getNodes(pGraph);
-  std::cout<<"size: "<<ids.size()<<std::endl;
-  //assert(ids.size() > 0);
-  PRINT_NODE(pGraph, "mother");
-  PRINT_NODE(pGraph, "father");
-
-  GVertexProptertyFeature* pBTreeIndex = new GBTreeIndex("create_time");
-  engine.registGraphFeature(pGraph, pBTreeIndex);
-  
-  engine.finishUpdate(pGraph);
-  PRINT_NODE(pGraph, "photo_father");
-  
-  //ids = engine.getNodes(pGraph, "create_time",
-  //  []() {},
-  //  1, 4);
-  std::cout << "size: " << ids.size() << std::endl;
-  engine.closeGraph(pGraph);
+  engine.open("testdb");
+  std::cout << "schema: "<< engine.getSchema() << std::endl;
+  std::string value("hello gqlite");
+  engine.addProp("revert_index", PropertyType::String);
+  engine.write("revert_index", "key", value.data(), value.size());
+  // engine.finishTrans();
+  // engine.startTrans();
+  std::string result;
+  engine.read("revert_index", "key", result);
+  std::cout<< result<<std::endl;
   return 0;
 }

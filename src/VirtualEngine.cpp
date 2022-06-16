@@ -4,6 +4,7 @@
 #include "base/lang/ASTNode.h"
 #include "plan/Plan.h"
 #include "plan/CreatePlan.h"
+#include "VirtualNetwork.h"
 
 uint32_t GVirtualEngine::_indx = 0;
 
@@ -17,9 +18,11 @@ GVirtualEngine::GVirtualEngine()
 , _errorCode(ECode_GQL_Parse_Fail)
 , _cmdtype(GQL_Command_Size)
 {
+  _network = new GVirtualNetwork();
 }
 
 GVirtualEngine::~GVirtualEngine() {
+  delete _network;
   if (_graph) {
     delete _graph;
     _graph = nullptr;
@@ -27,8 +30,7 @@ GVirtualEngine::~GVirtualEngine() {
 }
 
 void GVirtualEngine::cleanPlans(GPlan* plans) {
-  if (!plans) return;
-  delete plans;
+  if (plans) delete plans;
 }
 
 GPlan* GVirtualEngine::makePlans(GASTNode* ast) {
@@ -38,7 +40,7 @@ GPlan* GVirtualEngine::makePlans(GASTNode* ast) {
   {
   case NodeType::CreationStatement:
   {
-    root = new GCreatePlan(_network);
+    root = new GCreatePlan(_network, _storage, ast);
   }
     break;
   default:
@@ -50,9 +52,12 @@ GPlan* GVirtualEngine::makePlans(GASTNode* ast) {
   return root;
 }
 
-int GVirtualEngine::executePlans(GPlan*) {
-
-  return ECode_Success;
+int GVirtualEngine::executePlans(GPlan* plans) {
+  int ret = ECode_Success;
+  if (plans) {
+    ret = plans->execute();
+  }
+  return ret;
 }
 
 int GVirtualEngine::execAST(GASTNode* ast) {

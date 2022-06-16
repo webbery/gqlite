@@ -1,6 +1,5 @@
 #pragma once
 
-#include "base/lang/ASTNode.h"
 #include "base/lang/GQLExpression.h"
 #include "base/lang/Literal.h"
 #include "base/lang/CreateStmt.h"
@@ -12,3 +11,6 @@
 #include "base/lang/LiteralString.h"
 #include "base/lang/VertexDeclaration.h"
 #include "base/lang/EdgeDeclaration.h"
+#include "base/lang/DropStmt.h"
+#include "base/lang/RemoveStmt.h"
+#include "base/lang/ASTNode.h"

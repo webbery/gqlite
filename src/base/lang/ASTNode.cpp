@@ -1,54 +1,13 @@
-#include "base/lang/lang.h"
 #include <map>
 #include <functional>
 #include <string>
 #include <fmt/printf.h>
 #include <cassert>
+#include "base/lang/ASTNode.h"
 
 #define RETURN_CASE_NODE_TYPE(node_type) case NodeType::node_type: return #node_type
 #define RETURN_CASE_PROP_KIND(prop_kind) case PropertyKind::prop_kind: return #prop_kind
 #define FREE_NODE(node) case 
-
-template <NodeType T> struct GTypeTraits {};
-
-template <> struct GTypeTraits<NodeType::GQLExpression> {
-  typedef GGQLExpression type;
-};
-template <> struct GTypeTraits<NodeType::Literal> {
-  typedef GLiteral type;
-};
-
-template <> struct GTypeTraits<NodeType::CreationStatement> {
-  typedef GCreateStmt type;
-};
-
-template <> struct GTypeTraits<NodeType::UpsetStatement> {
-  typedef GUpsetStmt type;
-};
-
-template <> struct GTypeTraits<NodeType::ArrayExpression> {
-  typedef GASTNode type;
-};
-
-template <> struct GTypeTraits<NodeType::Property> {
-  typedef GProperty type;
-};
-
-template <> struct GTypeTraits<NodeType::BinaryExpression> {
-  typedef GProperty type;
-};
-
-template <> struct GTypeTraits<NodeType::QueryStatement> {
-  typedef GQueryStmt type;
-};
-
-template <> struct GTypeTraits<NodeType::VertexDeclaration> {
-  typedef GVertexDeclaration type;
-};
-
-template <> struct GTypeTraits<NodeType::EdgeDeclaration> {
-  typedef GEdgeDeclaration type;
-};
 
 GASTNode* ListJoin(GASTNode* first, GASTNode* second) {
   if (!first) return second;
@@ -104,6 +63,8 @@ std::string NodeType2String(NodeType nt) {
     RETURN_CASE_NODE_TYPE(QueryStatement);
     RETURN_CASE_NODE_TYPE(VertexDeclaration);
     RETURN_CASE_NODE_TYPE(EdgeDeclaration);
+    RETURN_CASE_NODE_TYPE(DropStatement);
+    RETURN_CASE_NODE_TYPE(RemoveStatement);
   default: return "Unknow Node Type: " + std::to_string((int)nt);
   }
 }
@@ -259,4 +220,9 @@ void DumpAst(GASTNode* root, int level /* = 0 */) {
   for (size_t idx = 0; idx < root->_size; ++idx) {
     DumpAst(root->_children + idx, level + 1);
   }
+}
+
+std::string GetString(GASTNode* node) {
+  GLiteral* str = (GLiteral*)node->_value;
+  return str->raw();
 }

@@ -41,7 +41,8 @@ int GQLiteImpl::open(const char* filename, gqlite_open_mode mode)
 int GQLiteImpl::close()
 {
   if (_statement->_storage) {
-    return _statement->_storage->closeGraph(nullptr);
+    // return _statement->_storage->closeGraph(nullptr);
+    return true;
   } else {
     delete _statement->_graph;
     _statement->_graph = nullptr;
@@ -60,7 +61,7 @@ void GQLiteImpl::set(GVirtualEngine* pStatement)
 int GQLiteImpl::create(const char* filename, gqlite_open_mode mode)
 {
   if (filename) {
-    return _statement->_storage->create(filename);
+    return _statement->_storage->open(filename);
   } else {
     if (_statement->_graph) delete _statement->_graph;
     _statement->_graph = new GSubGraph();

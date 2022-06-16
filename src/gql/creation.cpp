@@ -5,9 +5,9 @@
 #include "StorageEngine.h"
 
 namespace creation {
-  int createGraph(GStorageEngine* storage, const std::string& name) {
-    return storage->openGraph(name.c_str());
-  }
+  // int createGraph(GStorageEngine* storage, const std::string& name) {
+  //   return storage->openGraph(name.c_str());
+  // }
 
   int createInvertIndex(GStorageEngine* storage, GGraphInstance* g, const std::string& name) {
     createGraph(storage, name);

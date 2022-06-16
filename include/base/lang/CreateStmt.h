@@ -2,6 +2,7 @@
 #include <string>
 
 struct GASTNode;
+class GPlan;
 class GCreateStmt {
 public:
   GCreateStmt(const std::string& name, GASTNode* indexes);

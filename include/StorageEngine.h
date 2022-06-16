@@ -12,22 +12,31 @@
 #include <map>
 #include <functional>
 
+enum class PropertyType {
+    Undefined,
+    String,
+    Number
+};
+
 class GStorageEngine {
 public:
     GStorageEngine();
     ~GStorageEngine();
 
-    int create(const char* filename);
+    int open(const char* filename);
+    void close();
 
-    int openGraph(const char* name);
+    void addProp(const std::string& prop, PropertyType type = PropertyType::Undefined);
+
+    int write(const std::string& prop, const std::string& key, void* value, size_t len);
+    int read(const std::string& prop, const std::string& key, std::string& value);
+
+    int write(const std::string& prop, uint64_t key, void* value, size_t len);
+    int read(const std::string& prop, uint64_t key, std::string& value);
 
     void registGraphFeature(GGraphInstance*, GVertexProptertyFeature* feature);
 
-    GGraphInstance* getGraph(const char* name = nullptr);
-    std::vector<std::string> getGraphs();
-
-    int dropGraph(GGraphInstance* pGraph);
-    int closeGraph(GGraphInstance* pGraph);
+    nlohmann::json getSchema() { return _schema; }
 
     int startTrans();
 
@@ -35,51 +44,58 @@ public:
 
     int rollbackTrans();
 
-    int group();
+    // int group();
 
     /**
      * generate edge id or vertex id
      * @param type 0-vertex, 1-edge
      */
-    int generateID(GGraphInstance* graph, char type, char*& id);
+    // int generateID(GGraphInstance* graph, char type, char*& id);
 
-    int finishUpdate(GGraphInstance* graph);
+    // int finishUpdate(GGraphInstance* graph);
 
-    int getNode(GGraphInstance* graph, const VertexID& nodeid, std::function<int(const char*, void*, int, void*)>);
-    int getNode(GGraphInstance* graph, const VertexID& nodeid, std::function<int(const char*, void*)>);
+    // int getNode(GGraphInstance* graph, const VertexID& nodeid, std::function<int(const char*, void*, int, void*)>);
+    // int getNode(GGraphInstance* graph, const VertexID& nodeid, std::function<int(const char*, void*)>);
 
-    std::vector<VertexID> getNodes(GGraphInstance* graph);
+    // std::vector<VertexID> getNodes(GGraphInstance* graph);
 
-    int dropNode(GGraphInstance* graph, const VertexID& nodeid);
+    // int dropNode(GGraphInstance* graph, const VertexID& nodeid);
 
-    int dropRelationship();
+    // int dropRelationship();
 
     /*
      *
      */
-    int startNode(const char* graph, const VertexID& nodeid);
+    // int startNode(const char* graph, const VertexID& nodeid);
 
-    int forward();
+    // int forward();
 
-    int backward();
+    // int backward();
 
     //template<typename T>
     //int makeDirection(GGraph* graph, const VertexID& from, const VertexID& to, const char* name, T&& value){}
 
-    int makeDirection(GGraphInstance* graph, const EdgeID& id, const VertexID& from, const VertexID& to, const char* name);
+    // int makeDirection(GGraphInstance* graph, const EdgeID& id, const VertexID& from, const VertexID& to, const char* name);
 
     int injectCostFunc();
     int injectNodeUpdateFunc();
 
 private:
-    int openGraph(const char* name, GGraphInstance*& pGraph);
+    bool isPropExist(const std::string& prop);
+    mdbx::map_handle getOrCreateHandle(const std::string& prop, mdbx::key_mode mode);
     /*
-     * @brief schema is used to record all the graph's name
+     * @brief schema is used to record the graph's infomation
      */
-    void schema();
+    mdbx::map_handle openSchema();
+
 private:
     mdbx::env_managed _env;
     mdbx::txn_managed _txn;
-    std::map<std::string, GGraphInstance*> _mHandle;
-    std::string _usedgraph;
+    std::map<std::string, mdbx::map_handle> _mHandle;
+    /**
+     * schema: {
+     *   prop: [ {name: 'xx', type: undefined/str/number} ]
+     * }
+     */
+    nlohmann::json _schema;
 };
