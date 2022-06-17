@@ -37,6 +37,10 @@ public:
     void registGraphFeature(GGraphInstance*, GVertexProptertyFeature* feature);
 
     nlohmann::json getSchema() { return _schema; }
+    /**
+     * add attribute of schema
+     */
+    void addAttribute(const std::string& key, const std::string& value);
 
     int startTrans();
 

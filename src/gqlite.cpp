@@ -6,6 +6,7 @@
 #include "Memory.h"
 #include "json.hpp"
 
+#define MAX_MEMORY  5*1024*1024
 #define CHECK_NULL_PTR(p) {if (!p) return ECODE_NULL_PTR;}
 
 #define UNKNOWN_ERROR           "unknow error"
@@ -37,9 +38,8 @@ namespace {
 
 SYMBOL_EXPORT int gqlite_open_with_mode(const char* filename, gqlite** ppDb, gqlite_open_mode mode)
 {
-  GQLiteImpl* impl = new GQLiteImpl();
-  GVirtualEngine* stm = new GVirtualEngine();
-  impl->set(stm);
+  GVirtualEngine* stm = new GVirtualEngine(MAX_MEMORY);
+  GQLiteImpl* impl = new GQLiteImpl(stm);
   *ppDb = (gqlite*)impl;
   return impl->open(filename, mode);
 }

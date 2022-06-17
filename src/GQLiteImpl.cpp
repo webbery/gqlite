@@ -21,8 +21,8 @@ int yylex(YYSTYPE* yylval_param, YYLTYPE* yylloc_param, void* yyscanner, GVirtua
 #define VALUE_START  RANGE_BEGIN
 #define VALUE_END    EOL
 
-GQLiteImpl::GQLiteImpl()
-  : _statement(new GVirtualEngine)
+GQLiteImpl::GQLiteImpl(GVirtualEngine* pEng)
+  : _statement(pEng)
 {}
 
 GQLiteImpl::~GQLiteImpl()
@@ -48,14 +48,6 @@ int GQLiteImpl::close()
     _statement->_graph = nullptr;
     return true;
   }
-}
-
-void GQLiteImpl::set(GVirtualEngine* pStatement)
-{
-  if (_statement) {
-    delete _statement;
-  }
-  _statement = pStatement;
 }
 
 int GQLiteImpl::create(const char* filename, gqlite_open_mode mode)

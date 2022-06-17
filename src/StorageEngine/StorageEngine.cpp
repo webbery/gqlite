@@ -1,11 +1,8 @@
 #include "StorageEngine.h"
-#include "Error.h"
-#include "Type/Binary.h"
 #include <regex>
-#include <fmt/printf.h>
 #define GRAPH_EXCEPTION_CATCH(expr) try{\
   expr;\
-}catch(std::exception& err) {fmt::printf("exception {} [{}]: {}\n", __FILE__, __LINE__, err.what());}
+}catch(std::exception& err) {printf("exception %s [%d]: %s\n", __FILE__, __LINE__, err.what());}
 #define DB_SCHEMA   "gql_schema"
 #define SCHEMA_BASIC  "basic"
 
@@ -91,6 +88,7 @@ void GStorageEngine::addProp(const std::string& prop, PropertyType type) {
   if (!isPropExist(prop)) {
     nlohmann::json info;
     info["name"] = prop;
+    info["type"] = type;
     _schema["prop"].push_back(info);
   }
 }
@@ -125,6 +123,7 @@ int GStorageEngine::read(const std::string& prop, const std::string& key, std::s
   assert(isPropExist(prop));
   auto handle = getOrCreateHandle(prop, mdbx::key_mode::usual);
   mdbx::slice data = ::get(_txn, handle, key);
+  value.assign((char*)data.data(), data.size());
   return ECode_Success;
 }
 
@@ -140,31 +139,13 @@ int GStorageEngine::read(const std::string& prop, uint64_t key, std::string& val
   assert(isPropExist(prop));
   auto handle = getOrCreateHandle(prop, mdbx::key_mode::ordinal);
   mdbx::slice data = ::get(_txn, handle, key);
+  value.assign((char*)data.data(), data.size());
   return ECode_Success;
 }
-// int GStorageEngine::openGraph(const char* name, GGraphInstance*& pGraph) {
-//   if (!name) return ECODE_NULL_PTR;
-//   auto ptr = _mHandle.find(name);
-//   if (ptr == _mHandle.end()) {
-//       pGraph = new GGraphInstance(_txn, name);
-//   }
-//   return ECode_Success;
-// }
 
-// int GStorageEngine::openGraph(const char* name)
-// {
-//   if (_mHandle.find(name) == _mHandle.end()) {
-//     GGraphInstance* pGraph = nullptr;
-//     int ret = this->openGraph(name, pGraph);
-//     if (pGraph) {
-//       _mHandle[name] = pGraph;
-//     } else {
-//       return ECODE_NULL_PTR;
-//     }
-//   }
-//   _usedgraph = name;
-//   return ECode_Success;
-// }
+void GStorageEngine::addAttribute(const std::string& key, const std::string& value) {
+  _schema[key] = value;
+}
 
 void GStorageEngine::registGraphFeature(GGraphInstance* pGraph, GVertexProptertyFeature* feature)
 {

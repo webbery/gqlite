@@ -38,8 +38,6 @@ int main() {
   std::string value("hello gqlite");
   engine.addProp("revert_index", PropertyType::String);
   engine.write("revert_index", "key", value.data(), value.size());
-  // engine.finishTrans();
-  // engine.startTrans();
   std::string result;
   engine.read("revert_index", "key", result);
   std::cout<< result<<std::endl;

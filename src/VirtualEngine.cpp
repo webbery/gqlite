@@ -4,6 +4,7 @@
 #include "base/lang/ASTNode.h"
 #include "plan/Plan.h"
 #include "plan/CreatePlan.h"
+#include "plan/UpsetPlan.h"
 #include "VirtualNetwork.h"
 
 uint32_t GVirtualEngine::_indx = 0;
@@ -13,12 +14,12 @@ uint32_t GVirtualEngine::GenerateIndex()
   return ++GVirtualEngine::_indx;
 }
 
-GVirtualEngine::GVirtualEngine()
+GVirtualEngine::GVirtualEngine(size_t memsize)
 : _errIndx(0)
 , _errorCode(ECode_GQL_Parse_Fail)
 , _cmdtype(GQL_Command_Size)
 {
-  _network = new GVirtualNetwork();
+  _network = new GVirtualNetwork(memsize);
 }
 
 GVirtualEngine::~GVirtualEngine() {
@@ -43,11 +44,22 @@ GPlan* GVirtualEngine::makePlans(GASTNode* ast) {
     root = new GCreatePlan(_network, _storage, ast);
   }
     break;
+  case NodeType::UpsetStatement:
+  {
+    root = new GUpsetPlan(_network, _storage, ast);
+  }
+    break;
+  case NodeType::DropStatement:
+    break;
   default:
     break;
   }
+  GPlan* node = root;
   for (size_t idx = 0; idx < ast->_size; ++idx) {
-    makePlans(ast->_children + idx);
+    GPlan* plan = makePlans(ast->_children + idx);
+    if (plan == nullptr || node == nullptr) break;
+    node->addLeft(plan);
+    node = plan;
   }
   return root;
 }

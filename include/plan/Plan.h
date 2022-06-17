@@ -8,7 +8,9 @@ public:
   virtual ~GPlan();
   
   virtual int execute() = 0;
+  void addLeft(GPlan* plan) { _left = plan; }
 
+  inline GPlan* left() { return _left; }
 protected:
   GVirtualNetwork* _network;
   GStorageEngine* _store;

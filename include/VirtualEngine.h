@@ -26,7 +26,7 @@ class GVirtualEngine {
 public:
   static uint32_t GenerateIndex();
 
-  GVirtualEngine();
+  GVirtualEngine(size_t);
   GVirtualEngine( const char* gql, gqlite_callback cb);
   ~GVirtualEngine();
   

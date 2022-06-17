@@ -13,4 +13,5 @@ public:
 
 private:
   std::vector<std::string> _indexes;
+  std::string _name;
 };
