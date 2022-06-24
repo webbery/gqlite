@@ -3,6 +3,7 @@
 #ifdef __linux
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wwrite-strings"
+#pragma GCC diagnostic ignored "-Wdelete-non-virtual-dtor"
 #else
 #pragma warning(push)
 #pragma warning(disable : 4054)

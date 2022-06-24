@@ -17,8 +17,6 @@
 #include "gql/upset.h"
 #include "Type/Binary.h"
 #include "base/lang/lang.h"
-#include "base/VertexVisitor.h"
-#include "base/EdgeVisitor.h"
 
 #define MAX_VARIANT_SIZE  32
 #define GET_GRAPH(name)  \

@@ -156,7 +156,7 @@ elseif(NOT CMAKE_COMPILER_IS_GNUCXX)
     elseif("${CMAKE_Fortran_COMPILER_ID}" MATCHES "GNU")
         # Do nothing; exit conditional without error if true
     else()
-        message(FATAL_ERROR "Compiler is not GNU gcc! Aborting...")
+        # message(FATAL_ERROR "Compiler is not GNU gcc! Aborting... COMPILER:" ${CMAKE_Fortran_COMPILER_ID})
     endif()
 endif()
 

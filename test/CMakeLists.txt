@@ -16,7 +16,6 @@ set(STORAGE_SOURCE
 	../src/Type/VertexStmt.cpp
 	../src/Feature/Gist.cpp
 	../src/Feature/Feature.cpp
-	../src/base/VertexVisitor.cc
 	../src/Type/QueryCondition.cpp
 	)
 set(PARSER_SOURCE
@@ -57,11 +56,14 @@ set(QUERY_SOURCE ./query.cpp
 	../src/base/system/Platform.cpp
 )
 
+set(PTREE_SOURCE ./ptree.cpp)
+
 add_executable(grammar ${TEST_GRAMMAR_SOURCE})
 add_executable(storage ${STORAGE_SOURCE})
 add_executable(regress ${REGRESS_SOURCE})
 add_executable(algorithm ${OLGRITHM_SOURCE})
 add_executable(query ${QUERY_SOURCE})
+add_executable(ptree ${PTREE_SOURCE})
 
 set_property(TARGET algorithm PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/test")
 target_link_libraries(grammar PUBLIC gqlite fmt-header-only)
@@ -83,6 +85,7 @@ add_test(NAME storage COMMAND storage)
 add_test(NAME algorithm COMMAND algorithm)
 add_test(NAME query COMMAND query)
 add_test(NAME grammar COMMAND grammar)
+add_test(NAME ptree COMMAND ptree)
 add_test(NAME regress_vertex COMMAND regress --inputdir=./vertex --outputdir=./vertex
 	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 add_test(NAME regress_edge COMMAND regress --inputdir=./edge --outputdir=./edge

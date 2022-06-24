@@ -1,11 +1,14 @@
 #include "VirtualNetwork.h"
+#include "Graph/Node.h"
 
 GVirtualNetwork::GVirtualNetwork(size_t maxMem)
-:_maxMemory(maxMem)
-,_current(nullptr) {}
+:_current(nullptr)
+,_cache(maxMem)
+{
+}
 
-void GVirtualNetwork::addNode(GNode* node) {
-
+void GVirtualNetwork::add(GNode* node) {
+  
 }
 
 void GVirtualNetwork::release() {}

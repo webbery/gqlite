@@ -3,7 +3,6 @@
 #include <cassert>
 #include "Feature/Gist.h"
 #include "Type/Vertex.h"
-#include "base/VertexVisitor.h"
 
 #define GRAPH_NAME  "g1"
 
