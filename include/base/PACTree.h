@@ -216,9 +216,11 @@ std::tuple<GPACNode<T>*, GPACNode<T>*, GPACNode<T>*> expose(GPACNode<T>* tree) {
     iterator end() { return iterator(_header); }
 
     node_ptr left_rotate(node_ptr root) {
+      return root;
     }
 
     node_ptr right_rotate(node_ptr root) {
+      return root;
     }
 
     size_t deepth(node_ptr root) {

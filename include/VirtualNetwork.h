@@ -1,29 +1,12 @@
 #pragma once
 #include <queue>
-#include "base/PACTree.h"
+#include "base/parallel/gql_map.h"
+#include "Graph/Node.h"
 
 class GNode;
 
-template<typename K, typename T>
-class GCacheNode {
-public:
-private:
-  K _key;
-  T _value;
-  GCacheNode* _next;
-  GCacheNode* _prev;
-};
-
-template<typename T>
-class GLRU {
-public:
-  GLRU(size_t capacity): _capacity(capacity) {}
-
-private:
-  size_t _capacity;
-  GCacheNode<uint64_t, GNode*> _node;
-};
-
+class GEntityNode;
+class GAttributeNode;
 class GVirtualNetwork {
 public:
   GVirtualNetwork(size_t maxMem);
@@ -41,6 +24,8 @@ private:
 
 private:
   GNode* _current;
-  GLRU<GNode*> _cache;
-  gql::GPACTree<int, GNode> _tree;
+  size_t _maxMemory;
+  std::priority_queue<uint32_t> _queue;
+  GMap<uint32_t, GNode*> _nodes;
+  GMap<GNode*, std::tuple<GEntityNode*, GAttributeNode*>> _relations;
 };

@@ -84,11 +84,12 @@ mdbx::map_handle GStorageEngine::openSchema() {
   return schema;
 }
 
-void GStorageEngine::addProp(const std::string& prop, PropertyType type) {
+void GStorageEngine::addProp(const std::string& prop, PropertyInfo type) {
   if (!isPropExist(prop)) {
     nlohmann::json info;
     info["name"] = prop;
-    info["type"] = type;
+    uint8_t value = *(uint8_t*)&type;
+    info["info"] = value;
     _schema["prop"].push_back(info);
   }
 }
@@ -100,6 +101,15 @@ bool GStorageEngine::isPropExist(const std::string& prop) {
     if ((*itr)["name"] == prop) return true;
   }
   return false;
+}
+
+nlohmann::json GStorageEngine::getProp(const std::string& prop)
+{
+  const auto& props = _schema["prop"];
+  for (auto itr = props.begin(); itr != props.end(); ++itr) {
+    if ((*itr)["name"] == prop) return *itr;
+  }
+  assert(false);
 }
 
 mdbx::map_handle GStorageEngine::getOrCreateHandle(const std::string& prop, mdbx::key_mode mode) {
@@ -147,9 +157,28 @@ void GStorageEngine::addAttribute(const std::string& key, const std::string& val
   _schema[key] = value;
 }
 
+GStorageEngine::cursor GStorageEngine::getCursor(const std::string& prop)
+{
+  assert(isPropExist(prop));
+  mdbx::key_mode mode = mdbx::key_mode::ordinal;
+  auto pp = getProp(prop);
+  auto c = (uint8_t)pp["info"];
+  PropertyInfo info = { 0 };
+  size_t n = sizeof(PropertyInfo);
+  std::memcpy(&info, &c, sizeof(PropertyInfo));
+  mdbx::map_handle handle;
+  if (info.key_type == 0) {
+    handle = getOrCreateHandle(prop, mdbx::key_mode::ordinal);
+  }
+  else {
+    handle = getOrCreateHandle(prop, mdbx::key_mode::usual);
+  }
+  return _txn.open_cursor(handle);
+}
+
 void GStorageEngine::registGraphFeature(GGraphInstance* pGraph, GVertexProptertyFeature* feature)
 {
-  pGraph->registPropertyFeature(feature);
+  //pGraph->registPropertyFeature(feature);
 }
 
 // GGraphInstance* GStorageEngine::getGraph(const char* name)

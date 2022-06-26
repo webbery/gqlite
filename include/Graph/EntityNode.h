@@ -4,4 +4,6 @@
 class GEntityNode: public GNode {
 public:
   GEntityNode();
+
+private:
 };

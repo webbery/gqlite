@@ -1,6 +1,7 @@
 #include "StorageEngine.h"
 #include <iostream>
 #include <cassert>
+#include <catch.hpp>
 #include "Feature/Gist.h"
 #include "Type/Vertex.h"
 
@@ -30,15 +31,43 @@
 }
   
 
-int main() {
+TEST_CASE("basic storage") {
   GStorageEngine engine;
   engine.open("testdb");
   std::cout << "schema: "<< engine.getSchema() << std::endl;
+  PropertyInfo info;
+  info.key_type = 1;
+  info.value_type = PropertyType::String;
+  info.reserved = 0;
+  engine.addProp("revert_index", info);
   std::string value("hello gqlite");
-  engine.addProp("revert_index", PropertyType::String);
   engine.write("revert_index", "key", value.data(), value.size());
   std::string result;
   engine.read("revert_index", "key", result);
-  std::cout<< result<<std::endl;
-  return 0;
+  CHECK(result == value);
+}
+
+TEST_CASE("range query") {
+  GStorageEngine engine;
+  engine.open("testdb");
+  PropertyInfo info;
+  info.key_type = 0;
+  info.value_type = PropertyType::String;
+  info.reserved = 0;
+  const std::string propname("name");
+  engine.addProp(propname, info);
+  int32_t key = 0;
+  for (size_t idx = 1; idx < 50; ++idx) {
+    std::string value = std::to_string(idx);
+    engine.write(propname, idx, value.data(), value.size());
+  }
+  auto cursor = engine.getCursor(propname);
+  mdbx::cursor::move_result result = cursor.to_first(false);
+  int idx = 0;
+  while (result)
+  {
+    std::string name((char*)result.value.byte_ptr(), result.value.size());
+    CHECK(name == std::to_string(++idx));
+    result = cursor.to_next(false);
+  }
 }

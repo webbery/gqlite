@@ -10,13 +10,6 @@ set(TEST_GRAMMAR_SOURCE ./grammar.cpp)
 set(STORAGE_SOURCE
 	./storage.cpp
 	../src/StorageEngine/StorageEngine.cpp
-	../src/StorageEngine/Graph.cpp
-	../src/Type/Hash.cpp
-	../src/Type/Binary.cpp
-	../src/Type/VertexStmt.cpp
-	../src/Feature/Gist.cpp
-	../src/Feature/Feature.cpp
-	../src/Type/QueryCondition.cpp
 	)
 set(PARSER_SOURCE
 	../src/StorageEngine/StorageEngine.cpp

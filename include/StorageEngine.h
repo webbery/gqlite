@@ -1,21 +1,21 @@
 #pragma once
 #include "gqlite.h"
 #include <mdbx.h++>
-#include "Graph.h"
-#include "Type/Hash.h"
-#include "Type/Binary.h"
-#include "Type/Datetime.h"
-#include "Type/Integer.h"
-#include "Type/Real.h"
-#include "Type/Text.h"
 #include "Feature/Feature.h"
 #include <map>
 #include <functional>
 
-enum class PropertyType {
+enum class PropertyType : uint8_t {
     Undefined,
     String,
-    Number
+    Number,
+    Custom
+};
+
+struct alignas(8) PropertyInfo {
+  uint8_t       key_type : 1;    // 0 - interger, 1 - byte;
+  PropertyType  value_type : 5;  // 
+  uint8_t       reserved : 2;
 };
 
 class GStorageEngine {
@@ -26,13 +26,16 @@ public:
     int open(const char* filename);
     void close();
 
-    void addProp(const std::string& prop, PropertyType type = PropertyType::Undefined);
+    void addProp(const std::string& prop, PropertyInfo info);
 
     int write(const std::string& prop, const std::string& key, void* value, size_t len);
     int read(const std::string& prop, const std::string& key, std::string& value);
 
     int write(const std::string& prop, uint64_t key, void* value, size_t len);
     int read(const std::string& prop, uint64_t key, std::string& value);
+
+    typedef mdbx::cursor_managed  cursor;
+    cursor getCursor(const std::string& prop);
 
     void registGraphFeature(GGraphInstance*, GVertexProptertyFeature* feature);
 
@@ -86,6 +89,7 @@ public:
 
 private:
     bool isPropExist(const std::string& prop);
+    nlohmann::json getProp(const std::string& prop);
     mdbx::map_handle getOrCreateHandle(const std::string& prop, mdbx::key_mode mode);
     /*
      * @brief schema is used to record the graph's infomation

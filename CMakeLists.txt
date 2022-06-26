@@ -26,6 +26,8 @@ setup_target_for_coverage_gcovr_xml(
 		"tool/getopt.h"
 		"test/uint.hpp"
 		"third_party/catch2/catch.hpp"
+		"include/base/parallel/pam/*"
+		"include/base/parallel/parlay/*"
 )
 # ctest_coverage(BUILD test)
 ELSE ()
