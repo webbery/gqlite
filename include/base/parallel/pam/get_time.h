@@ -1,26 +1,46 @@
 #pragma once
 
 #include <stdlib.h>
-#include <sys/time.h>
 #include <iomanip>
 #include <iostream>
 #include <string>
+#ifdef WIN32
+#include <windows.h>
+inline int gettimeofday(struct timeval *tp, void *tzp) {
+  time_t clock;
+  struct tm tm;
+  SYSTEMTIME wtm;
+  GetLocalTime(&wtm);
+  tm.tm_year   = wtm.wYear - 1900;
+  tm.tm_mon   = wtm.wMonth - 1;
+  tm.tm_mday   = wtm.wDay;
+  tm.tm_hour   = wtm.wHour;
+  tm.tm_min   = wtm.wMinute;
+  tm.tm_sec   = wtm.wSecond;
+  tm. tm_isdst  = -1;
+  clock = mktime(&tm);
+  tp->tv_sec = clock;
+  tp->tv_usec = wtm.wMilliseconds * 1000;
+  return 0;
+}
+#else
+#include <sys/time.h>
+#endif
 
 struct timer {
   double total_time;
   double last_time;
   bool on;
   std::string name;
-  struct timezone tzp;
 
   timer(std::string name = "PBBS time", bool _start = true)
-  : total_time(0.0), on(false), name(name), tzp({0,0}) {
+  : total_time(0.0), on(false), name(name) {
     if (_start) start();
   }
 
   double get_time() {
     timeval now;
-    gettimeofday(&now, &tzp);
+    gettimeofday(&now, nullptr);
     return ((double) now.tv_sec) + ((double) now.tv_usec)/1000000.;
   }
 
