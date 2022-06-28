@@ -1,6 +1,5 @@
 #pragma once
 #include "pam/pam.h"
-#include <bits/functexcept.h>
 #if __cplusplus >= 201103L
 #include <initializer_list>
 #endif
