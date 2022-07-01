@@ -1,3 +1,5 @@
+#include <thread>
+#include <future>
 #include "plan/UpsetPlan.h"
 #include "StorageEngine.h"
 #include "VirtualNetwork.h"
@@ -9,7 +11,7 @@ int GUpsetPlan::execute() {
   GPlan* plan = _left;
   while (plan)
   {
-    _network->add(nullptr);
+    _network->add(0, nullptr);
     plan = plan->left();
   }
   

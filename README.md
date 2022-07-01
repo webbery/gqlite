@@ -246,4 +246,7 @@ use graph 'xxx'
 ```
 
 ## Papers  
-[向量索引算法HNSW和NSG的比较](https://zhuanlan.zhihu.com/p/105594786)
+1. Yihan Sun, Daniel Ferizovic, Guy E. Belloch. PAM: Parallel Augmented Maps.  
+2. Laxman Dhulipala, Guy Blelloch, Yan Gu, Yihan Sun. PaC-trees: Supporting Parallel and Compressed Purely-Functional Collections.  
+3. Amine Ghrab, Oscar Romero, Sabri Skhiri etc. GRAD: On Graph Database Modeling.  
+4. [向量索引算法HNSW和NSG的比较](https://zhuanlan.zhihu.com/p/105594786)  

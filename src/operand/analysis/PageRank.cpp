@@ -1,5 +1,5 @@
 #include "operand/analysis/PageRank.h"
-#include "operand/algorithms/RandomWalk.h"
+#include "walk/RandomWalk.h"
 
 #define SIZE_OF_MATRIX_COMPUTATION  10
 void GPageRank::analysis(const GSubGraph& g) {

@@ -9,7 +9,6 @@
 #include <iostream>
 #include "operand/SimilarityOp.h"
 #include "operand/algorithms/Hungarian.h"
-#include "operand/algorithms/RandomWalk.h"
 #include "Graph/BipartiteGraph.h"
 #include "base/system/Platform.h"
 #include "operand/analysis/DegreeCentrality.h"
@@ -118,21 +117,6 @@ TEST_CASE("hungarian algorithm") {
     alg.solve(m88, weight);
   };
   releaseGraph(wg);
-}
-
-/**
- * https://people.math.osu.edu/husen.1/teaching/571/random_walks.pdf
- */
-TEST_CASE("random walk algorithm") {
-  // enableStackTrace(true);
-  GSubGraph* basic = createGraph(working_directory + "random_walk.dot");
-  GRandomWalk rw(*basic);
-  std::list<std::string> vnames;
-  for (size_t cnt = 0; cnt < 5000; ++cnt) {
-    GVertex* v = rw.next();
-    vnames.push_back(v->id());
-  }
-  // fmt::print("walk: {}\n", vnames);
 }
 
 TEST_CASE("analysis algorithm") {

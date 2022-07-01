@@ -36,7 +36,6 @@ set(OLGRITHM_SOURCE ./algorithm.cpp
 	../src/Graph/BipartiteGraph.cpp
 	../src/operand/distance/EditDistance.cpp
 	../src/operand/algorithms/Hungarian.cpp
-	../src/operand/algorithms/RandomWalk.cpp
 	../src/operand/match/CTreeStrategy.cpp
 	../src/operand/analysis/DegreeCentrality.cpp
 )
@@ -50,6 +49,10 @@ set(QUERY_SOURCE ./query.cpp
 )
 
 set(PTREE_SOURCE ./ptree.cpp)
+set(VNET_SOURCE ./vnet.cpp
+	../src/walk/WalkFactory.cpp
+	../src/walk/RandomWalk.cpp
+	../src/VirtualNetwork.cpp)
 
 add_executable(grammar ${TEST_GRAMMAR_SOURCE})
 add_executable(storage ${STORAGE_SOURCE})
@@ -57,6 +60,7 @@ add_executable(regress ${REGRESS_SOURCE})
 add_executable(algorithm ${OLGRITHM_SOURCE})
 add_executable(query ${QUERY_SOURCE})
 add_executable(ptree ${PTREE_SOURCE})
+add_executable(vnet ${VNET_SOURCE})
 
 set_property(TARGET algorithm PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/test")
 target_link_libraries(grammar PUBLIC gqlite fmt-header-only)
@@ -64,6 +68,7 @@ target_link_libraries(regress PUBLIC gqlite fmt-header-only)
 target_link_libraries(storage PUBLIC mdbx-static fmt-header-only)
 target_link_libraries(algorithm fmt-header-only)
 target_link_libraries(query fmt-header-only)
+target_link_libraries(vnet fmt-header-only pthread)
 
 # find_package(Python3 COMPONENTS Interpreter Development)
 

@@ -1,5 +1,6 @@
 #pragma once
 #include <stdint.h>
+#include <atomic>
 
 enum class NodeKind: uint8_t {
   Entity,
@@ -10,13 +11,15 @@ enum class NodeKind: uint8_t {
 
 class GNode {
 public:
+
   virtual ~GNode() {}
 
   struct alignas(8) Status {
     bool visit: 1;        // visit state of current plan. For example, 1 is visited in last plan, 0 is current plan.
     bool updated: 1;      // is this node updated
+    bool hold: 1;
     NodeKind kind: 4;
   };
 
-  Status _status;
+  std::atomic<Status> _status;
 };
