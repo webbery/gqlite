@@ -3,7 +3,6 @@
 #include "Error.h"
 #include <set>
 #include "Type/Binary.h"
-#include "Predicate.h"
 #include "gqlite.h"
 
 #define GRAPH_EXCEPTION_CATCH(expr) try{\
@@ -159,8 +158,8 @@ std::vector<std::pair<VertexID, nlohmann::json>> GGraphInstance::getVertex(mdbx:
   return result;
 }
 
-int GGraphInstance::queryVertex(std::set<VertexID>& ids, const GConditions& preds)
-{/*
+/*int GGraphInstance::queryVertex(std::set<VertexID>& ids, const GConditions& preds)
+{
   const GConditions* cur = &preds;
   while (cur) {
     std::shared_ptr<GPredition> pred = cur->_preds;
@@ -221,9 +220,9 @@ int GGraphInstance::queryVertex(std::set<VertexID>& ids, const GConditions& pred
       lastResult = out;
     }
     cur = cur->_next.get();
-  }*/
+  }
   return ECode_Success;
-}
+}*/
 
 int GGraphInstance::queryEdge(const nlohmann::json& pred)
 {
@@ -235,18 +234,18 @@ int GGraphInstance::queryEdge(const nlohmann::json& pred)
 //   return ECode_Success;
 // }
 
-GVertexStmt GGraphInstance::getVertexById(const std::string& id)
-{
-  GVertexStmt vertex;
-  mdbx::slice data = get(_txn, _vertexes, id);
-  if (data.empty()) return vertex;
-  vertex.property() = nlohmann::json::from_cbor(data.byte_ptr(), data.byte_ptr() + data.size() - 1);
-  size_t offset = data.size();
-  mdbx::byte extra = *(data.byte_ptr() + offset - 1);
-  // vertex.setBinaryFlag(extra & EXTERN_BINARY_BIT);
-  vertex.setBinaryFlag(true);
-  return vertex;
-}
+// GVertexStmt GGraphInstance::getVertexById(const std::string& id)
+// {
+//   GVertexStmt vertex;
+//   mdbx::slice data = get(_txn, _vertexes, id);
+//   if (data.empty()) return vertex;
+//   vertex.property() = nlohmann::json::from_cbor(data.byte_ptr(), data.byte_ptr() + data.size() - 1);
+//   size_t offset = data.size();
+//   mdbx::byte extra = *(data.byte_ptr() + offset - 1);
+//   // vertex.setBinaryFlag(extra & EXTERN_BINARY_BIT);
+//   vertex.setBinaryFlag(true);
+//   return vertex;
+// }
 
 int GGraphInstance::bind(const EdgeID& eid, const VertexID& from, const VertexID& to)
 {

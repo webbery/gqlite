@@ -11,7 +11,7 @@ int GUpsetPlan::execute() {
   GPlan* plan = _left;
   while (plan)
   {
-    _network->add(0, nullptr);
+    _network->addNode(0);
     plan = plan->left();
   }
   

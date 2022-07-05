@@ -24,6 +24,6 @@ public:
 
 class GWalkFactory {
 public:
-  virtual IWalkStrategy* createStrategy(VisitSelector selector);
+  virtual IWalkStrategy* createStrategy(VisitSelector selector, parlay::sequence<GNode*>& visited);
   
 };

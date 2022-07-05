@@ -9,9 +9,8 @@ std::atomic_bool is_exit(false);
 void productor(GVirtualNetwork* vn) {
   uint32_t id = 1;
   while (!is_exit) {
-    GNode* node = new GNode();
     prod_mut.lock();
-    vn->add(id++, node);
+    vn->addNode(id++);
     prod_mut.unlock();
   }
 }
@@ -22,9 +21,7 @@ void productor(GVirtualNetwork* vn) {
 TEST_CASE("random walk algorithm") {
   GVirtualNetwork* net = new GVirtualNetwork(10);
   std::thread t(productor, net);
-  net->visit(VisitSelector::RandomWalk, [](GNode* node) {
-
-  });
+  net->visit(VisitSelector::RandomWalk, [](GNode*) {});
   is_exit.store(true);
   t.join();
   net->release();

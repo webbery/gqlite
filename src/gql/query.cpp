@@ -30,12 +30,12 @@ namespace query
     // }
   }
   
-  void filter_property(gqlite_result& results, gast* properties) {
-    if (!properties) return;
-    for (size_t idx = 0; idx < results.count; ++idx) {
+  // void filter_property(gqlite_result& results, gast* properties) {
+  //   if (!properties) return;
+  //   for (size_t idx = 0; idx < results.count; ++idx) {
 
-    }
-  }
+  //   }
+  // }
 
   void release_vertexes(gqlite_result& results) {
     gqlite_node* node = results.nodes;

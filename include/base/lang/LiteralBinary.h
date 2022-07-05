@@ -8,8 +8,8 @@ public:
   virtual std::string raw() const {
     return _raw;
   }
-  virtual PropertyKind kind() const {
-    return PropertyKind::Binary;
+  virtual AttributeKind kind() const {
+    return AttributeKind::Binary;
   }
 private:
   std::string _raw;

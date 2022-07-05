@@ -52,6 +52,9 @@ set(PTREE_SOURCE ./ptree.cpp)
 set(VNET_SOURCE ./vnet.cpp
 	../src/walk/WalkFactory.cpp
 	../src/walk/RandomWalk.cpp
+	../src/base/system/EventEmitter.cpp
+	../src/Graph/EntityNode.cpp
+	../src/Graph/EntityEdge.cpp
 	../src/VirtualNetwork.cpp)
 
 add_executable(grammar ${TEST_GRAMMAR_SOURCE})
@@ -84,6 +87,7 @@ add_test(NAME algorithm COMMAND algorithm)
 add_test(NAME query COMMAND query)
 add_test(NAME grammar COMMAND grammar)
 add_test(NAME ptree COMMAND ptree)
+add_test(NAME vnet COMMAND vnet)
 add_test(NAME regress_vertex COMMAND regress --inputdir=./vertex --outputdir=./vertex
 	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 add_test(NAME regress_edge COMMAND regress --inputdir=./edge --outputdir=./edge

@@ -1,3 +1,3 @@
 #include "Graph/EntityNode.h"
 
-GEntityNode::GEntityNode() {}
+GEntityNode::GEntityNode(GEventEmitter& event) {}

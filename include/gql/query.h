@@ -38,6 +38,6 @@ namespace query
     // }
     // results.nodes = root;
   }
-  void filter_property(gqlite_result& results, gast* properties);
+  // void filter_property(gqlite_result& results, gast* properties);
   void release_vertexes(gqlite_result& results);
 } // namespace query

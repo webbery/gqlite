@@ -39,11 +39,10 @@ enum NodeType {
   CallExpression,
 };
 
-enum PropertyKind {
+enum AttributeKind {
   Number,
   Integer,
   String,
   Binary,
-  From,
-  To,
+  Datetime,
 };

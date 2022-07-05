@@ -5,7 +5,6 @@
 #include "operand/skey.h"
 #include "Feature/Gist.h"
 #include "IGraph.h"
-#include "Type/VertexStmt.h"
 
 #define BIN_FLAG  ":bin"
 #define IS_INVALID_VERTEX(v) \
@@ -45,12 +44,12 @@ public:
   // std::vector<Edge> getEdges(mdbx::txn_managed& txn, VertexID vertex);
   std::vector<std::pair<VertexID, nlohmann::json>> getVertex(mdbx::txn_managed& txn);
 
-  int queryVertex(std::set<VertexID>& ids, const GConditions& pred);
+  // int queryVertex(std::set<VertexID>& ids, const GConditions& pred);
   int queryEdge(const nlohmann::json& pred);
   // int query(const GMatchPattern& pattern);
 
     // std::vector<Vertex> getVertex(mdbx::txn_managed& txn, EdgeID edge);
-  GVertexStmt getVertexById(const std::string& id);
+  // GVertexStmt getVertexById(const std::string& id);
 
   int bind(const EdgeID& eid, const VertexID& from, const VertexID& to);
 

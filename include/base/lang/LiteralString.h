@@ -9,8 +9,8 @@ public:
 
   virtual std::string raw() const;
   
-  PropertyKind kind() const {
-    return PropertyKind::String;
+  AttributeKind kind() const {
+    return AttributeKind::String;
   }
 private:
   std::string _value;

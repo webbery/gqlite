@@ -11,6 +11,8 @@ enum class NodeKind: uint8_t {
 
 class GNode {
 public:
+  using attr_t = uint8_t;
+  using node_t = uint32_t;
 
   virtual ~GNode() {}
 

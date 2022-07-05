@@ -6,7 +6,7 @@
 #include "base/lang/ASTNode.h"
 
 #define RETURN_CASE_NODE_TYPE(node_type) case NodeType::node_type: return #node_type
-#define RETURN_CASE_PROP_KIND(prop_kind) case PropertyKind::prop_kind: return #prop_kind
+#define RETURN_CASE_PROP_KIND(prop_kind) case AttributeKind::prop_kind: return #prop_kind
 #define FREE_NODE(node) case 
 
 GASTNode* ListJoin(GASTNode* first, GASTNode* second) {
@@ -69,7 +69,7 @@ std::string NodeType2String(NodeType nt) {
   }
 }
 
-std::string PropertyKind2String(PropertyKind kind) {
+std::string PropertyKind2String(AttributeKind kind) {
   switch (kind) {
     RETURN_CASE_PROP_KIND(Binary);
     RETURN_CASE_PROP_KIND(Number);

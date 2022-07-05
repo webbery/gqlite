@@ -11,8 +11,8 @@ public:
     return std::to_string(_value);
   }
 
-  PropertyKind kind() const {
-    return PropertyKind::Number;
+  AttributeKind kind() const {
+    return AttributeKind::Number;
   }
   
 private:

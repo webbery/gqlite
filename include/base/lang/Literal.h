@@ -7,5 +7,5 @@ public:
   virtual ~GLiteral() {}
 
   virtual std::string raw() const = 0;
-  virtual PropertyKind kind() const = 0;
+  virtual AttributeKind kind() const = 0;
 };
