@@ -20,7 +20,8 @@ public:
     bool visit: 1;        // visit state of current plan. For example, 1 is visited in last plan, 0 is current plan.
     bool updated: 1;      // is this node updated
     bool hold: 1;
-    NodeKind kind: 4;
+    NodeKind kind: 3;
+    uint8_t layer: 2;     // hnsw layer level
   };
 
   std::atomic<Status> _status;

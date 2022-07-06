@@ -71,7 +71,11 @@ target_link_libraries(regress PUBLIC gqlite fmt-header-only)
 target_link_libraries(storage PUBLIC mdbx-static fmt-header-only)
 target_link_libraries(algorithm fmt-header-only)
 target_link_libraries(query fmt-header-only)
+IF (WIN32)
+target_link_libraries(vnet fmt-header-only)
+ELSE ()
 target_link_libraries(vnet fmt-header-only pthread)
+ENDIF ()
 
 # find_package(Python3 COMPONENTS Interpreter Development)
 
