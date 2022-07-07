@@ -17,15 +17,20 @@ void GVirtualNetwork::addNode(uint32_t id) {
   _vg._mNodesInstance[id] = new GEntityNode(_event);
 }
 
+void GVirtualNetwork::addEdge(uint32_t id) {}
+
 void GVirtualNetwork::release() {
-  
+  std::any arg = std::make_any<int>(0);
+  _event.emit((int)VNMessage::WalkStop, arg);
+  _vg.clear();
 }
 
-size_t GVirtualNetwork::clean() {
-  
-  return 0;
+void GVirtualNetwork::startWalk() {
+  std::any arg = std::make_any<int>(0);
+  _event.emit((int)VNMessage::WalkStart, arg);
 }
 
-const std::vector<std::string>& GVirtualNetwork::attributes() const {
-  return _attributes;
+void GVirtualNetwork::stopWalk() {
+  std::any arg = std::make_any<int>(0);
+  _event.emit((int)VNMessage::WalkStop, arg);
 }

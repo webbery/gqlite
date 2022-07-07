@@ -1,6 +1,7 @@
 #pragma once
 
 #include "base/lang/GQLExpression.h"
+#include "base/lang/ArrayExpression.h"
 #include "base/lang/Literal.h"
 #include "base/lang/CreateStmt.h"
 #include "base/lang/UpsetStmt.h"

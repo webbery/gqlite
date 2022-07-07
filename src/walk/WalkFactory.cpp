@@ -1,11 +1,11 @@
 #include "walk/WalkFactory.h"
 #include "walk/RandomWalk.h"
 
-IWalkStrategy* GWalkFactory::createStrategy(VisitSelector selector, parlay::sequence<GNode*>& visitedQueue) {
+IWalkStrategy* GWalkFactory::createStrategy(VisitSelector selector) {
   switch (selector)
   {
   case VisitSelector::RandomWalk:
-      return new GRandomWalk(visitedQueue);
+      return new GRandomWalk();
   default:
       return nullptr;
   }

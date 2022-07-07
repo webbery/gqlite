@@ -15,4 +15,5 @@ public:
 private:
   node_t _id;
   group_t _gid;
+  GEventEmitter& _event;
 };

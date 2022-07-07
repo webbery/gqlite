@@ -3,7 +3,7 @@
 #include <string>
 #include <fmt/printf.h>
 #include <cassert>
-#include "base/lang/ASTNode.h"
+#include "base/lang/AST.h"
 
 #define RETURN_CASE_NODE_TYPE(node_type) case NodeType::node_type: return #node_type
 #define RETURN_CASE_PROP_KIND(prop_kind) case AttributeKind::prop_kind: return #prop_kind
@@ -87,21 +87,6 @@ void printLine(const std::string& format, const std::string& str, int level) {
 
 std::function<void(GASTNode* , int )> getPrintFunc(NodeType nt) {
   static std::map<NodeType, std::function<void(GASTNode* root, int level)> > mPrinter({
-    {NodeType::Literal,
-      [](GASTNode* root, int level) {
-        GTypeTraits<NodeType::Literal>::type* ptr = reinterpret_cast<GTypeTraits<NodeType::Literal>::type*>(root->_value);
-        std::string nodeType = NodeType2String(root->_nodetype);
-        printLine("|- type: {}\n", nodeType, level);
-        printLine("|- raw: {}\n", ptr->raw(), level);
-        printLine("|- kind: {}\n", PropertyKind2String(ptr->kind()), level);
-      }
-    },
-    {NodeType::GQLExpression,
-      [](GASTNode* root, int level) {
-        std::string nodeType = NodeType2String(root->_nodetype);
-        printLine("|- type: {}\n", nodeType, level);
-      }
-    },
     {NodeType::CreationStatement,
       [](GASTNode* root, int level) {
         std::string nodeType = NodeType2String(root->_nodetype);
@@ -225,4 +210,69 @@ void DumpAst(GASTNode* root, int level /* = 0 */) {
 std::string GetString(GASTNode* node) {
   GLiteral* str = (GLiteral*)node->_value;
   return str->raw();
+}
+
+VisitFlow GViewVisitor::apply(GASTNode* stmt, std::list<NodeType>& path) {
+  size_t level = path.size();
+  printLine("`- type: {}\n", NodeType2String(stmt->_nodetype), level);
+  // printLine("|- name: {}\n", stmt->name(), level);
+  return VisitFlow::Children;
+}
+VisitFlow GViewVisitor::apply(GUpsetStmt* stmt, std::list<NodeType>& path) {
+  size_t level = path.size();
+  printLine("|- type: {}\n", NodeType2String(UpsetStatement), level);
+  printLine("|- name: {}\n", stmt->name(), level);
+  return VisitFlow::Children;
+}
+VisitFlow GViewVisitor::apply(GQueryStmt* stmt, std::list<NodeType>& path) {
+  size_t level = path.size();
+  printLine("|- type: {}\n", NodeType2String(QueryStatement), level);
+  printLine("|- query:\n", "", level);
+  // DumpAst(ptr->query(), level + 1);
+  printLine("|- graph:\n", "", level);
+  return VisitFlow::Children;
+}
+VisitFlow GViewVisitor::apply(GGQLExpression* stmt, std::list<NodeType>& path) {
+  size_t level = path.size();
+  printLine("|- type: {}\n", NodeType2String(GQLExpression), level);
+  // printLine("|- name: {}\n", stmt->name(), level);
+  return VisitFlow::Children;
+}
+VisitFlow GViewVisitor::apply(GProperty* stmt, std::list<NodeType>& path) {
+  size_t level = path.size();
+  printLine("|- type: {}\n", NodeType2String(Property), level);
+  printLine("|- key: {}\n", stmt->key(), level);
+  printLine("|- value:\n", "", level);
+  return VisitFlow::Children;
+}
+VisitFlow GViewVisitor::apply(GVertexDeclaration* stmt, std::list<NodeType>& path) {
+  size_t level = path.size();
+  printLine("|- type: {}\n", NodeType2String(VertexDeclaration), level);
+  return VisitFlow::Children;
+}
+VisitFlow GViewVisitor::apply(GCreateStmt* stmt, std::list<NodeType>& path) {
+  size_t level = path.size();
+  printLine("|- type: {}\n", NodeType2String(CreationStatement), level);
+  printLine("|- name: {}\n", stmt->name(), level);
+  return VisitFlow::Children;
+}
+VisitFlow GViewVisitor::apply(GLiteral* stmt, std::list<NodeType>& path) {
+  size_t level = path.size();
+  printLine("|- type: {}\n", NodeType2String(Literal), level);
+  printLine("|- raw: {}\n", stmt->raw(), level);
+  printLine("|- kind: {}\n", PropertyKind2String(stmt->kind()), level);
+  return VisitFlow::Children;
+}
+
+VisitFlow GViewVisitor::apply(GArrayExpression* stmt, std::list<NodeType>& path) {
+  size_t level = path.size();
+  printLine("|- type: {}\n", NodeType2String(ArrayExpression), level);
+  auto itr = stmt->begin();
+  size_t cnt = 1;
+  while (itr != stmt->end()) {
+    printLine("|- #{}\n", std::to_string(cnt++), level);
+    accept(*itr, *this, path);
+    ++itr;
+  }
+  return VisitFlow::SkipCurrent;
 }

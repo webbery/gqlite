@@ -8,7 +8,7 @@
 
 class GRandomWalk : public IWalkStrategy {
 public:
-  GRandomWalk(parlay::sequence<GNode*>& visitedNode, double dumping = 0.9);
+  GRandomWalk(double dumping = 0.9);
 
   virtual int walk(virtual_graph_t& vg, std::function<void(GNode*)>);
 
@@ -19,5 +19,4 @@ private:
   std::default_random_engine _re;
   std::normal_distribution<> _distribution;
   double _dumping;
-  parlay::sequence<GNode*>& _visited;
 };

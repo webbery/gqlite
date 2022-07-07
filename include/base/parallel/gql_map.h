@@ -32,6 +32,22 @@ public:
 
   size_t size() { return _mNodesInstance.size(); }
 
+  void clean() {
+    parlay::parallel_for(0, _visitedNodes.size(), [&](size_t idx) {
+      node_t nodeID = _visitedNodes[idx];
+      delete _mNodesInstance[nodeID];
+      _mNodesInstance.erase(nodeID);
+    });
+  }
+
+  void clear() {
+    for (auto itr = _mNodesInstance.begin(); itr != _mNodesInstance.end(); ++itr) {
+      delete itr->second;
+    }
+    _mNodesInstance.clear();
+    _visitedNodes.clear();
+  }
+  parlay::sequence<node_t> _visitedNodes;
   // limited size of total nodes
   std::map<node_t, GNode*> _mNodesInstance;
   pam_node _nodes;

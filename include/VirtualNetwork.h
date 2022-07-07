@@ -16,43 +16,53 @@ class GVirtualNetwork {
 public:
   enum class VNMessage {
     FirstNodeLoaded = 1,
+    LastNodeLoaded = 2,
+    WalkInterrupt = 3,    //
+    WalkStart = 4,
+    WalkStop
   };
+
   GVirtualNetwork(size_t maxMem);
+
+  void startWalk();
+  void stopWalk();
   /**
    * 如果当前节点数量达到上限，按如下规则移除节点：
    * 1. 最近最少使用的节点
    * 然后将节点添加进来
    */
   void addNode(uint32_t id);
+  void addEdge(uint32_t id);
   void release();
 
   template<typename Visitor>
   void visit(VisitSelector selector, Visitor visitor) {
     GWalkFactory* factory = new GWalkFactory();
-    auto* strategy = factory->createStrategy(selector, _visitedNodes);
+    auto* strategy = factory->createStrategy(selector);
     // wait for start
-    _event.on((int)VNMessage::FirstNodeLoaded, [](const std::any&) {
-      // strategy->walk(_vg, visitor);
+    _event.on((int)VNMessage::FirstNodeLoaded, [&](const std::any&) {
+      strategy->walk(_vg, visitor);
     });
-    delete factory;
+    _event.on((int)VNMessage::LastNodeLoaded, [&](const std::any&) {
+      delete strategy;
+      delete factory;
+    });
+    _event.on((int)VNMessage::WalkInterrupt, [&](const std::any&) {
+      delete strategy;
+      delete factory;
+    });
   }
 
-  const std::vector<std::string>& attributes() const;
-  AttributeKind attributeKind(uint8_t idx) const { return _attributesKind[idx]; }
 
 private:
-  size_t clean();
+  size_t clean() { _vg.clean(); return 0;}
 
 private:
   size_t _maxMemory;
 
   GEventEmitter _event;
 
-  parlay::sequence<GNode*> _visitedNodes;
   virtual_graph_t _vg;
-
-  std::vector<std::string> _attributes;
-  std::vector<AttributeKind> _attributesKind;
 
   std::vector<std::string> _groups;
 };

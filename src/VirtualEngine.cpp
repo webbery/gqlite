@@ -2,8 +2,7 @@
 #include "gqlite.h"
 #include "StorageEngine.h"
 #include "base/lang/ASTNode.h"
-#include "plan/Plan.h"
-#include "plan/CreatePlan.h"
+#include "plan/UtilPlan.h"
 #include "plan/UpsetPlan.h"
 #include "VirtualNetwork.h"
 
@@ -39,17 +38,16 @@ GPlan* GVirtualEngine::makePlans(GASTNode* ast) {
   GPlan* root = nullptr;
   switch (ast->_nodetype)
   {
+  case NodeType::DropStatement:
   case NodeType::CreationStatement:
   {
-    root = new GCreatePlan(_network, _storage, ast);
+    root = new GUtilPlan(_network, _storage, ast);
   }
     break;
   case NodeType::UpsetStatement:
   {
     root = new GUpsetPlan(_network, _storage, ast);
   }
-    break;
-  case NodeType::DropStatement:
     break;
   default:
     break;

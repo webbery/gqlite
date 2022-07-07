@@ -8,6 +8,13 @@ void GEventEmitter::emit(int event, std::any& args) {
   }
 }
 
+void GEventEmitter::emit(int event) {
+  if (_listeners.count(event)) {
+    std::any args;
+    _listeners[event](args);
+  }
+}
+
 void GEventEmitter::on(int event, std::function<void(const std::any&)> f) {
   _listeners[event] = f;
 }

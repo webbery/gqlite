@@ -15,5 +15,6 @@ public:
     bool updated: 1;      // is this node updated
     bool hold: 1;
     EdgeKind kind: 3;
+    uint8_t direction: 1;  // 1 is bidirection, 0 is direction. Other wise it can be delete.
   };
 };

@@ -17,6 +17,7 @@
 #include "gql/upset.h"
 #include "Type/Binary.h"
 #include "base/lang/lang.h"
+#include "base/lang/AST.h"
 
 #define MAX_VARIANT_SIZE  32
 #define GET_GRAPH(name)  \
@@ -209,7 +210,10 @@ utility_cmd: CMD_SHOW KW_GRAPH
         | KW_AST gql
           {
             fmt::print("AST:\n");
-            DumpAst($2);
+            // DumpAst($2);
+            GAST ast($2);
+            GViewVisitor visitor;
+            ast.parse(visitor);
             stm._cmdtype = GQL_Util;
           }
         | profile gql {};
@@ -385,8 +389,9 @@ a_graph_expr:
 where_expr: OP_WHERE COLON json { $$ = $3; };
 string_list: VAR_STRING
               {
-                struct GASTNode* node = INIT_STRING_AST($1);
-                $$ = NewAst(NodeType::ArrayExpression, node, nullptr, 0);
+                GArrayExpression* array = new GArrayExpression();
+                array->addElement(INIT_STRING_AST($1));
+                $$ = NewAst(NodeType::ArrayExpression, array, nullptr, 0);
               }
         | LEFT_SQUARE strings RIGHT_SQUARE
               {
@@ -397,13 +402,15 @@ string_list: VAR_STRING
 //         | string_list { $$ = $1; };
 strings:  VAR_STRING
               {
-                struct GASTNode* node = INIT_STRING_AST($1);
-                $$ = NewAst(NodeType::ArrayExpression, node, nullptr, 0);
+                GArrayExpression* array = new GArrayExpression();
+                array->addElement(INIT_STRING_AST($1));
+                $$ = NewAst(NodeType::ArrayExpression, array, nullptr, 0);
               }
         | strings COMMA VAR_STRING
               {
-                GASTNode* node = NewAst(NodeType::ArrayExpression, INIT_STRING_AST($3), nullptr, 0);
-                $$ = ListJoin($1, node);
+                GArrayExpression* array = (GArrayExpression*)$1->_value;
+                array->addElement(INIT_STRING_AST($3));
+                $$ = $1;
               };
 number: VAR_DECIMAL { $$ = INIT_NUMBER_AST($1); }
         | VAR_INTEGER { $$ = INIT_NUMBER_AST($1); };
@@ -432,16 +439,15 @@ vertexes: vertex
               };
 vertex: LEFT_SQUARE VAR_STRING RIGHT_SQUARE
               {
-                struct GASTNode* value = INIT_STRING_AST($2);
-                $$ = NewAst(NodeType::ArrayExpression, value, nullptr, 0);
+                GVertexDeclaration* decl = new GVertexDeclaration(INIT_STRING_AST($2), nullptr);
+                $$ = NewAst(NodeType::VertexDeclaration, decl, nullptr, 0);
               }
         | LEFT_SQUARE VAR_STRING COMMA json RIGHT_SQUARE
               {
-                struct GASTNode* value = INIT_STRING_AST($2);
-                GASTNode* node = NewAst(NodeType::ArrayExpression, value, nullptr, 0);
-                GASTNode* jsn = NewAst(NodeType::ArrayExpression, $4, nullptr, 0);
-                GASTNode* vertex = ListJoin(node, jsn);
-                GVertexDeclaration* decl = new GVertexDeclaration(vertex);
+                GArrayExpression* value = new GArrayExpression();
+                value->addElement($4);
+                GASTNode* jsn = NewAst(NodeType::ArrayExpression, value, nullptr, 0);
+                GVertexDeclaration* decl = new GVertexDeclaration(INIT_STRING_AST($2), jsn);
                 $$ = NewAst(NodeType::VertexDeclaration, decl, nullptr, 0);
               };
 edge_list: LEFT_SQUARE edges RIGHT_SQUARE {$$ = $2;};
@@ -481,12 +487,15 @@ object: RANGE_BEGIN properties RANGE_END
               $$ = NewAst(NodeType::ObjectExpression, $2, nullptr, 0);
             };
 properties: property {
-              $$ = NewAst(NodeType::ArrayExpression, $1, nullptr, 0);
+              GArrayExpression* props = new GArrayExpression();
+              props->addElement($1);
+              $$ = NewAst(NodeType::ArrayExpression, props, nullptr, 0);
             }
         | properties COMMA property
               {
-                GASTNode* node = NewAst(NodeType::ArrayExpression, $3, nullptr, 0);
-                $$ = ListJoin($1, node);
+                GArrayExpression* props = (GArrayExpression*)$1->_value;
+                props->addElement($3);
+                $$ = $1;
               };
 property: VAR_STRING COLON value
               {
@@ -563,12 +572,15 @@ array:    LEFT_SQUARE RIGHT_SQUARE { $$ = nullptr; }
                 $$ = $2;
               };
 values: value {
-                $$ = NewAst(NodeType::ArrayExpression, $1, nullptr, 0);
+                GArrayExpression* values = new GArrayExpression();
+                values->addElement($1);
+                $$ = NewAst(NodeType::ArrayExpression, values, nullptr, 0);
               }
         | values COMMA value
               {
-                GASTNode* node = NewAst(NodeType::ArrayExpression, $3, nullptr, 0);
-                $$ = ListJoin($1, node);
+                GArrayExpression* values = (GArrayExpression*)$1->_value;
+                values->addElement($3);
+                $$ = $1;
               }
         | values COMMA KW_REST {};
 a_link_condition: 

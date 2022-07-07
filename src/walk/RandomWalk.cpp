@@ -4,16 +4,14 @@
 #include <fmt/ranges.h>
 #endif
 
-GRandomWalk::GRandomWalk(parlay::sequence<GNode*>& visitedNode, double dumping)
+GRandomWalk::GRandomWalk(double dumping)
 : _distribution(0.5, 0.5)
 , _dumping(dumping)
-, _visited(visitedNode)
 {
 }
 
 int GRandomWalk::walk(virtual_graph_t& vg, std::function<void(GNode*)> f) {
-  
-  auto itr = vg._mNodesInstance.begin();
+  // auto itr = vg._mNodesInstance.begin();
   return 0;
 }
 // GVertex* GRandomWalk::next() {

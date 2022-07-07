@@ -2,46 +2,18 @@
 #include "../type.h"
 #include "base/lang/lang.h"
 #include <stddef.h>
+#include <list>
 
-template <NodeType T> struct GTypeTraits {};
-
-template <> struct GTypeTraits<NodeType::GQLExpression> {
-  typedef GGQLExpression type;
-};
-template <> struct GTypeTraits<NodeType::Literal> {
-  typedef GLiteral type;
-};
-
-template <> struct GTypeTraits<NodeType::CreationStatement> {
-  typedef GCreateStmt type;
-};
-
-template <> struct GTypeTraits<NodeType::UpsetStatement> {
-  typedef GUpsetStmt type;
-};
-
-template <> struct GTypeTraits<NodeType::ArrayExpression> {
-  typedef GASTNode type;
-};
-
-template <> struct GTypeTraits<NodeType::Property> {
-  typedef GProperty type;
-};
-
-template <> struct GTypeTraits<NodeType::BinaryExpression> {
-  typedef GProperty type;
-};
-
-template <> struct GTypeTraits<NodeType::QueryStatement> {
-  typedef GQueryStmt type;
-};
-
-template <> struct GTypeTraits<NodeType::VertexDeclaration> {
-  typedef GVertexDeclaration type;
-};
-
-template <> struct GTypeTraits<NodeType::EdgeDeclaration> {
-  typedef GEdgeDeclaration type;
+/*************************
+ * AST visitor flow control.
+ * skip will not process current node.
+ * return will stop recursive ast node.
+ * children will visit its children.
+ *************************/
+enum class VisitFlow {
+  SkipCurrent,
+  Return,
+  Children
 };
 
 struct GASTNode {
@@ -63,3 +35,18 @@ GASTNode* ListJoin(GASTNode* first, GASTNode* second);
  * 
  */
 std::string GetString(GASTNode* node);
+
+class GViewVisitor {
+public:
+  VisitFlow apply(GASTNode* stmt, std::list<NodeType>& path);
+  VisitFlow apply(GUpsetStmt* stmt, std::list<NodeType>& path);
+  VisitFlow apply(GQueryStmt* stmt, std::list<NodeType>& path);
+  VisitFlow apply(GGQLExpression* stmt, std::list<NodeType>& path);
+  VisitFlow apply(GProperty* stmt, std::list<NodeType>& path);
+  VisitFlow apply(GVertexDeclaration* stmt, std::list<NodeType>& path);
+  VisitFlow apply(GCreateStmt* stmt, std::list<NodeType>& path);
+  VisitFlow apply(GLiteral* stmt, std::list<NodeType>& path);
+  VisitFlow apply(GArrayExpression* stmt, std::list<NodeType>& path);
+
+private:
+};

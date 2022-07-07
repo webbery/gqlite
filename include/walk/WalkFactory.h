@@ -19,11 +19,14 @@ enum class VisitSelector {
 
 class IWalkStrategy {
 public:
+  virtual ~IWalkStrategy(){
+    printf("~IWalkStrategy\n");
+  }
   virtual int walk(virtual_graph_t& vg, std::function<void(GNode*)>) = 0;
 };
 
 class GWalkFactory {
 public:
-  virtual IWalkStrategy* createStrategy(VisitSelector selector, parlay::sequence<GNode*>& visited);
+  virtual IWalkStrategy* createStrategy(VisitSelector selector);
   
 };
