@@ -78,8 +78,8 @@ std::string PropertyKind2String(AttributeKind kind) {
   }
 }
 
-void printLine(const std::string& format, const std::string& str, int level) {
-  for (int lvl = 0; lvl < level; ++lvl) {
+void printLine(const std::string& format, const std::string& str, size_t level) {
+  for (size_t lvl = 0; lvl < level; ++lvl) {
     fmt::printf("  ");
   }
   fmt::print(format, str);

@@ -2,7 +2,7 @@
 #include <stdint.h>
 #include <string>
 #include "base/MemoryPool.h"
-#include "SubGraph.h"
+#include "base/lang/AST.h"
 
 struct _gqlite_result;
 
@@ -45,9 +45,40 @@ public:
   //std::string _msg;
   // gql type
   GQL_Command_Type _cmdtype;
-  GSubGraph* _graph = nullptr;
   GStorageEngine* _storage = nullptr;
 
+private:
+  struct PlanVisitor {
+    GPlan* _plan = nullptr;
+    GVirtualNetwork* _vn;
+    GStorageEngine* _store;
+    PlanVisitor(GVirtualNetwork* vn, GStorageEngine* store):_vn(vn), _store(store){}
+    VisitFlow apply(GASTNode* stmt, std::list<NodeType>& path) {
+      return VisitFlow::Children;
+    }
+    VisitFlow apply(GUpsetStmt* stmt, std::list<NodeType>& path) {
+      return VisitFlow::Return;
+    }
+    VisitFlow apply(GQueryStmt* stmt, std::list<NodeType>& path) {
+      return VisitFlow::Return;
+    }
+    VisitFlow apply(GGQLExpression* stmt, std::list<NodeType>& path) {
+      return VisitFlow::Children;
+    }
+    VisitFlow apply(GProperty* stmt, std::list<NodeType>& path) {
+      return VisitFlow::Return;
+    }
+    VisitFlow apply(GVertexDeclaration* stmt, std::list<NodeType>& path) {
+      return VisitFlow::Return;
+    }
+    VisitFlow apply(GCreateStmt* stmt, std::list<NodeType>& path);
+    VisitFlow apply(GLiteral* stmt, std::list<NodeType>& path) {
+      return VisitFlow::Children;
+    }
+    VisitFlow apply(GArrayExpression* stmt, std::list<NodeType>& path) {
+      return VisitFlow::Children;
+    }
+  };
 private:
   GPlan* makePlans(GASTNode* ast);
   int executePlans(GPlan*);

@@ -211,9 +211,9 @@ utility_cmd: CMD_SHOW KW_GRAPH
           {
             fmt::print("AST:\n");
             // DumpAst($2);
-            GAST ast($2);
             GViewVisitor visitor;
-            ast.parse(visitor);
+            std::list<NodeType> ln;
+            accept($2, visitor, ln);
             stm._cmdtype = GQL_Util;
           }
         | profile gql {};

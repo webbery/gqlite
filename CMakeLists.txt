@@ -17,9 +17,7 @@ setup_target_for_coverage_gcovr_xml(
 	${PROJECT_NAME}_coverage NAME coverage
 	EXCLUDE
 		"include/json.hpp"
-		"tool/gqlcmd.cpp"
-		"tool/gqlexport.cpp"
-		"tool/linenoise.hpp"
+		"tool/*"
 		"include/gql.hpp"
 		"include/gql.cpp"
 		"tool/getopt.c"

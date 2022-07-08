@@ -23,10 +23,6 @@ GVirtualEngine::GVirtualEngine(size_t memsize)
 
 GVirtualEngine::~GVirtualEngine() {
   delete _network;
-  if (_graph) {
-    delete _graph;
-    _graph = nullptr;
-  }
 }
 
 void GVirtualEngine::cleanPlans(GPlan* plans) {
@@ -35,31 +31,10 @@ void GVirtualEngine::cleanPlans(GPlan* plans) {
 
 GPlan* GVirtualEngine::makePlans(GASTNode* ast) {
   if (ast == nullptr) return nullptr;
-  GPlan* root = nullptr;
-  switch (ast->_nodetype)
-  {
-  case NodeType::DropStatement:
-  case NodeType::CreationStatement:
-  {
-    root = new GUtilPlan(_network, _storage, ast);
-  }
-    break;
-  case NodeType::UpsetStatement:
-  {
-    root = new GUpsetPlan(_network, _storage, ast);
-  }
-    break;
-  default:
-    break;
-  }
-  GPlan* node = root;
-  for (size_t idx = 0; idx < ast->_size; ++idx) {
-    GPlan* plan = makePlans(ast->_children + idx);
-    if (plan == nullptr || node == nullptr) break;
-    node->addLeft(plan);
-    node = plan;
-  }
-  return root;
+  PlanVisitor visitor(_network, _storage);
+  std::list<NodeType> ln;
+  accept(ast, visitor, ln);
+  return visitor._plan;
 }
 
 int GVirtualEngine::executePlans(GPlan* plans) {
@@ -76,4 +51,10 @@ int GVirtualEngine::execAST(GASTNode* ast) {
   int ret = executePlans(plans);
   cleanPlans(plans);
   return ret;
+}
+
+VisitFlow GVirtualEngine::PlanVisitor::apply(GCreateStmt* stmt, std::list<NodeType>& path)
+{
+  _plan = new GUtilPlan(_vn, _store, stmt);
+  return VisitFlow::Children;
 }

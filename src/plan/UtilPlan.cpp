@@ -4,21 +4,11 @@
 #include "StorageEngine.h"
 #include "base/lang/AST.h"
 
-GUtilPlan::GUtilPlan(GVirtualNetwork* vn, GStorageEngine* store, GASTNode* ast)
+GUtilPlan::GUtilPlan(GVirtualNetwork* vn, GStorageEngine* store, GCreateStmt* stmt)
 :GPlan(vn, store) {
-  switch (ast->_nodetype)
-  {
-  case NodeType::CreationStatement:
-  {
     _type = UtilType::Creation;
-    CreationVisitor visitor(*this);
-    std::list<NodeType> path;
-    accept(ast, visitor, path);
-  }
-    break;
-  default:
-    break;
-  }
+    _var = stmt->name();
+    GASTNode* indexes = stmt->indexes();
 }
 int GUtilPlan::execute() {
   switch (_type)
