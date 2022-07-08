@@ -25,7 +25,7 @@ int GUtilPlan::execute() {
   {
   case UtilType::Creation:
     if (!_store) return ECode_DISK_OPEN_FAIL;
-    break;
+    return _store->open(std::get<std::string>(_var).c_str());
   default:
     break;
   }

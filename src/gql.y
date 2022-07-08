@@ -219,23 +219,12 @@ utility_cmd: CMD_SHOW KW_GRAPH
         | profile gql {};
 creation: RANGE_BEGIN KW_CREATE COLON VAR_STRING RANGE_END
             {
-              // stm._graph->openGraph($4);
               GCreateStmt* createStmt = new GCreateStmt($4, nullptr);
               $$ = NewAst(NodeType::CreationStatement, createStmt, nullptr, 0);
               stm._errorCode = ECode_Success;
             }
         | RANGE_BEGIN KW_CREATE COLON VAR_STRING COMMA KW_INDEX COLON string_list RANGE_END
             {
-              // stm._graph->openGraph($4);
-              // GGraph* g = stm._graph->getGraph($4);
-              // gql_node* cur = $8;
-              // do {
-              //   GASTNode* s = (struct GASTNode*)(cur->_value);
-              //   std::string value = GET_STRING_VALUE(s);
-              //   creation::createInvertIndex(stm._graph, g, value.c_str());
-              //   cur = cur->_next;
-              // } while(cur);
-
               GCreateStmt* createStmt = new GCreateStmt($4, $8);
               $$ = NewAst(NodeType::CreationStatement, createStmt, nullptr, 0);
               stm._errorCode = ECode_Success;

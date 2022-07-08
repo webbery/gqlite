@@ -5,7 +5,7 @@ struct GASTNode;
 class GPlan;
 class GCreateStmt {
 public:
-  GCreateStmt(const std::string& name, GASTNode* indexes);
+  GCreateStmt(const std::string& name, GASTNode* indexes = nullptr);
 
   std::string name() const;
   GASTNode* indexes() const;

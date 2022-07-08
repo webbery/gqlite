@@ -49,6 +49,7 @@ template <> struct GTypeTraits<NodeType::EdgeDeclaration> {
  ******************************/
 template <typename Visitor>
 VisitFlow accept(GASTNode* node, Visitor& visitor, std::list<NodeType>& path) {
+  if (node == nullptr) return VisitFlow::Children;
   path.push_back(node->_nodetype);
   VisitFlow vf = VisitFlow::Children;
   switch(node->_nodetype) {
@@ -121,6 +122,14 @@ VisitFlow accept(GASTNode* node, Visitor& visitor, std::list<NodeType>& path) {
     }
     break;
     case NodeType::QueryStatement:
+    {
+      GTypeTraits<NodeType::QueryStatement>::type* ptr = reinterpret_cast<GTypeTraits<NodeType::QueryStatement>::type*>(node->_value);
+      vf = visitor.apply(ptr, path);
+      accept(ptr->graph(), visitor, path);
+      if (ptr->where()) {
+        accept(ptr->where(), visitor, path);
+      }
+    }
     break;
     case NodeType::Property:
     {
