@@ -47,23 +47,30 @@ GStorageEngine::~GStorageEngine() {
 }
 
 int GStorageEngine::open(const char* filename) {
-    env::geometry db_geometry;
-    env_managed::create_parameters create_param;
-    create_param.geometry=db_geometry;
+  if (_env) {
+    this->close();
+    _env.sync_to_disk();
+    _env.close();
+    //mdbx::env::info info = _env.get_info();
+    //info.
+  }
+  env::geometry db_geometry;
+  env_managed::create_parameters create_param;
+  create_param.geometry=db_geometry;
 
-    env::operate_parameters operator_param;
+  env::operate_parameters operator_param;
 #define DEFAULT_MAX_PROPS  64
-    operator_param.max_maps = DEFAULT_MAX_PROPS;
+  operator_param.max_maps = DEFAULT_MAX_PROPS;
 
-    _env = env_managed(std::string(filename), create_param, operator_param);
-    int ret = startTrans();
-    mdbx::map_handle schema = openSchema();
-    mdbx::slice data = ::get(_txn, schema, SCHEMA_BASIC);
-    if (data.size()) {
-      std::vector<uint8_t> v(data.byte_ptr(), data.byte_ptr() + data.size());
-      _schema = nlohmann::json::from_cbor(v);
-    }
-    return ret;
+  _env = env_managed(std::string(filename), create_param, operator_param);
+  int ret = startTrans();
+  mdbx::map_handle schema = openSchema();
+  mdbx::slice data = ::get(_txn, schema, SCHEMA_BASIC);
+  if (data.size()) {
+    std::vector<uint8_t> v(data.byte_ptr(), data.byte_ptr() + data.size());
+    _schema = nlohmann::json::from_cbor(v);
+  }
+  return ret;
 }
 
 void GStorageEngine::close() {

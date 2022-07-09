@@ -52,6 +52,12 @@ int GQLiteImpl::create(const char* filename, gqlite_open_mode mode)
   if (filename) {
     return _statement->_storage->open(filename);
   }
+  else {
+    if (_statement->_storage) {
+      delete _statement->_storage;
+    }
+    _statement->_storage = new GStorageEngine();
+  }
   return ECode_Success;
 }
 
