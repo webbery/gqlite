@@ -1,6 +1,7 @@
 #pragma once
 #include "base/lang/lang.h"
 #include <list>
+#include <functional>
 
 template <NodeType T> struct GTypeTraits {};
 
@@ -13,6 +14,10 @@ template <> struct GTypeTraits<NodeType::Literal> {
 
 template <> struct GTypeTraits<NodeType::CreationStatement> {
   typedef GCreateStmt type;
+};
+
+template<> struct GTypeTraits<NodeType::DropStatement> {
+  typedef GDropStmt type;
 };
 
 template <> struct GTypeTraits<NodeType::UpsetStatement> {

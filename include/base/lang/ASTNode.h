@@ -47,6 +47,22 @@ public:
   VisitFlow apply(GCreateStmt* stmt, std::list<NodeType>& path);
   VisitFlow apply(GLiteral* stmt, std::list<NodeType>& path);
   VisitFlow apply(GArrayExpression* stmt, std::list<NodeType>& path);
+  VisitFlow apply(GEdgeDeclaration* stmt, std::list<NodeType>& path);
+  VisitFlow apply(GDropStmt* stmt, std::list<NodeType>& path);
 
 private:
+};
+
+class GCleanVisitor {
+public:
+  VisitFlow apply(GASTNode* stmt, std::list<NodeType>& path);
+  VisitFlow apply(GUpsetStmt* stmt, std::list<NodeType>& path);
+  VisitFlow apply(GQueryStmt* stmt, std::list<NodeType>& path);
+  VisitFlow apply(GGQLExpression* stmt, std::list<NodeType>& path);
+  VisitFlow apply(GProperty* stmt, std::list<NodeType>& path);
+  VisitFlow apply(GVertexDeclaration* stmt, std::list<NodeType>& path);
+  VisitFlow apply(GEdgeDeclaration* stmt, std::list<NodeType>& path);
+  VisitFlow apply(GCreateStmt* stmt, std::list<NodeType>& path);
+  VisitFlow apply(GLiteral* stmt, std::list<NodeType>& path);
+  VisitFlow apply(GArrayExpression* stmt, std::list<NodeType>& path);
 };

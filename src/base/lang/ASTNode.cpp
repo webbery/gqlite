@@ -18,10 +18,55 @@ GASTNode* ListJoin(GASTNode* first, GASTNode* second) {
   return first;
 }
 
-void FreeNodeType(GASTNode* node) {
-  std::map<NodeType, std::function<void (void*, size_t)> > release({
-    {NodeType::Literal, [](void* ptr, size_t len) {}}
-  });
+void FreeNode(GASTNode* node) {
+  switch (node->_nodetype)
+  {
+  case NodeType::CreationStatement:
+  {
+    GTypeTraits<NodeType::CreationStatement>::type* ptr = reinterpret_cast<GTypeTraits<NodeType::CreationStatement>::type*>(node->_value);
+    delete ptr;
+  }
+    break;
+  case NodeType::UpsetStatement:
+  {
+    GTypeTraits<NodeType::UpsetStatement>::type* ptr = reinterpret_cast<GTypeTraits<NodeType::UpsetStatement>::type*>(node->_value);
+    delete ptr;
+  }
+    break;
+  case NodeType::QueryStatement:
+  {
+    GTypeTraits<NodeType::QueryStatement>::type* ptr = reinterpret_cast<GTypeTraits<NodeType::QueryStatement>::type*>(node->_value);
+    delete ptr;
+  }
+    break;
+  case NodeType::EdgeDeclaration:
+  {
+    GTypeTraits<NodeType::EdgeDeclaration>::type* ptr = reinterpret_cast<GTypeTraits<NodeType::EdgeDeclaration>::type*>(node->_value);
+    delete ptr;
+  }
+    break;
+  case NodeType::VertexDeclaration:
+  {
+    GTypeTraits<NodeType::VertexDeclaration>::type* ptr = reinterpret_cast<GTypeTraits<NodeType::VertexDeclaration>::type*>(node->_value);
+    delete ptr;
+  }
+    break;
+  case NodeType::DropStatement:
+  {
+    GTypeTraits<NodeType::DropStatement>::type* ptr = reinterpret_cast<GTypeTraits<NodeType::DropStatement>::type*>(node->_value);
+    delete ptr;
+  }
+    break;
+  case NodeType::Literal:
+  {
+    GTypeTraits<NodeType::Literal>::type* ptr = reinterpret_cast<GTypeTraits<NodeType::Literal>::type*>(node->_value);
+    delete ptr;
+  }
+    break;
+  default:
+    break;
+  }
+  delete node;
 }
 
 GASTNode* NewAst(enum NodeType type, void* value, GASTNode* children, size_t size) {
@@ -39,7 +84,7 @@ void FreeAst(GASTNode* root) {
   for (size_t idx = 0; idx < root->_size; ++idx) {
     FreeAst(root->_children + idx);
   }
-  FreeNodeType(root);
+  FreeNode(root);
 }
 
 std::string NodeType2String(NodeType nt) {
@@ -275,4 +320,78 @@ VisitFlow GViewVisitor::apply(GArrayExpression* stmt, std::list<NodeType>& path)
     ++itr;
   }
   return VisitFlow::SkipCurrent;
+}
+
+VisitFlow GViewVisitor::apply(GEdgeDeclaration* stmt, std::list<NodeType>& path)
+{
+  size_t level = path.size();
+  printLine("|- type: {}\n", NodeType2String(EdgeDeclaration), level);
+  return VisitFlow::Children;
+}
+
+VisitFlow GViewVisitor::apply(GDropStmt* stmt, std::list<NodeType>& path)
+{
+  size_t level = path.size();
+  printLine("|- type: {}\n", NodeType2String(DropStatement), level);
+  return VisitFlow::Children;
+}
+
+VisitFlow GCleanVisitor::apply(GASTNode* stmt, std::list<NodeType>& path)
+{
+  delete stmt;
+  return VisitFlow::Children;
+}
+
+VisitFlow GCleanVisitor::apply(GUpsetStmt* stmt, std::list<NodeType>& path)
+{
+  delete stmt;
+  return VisitFlow::Children;
+}
+
+VisitFlow GCleanVisitor::apply(GQueryStmt* stmt, std::list<NodeType>& path)
+{
+  delete stmt;
+  return VisitFlow::Children;
+}
+
+VisitFlow GCleanVisitor::apply(GGQLExpression* stmt, std::list<NodeType>& path)
+{
+  delete stmt;
+  return VisitFlow::Children;
+}
+
+VisitFlow GCleanVisitor::apply(GProperty* stmt, std::list<NodeType>& path)
+{
+  delete stmt;
+  return VisitFlow::Children;
+}
+
+VisitFlow GCleanVisitor::apply(GVertexDeclaration* stmt, std::list<NodeType>& path)
+{
+  delete stmt;
+  return VisitFlow::Children;
+}
+
+VisitFlow GCleanVisitor::apply(GCreateStmt* stmt, std::list<NodeType>& path)
+{
+  delete stmt;
+  return VisitFlow::Children;
+}
+
+VisitFlow GCleanVisitor::apply(GLiteral* stmt, std::list<NodeType>& path)
+{
+  delete stmt;
+  return VisitFlow::Children;
+}
+
+VisitFlow GCleanVisitor::apply(GArrayExpression* stmt, std::list<NodeType>& path)
+{
+  delete stmt;
+  return VisitFlow::Children;
+}
+
+VisitFlow GCleanVisitor::apply(GEdgeDeclaration* stmt, std::list<NodeType>& path)
+{
+  delete stmt;
+  return VisitFlow::Children;
 }

@@ -86,13 +86,6 @@ void release_result_info(gqlite_result& result) {
   free(result.infos);
 }
 
-nlohmann::json* get_or_create_json(nlohmann::json* item) {
-  if (item->empty()) {
-    nlohmann::json* j = new nlohmann::json();
-    return j;
-  }
-  return item;
-}
 }
 
 %token RANGE_BEGIN RANGE_END COLON QUOTE COMMA LEFT_SQUARE RIGHT_SQUARE STAR CR PARAM_BEGIN PARAM_END
@@ -148,6 +141,7 @@ line_list: line
           ;
     line: gql {
           stm._errorCode = stm.execAST($1);
+          FreeAst($1);
         }
         | utility_cmd { stm._cmdtype = GQL_Util; }
         | {}
@@ -214,6 +208,7 @@ utility_cmd: CMD_SHOW KW_GRAPH
             GViewVisitor visitor;
             std::list<NodeType> ln;
             accept($2, visitor, ln);
+            FreeAst($2);
             stm._cmdtype = GQL_Util;
           }
         | profile gql {};

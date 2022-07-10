@@ -6,6 +6,7 @@ class GPlan;
 class GCreateStmt {
 public:
   GCreateStmt(const std::string& name, GASTNode* indexes = nullptr);
+  ~GCreateStmt();
 
   std::string name() const;
   GASTNode* indexes() const;
