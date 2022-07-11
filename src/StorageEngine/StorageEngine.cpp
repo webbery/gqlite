@@ -43,13 +43,12 @@ GStorageEngine::GStorageEngine() {
 
 GStorageEngine::~GStorageEngine() {
   close();
-  //_env.close();
+  if (_env) _env.close();
 }
 
 int GStorageEngine::open(const char* filename) {
   if (_env) {
     this->close();
-    _env.sync_to_disk();
     _env.close();
     //mdbx::env::info info = _env.get_info();
     //info.
@@ -64,23 +63,29 @@ int GStorageEngine::open(const char* filename) {
 
   _env = env_managed(std::string(filename), create_param, operator_param);
   int ret = startTrans();
-  mdbx::map_handle schema = openSchema();
-  mdbx::slice data = ::get(_txn, schema, SCHEMA_BASIC);
+  mdbx::map_handle handle = openSchema();
+  mdbx::slice data = ::get(_txn, handle, SCHEMA_BASIC);
   if (data.size()) {
     std::vector<uint8_t> v(data.byte_ptr(), data.byte_ptr() + data.size());
     _schema = nlohmann::json::from_cbor(v);
   }
+  // _env.close_map(handle);
   return ret;
 }
 
 void GStorageEngine::close() {
   if (_txn) {
     if (!_schema.empty()) {
-      mdbx::map_handle schema = openSchema();
+      mdbx::map_handle handle = openSchema();
       std::vector<uint8_t> v = nlohmann::json::to_cbor(_schema);
       mdbx::slice data(v.data(), v.size());
-      ::put(_txn, schema, SCHEMA_BASIC, data);
+      ::put(_txn, handle, SCHEMA_BASIC, data);
+      // _env.close_map(handle);
     }
+    // for (auto itr = _mHandle.begin(); itr != _mHandle.end(); ++itr) {
+    //   _env.close_map(itr->second);
+    // }
+    // _mHandle.clear();
     _txn.commit();
   }
 }

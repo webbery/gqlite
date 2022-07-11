@@ -41,7 +41,7 @@ int GQLiteImpl::open(const char* filename, gqlite_open_mode mode)
 int GQLiteImpl::close()
 {
   if (_statement->_storage) {
-    // return _statement->_storage->closeGraph(nullptr);
+    delete _statement->_storage;
     return true;
   }
   return true;

@@ -59,14 +59,32 @@ void FreeNode(GASTNode* node) {
     break;
   case NodeType::Literal:
   {
-    GTypeTraits<NodeType::Literal>::type* ptr = reinterpret_cast<GTypeTraits<NodeType::Literal>::type*>(node->_value);
+    GTypeTraits<NodeType::Literal>::type* ptr = static_cast<GTypeTraits<NodeType::Literal>::type*>(node->_value);
+    delete ptr;
+  }
+    break;
+  case NodeType::GQLExpression:
+  {
+    GTypeTraits<NodeType::GQLExpression>::type* ptr = reinterpret_cast<GTypeTraits<NodeType::GQLExpression>::type*>(node->_value);
+    delete ptr;
+  }
+    break;
+  case NodeType::ArrayExpression:
+  {
+    GTypeTraits<NodeType::ArrayExpression>::type* ptr = reinterpret_cast<GTypeTraits<NodeType::ArrayExpression>::type*>(node->_value);
+    delete ptr;
+  }
+    break;
+  case NodeType::RemoveStatement:
+  {
+    GTypeTraits<NodeType::RemoveStatement>::type* ptr = reinterpret_cast<GTypeTraits<NodeType::RemoveStatement>::type*>(node->_value);
     delete ptr;
   }
     break;
   default:
     break;
   }
-  delete node;
+  free(node);
 }
 
 GASTNode* NewAst(enum NodeType type, void* value, GASTNode* children, size_t size) {

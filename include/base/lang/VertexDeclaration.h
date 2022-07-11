@@ -4,6 +4,7 @@ struct GASTNode;
 class GVertexDeclaration {
 public:
   GVertexDeclaration(GASTNode* key, GASTNode* nodes);
+  ~GVertexDeclaration();
 
   GASTNode* key() const { return _key; }
   GASTNode* vertex() const { return _head; }

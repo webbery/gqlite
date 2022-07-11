@@ -7,6 +7,7 @@ public:
   using iterator = std::vector<GASTNode*>::iterator;
 
   GArrayExpression();
+  ~GArrayExpression();
 
   void addElement(GASTNode* element);
 

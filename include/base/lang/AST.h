@@ -48,6 +48,10 @@ template <> struct GTypeTraits<NodeType::EdgeDeclaration> {
   typedef GEdgeDeclaration type;
 };
 
+template <> struct GTypeTraits<NodeType::RemoveStatement> {
+  typedef GRemoveStmt type;
+};
+
 /******************************
  * accept function will visit all nodes start from input node.
  * We define ourself's visitor to process nodes when type is matched.
