@@ -163,6 +163,12 @@ VisitFlow accept(GASTNode* node, Visitor& visitor, std::list<NodeType>& path) {
       }
     }
     break;
+    case NodeType::EdgeDeclaration:
+    {
+      GTypeTraits<NodeType::EdgeDeclaration>::type* ptr = reinterpret_cast<GTypeTraits<NodeType::EdgeDeclaration>::type*>(node->_value);
+      vf = visitor.apply(ptr, path);
+    }
+      break;
     default: vf = visitor.apply(node, path); break;
   }
   for (size_t idx = 0; idx < node->_size; ++idx) {

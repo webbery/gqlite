@@ -78,6 +78,9 @@ private:
     VisitFlow apply(GArrayExpression* stmt, std::list<NodeType>& path) {
       return VisitFlow::Children;
     }
+    VisitFlow apply(GEdgeDeclaration* stmt, std::list<NodeType>& path) {
+      return VisitFlow::Children;
+    }
   };
 private:
   GPlan* makePlans(GASTNode* ast);

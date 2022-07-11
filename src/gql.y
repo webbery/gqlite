@@ -435,10 +435,17 @@ vertex: LEFT_SQUARE VAR_STRING RIGHT_SQUARE
                 $$ = NewAst(NodeType::VertexDeclaration, decl, nullptr, 0);
               };
 edge_list: LEFT_SQUARE edges RIGHT_SQUARE {$$ = $2;};
-edges: edge { $$ = $1; }
+edges: edge
+              {
+                GArrayExpression* edges = new GArrayExpression();
+                edges->addElement($1);
+                $$ = NewAst(NodeType::ArrayExpression, edges, nullptr, 0);
+              }
         | edges COMMA edge
               {
-                $$ = ListJoin($1, $3);
+                GArrayExpression* edges = (GArrayExpression*)$1->_value;
+                edges->addElement($3);
+                $$ = $1;
               };
 edge: LEFT_SQUARE VAR_STRING COMMA a_edge COMMA VAR_STRING RIGHT_SQUARE
               {

@@ -3,6 +3,7 @@
 typedef double REAL;
 
 enum NodeType {
+  InvalidNode,
   Removable,
   WalkExpression,
   Property,

@@ -344,6 +344,14 @@ VisitFlow GViewVisitor::apply(GEdgeDeclaration* stmt, std::list<NodeType>& path)
 {
   size_t level = path.size();
   printLine("|- type: {}\n", NodeType2String(EdgeDeclaration), level);
+  path.push_back(NodeType::InvalidNode);
+  printLine("|- link:{}\n", "", level+1);
+  accept(stmt->link(), *this, path);
+  printLine("|- from:{}\n", "", level+1);
+  accept(stmt->from(), *this, path);
+  printLine("|- to:{}\n", "", level+1);
+  accept(stmt->to(), *this, path);
+  path.pop_back();
   return VisitFlow::Children;
 }
 
