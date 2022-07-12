@@ -3,4 +3,5 @@
 class GObjectStmt {
 public:
   GObjectStmt();
+  ~GObjectStmt();
 };

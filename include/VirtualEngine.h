@@ -72,6 +72,7 @@ private:
       return VisitFlow::Return;
     }
     VisitFlow apply(GCreateStmt* stmt, std::list<NodeType>& path);
+    VisitFlow apply(GDropStmt* stmt, std::list<NodeType>& path);
     VisitFlow apply(GLiteral* stmt, std::list<NodeType>& path) {
       return VisitFlow::Children;
     }

@@ -52,6 +52,10 @@ template <> struct GTypeTraits<NodeType::RemoveStatement> {
   typedef GRemoveStmt type;
 };
 
+template <> struct GTypeTraits<NodeType::ObjectExpression> {
+  typedef GASTNode type;
+};
+
 /******************************
  * accept function will visit all nodes start from input node.
  * We define ourself's visitor to process nodes when type is matched.

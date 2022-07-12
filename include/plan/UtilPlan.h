@@ -11,8 +11,10 @@ class GUtilPlan: public GPlan {
 public:
   enum class UtilType {
     Creation,
+    Drop,
   };
   GUtilPlan(GVirtualNetwork* vn, GStorageEngine* store, GCreateStmt* ast);
+  GUtilPlan(GVirtualNetwork* vn, GStorageEngine* store, GDropStmt* ast);
   virtual int execute();
 
 private:

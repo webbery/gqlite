@@ -152,7 +152,11 @@ line_list: line
             $$ = NewAst(NodeType::GQLExpression, expr, $1, 1);
             stm._cmdtype = GQL_Creation;
           }
-        | a_simple_query { $$ = $1; stm._cmdtype = GQL_Query; }
+        | a_simple_query {
+            GGQLExpression* expr = new GGQLExpression();
+            $$ = NewAst(NodeType::GQLExpression, expr, $1, 1);
+            stm._cmdtype = GQL_Query;
+          }
         | upset_vertexes
           {
             GGQLExpression* expr = new GGQLExpression();

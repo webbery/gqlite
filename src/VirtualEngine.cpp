@@ -58,3 +58,8 @@ VisitFlow GVirtualEngine::PlanVisitor::apply(GCreateStmt* stmt, std::list<NodeTy
   _plan = new GUtilPlan(_vn, _store, stmt);
   return VisitFlow::Children;
 }
+
+VisitFlow GVirtualEngine::PlanVisitor::apply(GDropStmt* stmt, std::list<NodeType>& path) {
+  _plan = new GUtilPlan(_vn, _store, stmt);
+  return VisitFlow::Return;
+}

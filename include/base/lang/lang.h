@@ -14,4 +14,5 @@
 #include "base/lang/EdgeDeclaration.h"
 #include "base/lang/DropStmt.h"
 #include "base/lang/RemoveStmt.h"
+#include "base/lang/ObjectStmt.h"
 #include "base/lang/ASTNode.h"

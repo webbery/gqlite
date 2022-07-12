@@ -24,6 +24,7 @@
 #define ECode_GQL_Edge_Type_Unknow  101
 #define ECode_GQL_Parse_Fail        200
 #define ECode_DISK_OPEN_FAIL        300
+#define ECode_DB_Drop_Fail          301
 
 typedef void* gqlite;
 
