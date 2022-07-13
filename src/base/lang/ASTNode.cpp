@@ -9,15 +9,6 @@
 #define RETURN_CASE_PROP_KIND(prop_kind) case AttributeKind::prop_kind: return #prop_kind
 #define FREE_NODE(node) case 
 
-GASTNode* ListJoin(GASTNode* first, GASTNode* second) {
-  if (!first) return second;
-  if (!second) return first;
-  GASTNode* cur = first;
-  while (cur->_children) cur = cur->_children;
-  cur->_children = second;
-  return first;
-}
-
 void FreeNode(GASTNode* node) {
   switch (node->_nodetype)
   {
@@ -84,7 +75,7 @@ void FreeNode(GASTNode* node) {
   case NodeType::ObjectExpression:
   {
     GTypeTraits<NodeType::ObjectExpression>::type* ptr = reinterpret_cast<GTypeTraits<NodeType::ObjectExpression>::type*>(node->_value);
-    free(ptr);
+    delete ptr;
   }
     break;
   case NodeType::Property:
@@ -96,11 +87,11 @@ void FreeNode(GASTNode* node) {
   default:
     break;
   }
-  free(node);
+  delete node;
 }
 
 GASTNode* NewAst(enum NodeType type, void* value, GASTNode* children, size_t size) {
-  GASTNode* ast = (struct GASTNode*)malloc(sizeof(struct GASTNode));
+  GASTNode* ast = new GASTNode;
   ast->_value = value;
   ast->_nodetype = type;
   ast->_children = children;

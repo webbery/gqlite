@@ -5,16 +5,21 @@
 #include <map>
 #include <functional>
 
-enum class PropertyType : uint8_t {
+#define SCHEMA_CLASS            "cls"
+#define SCHEMA_CLASS_INFO       "info"
+#define SCHEMA_CLASS_NAME       "name"
+#define SCHEMA_CLASS_DEFAULT    "default"
+
+enum class ClassType : uint8_t {
     Undefined,
     String,
     Number,
     Custom
 };
 
-struct alignas(8) PropertyInfo {
-  uint8_t       key_type : 1;    // 0 - interger, 1 - byte;
-  PropertyType  value_type : 5;  // 
+struct alignas(8) ClassInfo {
+  uint8_t       key_type : 1;    /**<  0 - interger, 1 - byte; */
+  ClassType  value_type : 5;  /**< */ 
   uint8_t       reserved : 2;
 };
 
@@ -23,27 +28,52 @@ public:
     GStorageEngine();
     ~GStorageEngine();
 
+    /** Open a graph instance with file.
+     * A file is a graph instance.
+     * After open success, its shcema is loaded.
+     * The schema contains:
+     *   all classes, all attribute's info(such as name, value type) of class
+     * When reading the data, it will use schema and convert to GRAD graph
+     * @param filename database filename
+     */
     int open(const char* filename);
+
     void close();
 
-    void addProp(const std::string& prop, PropertyInfo info);
+    /** Add new class to graph schema.
+     * It will create a new map with `prop`, which key type is info.key_type.
+     * Example:
+     *   In MovieLens, it has class like `MOVIE`, `ACTOR`, `USER` etc.
+     * @param clazz class name
+     * @param info  class infomation.
+     */
+    void addClass(const std::string& clazz, ClassInfo info);
 
-    int write(const std::string& prop, const std::string& key, void* value, size_t len);
-    int read(const std::string& prop, const std::string& key, std::string& value);
+    /** Record an node/edge infomation to disk
+     * For example:
+     *   <MOVIE, Star Trek, 3884>
+     *   `MOVIE` is class, movie name `Star Trek` is key, 3884 is value.
+     * @param clazz class name
+     * @param key   the key of node/edge
+     * @param value the attribute of node/edge
+     */
+    int write(const std::string& clazz, const std::string& key, void* value, size_t len);
+    int read(const std::string& clazz, const std::string& key, std::string& value);
 
-    int write(const std::string& prop, uint64_t key, void* value, size_t len);
-    int read(const std::string& prop, uint64_t key, std::string& value);
+    int write(const std::string& clazz, uint64_t key, void* value, size_t len);
+    int read(const std::string& clazz, uint64_t key, std::string& value);
 
     typedef mdbx::cursor_managed  cursor;
-    cursor getCursor(const std::string& prop);
+    cursor getCursor(const std::string& clazz);
 
     void registGraphFeature(GGraphInstance*, GVertexProptertyFeature* feature);
 
-    nlohmann::json getSchema() { return _schema; }
-    /**
-     * add attribute of schema
+    /** 
+     * Get the schema of current graph instance.
+     * Schema is a json which format as follows:
+     *   
      */
-    void addAttribute(const std::string& key, const std::string& value);
+    nlohmann::json getSchema() { return _schema; }
 
     int startTrans();
 
@@ -59,36 +89,11 @@ public:
      */
     // int generateID(GGraphInstance* graph, char type, char*& id);
 
-    // int finishUpdate(GGraphInstance* graph);
-
-    // int getNode(GGraphInstance* graph, const VertexID& nodeid, std::function<int(const char*, void*, int, void*)>);
-    // int getNode(GGraphInstance* graph, const VertexID& nodeid, std::function<int(const char*, void*)>);
-
-    // std::vector<VertexID> getNodes(GGraphInstance* graph);
-
-    // int dropNode(GGraphInstance* graph, const VertexID& nodeid);
-
-    // int dropRelationship();
-
-    /*
-     *
-     */
-    // int startNode(const char* graph, const VertexID& nodeid);
-
-    // int forward();
-
-    // int backward();
-
-    //template<typename T>
-    //int makeDirection(GGraph* graph, const VertexID& from, const VertexID& to, const char* name, T&& value){}
-
-    // int makeDirection(GGraphInstance* graph, const EdgeID& id, const VertexID& from, const VertexID& to, const char* name);
-
     int injectCostFunc();
     int injectNodeUpdateFunc();
 
 private:
-    bool isPropExist(const std::string& prop);
+    bool isClassExist(const std::string& prop);
     nlohmann::json getProp(const std::string& prop);
     mdbx::map_handle getOrCreateHandle(const std::string& prop, mdbx::key_mode mode);
     /*

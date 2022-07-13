@@ -70,6 +70,7 @@ d[0-9]{10}$         {
 "show"              {stm._errIndx += yyleng; return CMD_SHOW;};
 "graph"             {stm._errIndx += yyleng; return KW_GRAPH;};
 "walk"              {stm._errIndx += yyleng; };
+"group"             {stm._errIndx += yyleng; return group;};
 "order"             {stm._errIndx += yyleng;}
 "start"             {stm._errIndx += yyleng;};
 "with"              {stm._errIndx += yyleng;};

@@ -96,7 +96,8 @@ void release_result_info(gqlite_result& result) {
 %token <__int> VAR_DATETIME
 %token KW_AST KW_ID KW_GRAPH KW_COMMIT
 %token KW_CREATE KW_DROP KW_IN KW_REMOVE KW_UPSET KW_LEFT_RELATION KW_RIGHT_RELATION KW_BIDIRECT_RELATION KW_REST KW_DELETE
-%token OP_QUERY KW_INDEX KW_GROUP OP_WHERE
+%token OP_QUERY KW_INDEX OP_WHERE
+%token group
 %token CMD_SHOW 
 %token OP_GREAT_THAN OP_LESS_THAN OP_GREAT_THAN_EQUAL OP_LESS_THAN_EQUAL OP_EQUAL OP_AND OP_OR
 %token FN_COUNT
@@ -263,21 +264,8 @@ dump: RANGE_BEGIN KW_AST COLON VAR_STRING RANGE_END
             };
 upset_vertexes: RANGE_BEGIN KW_UPSET COLON VAR_STRING COMMA KW_VERTEX COLON vertex_list RANGE_END
               {
-                // struct GASTNode* g = INIT_STRING_AST($4);
-                // $$ = NewAst(NodeType::UpsetStatement, $8, g, nullptr);
-                // GET_GRAPH($4);
-                // gql_node* cur = $8;
-                // ASTVertexUpdateVisitor visitor;
-                // while(cur) {
-                //   GASTNode* pv = (GASTNode*)(cur->_value);
-                //   traverse(pv, &visitor);
-                //   cur = cur->_next;
-                // }
-                // release_list($8, release_vertex_callback);
-                // stm._graph->finishUpdate(pGraph);
-
-                GUpsetStmt* upsetStmt = new GUpsetStmt($4);
-                $$ = NewAst(NodeType::UpsetStatement, upsetStmt, $8, 1);
+                GUpsetStmt* upsetStmt = new GUpsetStmt($4, $8);
+                $$ = NewAst(NodeType::UpsetStatement, upsetStmt, nullptr, 0);
               };
 remove_vertexes: RANGE_BEGIN KW_REMOVE COLON VAR_STRING COMMA KW_VERTEX COLON array RANGE_END
               {
@@ -309,8 +297,8 @@ upset_edges: RANGE_BEGIN KW_UPSET COLON VAR_STRING COMMA KW_EDGE COLON edge_list
                 //   traverse(pv, &visitor);
                 //   cur = cur->_next;
                 // }
-                GUpsetStmt* upsetStmt = new GUpsetStmt($4);
-                $$ = NewAst(NodeType::UpsetStatement, upsetStmt, $8, 1);
+                GUpsetStmt* upsetStmt = new GUpsetStmt($4, $8);
+                $$ = NewAst(NodeType::UpsetStatement, upsetStmt, nullptr, 0);
               };
 drop_graph: RANGE_BEGIN KW_DROP COLON VAR_STRING RANGE_END
               {
@@ -419,11 +407,15 @@ vertex_list: LEFT_SQUARE vertexes RIGHT_SQUARE
               };
 vertexes: vertex
               {
-                $$ = $1;
+                GArrayExpression* vertexes = new GArrayExpression();
+                vertexes->addElement($1);
+                $$ = NewAst(NodeType::ArrayExpression, vertexes, nullptr, 0);
               }
         | vertexes COMMA vertex
               {
-                $$ = ListJoin($1, $3);
+                GArrayExpression* vertexes = (GArrayExpression*)$1->_value;
+                vertexes->addElement($3);
+                $$ = $1;
               };
 vertex: LEFT_SQUARE VAR_STRING RIGHT_SQUARE
               {
@@ -432,10 +424,7 @@ vertex: LEFT_SQUARE VAR_STRING RIGHT_SQUARE
               }
         | LEFT_SQUARE VAR_STRING COMMA json RIGHT_SQUARE
               {
-                GArrayExpression* value = new GArrayExpression();
-                value->addElement($4);
-                GASTNode* jsn = NewAst(NodeType::ArrayExpression, value, nullptr, 0);
-                GVertexDeclaration* decl = new GVertexDeclaration(INIT_STRING_AST($2), jsn);
+                GVertexDeclaration* decl = new GVertexDeclaration(INIT_STRING_AST($2), $4);
                 $$ = NewAst(NodeType::VertexDeclaration, decl, nullptr, 0);
               };
 edge_list: LEFT_SQUARE edges RIGHT_SQUARE {$$ = $2;};
@@ -536,31 +525,7 @@ property: VAR_STRING COLON value
                 // $$ = NewAst(NodeType::Property, nullptr, key, value);
               }
         | a_link_condition {}
-        // | KW_RIGHT_RELATION COLON VAR_INTEGER
-        //       {
-        //         struct GASTNode* key = INIT_STRING_AST("rac"); // right array count
-        //         struct GASTNode* value = INIT_LITERAL_AST($3, NodeType::Integer);
-        //         $$ = NewAst(NodeType::Property, nullptr, key, value);
-        //       }
-        // | KW_LEFT_RELATION COLON VAR_INTEGER
-        //       {
-        //         struct GASTNode* key = INIT_STRING_AST("lac");  // left arraw count
-        //         struct GASTNode* value = INIT_LITERAL_AST($3, NodeType::Integer);
-        //         $$ = NewAst(NodeType::Property, nullptr, key, value);
-        //       }
-        // | KW_BIDIRECT_RELATION COLON VAR_INTEGER
-        //       {
-        //         struct GASTNode* key = INIT_STRING_AST("ac"); // arraw count
-        //         struct GASTNode* value = INIT_LITERAL_AST($3, NodeType::Integer);
-        //         $$ = NewAst(NodeType::Property, nullptr, key, value);
-        //       }
-        // | OP_TO COLON VAR_STRING
-        //       {
-        //         struct GASTNode* key = INIT_STRING_AST("->");
-        //         struct GASTNode* value = INIT_LITERAL_AST($3, NodeType::String);
-        //         $$ = NewAst(NodeType::Property, nullptr, key, value);
-        //       }
-        | ;
+        | group COLON VAR_STRING {};
 array:    LEFT_SQUARE RIGHT_SQUARE { $$ = nullptr; }
         | LEFT_SQUARE values RIGHT_SQUARE
               {

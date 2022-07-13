@@ -56,9 +56,7 @@ private:
     VisitFlow apply(GASTNode* stmt, std::list<NodeType>& path) {
       return VisitFlow::Children;
     }
-    VisitFlow apply(GUpsetStmt* stmt, std::list<NodeType>& path) {
-      return VisitFlow::Return;
-    }
+    VisitFlow apply(GUpsetStmt* stmt, std::list<NodeType>& path);
     VisitFlow apply(GQueryStmt* stmt, std::list<NodeType>& path) {
       return VisitFlow::Return;
     }

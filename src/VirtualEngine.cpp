@@ -40,6 +40,8 @@ GPlan* GVirtualEngine::makePlans(GASTNode* ast) {
 int GVirtualEngine::executePlans(GPlan* plans) {
   int ret = ECode_Success;
   if (plans) {
+    ret = plans->prepare();
+    if (ret != ECode_Success) return ret;
     ret = plans->execute();
   }
   return ret;
@@ -53,6 +55,10 @@ int GVirtualEngine::execAST(GASTNode* ast) {
   return ret;
 }
 
+VisitFlow GVirtualEngine::PlanVisitor::apply(GUpsetStmt* stmt, std::list<NodeType>& path) {
+  _plan = new GUpsetPlan(_vn, _store, stmt);
+  return VisitFlow::Children;
+}
 VisitFlow GVirtualEngine::PlanVisitor::apply(GCreateStmt* stmt, std::list<NodeType>& path)
 {
   _plan = new GUtilPlan(_vn, _store, stmt);

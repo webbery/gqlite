@@ -2,7 +2,6 @@
 #include "VirtualEngine.h"
 #include "gql/query.h"
 #include "base/type.h"
-#include "base/visitor.h"
 
 namespace upset
 {

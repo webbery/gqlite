@@ -1,20 +1,23 @@
 #include "base/system/EventEmitter.h"
 
-GEventEmitter::GEventEmitter() {}
+GEventEmitter::GEventEmitter()
+:_scheduler(2) {}
 
 void GEventEmitter::emit(int event, std::any& args) {
   if (_listeners.count(event)) {
-    _listeners[event](args);
-  }
-}
-
-void GEventEmitter::emit(int event) {
-  if (_listeners.count(event)) {
-    std::any args;
-    _listeners[event](args);
+    std::function<void()> lambda = [&job = this->_listeners[event], args = args]() {
+      job(args);
+    };
+    // _scheduler.spawn(lambda);
+    // _listeners[event](args);
+    lambda();
   }
 }
 
 void GEventEmitter::on(int event, std::function<void(const std::any&)> f) {
   _listeners[event] = f;
+}
+
+void GEventEmitter::clear() {
+  _listeners.clear();
 }

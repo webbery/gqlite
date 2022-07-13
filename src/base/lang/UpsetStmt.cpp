@@ -1,6 +1,7 @@
 #include "base/lang/UpsetStmt.h"
 
-GUpsetStmt::GUpsetStmt(const std::string& graph)
-:_name(graph) {
+GUpsetStmt::GUpsetStmt(const std::string& graph, GASTNode* ast)
+:_name(graph)
+, _node(ast) {
 
 }

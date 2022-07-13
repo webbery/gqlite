@@ -29,8 +29,6 @@ void DumpAst(GASTNode* root, int level = 0);
 
 GASTNode* LoadAST();
 
-GASTNode* ListJoin(GASTNode* first, GASTNode* second);
-
 /****
  * 
  */

@@ -8,13 +8,21 @@ GVirtualNetwork::GVirtualNetwork(size_t maxMem)
 {
 }
 
-void GVirtualNetwork::addNode(uint32_t id) {
+GVirtualNetwork::~GVirtualNetwork() {
+  // if (_vg.size()) release();
+}
+
+void GVirtualNetwork::addNode(uint32_t id, const std::vector<node_attr_t>& attr, const std::vector<node_literal_t>& value) {
   if (_vg.size() >= _maxMemory) {
     // detach nodes in future
     std::future<size_t> fut = std::async(&GVirtualNetwork::clean, this);
   }
   // add nodes
-  _vg._mNodesInstance[id] = new GEntityNode(_event);
+  GMap::node_cellection collection;
+  if (_vg._nodes.count(id)) {
+
+  }
+  // _vg._nodes[id] = 
 }
 
 void GVirtualNetwork::addEdge(uint32_t id) {}

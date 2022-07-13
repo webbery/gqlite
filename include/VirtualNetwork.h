@@ -14,24 +14,26 @@ class GEntityNode;
 class GAttributeNode;
 class GVirtualNetwork {
 public:
+  using node_t = GMap::node_t;
+  using node_attr_t = GMap::node_attr_t;
+  using node_literal_t = GMap::node_literal_t;
+
   enum class VNMessage {
     FirstNodeLoaded = 1,
     LastNodeLoaded = 2,
     WalkInterrupt = 3,    //
     WalkStart = 4,
+    WalkPause,
     WalkStop
   };
 
   GVirtualNetwork(size_t maxMem);
+  ~GVirtualNetwork();
 
   void startWalk();
   void stopWalk();
-  /**
-   * 如果当前节点数量达到上限，按如下规则移除节点：
-   * 1. 最近最少使用的节点
-   * 然后将节点添加进来
-   */
-  void addNode(uint32_t id);
+  
+  void addNode(node_t id, const std::vector<node_attr_t>& attr, const std::vector<node_literal_t>& value);
   void addEdge(uint32_t id);
   void release();
 
@@ -39,20 +41,31 @@ public:
   void visit(VisitSelector selector, Visitor visitor) {
     GWalkFactory* factory = new GWalkFactory();
     auto* strategy = factory->createStrategy(selector);
+    auto clean_env = [&] () {
+      if (strategy) {
+        delete strategy;
+        strategy = nullptr;
+      }
+      if (factory) {
+        delete factory;
+        factory = nullptr;
+      }
+      // _event.clear();
+    };
     // wait for start
     _event.on((int)VNMessage::FirstNodeLoaded, [&](const std::any&) {
-      strategy->walk(_vg, visitor);
+      // strategy->walk(_vg, visitor);
     });
     _event.on((int)VNMessage::LastNodeLoaded, [&](const std::any&) {
-      delete strategy;
-      delete factory;
+      clean_env();
     });
     _event.on((int)VNMessage::WalkInterrupt, [&](const std::any&) {
-      delete strategy;
-      delete factory;
+      clean_env();
+    });
+    _event.on((int)VNMessage::WalkStop, [&](const std::any&) {
+      clean_env();
     });
   }
-
 
 private:
   size_t clean() { _vg.clean(); return 0;}

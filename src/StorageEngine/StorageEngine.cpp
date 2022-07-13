@@ -69,6 +69,12 @@ int GStorageEngine::open(const char* filename) {
     std::vector<uint8_t> v(data.byte_ptr(), data.byte_ptr() + data.size());
     _schema = nlohmann::json::from_cbor(v);
   }
+  if (!isClassExist(SCHEMA_CLASS_DEFAULT)) {
+    ClassInfo info;
+    info.key_type = 1;
+    info.value_type = ClassType::String;
+    addClass(SCHEMA_CLASS_DEFAULT, info);
+  }
   // _env.close_map(handle);
   return ret;
 }
@@ -96,30 +102,30 @@ mdbx::map_handle GStorageEngine::openSchema() {
   return schema;
 }
 
-void GStorageEngine::addProp(const std::string& prop, PropertyInfo type) {
-  if (!isPropExist(prop)) {
+void GStorageEngine::addClass(const std::string& prop, ClassInfo type) {
+  if (!isClassExist(prop)) {
     nlohmann::json info;
-    info["name"] = prop;
+    info[SCHEMA_CLASS_NAME] = prop;
     uint8_t value = *(uint8_t*)&type;
-    info["info"] = value;
-    _schema["prop"].push_back(info);
+    info[SCHEMA_CLASS_INFO] = value;
+    _schema[SCHEMA_CLASS].push_back(info);
   }
 }
 
-bool GStorageEngine::isPropExist(const std::string& prop) {
+bool GStorageEngine::isClassExist(const std::string& prop) {
   if (_schema.empty()) return false;
-  const auto& props = _schema["prop"];
+  const auto& props = _schema[SCHEMA_CLASS];
   for (auto itr = props.begin(); itr != props.end(); ++itr) {
-    if ((*itr)["name"] == prop) return true;
+    if ((*itr)[SCHEMA_CLASS_NAME] == prop) return true;
   }
   return false;
 }
 
 nlohmann::json GStorageEngine::getProp(const std::string& prop)
 {
-  const auto& props = _schema["prop"];
+  const auto& props = _schema[SCHEMA_CLASS];
   for (auto itr = props.begin(); itr != props.end(); ++itr) {
-    if ((*itr)["name"] == prop) return *itr;
+    if ((*itr)[SCHEMA_CLASS_NAME] == prop) return *itr;
   }
   assert(false);
 }
@@ -134,7 +140,7 @@ mdbx::map_handle GStorageEngine::getOrCreateHandle(const std::string& prop, mdbx
 }
 
 int GStorageEngine::write(const std::string& prop, const std::string& key, void* value, size_t len) {
-  assert(isPropExist(prop));
+  assert(isClassExist(prop));
   mdbx::slice data(value, len);
   auto handle = getOrCreateHandle(prop, mdbx::key_mode::usual);
   ::put(_txn, handle, key, data);
@@ -142,7 +148,7 @@ int GStorageEngine::write(const std::string& prop, const std::string& key, void*
 }
 
 int GStorageEngine::read(const std::string& prop, const std::string& key, std::string& value) {
-  assert(isPropExist(prop));
+  assert(isClassExist(prop));
   auto handle = getOrCreateHandle(prop, mdbx::key_mode::usual);
   mdbx::slice data = ::get(_txn, handle, key);
   value.assign((char*)data.data(), data.size());
@@ -150,7 +156,7 @@ int GStorageEngine::read(const std::string& prop, const std::string& key, std::s
 }
 
 int GStorageEngine::write(const std::string& prop, uint64_t key, void* value, size_t len) {
-  assert(isPropExist(prop));
+  assert(isClassExist(prop));
   mdbx::slice data(value, len);
   auto handle = getOrCreateHandle(prop, mdbx::key_mode::ordinal);
   ::put(_txn, handle, key, data);
@@ -158,26 +164,22 @@ int GStorageEngine::write(const std::string& prop, uint64_t key, void* value, si
 
 }
 int GStorageEngine::read(const std::string& prop, uint64_t key, std::string& value) {
-  assert(isPropExist(prop));
+  assert(isClassExist(prop));
   auto handle = getOrCreateHandle(prop, mdbx::key_mode::ordinal);
   mdbx::slice data = ::get(_txn, handle, key);
   value.assign((char*)data.data(), data.size());
   return ECode_Success;
 }
 
-void GStorageEngine::addAttribute(const std::string& key, const std::string& value) {
-  _schema[key] = value;
-}
-
 GStorageEngine::cursor GStorageEngine::getCursor(const std::string& prop)
 {
-  assert(isPropExist(prop));
+  assert(isClassExist(prop));
   mdbx::key_mode mode = mdbx::key_mode::ordinal;
   auto pp = getProp(prop);
-  auto c = (uint8_t)pp["info"];
-  PropertyInfo info = { 0 };
-  size_t n = sizeof(PropertyInfo);
-  std::memcpy(&info, &c, sizeof(PropertyInfo));
+  auto c = (uint8_t)pp[SCHEMA_CLASS_INFO];
+  ClassInfo info = { 0 };
+  size_t n = sizeof(ClassInfo);
+  std::memcpy(&info, &c, sizeof(ClassInfo));
   mdbx::map_handle handle;
   if (info.key_type == 0) {
     handle = getOrCreateHandle(prop, mdbx::key_mode::ordinal);
