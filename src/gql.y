@@ -126,7 +126,7 @@ void release_result_info(gqlite_result& result) {
 %type <__node> a_simple_query
 %type <__node> query_kind_expr a_match   a_relation_match  match_expr
 %type <__node> query_kind
-%type <__node> a_graph_properties
+%type <__node> a_graph_properties graph_property graph_properties
 %type <__node> a_edge
 %type <__node> a_link_condition
 %type <__node> a_value
@@ -376,13 +376,25 @@ strings:  VAR_STRING
 number: VAR_DECIMAL { $$ = INIT_NUMBER_AST($1); }
         | VAR_INTEGER { $$ = INIT_NUMBER_AST($1); };
 a_graph_properties:
-          graph_property {}
-        | LEFT_SQUARE graph_properties RIGHT_SQUARE {};
+          graph_property { $$ = $1; }
+        | LEFT_SQUARE graph_properties RIGHT_SQUARE { $$ = $2; };
 graph_properties: 
-          graph_property {}
-        | graph_properties COMMA graph_property {};
+          graph_property
+              {
+                GArrayExpression* array = new GArrayExpression();
+                array->addElement($1);
+                $$ = NewAst(NodeType::ArrayExpression, array, nullptr, 0);
+              }
+        | graph_properties COMMA graph_property
+              {
+                GArrayExpression* array = (GArrayExpression*)$1->_value;
+                array->addElement($3);
+                $$ = $1;
+              };
 graph_property:
-          KW_VERTEX dot VAR_STRING {}
+          KW_VERTEX dot VAR_STRING {
+            $$ = NewAst(NodeType::VariableDeclarator, INIT_STRING_AST($3), nullptr, 0);
+          }
         | KW_EDGE dot VAR_STRING {}
         | KW_VERTEX dot function_call {}
         | KW_EDGE dot function_call {};

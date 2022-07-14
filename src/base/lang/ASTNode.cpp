@@ -89,6 +89,13 @@ void FreeNode(GASTNode* node) {
     GTypeTraits<NodeType::BinaryExpression>::type* ptr = reinterpret_cast<GTypeTraits<NodeType::BinaryExpression>::type*>(node->_value);
     delete ptr;
   }
+    break;
+  case NodeType::VariableDeclarator:
+  {
+    GASTNode* ptr = (GASTNode*)node->_value;
+    FreeNode(ptr);
+  }
+    break;
   default:
     break;
   }
