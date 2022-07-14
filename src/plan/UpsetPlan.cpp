@@ -20,7 +20,6 @@ int GUpsetPlan::prepare() {
 }
 
 int GUpsetPlan::execute() {
-  printf("upset plan, class: %s, key: %s\n", _class.c_str(), std::get<0>(_key).c_str());
   if (_store) {
     std::string k = std::get<0>(_key);
     _store->write(_class, k, _value.data(), _value.size());

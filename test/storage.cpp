@@ -35,11 +35,11 @@ TEST_CASE("basic storage") {
   GStorageEngine engine;
   engine.open("testdb");
   std::cout << "schema: "<< engine.getSchema() << std::endl;
-  PropertyInfo info;
+  ClassInfo info;
   info.key_type = 1;
-  info.value_type = PropertyType::String;
+  info.value_type = ClassType::String;
   info.reserved = 0;
-  engine.addProp("revert_index", info);
+  engine.addClass("revert_index", info);
   std::string value("hello gqlite");
   engine.write("revert_index", "key", value.data(), value.size());
   std::string result;
@@ -50,12 +50,12 @@ TEST_CASE("basic storage") {
 TEST_CASE("range query") {
   GStorageEngine engine;
   engine.open("testdb");
-  PropertyInfo info;
+  ClassInfo info;
   info.key_type = 0;
-  info.value_type = PropertyType::String;
+  info.value_type = ClassType::String;
   info.reserved = 0;
   const std::string propname("name");
-  engine.addProp(propname, info);
+  engine.addClass(propname, info);
   int32_t key = 0;
   for (size_t idx = 1; idx < 50; ++idx) {
     std::string value = std::to_string(idx);
@@ -70,4 +70,19 @@ TEST_CASE("range query") {
     CHECK(name == std::to_string(++idx));
     result = cursor.to_next(false);
   }
+}
+
+TEST_CASE("empty storage") {
+  GStorageEngine engine;
+  engine.open("testdb");
+  ClassInfo info;
+  info.key_type = 1;
+  info.value_type = ClassType::String;
+  info.reserved = 0;
+  engine.addClass("index", info);
+  std::string value;
+  engine.write("index", "key", value.data(), value.size());
+  std::string result;
+  engine.read("index", "key", result);
+  CHECK(result == value);
 }

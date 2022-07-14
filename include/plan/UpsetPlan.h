@@ -32,7 +32,6 @@ private:
     }
     VisitFlow apply(GProperty* stmt, std::list<NodeType>& path) {
       std::string k = stmt->key();
-      printf("Visit, Key: %s\n", k.c_str());
       accept(stmt->value(), *this, path);
       return VisitFlow::Children;
     }

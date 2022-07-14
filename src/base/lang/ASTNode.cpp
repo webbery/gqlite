@@ -75,7 +75,7 @@ void FreeNode(GASTNode* node) {
   case NodeType::ObjectExpression:
   {
     GTypeTraits<NodeType::ObjectExpression>::type* ptr = reinterpret_cast<GTypeTraits<NodeType::ObjectExpression>::type*>(node->_value);
-    delete ptr;
+    FreeNode(ptr);
   }
     break;
   case NodeType::Property:
@@ -84,6 +84,11 @@ void FreeNode(GASTNode* node) {
     delete ptr;
   }
     break;
+  case NodeType::BinaryExpression:
+  {
+    GTypeTraits<NodeType::BinaryExpression>::type* ptr = reinterpret_cast<GTypeTraits<NodeType::BinaryExpression>::type*>(node->_value);
+    delete ptr;
+  }
   default:
     break;
   }

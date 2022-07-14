@@ -1,7 +1,7 @@
 #include "base/system/EventEmitter.h"
 
 GEventEmitter::GEventEmitter()
-:_scheduler(2) {}
+{}
 
 void GEventEmitter::emit(int event, std::any& args) {
   if (_listeners.count(event)) {

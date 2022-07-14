@@ -1,6 +1,7 @@
 #pragma once
 #include <any>
 #include <map>
+#include <functional>
 #include "base/parallel/parlay/scheduler.h"
 
 class GEventEmitter {

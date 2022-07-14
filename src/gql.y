@@ -145,7 +145,9 @@ line_list: line
           FreeAst($1);
         }
         | utility_cmd { stm._cmdtype = GQL_Util; }
-        | {}
+        | error '\n' {
+          printf("++++++Error\n");
+        }
         ;
     gql: creation
           {
@@ -287,16 +289,6 @@ remove_vertexes: RANGE_BEGIN KW_REMOVE COLON VAR_STRING COMMA KW_VERTEX COLON ar
               };
 upset_edges: RANGE_BEGIN KW_UPSET COLON VAR_STRING COMMA KW_EDGE COLON edge_list RANGE_END
               {
-                // struct GASTNode* g = INIT_STRING_AST($4);
-                // $$ = NewAst(NodeType::UpsetStatement, $8, g, nullptr);
-                // GET_GRAPH($4);
-                // gql_node* cur = $8;
-                // ASTEdgeUpdateVisitor visitor;
-                // while(cur) {
-                //   GASTNode* pv = (GASTNode*)(cur->_value);
-                //   traverse(pv, &visitor);
-                //   cur = cur->_next;
-                // }
                 GUpsetStmt* upsetStmt = new GUpsetStmt($4, $8);
                 $$ = NewAst(NodeType::UpsetStatement, upsetStmt, nullptr, 0);
               };
@@ -326,18 +318,6 @@ a_simple_query:
                 }
         | RANGE_BEGIN query_kind COMMA a_graph_expr COMMA where_expr RANGE_END
                 {
-                  // const GraphProperty& properties = $4->property();
-                  // ASTVertexQueryVisitor visitor;
-                  // traverse($6, &visitor);
-                  // std::set<VertexID> sIds;
-                  // stm._errorCode = $4->queryVertex(sIds, visitor.conditions());
-                  // if(!stm._errorCode && sIds.size() == 0) break;
-                  // gqlite_result results;
-                  // results.type = gqlite_result_type_node;
-                  // query::get_vertexes($4, sIds, results);
-                  // query::filter_property(results, $2);
-                  // stm._result_callback(&results);
-                  // query::release_vertexes(results);
                   GQueryStmt* queryStmt = new GQueryStmt($2, $4, $6);
                   $$ = NewAst(NodeType::QueryStatement, queryStmt, nullptr, 0);
                   stm._errorCode = ECode_Success;
@@ -460,6 +440,7 @@ value: object { $$ = $1; }
         | VAR_BASE64
               {
                 GLiteralBinary* bin = new GLiteralBinary($1, "b64");
+                free($1);
                 $$ = NewAst(NodeType::Literal, bin, nullptr, 0);
               }
         | VAR_DATETIME {}
@@ -524,8 +505,16 @@ property: VAR_STRING COLON value
                 // struct GASTNode* value = INIT_NUMBER_AST($3, NodeType::ArrayExpression);
                 // $$ = NewAst(NodeType::Property, nullptr, key, value);
               }
-        | a_link_condition {}
-        | group COLON VAR_STRING {};
+        | a_link_condition
+              {
+                $$ = $1;
+              }
+        | group COLON VAR_STRING
+              {
+                struct GASTNode* value = INIT_STRING_AST($3);
+                GProperty* prop = new GProperty("group", value);
+                $$ = NewAst(NodeType::Property, prop, nullptr, 0);
+              };
 array:    LEFT_SQUARE RIGHT_SQUARE { $$ = nullptr; }
         | LEFT_SQUARE values RIGHT_SQUARE
               {
@@ -546,7 +535,8 @@ values: value {
 a_link_condition: 
         | a_edge COLON a_value
               {
-
+                GEdgeDeclaration* edge = new GEdgeDeclaration(nullptr, $3, $1);
+                $$ = NewAst(NodeType::EdgeDeclaration, edge, nullptr, 0);
               };
 a_edge:
         | KW_RIGHT_RELATION { $$ = INIT_STRING_AST("->");}
