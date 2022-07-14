@@ -95,7 +95,7 @@ void release_result_info(gqlite_result& result) {
 %token <__int> VAR_INTEGER
 %token <__int> VAR_DATETIME
 %token KW_AST KW_ID KW_GRAPH KW_COMMIT
-%token KW_CREATE KW_DROP KW_IN KW_REMOVE KW_UPSET KW_LEFT_RELATION KW_RIGHT_RELATION KW_BIDIRECT_RELATION KW_REST KW_DELETE
+%token KW_CREATE KW_DROP KW_IN KW_REMOVE KW_UPSET left_arrow right_arrow KW_BIDIRECT_RELATION KW_REST KW_DELETE
 %token OP_QUERY KW_INDEX OP_WHERE
 %token group
 %token CMD_SHOW 
@@ -124,7 +124,7 @@ void release_result_info(gqlite_result& result) {
 %type <__node> upset_vertexes
 %type <__node> upset_edges
 %type <__node> a_simple_query
-%type <__node> query_kind_expr
+%type <__node> query_kind_expr a_match   a_relation_match  match_expr
 %type <__node> query_kind
 %type <__node> a_graph_properties
 %type <__node> a_edge
@@ -304,14 +304,6 @@ drop_graph: RANGE_BEGIN KW_DROP COLON VAR_STRING RANGE_END
 a_simple_query: 
           RANGE_BEGIN query_kind COMMA a_graph_expr RANGE_END
                 {
-                  // if (!$4) break;
-                  // std::vector<VertexID> ids = GSinglecton::get<GStorageEngine>()->getNodes($4);
-                  // gqlite_result results;
-                  // query::get_vertexes($4, ids, results);
-                  // query::filter_property(results, $2);
-                  // results.type = gqlite_result_type_node;
-                  // stm._result_callback(&results);
-                  // query::release_vertexes(results);
                   GQueryStmt* queryStmt = new GQueryStmt($2, $4, nullptr);
                   $$ = NewAst(NodeType::QueryStatement, queryStmt, nullptr, 0);
                   stm._errorCode = ECode_Success;
@@ -323,18 +315,31 @@ a_simple_query:
                   stm._errorCode = ECode_Success;
                 };
 query_kind: OP_QUERY COLON query_kind_expr { $$ = $3; }
-        |   OP_QUERY COLON match_expr {};
+        |   OP_QUERY COLON match_expr { $$ = $3; };
 query_kind_expr: 
           KW_VERTEX { $$ = INIT_STRING_AST("vertex"); }
         | KW_EDGE { $$ = INIT_STRING_AST("edge"); }
         | KW_PATH { $$ = INIT_STRING_AST("path");}
         | a_graph_properties { $$ = $1; };
 match_expr: //{->: 'alias'}
-          RANGE_BEGIN a_match RANGE_END {};
-a_match:  a_relation_match {}
+          RANGE_BEGIN a_match RANGE_END { $$ = $2; };
+a_match:  a_relation_match
+                {
+                  $$ = $1;
+                }
         | a_vertex_match COMMA a_relation_match COMMA a_vertex_match {};
-a_relation_match: KW_RIGHT_RELATION COLON VAR_STRING {}
-        | KW_LEFT_RELATION COLON VAR_STRING {};
+a_relation_match: right_arrow COLON VAR_STRING
+                {
+                  struct GASTNode* to_value = INIT_STRING_AST($3);
+                  GEdgeDeclaration* edge = new GEdgeDeclaration(nullptr, to_value, INIT_STRING_AST("->"));
+                  $$ = NewAst(NodeType::EdgeDeclaration, edge, nullptr, 0);
+                }
+        | left_arrow COLON VAR_STRING
+                {
+                  struct GASTNode* to_value = INIT_STRING_AST($3);
+                  GEdgeDeclaration* edge = new GEdgeDeclaration(nullptr, to_value, INIT_STRING_AST("<-"));
+                  $$ = NewAst(NodeType::EdgeDeclaration, edge, nullptr, 0);
+                };
 a_vertex_match: KW_VERTEX COLON VAR_STRING {};
 a_graph_expr:
           KW_IN COLON VAR_STRING
@@ -539,8 +544,8 @@ a_link_condition:
                 $$ = NewAst(NodeType::EdgeDeclaration, edge, nullptr, 0);
               };
 a_edge:
-        | KW_RIGHT_RELATION { $$ = INIT_STRING_AST("->");}
-        | KW_LEFT_RELATION { $$ = INIT_STRING_AST("<-"); }
+        | right_arrow { $$ = INIT_STRING_AST("->");}
+        | left_arrow { $$ = INIT_STRING_AST("<-"); }
         | KW_BIDIRECT_RELATION { $$ = INIT_STRING_AST("--"); };
 a_value:
         | VAR_STRING { $$ = INIT_STRING_AST($1); }
