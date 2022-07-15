@@ -115,7 +115,7 @@ void release_result_info(gqlite_result& result) {
 %type <__node> array
 %type <__node> properties
 %type <__node> where_expr
-%type <__node> function_call
+%type <__node> function_call function_params
 %type <__node> property
 %type <__node> vertex
 %type <__node> edge
@@ -397,7 +397,11 @@ graph_property:
           }
         | KW_EDGE dot VAR_STRING {}
         | KW_VERTEX dot function_call {}
-        | KW_EDGE dot function_call {};
+        | KW_EDGE dot function_call
+              {
+                auto scope = INIT_STRING_AST("edge");
+                $$ = NewAst(NodeType::VariableDeclarator, scope, $3, 1);
+              };
 vertex_list: LEFT_SQUARE vertexes RIGHT_SQUARE
               {
                 $$ = $2;
@@ -564,10 +568,19 @@ a_value:
         | VAR_DECIMAL { $$ = INIT_NUMBER_AST($1); }
         | VAR_INTEGER { $$ = INIT_NUMBER_AST($1); };
 function_call:
-        | VAR_STRING function_params {};
+        | VAR_STRING function_params
+              {
+                auto fname = INIT_STRING_AST($1);
+                if ($2 == nullptr) {
+                  $$ = NewAst(NodeType::CallExpression, fname, $2, 0);
+                }
+                else {
+                  $$ = NewAst(NodeType::CallExpression, fname, $2, 1);
+                }
+              };
 function_params:
-        | PARAM_BEGIN PARAM_END {}
-        | PARAM_BEGIN STAR PARAM_END {}
-        | PARAM_BEGIN string_list PARAM_END {}
+        | PARAM_BEGIN PARAM_END { $$ = nullptr; }
+        | PARAM_BEGIN STAR PARAM_END { $$ = INIT_STRING_AST("*"); }
+        | PARAM_BEGIN string_list PARAM_END { $$ = $2; }
         ;
 %%

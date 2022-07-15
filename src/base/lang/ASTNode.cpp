@@ -96,6 +96,12 @@ void FreeNode(GASTNode* node) {
     FreeNode(ptr);
   }
     break;
+  case NodeType::CallExpression:
+  {
+    GASTNode* ptr = (GASTNode*)node->_value;
+    FreeNode(ptr);
+  }
+    break;
   default:
     break;
   }
