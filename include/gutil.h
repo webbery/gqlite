@@ -22,3 +22,8 @@
 #endif
 
 std::vector<std::string> split(const char* str, const char* delim);
+
+/**
+ * @brief try generate a Unicode number by input string
+ */
+uint32_t unicode32(const std::string& input);

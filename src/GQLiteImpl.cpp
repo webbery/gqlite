@@ -22,14 +22,14 @@ int yylex(YYSTYPE* yylval_param, YYLTYPE* yylloc_param, void* yyscanner, GVirtua
 #define VALUE_END    EOL
 
 GQLiteImpl::GQLiteImpl(GVirtualEngine* pEng)
-  : _statement(pEng)
+  : _ve(pEng)
 {}
 
 GQLiteImpl::~GQLiteImpl()
 {
   this->close();
-  if (_statement) {
-    delete _statement;
+  if (_ve) {
+    delete _ve;
   }
 }
 
@@ -40,8 +40,8 @@ int GQLiteImpl::open(const char* filename, gqlite_open_mode mode)
 
 int GQLiteImpl::close()
 {
-  if (_statement->_storage) {
-    delete _statement->_storage;
+  if (_ve->_storage) {
+    delete _ve->_storage;
     return true;
   }
   return true;
@@ -50,13 +50,13 @@ int GQLiteImpl::close()
 int GQLiteImpl::create(const char* filename, gqlite_open_mode mode)
 {
   if (filename) {
-    return _statement->_storage->open(filename);
+    return _ve->_storage->open(filename);
   }
   else {
-    if (_statement->_storage) {
-      delete _statement->_storage;
+    if (_ve->_storage) {
+      delete _ve->_storage;
     }
-    _statement->_storage = new GStorageEngine();
+    _ve->_storage = new GStorageEngine();
   }
   return ECode_Success;
 }

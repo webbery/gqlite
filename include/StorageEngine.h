@@ -8,7 +8,12 @@
 #define SCHEMA_CLASS            "cls"
 #define SCHEMA_CLASS_INFO       "info"
 #define SCHEMA_CLASS_NAME       "name"
-#define SCHEMA_CLASS_DEFAULT    "default"
+#define MAP_BASIC               "__basic"
+#define MAP_NODE                "_node"
+#define MAP_EDGE                "_edge"
+#define MAP_LINK                "_nlink"
+#define MAP_MAP_NODE            "_mn"
+#define MAP_MAP_EDGE            "_me"
 
 enum class ClassType : uint8_t {
     Undefined,
@@ -17,7 +22,7 @@ enum class ClassType : uint8_t {
     Custom
 };
 
-struct alignas(8) ClassInfo {
+struct alignas(8) MapInfo {
   uint8_t       key_type : 1;    /**<  0 - interger, 1 - byte; */
   ClassType  value_type : 5;  /**< */ 
   uint8_t       reserved : 2;
@@ -28,12 +33,17 @@ public:
     GStorageEngine();
     ~GStorageEngine();
 
-    /** Open a graph instance with file.
-     * A file is a graph instance.
-     * After open success, its shcema is loaded.
-     * The schema contains:
-     *   all classes, all attribute's info(such as name, value type) of class
-     * When reading the data, it will use schema and convert to GRAD graph
+    /** 
+     * @brief Open a graph instance with file.
+     *        A file is a graph instance.
+     *        After open success, its schema is loaded.
+     *        The schema contains:
+     *          all classes, all attributes info(such as name, value type) of class
+     *        For the first time open, it will create some map handle as follows:
+     *        1. `basic`. Include schema
+     *        2. `node`. Include all node with format: <node_t, {attr_id: value, ...}>
+     *        3. `edge`. Inlcude all edge with format: <edge_t, {attr_id: value, ...}>
+     *        4. `link`. Relationship of node and edge: <node_t, [edge_t, edge_t, ...]>
      * @param filename database filename
      */
     int open(const char* filename);
@@ -44,36 +54,42 @@ public:
      * It will create a new map with `prop`, which key type is info.key_type.
      * Example:
      *   In MovieLens, it has class like `MOVIE`, `ACTOR`, `USER` etc.
-     * @param clazz class name
-     * @param info  class infomation.
+     * @param mapname new map name
+     * @param info  map information.
      */
-    void addClass(const std::string& clazz, ClassInfo info);
+    void addMap(const std::string& mapname, MapInfo info);
 
-    /** Record an node/edge infomation to disk
-     * For example:
-     *   <MOVIE, Star Trek, 3884>
-     *   `MOVIE` is class, movie name `Star Trek` is key, 3884 is value.
-     * @param clazz class name
+    /** 
+     * @brief Record an node/edge information to disk
+     *        For example:
+     *          <MOVIE, Star Trek, 3884>
+     *        `MOVIE` is class, movie name `Star Trek` is key, 3884 is value.
+     * @param mapname class name
      * @param key   the key of node/edge
      * @param value the attribute of node/edge
      */
-    int write(const std::string& clazz, const std::string& key, void* value, size_t len);
-    int read(const std::string& clazz, const std::string& key, std::string& value);
+    int write(const std::string& mapname, const std::string& key, void* value, size_t len);
+    int read(const std::string& mapname, const std::string& key, std::string& value);
 
-    int write(const std::string& clazz, uint64_t key, void* value, size_t len);
-    int read(const std::string& clazz, uint64_t key, std::string& value);
+    int write(const std::string& mapname, uint64_t key, void* value, size_t len);
+    int read(const std::string& mapname, uint64_t key, std::string& value);
 
     typedef mdbx::cursor_managed  cursor;
-    cursor getCursor(const std::string& clazz);
+    cursor getCursor(const std::string& mapname);
 
     void registGraphFeature(GGraphInstance*, GVertexProptertyFeature* feature);
 
     /** 
      * Get the schema of current graph instance.
      * Schema is a json which format as follows:
-     *   
+     *   {
+     *     version: 0.0.1(example),
+     *     class(which values are map name): [Movie, Actor, ...],
+     *     Movie(class detail): [{Score: value type}, {Title: string}, {WebID:...}, ...],
+     *     Actor(class detail): [{nodes: current count}, {edges: current count}, ],
+     *   }
      */
-    nlohmann::json getSchema() { return _schema; }
+    nlohmann::json& getSchema() { return _schema; }
 
     int startTrans();
 
@@ -93,13 +109,15 @@ public:
     int injectNodeUpdateFunc();
 
 private:
-    bool isClassExist(const std::string& prop);
+    bool isMapExist(const std::string& prop);
     nlohmann::json getProp(const std::string& prop);
     mdbx::map_handle getOrCreateHandle(const std::string& prop, mdbx::key_mode mode);
     /*
-     * @brief schema is used to record the graph's infomation
+     * @brief schema is used to record the graph's information
      */
     mdbx::map_handle openSchema();
+
+    void initMap();
 
 private:
     mdbx::env_managed _env;

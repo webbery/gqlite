@@ -10,7 +10,7 @@ public:
   GUpsetPlan(GVirtualNetwork* vn, GStorageEngine* store, GUpsetStmt* stmt);
 
   virtual int prepare();
-  virtual int execute();
+  virtual int execute(gqlite_callback);
 
 private:
   struct UpsetVisitor {
@@ -36,6 +36,7 @@ private:
       return VisitFlow::Children;
     }
     VisitFlow apply(GVertexDeclaration* stmt, std::list<NodeType>& path) {
+      _plan._vertex = true;
       GLiteral* literal = (GLiteral*)(stmt->key()->_value);
       _plan._key = literal->raw();
       accept(stmt->vertex(), *this, path);
@@ -48,9 +49,13 @@ private:
       return VisitFlow::Children;
     }
     VisitFlow apply(GArrayExpression* stmt, std::list<NodeType>& path) {
+      for (auto itr = stmt->begin(), end = stmt->end(); itr != end; ++itr) {
+        accept(*itr, *this, path);
+      }
       return VisitFlow::Children;
     }
     VisitFlow apply(GEdgeDeclaration* stmt, std::list<NodeType>& path) {
+      _plan._vertex = false;
       return VisitFlow::Children;
     }
     VisitFlow apply(GDropStmt* stmt, std::list<NodeType>& path) {
@@ -61,6 +66,7 @@ private:
 
   friend class UpsetVisitor;
 private:
+  bool _vertex;       /**< true if upset target is vertex, else is edge */
   std::string _class;
   std::variant<std::string, uint64_t> _key;
   std::string _value;

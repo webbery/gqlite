@@ -48,18 +48,35 @@ public:
   GStorageEngine* _storage = nullptr;
 
 private:
+  struct PlanList {
+    GPlan* _plan;
+    /**< true if plan can be run in thread and next plan did not wait it finish. */
+    bool _threadable;
+    PlanList* _next;
+    PlanList* _parent;
+  };
   struct PlanVisitor {
-    GPlan* _plan = nullptr;
+    PlanList* _plans = nullptr;
     GVirtualNetwork* _vn;
     GStorageEngine* _store;
-    PlanVisitor(GVirtualNetwork* vn, GStorageEngine* store):_vn(vn), _store(store){}
+    PlanVisitor(GVirtualNetwork* vn, GStorageEngine* store):_vn(vn), _store(store){
+      _plans = new PlanList;
+      _plans->_next = _plans;
+      _plans->_parent = _plans;
+      _plans->_plan = nullptr;
+      _plans->_threadable = false;
+    }
+
+    /**
+     * Add a plan to list
+     */
+    void add(GPlan* plan, bool threadable = false);
+
     VisitFlow apply(GASTNode* stmt, std::list<NodeType>& path) {
       return VisitFlow::Children;
     }
     VisitFlow apply(GUpsetStmt* stmt, std::list<NodeType>& path);
-    VisitFlow apply(GQueryStmt* stmt, std::list<NodeType>& path) {
-      return VisitFlow::Return;
-    }
+    VisitFlow apply(GQueryStmt* stmt, std::list<NodeType>& path);
     VisitFlow apply(GGQLExpression* stmt, std::list<NodeType>& path) {
       return VisitFlow::Children;
     }
@@ -82,9 +99,9 @@ private:
     }
   };
 private:
-  GPlan* makePlans(GASTNode* ast);
-  int executePlans(GPlan*);
-  void cleanPlans(GPlan*);
+  PlanList* makePlans(GASTNode* ast);
+  int executePlans(PlanList*);
+  void cleanPlans(PlanList*);
 
 private:
   static uint32_t _indx;

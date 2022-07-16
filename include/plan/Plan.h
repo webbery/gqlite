@@ -1,7 +1,9 @@
 #pragma once
+#include "gqlite.h"
 
 class GVirtualNetwork;
 class GStorageEngine;
+typedef int (*gqlite_callback)(_gqlite_result*);
 class GPlan {
 public:
   GPlan(GVirtualNetwork* network, GStorageEngine* store);
@@ -12,7 +14,11 @@ public:
    * For example: before update execute, we should check database created or not.
    */
   virtual int prepare() { return 0; }
-  virtual int execute() = 0;
+  virtual int execute(gqlite_callback) = 0;
+  /**
+   * Try to interrupt plan when it still working
+   */
+  virtual int interrupt() { return 0; }
   void addLeft(GPlan* plan) { _left = plan; }
 
   inline GPlan* left() { return _left; }

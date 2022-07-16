@@ -25,10 +25,10 @@ public:
 
   int close();
   
-  GVirtualEngine* statement() { return _statement; }
+  GVirtualEngine* engine() { return _ve; }
 private:
   int create(const char* filename, gqlite_open_mode mode);
 
 private:
-  GVirtualEngine* _statement = nullptr;
+  GVirtualEngine* _ve = nullptr;
 };

@@ -12,9 +12,6 @@
 #include <set>
 #include <fmt/format.h>
 #include "Error.h"
-#include "gql/creation.h"
-#include "gql/query.h"
-#include "gql/upset.h"
 #include "Type/Binary.h"
 #include "base/lang/lang.h"
 #include "base/lang/AST.h"
@@ -271,19 +268,6 @@ upset_vertexes: RANGE_BEGIN KW_UPSET COLON VAR_STRING COMMA KW_VERTEX COLON vert
               };
 remove_vertexes: RANGE_BEGIN KW_REMOVE COLON VAR_STRING COMMA KW_VERTEX COLON array RANGE_END
               {
-                // struct GASTNode* g = INIT_STRING_AST($4);
-                // $$ = NewAst(NodeType::RemoveStatement, $8, g, nullptr);
-                // GET_GRAPH($4);
-                // gql_node* list = as_array($8);
-                // gql_node* current = list;
-                // while(current) {
-                //   GASTNode* node = (struct GASTNode*)current->_value;
-                //   // if (node->)
-                //   char* nodeid = (char*)node->_value;
-                //   stm._graph->dropNode(pGraph, nodeid);
-                //   current = current->_next;
-                // }
-                // stm._graph->finishUpdate(pGraph);
                 GRemoveStmt* rmStmt = new GRemoveStmt($4);
                 $$ = NewAst(NodeType::RemoveStatement, rmStmt, $8, 1);
               };
@@ -294,10 +278,6 @@ upset_edges: RANGE_BEGIN KW_UPSET COLON VAR_STRING COMMA KW_EDGE COLON edge_list
               };
 drop_graph: RANGE_BEGIN KW_DROP COLON VAR_STRING RANGE_END
               {
-                // struct GASTNode* g = INIT_STRING_AST($4);
-                // $$ = NewAst(NodeType::UpsetStatement, g, nullptr, nullptr);
-                // GET_GRAPH($4);
-                // stm._graph->dropGraph(pGraph);
                 GDropStmt* dropStmt = new GDropStmt($4);
                 $$ = NewAst(NodeType::DropStatement, dropStmt, nullptr, 0);
               };
@@ -344,7 +324,6 @@ a_vertex_match: KW_VERTEX COLON VAR_STRING {};
 a_graph_expr:
           KW_IN COLON VAR_STRING
                 {
-                  // stm._errorCode = ECode_Graph_Not_Exist;
                   $$ = INIT_STRING_AST($3);
                 };
 where_expr: OP_WHERE COLON json { $$ = $3; };

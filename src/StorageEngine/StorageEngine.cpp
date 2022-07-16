@@ -69,12 +69,7 @@ int GStorageEngine::open(const char* filename) {
     std::vector<uint8_t> v(data.byte_ptr(), data.byte_ptr() + data.size());
     _schema = nlohmann::json::from_cbor(v);
   }
-  if (!isClassExist(SCHEMA_CLASS_DEFAULT)) {
-    ClassInfo info;
-    info.key_type = 1;
-    info.value_type = ClassType::String;
-    addClass(SCHEMA_CLASS_DEFAULT, info);
-  }
+  initMap();
   // _env.close_map(handle);
   return ret;
 }
@@ -102,8 +97,36 @@ mdbx::map_handle GStorageEngine::openSchema() {
   return schema;
 }
 
-void GStorageEngine::addClass(const std::string& prop, ClassInfo type) {
-  if (!isClassExist(prop)) {
+void GStorageEngine::initMap()
+{
+  if (!isMapExist(MAP_BASIC)) {
+    MapInfo info = { 0 };
+    info.key_type = 1;
+    info.value_type = ClassType::String;
+    addMap(MAP_BASIC, info);
+  }
+  if (!isMapExist(MAP_NODE)) {
+    MapInfo info = { 0 };
+    info.key_type = 0;
+    info.value_type = ClassType::String;
+    addMap(MAP_NODE, info);
+  }
+  if (!isMapExist(MAP_EDGE)) {
+    MapInfo info = { 0 };
+    info.key_type = 0;
+    info.value_type = ClassType::String;
+    addMap(MAP_EDGE, info);
+  }
+  if (!isMapExist(MAP_LINK)) {
+    MapInfo info = { 0 };
+    info.key_type = 0;
+    info.value_type = ClassType::String;
+    addMap(MAP_LINK, info);
+  }
+}
+
+void GStorageEngine::addMap(const std::string& prop, MapInfo type) {
+  if (!isMapExist(prop)) {
     nlohmann::json info;
     info[SCHEMA_CLASS_NAME] = prop;
     uint8_t value = *(uint8_t*)&type;
@@ -112,7 +135,7 @@ void GStorageEngine::addClass(const std::string& prop, ClassInfo type) {
   }
 }
 
-bool GStorageEngine::isClassExist(const std::string& prop) {
+bool GStorageEngine::isMapExist(const std::string& prop) {
   if (_schema.empty()) return false;
   const auto& props = _schema[SCHEMA_CLASS];
   for (auto itr = props.begin(); itr != props.end(); ++itr) {
@@ -140,7 +163,7 @@ mdbx::map_handle GStorageEngine::getOrCreateHandle(const std::string& prop, mdbx
 }
 
 int GStorageEngine::write(const std::string& prop, const std::string& key, void* value, size_t len) {
-  assert(isClassExist(prop));
+  assert(isMapExist(prop));
   mdbx::slice data(value, len);
   auto handle = getOrCreateHandle(prop, mdbx::key_mode::usual);
   ::put(_txn, handle, key, data);
@@ -148,15 +171,16 @@ int GStorageEngine::write(const std::string& prop, const std::string& key, void*
 }
 
 int GStorageEngine::read(const std::string& prop, const std::string& key, std::string& value) {
-  assert(isClassExist(prop));
+  assert(isMapExist(prop));
   auto handle = getOrCreateHandle(prop, mdbx::key_mode::usual);
   mdbx::slice data = ::get(_txn, handle, key);
+  if (data.empty()) return ECode_DATUM_Not_Exist;
   value.assign((char*)data.data(), data.size());
   return ECode_Success;
 }
 
 int GStorageEngine::write(const std::string& prop, uint64_t key, void* value, size_t len) {
-  assert(isClassExist(prop));
+  assert(isMapExist(prop));
   mdbx::slice data(value, len);
   auto handle = getOrCreateHandle(prop, mdbx::key_mode::ordinal);
   ::put(_txn, handle, key, data);
@@ -164,22 +188,23 @@ int GStorageEngine::write(const std::string& prop, uint64_t key, void* value, si
 
 }
 int GStorageEngine::read(const std::string& prop, uint64_t key, std::string& value) {
-  assert(isClassExist(prop));
+  assert(isMapExist(prop));
   auto handle = getOrCreateHandle(prop, mdbx::key_mode::ordinal);
   mdbx::slice data = ::get(_txn, handle, key);
+  if (data.empty()) return ECode_DATUM_Not_Exist;
   value.assign((char*)data.data(), data.size());
   return ECode_Success;
 }
 
 GStorageEngine::cursor GStorageEngine::getCursor(const std::string& prop)
 {
-  assert(isClassExist(prop));
+  assert(isMapExist(prop));
   mdbx::key_mode mode = mdbx::key_mode::ordinal;
   auto pp = getProp(prop);
   auto c = (uint8_t)pp[SCHEMA_CLASS_INFO];
-  ClassInfo info = { 0 };
-  size_t n = sizeof(ClassInfo);
-  std::memcpy(&info, &c, sizeof(ClassInfo));
+  MapInfo info = { 0 };
+  size_t n = sizeof(MapInfo);
+  std::memcpy(&info, &c, sizeof(MapInfo));
   mdbx::map_handle handle;
   if (info.key_type == 0) {
     handle = getOrCreateHandle(prop, mdbx::key_mode::ordinal);
@@ -195,40 +220,6 @@ void GStorageEngine::registGraphFeature(GGraphInstance* pGraph, GVertexPropterty
   //pGraph->registPropertyFeature(feature);
 }
 
-// GGraphInstance* GStorageEngine::getGraph(const char* name)
-// {
-//   std::string gname;
-//   if (!name) gname = _usedgraph;
-//   else gname = name;
-//   std::vector<std::string> names = getGraphs();
-//   for (size_t i = 0; i < names.size(); i++)
-//   {
-//     if (names[i] == gname) {
-//       if (this->openGraph(gname.c_str()) != ECode_Success) {
-//         return nullptr;
-//       }
-//       return _mHandle[gname];
-//     }
-//   }
-//   return nullptr;
-// }
-
-// std::vector<std::string> GStorageEngine::getGraphs()
-// {
-//   mdbx::map_handle handle = open_schema(_txn);
-//   if (!handle) printf("222222222\n");
-//   std::vector<std::string> v;
-//   mdbx::cursor_managed cursor = _txn.open_cursor(handle);
-//   mdbx::cursor::move_result result = cursor.to_first(false);
-//   while (result)
-//   {
-//     std::string name((char*)result.key.byte_ptr(), result.key.size());
-//     v.push_back(name);
-//     result = cursor.to_next(false);
-//   }
-//   return v;
-// }
-
 int GStorageEngine::startTrans() {
   _txn = _env.start_write();
   if (!_txn) return ECODE_NULL_PTR;
@@ -239,111 +230,3 @@ int GStorageEngine::finishTrans() {
   _txn.commit();
   return ECode_Success;
 }
-
-// int GStorageEngine::closeGraph(GGraphInstance* pGraph) {
-//   if (pGraph) {
-//     delete pGraph;
-//   }
-//   return ECode_Success;
-// }
-
-// int GStorageEngine::dropGraph(GGraphInstance* pGraph) {
-//   int res = pGraph->drop();
-//   if (!res) {
-//     delete pGraph;
-//     this->finishTrans();
-//     this->startTrans();
-//     return res;
-//   }
-//   return ECode_Fail;
-// }
-
-// int GStorageEngine::finishUpdate(GGraphInstance* graph)
-// {
-//   return graph->finishUpdate(_txn);
-// }
-
-// int GStorageEngine::getNode(GGraphInstance* graph, const VertexID& nodeid, std::function<int(const char*, void*, int, void*)> f)
-// {
-//   GVertex vertex = graph->getVertexById(nodeid);
-//   if (IS_INVALID_VERTEX(vertex.property())) return ECode_Success;
-//   for (auto itr = vertex.property().begin(), end = vertex.property().end(); itr != end; ++itr) {
-//     std::string k = itr.key();
-//     auto v = itr.value();
-//     //auto data = json_cast<v.type()>(v);
-//     switch (v.type()) {
-//     case nlohmann::json::value_t::string:
-//     {
-//       std::string data = v.get<std::string>();
-//       f(k.c_str(), (void*)(data.c_str()), (int)v.type(), nullptr);
-//       break;
-//     }
-//     case nlohmann::json::value_t::number_integer:
-//     {
-//       int data = v.get<int>();
-//       f(k.c_str(), (void*)&data, (int)v.type(), nullptr);
-//       break;
-//     }
-//     case nlohmann::json::value_t::number_unsigned:
-//     {
-//       unsigned int data = v.get<int>();
-//       f(k.c_str(), (void*)&data, (int)v.type(), nullptr);
-//       break;
-//     }
-//     case nlohmann::json::value_t::binary:
-//     {
-//       std::vector<uint8_t> bin = v.get<std::vector<uint8_t>>();
-//       std::string s = gql::base64_encode(bin);
-//       // f(k.c_str(), (void*)&(s[0]), (int)v.type(), nullptr);
-//       break;
-//     }
-//     default:
-//       break;
-//     }
-//   }
-//   return ECode_Success;
-// }
-
-// int GStorageEngine::getNode(GGraphInstance* graph, const VertexID& nodeid, std::function<int(const char*, void*)> f)
-// {
-//   GVertexStmt vertex = graph->getVertexById(nodeid);
-//   if (IS_INVALID_VERTEX(vertex.property())) return ECode_Success;
-//   if (vertex.hasBinary()) {
-//     for (auto& item : vertex.property())
-//     {
-//       if (item.type() == nlohmann::json::value_t::binary) {
-//         nlohmann::json::binary_t bin = item;
-//         item = "b64'" + gql::base64_encode(bin) + "'";
-//       }
-//     }
-//   }
-//   std::string out = vertex.property().dump();
-//   out = std::regex_replace(out, std::regex("\"b64'([\\s\\S]+)'\"", std::regex_constants::ECMAScript), "b64'$1'");
-//   f(out.c_str(), nullptr);
-//   return ECode_Success;
-// }
-
-// std::vector<VertexID> GStorageEngine::getNodes(GGraphInstance* graph)
-// {
-//   auto vertexes = graph->getVertex(_txn);
-//   std::vector<VertexID> ids;
-//   for (auto& vertex : vertexes) {
-//     VertexID vid(vertex.first);
-//     ids.emplace_back(vid);
-//   }
-//   return ids;
-// }
-
-// int GStorageEngine::dropNode(GGraphInstance* graph, const VertexID& nodeid)
-// {
-//   graph->dropVertex(nodeid);
-//   return ECode_Success;
-// }
-
-// int GStorageEngine::makeDirection(GGraphInstance* graph, const EdgeID& id, const VertexID& from, const VertexID& to, const char* name)
-// {
-//   // graph->updateEdge(id, name, "");
-//   // make relation and then save it
-//   graph->bind(id, from, to);
-//   return ECode_Success;
-// }

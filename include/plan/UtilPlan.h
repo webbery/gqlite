@@ -15,7 +15,7 @@ public:
   };
   GUtilPlan(GVirtualNetwork* vn, GStorageEngine* store, GCreateStmt* ast);
   GUtilPlan(GVirtualNetwork* vn, GStorageEngine* store, GDropStmt* ast);
-  virtual int execute();
+  virtual int execute(gqlite_callback);
 
 private:
 private:

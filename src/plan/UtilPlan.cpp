@@ -18,7 +18,7 @@ GUtilPlan::GUtilPlan(GVirtualNetwork* vn, GStorageEngine* store, GDropStmt* stmt
   _var = stmt->name();
 }
 
-int GUtilPlan::execute() {
+int GUtilPlan::execute(gqlite_callback) {
   switch (_type)
   {
   case UtilType::Creation:

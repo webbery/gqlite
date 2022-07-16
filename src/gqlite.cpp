@@ -67,7 +67,7 @@ SYMBOL_EXPORT int gqlite_exec(gqlite* pDb, const char* gql, int (*gqlite_callbac
 {
   CHECK_NULL_PTR(pDb);
   GQLiteImpl* impl = (GQLiteImpl*)pDb;
-  GVirtualEngine* stm = impl->statement();
+  GVirtualEngine* stm = impl->engine();
   stm->_result_callback = gqlite_callback;
   stm->_gql = gql;
   impl->exec(*stm);
@@ -95,7 +95,7 @@ SYMBOL_EXPORT char* gqlite_error(gqlite* pDb, int error)
   size_t len = 0;
   char buff[256] = { 0 };
   GQLiteImpl* impl = (GQLiteImpl*)pDb;
-  GVirtualEngine* stm = impl->statement();
+  GVirtualEngine* stm = impl->engine();
   std::string gql = stm->gql();
   std::string operation = get_operation(stm->_cmdtype, gql);
   switch (error)
