@@ -61,16 +61,6 @@ add_definitions(-DGQL_LEVEL_DEBUG)
 add_definitions(-D_PRINT_FORMAT_)
 endif (${ENABLE_PRINT})
 
-option(ENABLE_SANITIZE "enable SANITIZE" false)
-if (ENABLE_SANITIZE)
-	if (WIN32)
-		add_compile_options(/fsanitize=address)
-	else ()
-		add_compile_options(-fsanitize=leak -fno-omit-frame-pointer)
-		add_link_options(-fsanitize=address -fno-omit-frame-pointer)
-	endif()
-endif()
-
 add_definitions(-DTHREAD_COUNT=4)
 
 include_directories(./include ./third_party/libmdbx ./third_party/eigen ./third_party/fmt/include)

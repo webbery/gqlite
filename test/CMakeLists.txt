@@ -104,3 +104,13 @@ add_test(NAME regress_util COMMAND regress --inputdir=./util --outputdir=./util
   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 add_test(NAME regress_error COMMAND regress --inputdir=./error --outputdir=./error
   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+
+IF (WIN32)
+ELSE ()
+set(TARGETS_OF_LEAK_TO_CHECK storage)
+
+foreach(LEAK_TARGET ${TARGETS_OF_LEAK_TO_CHECK})
+	target_compile_options(${LEAK_TARGET} PRIVATE -fsanitize=leak -fno-omit-frame-pointer)
+	target_link_options(${LEAK_TARGET} PRIVATE -fsanitize=address -fno-omit-frame-pointer)
+endforeach()
+ENDIF ()
