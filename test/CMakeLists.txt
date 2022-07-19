@@ -57,6 +57,8 @@ set(VNET_SOURCE ./vnet.cpp
 	../src/Graph/EntityEdge.cpp
 	../src/VirtualNetwork.cpp)
 
+set(MOVIELENS_SOURCE ./movielens.cpp)
+
 add_executable(grammar ${TEST_GRAMMAR_SOURCE})
 add_executable(storage ${STORAGE_SOURCE})
 add_executable(regress ${REGRESS_SOURCE})
@@ -64,17 +66,19 @@ add_executable(algorithm ${OLGRITHM_SOURCE})
 add_executable(query ${QUERY_SOURCE})
 add_executable(ptree ${PTREE_SOURCE})
 add_executable(vnet ${VNET_SOURCE})
+add_executable(movielens ${MOVIELENS_SOURCE})
 
 set_property(TARGET algorithm PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/test")
-target_link_libraries(grammar PUBLIC gqlite fmt-header-only)
-target_link_libraries(regress PUBLIC gqlite fmt-header-only)
-target_link_libraries(storage PUBLIC mdbx-static fmt-header-only)
-target_link_libraries(algorithm fmt-header-only)
-target_link_libraries(query fmt-header-only)
+target_link_libraries(grammar PUBLIC gqlite fmt::fmt-header-only)
+target_link_libraries(regress PUBLIC gqlite fmt::fmt-header-only)
+target_link_libraries(storage PUBLIC mdbx-static fmt::fmt-header-only)
+target_link_libraries(algorithm fmt::fmt-header-only)
+target_link_libraries(query fmt::fmt-header-only)
+target_link_libraries(movielens PUBLIC gqlite)
 IF (WIN32)
-target_link_libraries(vnet fmt-header-only)
+target_link_libraries(vnet PRIVATE fmt::fmt-header-only)
 ELSE ()
-target_link_libraries(vnet fmt-header-only pthread)
+target_link_libraries(vnet fmt::fmt-header-only pthread)
 ENDIF ()
 
 # find_package(Python3 COMPONENTS Interpreter Development)
@@ -104,6 +108,7 @@ add_test(NAME regress_util COMMAND regress --inputdir=./util --outputdir=./util
   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 add_test(NAME regress_error COMMAND regress --inputdir=./error --outputdir=./error
   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+add_test(NAME movielens COMMAND movielens)
 
 IF (UNIX AND NOT APPLE)
 set(TARGETS_OF_LEAK_TO_CHECK storage vnet)

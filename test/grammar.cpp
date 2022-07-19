@@ -67,12 +67,13 @@ void successful_test(gqlite* pHandle, char* ptr) {
   /*
   * create a `ga` graph for keyword search
   */
-  TEST_GRAMMAR("{create: 'ga', index: 'keyword'}");
+  TEST_GRAMMAR("{create: 'ga', group: ['g'], index: 'keyword'}");
   TEST_COMMAND("show graph");
-  TEST_GRAMMAR("{create: 'ga', index: ['keyword', 'color', 'create_time']}");
+  TEST_GRAMMAR("{create: 'ga', group: ['g', 'e'], index: ['keyword', 'color', 'create_time']}");
   TEST_COMMAND("show graph 'ga'");
-  TEST_GRAMMAR("{upset: 'ga', vertex: [['v1']]}");
-  TEST_QUERY("{query: vertex, in: 'ga'}", 1);
+  TEST_GRAMMAR("{upset: 'movie', vertex: [[328, {title: 'Tales from the Crypt Presents: Demon Knight (1995)', genres: 'Horror|Thriller'}]]}");
+  //TEST_GRAMMAR("{upset: 'g', vertex: [['v1']]}");
+  TEST_QUERY("{query: vertex, in: 'ga'}", 0);
   //printf(NORMAL"Test [%d]:\t%s\n", ++test_id, "{query: vertex, in: 'ga'}");
   //  if (gqlite_exec(pHandle, "{query: vertex, in: 'ga'}", gqlite_exec_assert_callback, nullptr, &ptr)) {
   //      printf(RED"exec error: %s\n", ptr); 
@@ -80,7 +81,7 @@ void successful_test(gqlite* pHandle, char* ptr) {
   //gqlite_free(ptr); 
   TEST_GRAMMAR(
     "{"
-      "upset: 'ga',"
+      "upset: 'g',"
       "vertex: ["
         "['v1', {class: 'a/c', location: [131.24194, 37.12532], keyword: ['a', 'b'], create_time: 1}],"
         "['v2', {color: '#343e58', keyword: ['a'], create_time: 2}],"
@@ -90,7 +91,7 @@ void successful_test(gqlite* pHandle, char* ptr) {
     "]"
     "}");
   TEST_QUERY("{query: vertex, in: 'ga'}", 4);
-  TEST_GRAMMAR("{remove: 'ga', vertex: ['v2']}");
+  TEST_GRAMMAR("{remove: 'g', vertex: ['v2']}");
   //printf(NORMAL"Test [%d]:\t%s\n", ++test_id, "{remove: 'ga', vertex: ['v2']}");
   //ptr = nullptr;
   //  if (gqlite_exec(pHandle, "{remove: 'ga', vertex: ['v2']}", gqlite_exec_callback, nullptr, &ptr)) {
@@ -112,7 +113,7 @@ void successful_test(gqlite* pHandle, char* ptr) {
   */
   TEST_GRAMMAR(
     "{"
-      "upset: 'ga',"
+      "upset: 'e',"
       "edge: ["
         "['v1', --, 'v2']"
       "]"
@@ -120,7 +121,7 @@ void successful_test(gqlite* pHandle, char* ptr) {
   );
   TEST_GRAMMAR(
     "{"
-      "upset: 'ga',"
+      "upset: 'e',"
       "edge: ["
         "['v2', ->, 'v3']"
       "]"
@@ -128,7 +129,7 @@ void successful_test(gqlite* pHandle, char* ptr) {
   );
   TEST_GRAMMAR(
     "{"
-      "upset: 'ga',"
+      "upset: 'e',"
       "edge: ["
         "['v3', ->, 'v3']"
       "]"
@@ -137,7 +138,7 @@ void successful_test(gqlite* pHandle, char* ptr) {
   // loop circle
   TEST_GRAMMAR(
     "{"
-      "upset: 'ga',"
+      "upset: 'e',"
       "edge: ["
         "['v4']"
       "]"

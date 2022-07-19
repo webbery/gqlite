@@ -35,9 +35,9 @@ h'' {
                         return VAR_HASH;
                     };
 b64'([A-Za-z0-9+/]{4})*([A-Za-z0-9+\/]{2}==|[A-Za-z0-9+\/]{3}=)?' {
-                        yylval->__c = (char*)malloc(yyleng - 2);
-                        memcpy(yylval->__c, yytext + 4, yyleng - 2);
-                        yylval->var_name[yyleng - 2] = '\0';
+                        yylval->__c = (char*)malloc(yyleng - 5);
+                        memcpy(yylval->__c, yytext + 4, yyleng - 6);
+                        yylval->__c[yyleng - 6] = '\0';
                         stm._errIndx += yyleng;
                         return VAR_BASE64;
                     };
@@ -49,20 +49,23 @@ d[0-9]{10}$         {
                         return VAR_DATETIME;
                     };
 '[a-zA-Z_]+[\w]*'    {
-                        memcpy(yylval->var_name, yytext + 1, yyleng - 2);
-                        yylval->var_name[yyleng - 2] = '\0';
+                        yylval->__c = (char*)malloc(yyleng - 1);
+                        memcpy(yylval->__c, yytext + 1, yyleng - 2);
+                        yylval->__c[yyleng - 2] = '\0';
                         stm._errIndx += yyleng;
                         return VAR_STRING;
                     };
 '[a-zA-Z]+[\w]*\.[a-zA-Z]+' {
-                        memcpy(yylval->var_name, yytext + 1, yyleng - 2);
-                        yylval->var_name[yyleng - 2] = '\0';
+                        yylval->__c = (char*)malloc(yyleng - 1);
+                        memcpy(yylval->__c, yytext + 1, yyleng - 2);
+                        yylval->__c[yyleng - 2] = '\0';
                         stm._errIndx += yyleng;
                         return VAR_STRING;
                     };
 '(\\.|[^'\\])*?'    {
-                        memcpy(yylval->var_name, yytext + 1, yyleng - 2);
-                        yylval->var_name[yyleng - 2] = '\0';
+                        yylval->__c = (char*)malloc(yyleng - 1);
+                        memcpy(yylval->__c, yytext + 1, yyleng - 2);
+                        yylval->__c[yyleng - 2] = '\0';
                         stm._errIndx += yyleng;
                         return VAR_STRING;
                     };
@@ -113,21 +116,22 @@ create              {stm._errIndx += yyleng; return KW_CREATE;};
 "*"                 {stm._errIndx += yyleng;};
 "/"                 {stm._errIndx += yyleng;};
 "\n"                {stm._errIndx += yyleng;};
-[0-9]+.[0-9]+       {
-                        std::string s(yytext, yyleng);
-                        yylval->__f = std::stof(s);
-                        stm._errIndx += yyleng;
-                        return VAR_DECIMAL;
-                    };
 [0-9]+              {
                         std::string s(yytext, yyleng);
                         yylval->__int = std::stoi(s);
                         stm._errIndx += yyleng;
                         return VAR_INTEGER;
                     };
+[0-9]+.[0-9]+       {
+                        std::string s(yytext, yyleng);
+                        yylval->__f = std::stof(s);
+                        stm._errIndx += yyleng;
+                        return VAR_DECIMAL;
+                    };
 [a-zA-Z_]+[0-9]*     {
-                        memcpy(yylval->var_name, yytext, yyleng);
-                        yylval->var_name[yyleng] = '\0';
+                        yylval->__c = (char*)malloc(yyleng + 1);
+                        memcpy(yylval->__c, yytext, yyleng);
+                        yylval->__c[yyleng] = '\0';
                         stm._errIndx += yyleng;
                         return VAR_STRING;
                     };

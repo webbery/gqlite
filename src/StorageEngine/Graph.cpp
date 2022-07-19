@@ -1,5 +1,4 @@
 #include "Graph.h"
-#include "Feature/Feature.h"
 #include "Error.h"
 #include <set>
 #include "Type/Binary.h"
@@ -98,31 +97,10 @@ GGraphInstance::GGraphInstance(mdbx::txn_managed& txn, const char* name)
       saveSchema();
     }
   }
-  GVertexProptertyFeature* f = new GIDFeature(_vertexes);
-  _propertyFeatures.push_back(f);
 }
 
 GGraphInstance::~GGraphInstance()
 {
-  for (GVertexProptertyFeature*& f : _propertyFeatures)
-  {
-    delete f;
-  }
-}
-
-bool GGraphInstance::registPropertyFeature(GVertexProptertyFeature* f)
-{
-  std::string name = f->indexName();
-    printf("feature name %s\n", name.c_str());
-  if (!isIndexExist(name)) {
-    _property._indexes.push_back(name);
-    saveSchema();
-  }
-  for (GVertexProptertyFeature* p : _propertyFeatures) {
-    if (p->indexName() == f->indexName()) return false;
-  }
-  _propertyFeatures.push_back(f);
-  return true;
 }
 
 // std::vector<Edge> GGraph::getEdges(mdbx::txn_managed& txn, VertexID vertex)
@@ -264,13 +242,6 @@ int GGraphInstance::updateEdge(const EdgeID& id, const std::vector<uint8_t>& dat
   return 0;
 }
 
-int GGraphInstance::updateIndex(const VertexID& id, const std::string& index, const nlohmann::json& value)
-{
-  GVertexProptertyFeature* f = getFeature(index.c_str());
-  if (!f) return ECode_GQL_Index_Not_Exist;
-  return f->apply(_txn, id, index, value);
-}
-
 int GGraphInstance::dropVertex(const std::string& id)
 {
   _removeVertexes.push_back(id);
@@ -278,9 +249,6 @@ int GGraphInstance::dropVertex(const std::string& id)
 }
 
 int GGraphInstance::drop() {
-  for (GVertexProptertyFeature* f : _propertyFeatures) {
-    f->drop(_txn);
-  }
   _txn.drop_map(_edges);
   _txn.drop_map(_schema);
   for (int idx = 0; idx < GK_Size; ++idx) {
@@ -313,9 +281,6 @@ bool GGraphInstance::isIndexExist(const std::string& name)
 }
 
 GVertexProptertyFeature* GGraphInstance::getFeature(const char* property) {
-  for (GVertexProptertyFeature* feature : _propertyFeatures) {
-    if (feature->indexName() == property) return feature;
-  }
   return nullptr;
 }
 int GGraphInstance::saveSchema()

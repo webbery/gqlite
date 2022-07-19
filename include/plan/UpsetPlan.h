@@ -38,7 +38,14 @@ private:
     VisitFlow apply(GVertexDeclaration* stmt, std::list<NodeType>& path) {
       _plan._vertex = true;
       GLiteral* literal = (GLiteral*)(stmt->key()->_value);
-      _plan._key = literal->raw();
+      switch (literal->kind()) {
+      case AttributeKind::Number:
+        _plan._key = atoi(literal->raw().c_str());
+        break;
+      default:
+        _plan._key = literal->raw();
+        break;
+      }
       accept(stmt->vertex(), *this, path);
       return VisitFlow::Children;
     }

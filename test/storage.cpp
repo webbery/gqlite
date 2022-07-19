@@ -3,7 +3,6 @@
 #include <cassert>
 #include <catch.hpp>
 #include <fstream>
-#include "Feature/Gist.h"
 #include "Type/Vertex.h"
 
 #define GRAPH_NAME  "g1"
@@ -115,7 +114,7 @@ TEST_CASE("movielens") {
   GStorageEngine engine;
   StoreOption opt;
   opt.compress = 1;
-  engine.open("movielens", opt);
+  engine.open("mvlens", opt);
   // create movie map
   MapInfo movie;
   movie.key_type = 0;

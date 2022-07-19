@@ -68,6 +68,7 @@ SYMBOL_EXPORT int gqlite_exec(gqlite* pDb, const char* gql, int (*gqlite_callbac
   CHECK_NULL_PTR(pDb);
   GQLiteImpl* impl = (GQLiteImpl*)pDb;
   GVirtualEngine* stm = impl->engine();
+  stm->_errIndx = 0;
   stm->_result_callback = gqlite_callback;
   stm->_gql = gql;
   impl->exec(*stm);

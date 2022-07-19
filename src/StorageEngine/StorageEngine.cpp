@@ -201,11 +201,6 @@ GStorageEngine::cursor GStorageEngine::getCursor(const std::string& prop)
   return _txn.open_cursor(handle);
 }
 
-void GStorageEngine::registGraphFeature(GGraphInstance* pGraph, GVertexProptertyFeature* feature)
-{
-  //pGraph->registPropertyFeature(feature);
-}
-
 int GStorageEngine::startTrans() {
   _txn = _env.start_write();
   if (!_txn) return ECODE_NULL_PTR;

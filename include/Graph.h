@@ -3,7 +3,6 @@
 #include <list>
 #include "json.hpp"
 #include "operand/skey.h"
-#include "Feature/Gist.h"
 #include "IGraph.h"
 
 #define BIN_FLAG  ":bin"
@@ -38,8 +37,6 @@ public:
   GGraphInstance(mdbx::txn_managed& txn, const char* name);
   ~GGraphInstance();
 
-  bool registPropertyFeature(GVertexProptertyFeature* f);
-
   // std::vector<Edge> getEdges();
   // std::vector<Edge> getEdges(mdbx::txn_managed& txn, VertexID vertex);
   std::vector<std::pair<VertexID, nlohmann::json>> getVertex(mdbx::txn_managed& txn);
@@ -55,7 +52,6 @@ public:
 
   int updateVertex(const VertexID& id, const std::vector<uint8_t>& data);
   int updateEdge(const EdgeID& id, const std::vector<uint8_t>& data);
-  int updateIndex(const VertexID& id, const std::string& index, const nlohmann::json& value);
   int updateLink();
 
   int dropVertex(const std::string& id);
@@ -95,5 +91,4 @@ private:
   };
   std::vector< Link > _updateRelations;
   std::list<VertexID> _removeVertexes;
-  std::vector< GVertexProptertyFeature* > _propertyFeatures;
 };

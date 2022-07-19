@@ -1,9 +1,9 @@
 #pragma once
 #include "gqlite.h"
 #include <mdbx.h++>
-#include "Feature/Feature.h"
 #include <map>
 #include <functional>
+#include <json.hpp>
 
 #define SCHEMA_CLASS            "cls"
 #define SCHEMA_CLASS_INFO       "info"
@@ -78,8 +78,6 @@ public:
 
     typedef mdbx::cursor_managed  cursor;
     cursor getCursor(const std::string& mapname);
-
-    void registGraphFeature(GGraphInstance*, GVertexProptertyFeature* feature);
 
     /** 
      * Get the schema of current graph instance.

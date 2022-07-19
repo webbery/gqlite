@@ -15,6 +15,7 @@ enum NodeType {
   QueryStatement,
   DropStatement,
   ConditionStatement,
+  GroupStatement,
   IfStatement,
   // prediction
   GreaterThan,
