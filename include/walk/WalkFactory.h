@@ -20,13 +20,12 @@ enum class VisitSelector {
 class IWalkStrategy {
 public:
   virtual ~IWalkStrategy(){
-    printf("~IWalkStrategy\n");
   }
   virtual int walk(virtual_graph_t& vg, std::function<void(GNode*)>) = 0;
 };
 
 class GWalkFactory {
 public:
-  virtual IWalkStrategy* createStrategy(VisitSelector selector);
+  virtual std::shared_ptr<IWalkStrategy> createStrategy(VisitSelector selector);
   
 };

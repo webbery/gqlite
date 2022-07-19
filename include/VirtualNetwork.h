@@ -40,31 +40,19 @@ public:
   template<typename Visitor>
   void visit(VisitSelector selector, Visitor visitor) {
     GWalkFactory* factory = new GWalkFactory();
-    auto* strategy = factory->createStrategy(selector);
-    auto clean_env = [&] () {
-      if (strategy) {
-        delete strategy;
-        strategy = nullptr;
-      }
-      if (factory) {
-        delete factory;
-        factory = nullptr;
-      }
-      // _event.clear();
-    };
+    std::shared_ptr<IWalkStrategy> strategy = factory->createStrategy(selector);
+
     // wait for start
-    _event.on((int)VNMessage::FirstNodeLoaded, [&](const std::any&) {
+    _event.on((int)VNMessage::FirstNodeLoaded, [strategy](const std::any&) {
       // strategy->walk(_vg, visitor);
     });
-    _event.on((int)VNMessage::LastNodeLoaded, [&](const std::any&) {
-      clean_env();
+    _event.on((int)VNMessage::LastNodeLoaded, [](const std::any&) {
     });
-    _event.on((int)VNMessage::WalkInterrupt, [&](const std::any&) {
-      clean_env();
+    _event.on((int)VNMessage::WalkInterrupt, [](const std::any&) {
     });
-    _event.on((int)VNMessage::WalkStop, [&](const std::any&) {
-      clean_env();
+    _event.on((int)VNMessage::WalkStop, [](const std::any&) {
     });
+    delete factory;
   }
 
 private:

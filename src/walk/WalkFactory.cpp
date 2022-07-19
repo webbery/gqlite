@@ -1,11 +1,11 @@
 #include "walk/WalkFactory.h"
 #include "walk/RandomWalk.h"
 
-IWalkStrategy* GWalkFactory::createStrategy(VisitSelector selector) {
+std::shared_ptr<IWalkStrategy> GWalkFactory::createStrategy(VisitSelector selector) {
   switch (selector)
   {
   case VisitSelector::RandomWalk:
-      return new GRandomWalk();
+      return std::shared_ptr<IWalkStrategy>(new GRandomWalk());
   default:
       return nullptr;
   }

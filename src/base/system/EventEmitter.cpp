@@ -1,12 +1,16 @@
 #include "base/system/EventEmitter.h"
+#include <iostream>
+#include <chrono>
+#include <thread>
 
 GEventEmitter::GEventEmitter()
 :_scheduler(new parlay::scheduler<Job>)
 {}
 
 GEventEmitter::~GEventEmitter() {
-  delete _scheduler;
+  join();
   for (Job* job: _jobs) {
+    while(job->state() == JobStatus::Working) continue;
     delete job;
   }
 }
@@ -25,4 +29,11 @@ void GEventEmitter::on(int event, std::function<void(const std::any&)> f) {
 
 void GEventEmitter::clear() {
   _listeners.clear();
+}
+
+void GEventEmitter::join() {
+  if (_scheduler) {
+    delete _scheduler;
+    _scheduler = nullptr;
+  }
 }

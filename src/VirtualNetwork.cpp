@@ -10,6 +10,7 @@ GVirtualNetwork::GVirtualNetwork(size_t maxMem)
 
 GVirtualNetwork::~GVirtualNetwork() {
   // if (_vg.size()) release();
+  _event.join();
 }
 
 void GVirtualNetwork::addNode(uint32_t id, const std::vector<node_attr_t>& attr, const std::vector<node_literal_t>& value) {

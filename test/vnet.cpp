@@ -44,7 +44,7 @@ TEST_CASE("random walk algorithm") {
   net->visit(VisitSelector::RandomWalk, visitor);
   is_exit.store(true);
   t.join();
-  // net->release();
+  net->release();
   delete net;
   // fmt::print("walk: {}\n", vnames);
 }
