@@ -51,7 +51,9 @@ void readCSV(const std::string& name, std::function<void(char*)> cb, bool skip_h
 
 TEST_CASE("basic storage api") {
   GStorageEngine engine;
-  engine.open("testdb");
+  StoreOption opt;
+  opt.compress = 1;
+  engine.open("testdb", opt);
   std::cout << "schema: "<< engine.getSchema() << std::endl;
   MapInfo info;
   info.key_type = 1;
@@ -67,7 +69,9 @@ TEST_CASE("basic storage api") {
 
 TEST_CASE("cursor api") {
   GStorageEngine engine;
-  engine.open("testdb");
+  StoreOption opt;
+  opt.compress = 1;
+  engine.open("testdb", opt);
   MapInfo info;
   info.key_type = 0;
   info.value_type = ClassType::String;
@@ -92,7 +96,9 @@ TEST_CASE("cursor api") {
 
 TEST_CASE("empty storage") {
   GStorageEngine engine;
-  engine.open("testdb");
+  StoreOption opt;
+  opt.compress = 1;
+  engine.open("testdb", opt);
   MapInfo info;
   info.key_type = 1;
   info.value_type = ClassType::String;
@@ -107,7 +113,9 @@ TEST_CASE("empty storage") {
 
 TEST_CASE("movielens") {
   GStorageEngine engine;
-  engine.open("movielens");
+  StoreOption opt;
+  opt.compress = 1;
+  engine.open("movielens", opt);
   // create movie map
   MapInfo movie;
   movie.key_type = 0;

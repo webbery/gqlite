@@ -9,11 +9,9 @@
 #define SCHEMA_CLASS_INFO       "info"
 #define SCHEMA_CLASS_NAME       "name"
 #define MAP_BASIC               "__basic"
-#define MAP_NODE                "_node"
-#define MAP_EDGE                "_edge"
-#define MAP_LINK                "_nlink"
-#define MAP_MAP_NODE            "_mn"
-#define MAP_MAP_EDGE            "_me"
+
+#define SCHEMA_GLOBAL           "__global"
+#define GLOBAL_COMPRESS_LEVEL   "__lvl"
 
 enum class ClassType : uint8_t {
     Undefined,
@@ -24,8 +22,12 @@ enum class ClassType : uint8_t {
 
 struct alignas(8) MapInfo {
   uint8_t       key_type : 1;    /**<  0 - interger, 1 - byte; */
-  ClassType  value_type : 5;  /**< */ 
+  ClassType     value_type : 5;  /**< */ 
   uint8_t       reserved : 2;
+};
+
+struct StoreOption {
+  uint8_t       compress;   /**< compress level: 0~ */
 };
 
 class GStorageEngine {
@@ -46,7 +48,7 @@ public:
      *        4. `link`. Relationship of node and edge: <node_t, [edge_t, edge_t, ...]>
      * @param filename database filename
      */
-    int open(const char* filename);
+    int open(const char* filename, StoreOption option);
 
     void close();
 
@@ -117,7 +119,7 @@ private:
      */
     mdbx::map_handle openSchema();
 
-    void initMap();
+    void initMap(StoreOption );
 
 private:
     mdbx::env_managed _env;

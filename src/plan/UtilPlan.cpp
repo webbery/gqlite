@@ -23,7 +23,9 @@ int GUtilPlan::execute(gqlite_callback) {
   {
   case UtilType::Creation:
     if (!_store) return ECode_DISK_OPEN_FAIL;
-    return _store->open(std::get<std::string>(_var).c_str());
+    StoreOption opt;
+    opt.compress = 1;
+    return _store->open(std::get<std::string>(_var).c_str(), opt);
   case UtilType::Drop:
   {
     std::string graph = std::get<std::string>(_var);

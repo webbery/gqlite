@@ -16,12 +16,7 @@ int GUpsetPlan::prepare() {
   // check graph is create or not.
   auto schema = _store->getSchema();
   if (schema.empty()) return ECode_Fail;
-  if (_vertex) {
-    _class = MAP_NODE;
-  }
-  else {
-    _class = MAP_EDGE;
-  }
+  _class = "default";
   return ECode_Success;
 }
 

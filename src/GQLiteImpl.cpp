@@ -50,7 +50,9 @@ int GQLiteImpl::close()
 int GQLiteImpl::create(const char* filename, gqlite_open_mode mode)
 {
   if (filename) {
-    return _ve->_storage->open(filename);
+    StoreOption opt;
+    opt.compress = 1;
+    return _ve->_storage->open(filename, opt);
   }
   else {
     if (_ve->_storage) {

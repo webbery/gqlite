@@ -105,7 +105,7 @@ add_test(NAME regress_util COMMAND regress --inputdir=./util --outputdir=./util
 add_test(NAME regress_error COMMAND regress --inputdir=./error --outputdir=./error
   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 
-IF (UNIX)
+IF (UNIX AND NOT APPLE)
 set(TARGETS_OF_LEAK_TO_CHECK storage vnet)
 
 foreach(LEAK_TARGET ${TARGETS_OF_LEAK_TO_CHECK})

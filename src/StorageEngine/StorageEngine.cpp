@@ -1,5 +1,6 @@
 #include "StorageEngine.h"
 #include <regex>
+#include <zstd.h>
 #define GRAPH_EXCEPTION_CATCH(expr) try{\
   expr;\
 }catch(std::exception& err) {printf("exception %s [%d]: %s\n", __FILE__, __LINE__, err.what());}
@@ -46,7 +47,7 @@ GStorageEngine::~GStorageEngine() {
   if (_env) _env.close();
 }
 
-int GStorageEngine::open(const char* filename) {
+int GStorageEngine::open(const char* filename, StoreOption option) {
   if (_env) {
     this->close();
     _env.close();
@@ -69,7 +70,7 @@ int GStorageEngine::open(const char* filename) {
     std::vector<uint8_t> v(data.byte_ptr(), data.byte_ptr() + data.size());
     _schema = nlohmann::json::from_cbor(v);
   }
-  initMap();
+  initMap(option);
   // _env.close_map(handle);
   return ret;
 }
@@ -97,7 +98,7 @@ mdbx::map_handle GStorageEngine::openSchema() {
   return schema;
 }
 
-void GStorageEngine::initMap()
+void GStorageEngine::initMap(StoreOption option)
 {
   if (!isMapExist(MAP_BASIC)) {
     MapInfo info = { 0 };
@@ -105,24 +106,7 @@ void GStorageEngine::initMap()
     info.value_type = ClassType::String;
     addMap(MAP_BASIC, info);
   }
-  if (!isMapExist(MAP_NODE)) {
-    MapInfo info = { 0 };
-    info.key_type = 0;
-    info.value_type = ClassType::String;
-    addMap(MAP_NODE, info);
-  }
-  if (!isMapExist(MAP_EDGE)) {
-    MapInfo info = { 0 };
-    info.key_type = 0;
-    info.value_type = ClassType::String;
-    addMap(MAP_EDGE, info);
-  }
-  if (!isMapExist(MAP_LINK)) {
-    MapInfo info = { 0 };
-    info.key_type = 0;
-    info.value_type = ClassType::String;
-    addMap(MAP_LINK, info);
-  }
+  _schema[SCHEMA_GLOBAL][GLOBAL_COMPRESS_LEVEL] = option.compress;
 }
 
 void GStorageEngine::addMap(const std::string& prop, MapInfo type) {
@@ -163,7 +147,7 @@ mdbx::map_handle GStorageEngine::getOrCreateHandle(const std::string& prop, mdbx
 }
 
 int GStorageEngine::write(const std::string& prop, const std::string& key, void* value, size_t len) {
-  assert(isMapExist(prop));
+  // assert(isMapExist(prop));
   mdbx::slice data(value, len);
   auto handle = getOrCreateHandle(prop, mdbx::key_mode::usual);
   ::put(_txn, handle, key, data);
@@ -171,7 +155,7 @@ int GStorageEngine::write(const std::string& prop, const std::string& key, void*
 }
 
 int GStorageEngine::read(const std::string& prop, const std::string& key, std::string& value) {
-  assert(isMapExist(prop));
+  // assert(isMapExist(prop));
   auto handle = getOrCreateHandle(prop, mdbx::key_mode::usual);
   mdbx::slice data = ::get(_txn, handle, key);
   if (data.empty()) return ECode_DATUM_Not_Exist;
@@ -180,9 +164,11 @@ int GStorageEngine::read(const std::string& prop, const std::string& key, std::s
 }
 
 int GStorageEngine::write(const std::string& prop, uint64_t key, void* value, size_t len) {
-  assert(isMapExist(prop));
+  // assert(isMapExist(prop));
   mdbx::slice data(value, len);
   auto handle = getOrCreateHandle(prop, mdbx::key_mode::ordinal);
+  // compress
+  // size_t inSize = ZSTD_CStreamInSize();
   ::put(_txn, handle, key, data);
   return ECode_Success;
 

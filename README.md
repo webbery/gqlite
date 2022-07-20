@@ -71,6 +71,7 @@ Walking is used to be through graph. So it's best to select a well walking metho
 | CRF | bayes network support |  | 0.4.0 |
 
 ##  3. <a name='Build'></a>Build
+Use command with `git clone --recursive https://github.com/webbery/gqlite.git` to clone this repository.
 ###  3.1. <a name='ubuntu'></a>ubuntu  
 Install latest version of bison.
 ###  3.2. <a name='macos'></a>macos  

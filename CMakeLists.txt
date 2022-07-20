@@ -63,7 +63,7 @@ endif (${ENABLE_PRINT})
 
 add_definitions(-DTHREAD_COUNT=4)
 
-include_directories(./include ./third_party/libmdbx ./third_party/eigen ./third_party/fmt/include)
+include_directories(./include ./third_party/libmdbx ./third_party/eigen ./third_party/fmt/include ./third_party/zstd/lib)
 
 file(GLOB BASE_SOURCES "src/*.cpp")
 aux_source_directory(src/StorageEngine StorageEngine_SOURCES)
@@ -87,6 +87,7 @@ aux_source_directory(src/walk Walk_SOURCES)
 
 # set(FMT_CAN_MODULE ON CACHE BOOL "Build a module instead of a traditional library." FORCE)
 add_subdirectory(third_party/libmdbx)
+add_subdirectory(third_party/zstd/build/cmake)
 add_subdirectory(third_party/fmt EXCLUDE_FROM_ALL)
 enable_testing()
 add_subdirectory(test)
