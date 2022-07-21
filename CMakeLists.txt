@@ -103,10 +103,11 @@ add_library(gqlite
 	${Query_SOURCES} ${HNSW_SOURCES} ${Language_SOURCES} ${Memory_SOURCES} ${Plan_SOURCES}
 	${Walk_SOURCES})
 target_link_libraries(gqlite mdbx-static fmt::fmt )
+add_dependencies(gqlite zstd)
 if (WIN32)
 else (WIN32)
-	link_directories(${zstd_BINARY_DIR}/lib)
-	target_link_libraries(gqlite zstd_static)
+	#link_directories(${zstd_BINARY_DIR}/lib)
+	target_link_libraries(gqlite ${zstd_BINARY_DIR}/lib/libzstd.a)
 	# if (${ENABLE_SANITIZE})
 	# 	target_link_libraries(gqlite asan)
 	# endif ()
