@@ -34,7 +34,21 @@ public:
 
   void* alloc(size_t size);
 
+  /**
+   * @brief parse an AST, then execute it.
+   * 
+   * @param ast an input AST from yacc
+   * @return int 
+   */
   int execAST(GASTNode* ast);
+
+  /**
+   * @brief execute some simple command that have no complex ast
+   * 
+   * @param ast an input AST from yacc
+   * @return int 
+   */
+  int execCommand(GASTNode* ast);
 
   gqlite_callback _result_callback;
   std::string _gql;
@@ -104,7 +118,6 @@ private:
   void cleanPlans(PlanList*);
 
 private:
-  static uint32_t _indx;
   MemoryPool<char> _memory;
   GVirtualNetwork* _network;
 };

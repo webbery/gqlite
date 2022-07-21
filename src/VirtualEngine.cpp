@@ -8,11 +8,21 @@
 #include "plan/ScanPlan.h"
 #include "VirtualNetwork.h"
 
-uint32_t GVirtualEngine::_indx = 0;
+void init_result_info(gqlite_result& result, const std::vector<std::string>& info) {
+  result.count = info.size();
+  result.infos = (char**)malloc(result.count * sizeof(char*));
+  for (size_t idx = 0; idx < result.count; ++idx) {
+    result.infos[idx] = (char*)malloc(info[idx].size() + 1);
+    memcpy(result.infos[idx], info[idx].data(), info[idx].size() + 1);
+  }
+  result.type = gqlite_result_type_cmd;
+}
 
-uint32_t GVirtualEngine::GenerateIndex()
-{
-  return ++GVirtualEngine::_indx;
+void release_result_info(gqlite_result& result) {
+  for (size_t idx = 0; idx < result.count; ++idx) {
+    free(result.infos[idx]);
+  }
+  free(result.infos);
 }
 
 GVirtualEngine::GVirtualEngine(size_t memsize)
@@ -70,6 +80,27 @@ int GVirtualEngine::execAST(GASTNode* ast) {
   int ret = executePlans(plans);
   cleanPlans(plans);
   return ret;
+}
+
+int GVirtualEngine::execCommand(GASTNode* ast)
+{
+  GGQLExpression* expr = (GGQLExpression * )ast->_value;
+  switch (expr->type())
+  {
+  case GGQLExpression::CMDType::SHOW_GRAPH_DETAIL:
+  {
+    std::string graph = expr->params();
+    auto jsn = _storage->getSchema();
+    _gqlite_result result;
+    init_result_info(result, { jsn.dump() });
+    _result_callback(&result);
+    release_result_info(result);
+  }
+    break;
+  default:
+    break;
+  }
+  return 0;
 }
 
 void GVirtualEngine::PlanVisitor::add(GPlan* plan, bool threadable)

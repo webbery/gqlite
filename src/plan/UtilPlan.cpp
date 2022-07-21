@@ -39,7 +39,7 @@ GUtilPlan::GUtilPlan(GVirtualNetwork* vn, GStorageEngine* store, GCreateStmt* st
 GUtilPlan::GUtilPlan(GVirtualNetwork* vn, GStorageEngine* store, GDropStmt* stmt)
 :GPlan(vn, store) {
   _type = UtilType::Drop;
-  _var = stmt->name();
+  _var = std::variant<std::string>{stmt->name()};
 }
 
 int GUtilPlan::execute(gqlite_callback) {

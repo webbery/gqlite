@@ -65,23 +65,6 @@ struct GASTNode* INIT_NUMBER_AST(T& v) {
   return NewAst(NodeType::Literal, number, nullptr, 0);
 }
 
-void init_result_info(gqlite_result& result, const std::vector<std::string>& info) {
-  result.count = info.size();
-  result.infos = (char**)malloc(result.count * sizeof(char*));
-  for (size_t idx = 0; idx < result.count; ++idx) {
-    result.infos[idx] = (char*)malloc(info[idx].size() + 1);
-    memcpy(result.infos[idx], info[idx].data(), info[idx].size() + 1);
-  }
-  result.type = gqlite_result_type_cmd;
-}
-
-void release_result_info(gqlite_result& result) {
-  for (size_t idx = 0; idx < result.count; ++idx) {
-    free(result.infos[idx]);
-  }
-  free(result.infos);
-}
-
 }
 
 %token RANGE_BEGIN RANGE_END COLON QUOTE COMMA LEFT_SQUARE RIGHT_SQUARE STAR CR PARAM_BEGIN PARAM_END
@@ -188,8 +171,11 @@ utility_cmd: CMD_SHOW KW_GRAPH
           }
         | CMD_SHOW KW_GRAPH VAR_STRING
           {
+            GGQLExpression* expr = new GGQLExpression(GGQLExpression::CMDType::SHOW_GRAPH_DETAIL, $3);
             free($3);
-            stm._errorCode = ECode_Success;
+            auto ast = NewAst(NodeType::GQLExpression, expr, nullptr, 0);
+            stm._errorCode = stm.execCommand(ast);
+            FreeAst(ast);
           }
         | KW_AST gql
           {

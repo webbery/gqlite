@@ -52,10 +52,10 @@ inline int gqlite_exec_callback(gqlite_result* params)
 
 inline int gqlite_cmd_callback(gqlite_result* params)
 {
-  //if (params && params->count) {
-  //    for (size_t idx = 0; idx < params->count; ++idx) {
-  //        printf("query result[%lu]: %s\n", idx, params->graphs[idx]);
-  //    }
-  //}
+  if (params && params->count) {
+    for (size_t idx = 0; idx < params->count; ++idx) {
+      printf("[%lu]:\t%s\n", idx, params->infos[idx]);
+    }
+  }
   return 0;
 }

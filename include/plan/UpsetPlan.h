@@ -13,6 +13,8 @@ public:
   virtual int execute(gqlite_callback);
 
 private:
+  using key_t = std::variant<std::string, uint64_t>;
+
   struct UpsetVisitor {
     GUpsetPlan& _plan;
 
@@ -39,10 +41,10 @@ private:
       GLiteral* literal = (GLiteral*)(stmt->key()->_value);
       switch (literal->kind()) {
       case AttributeKind::Number:
-        _plan._key = atoi(literal->raw().c_str());
+        _plan._key = key_t{ atoi(literal->raw().c_str()) };
         break;
       default:
-        _plan._key = literal->raw();
+        _plan._key = key_t{ literal->raw() };
         break;
       }
       accept(stmt->vertex(), *this, path);
@@ -74,6 +76,6 @@ private:
 private:
   bool _vertex;       /**< true if upset target is vertex, else is edge */
   std::string _class;
-  std::variant<std::string, uint64_t> _key;
+  key_t _key;
   std::string _value;
 };
