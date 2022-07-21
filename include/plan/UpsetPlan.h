@@ -21,7 +21,6 @@ private:
       return VisitFlow::Children;
     }
     VisitFlow apply(GUpsetStmt* stmt, std::list<NodeType>& path) {
-      std::string graph = stmt->name();
       return VisitFlow::Children;
     }
     VisitFlow apply(GQueryStmt* stmt, std::list<NodeType>& path) {
@@ -71,7 +70,7 @@ private:
     }
   };
 
-  friend class UpsetVisitor;
+  friend struct UpsetVisitor;
 private:
   bool _vertex;       /**< true if upset target is vertex, else is edge */
   std::string _class;

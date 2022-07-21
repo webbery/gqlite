@@ -6,7 +6,8 @@
 #include "gutil.h"
 
 GUpsetPlan::GUpsetPlan(GVirtualNetwork* vn, GStorageEngine* store, GUpsetStmt* ast)
-:GPlan(vn, store) {
+:GPlan(vn, store)
+,_class(ast->name()) {
   UpsetVisitor visitor(*this);
   std::list<NodeType> ln;
   accept(ast->node(), visitor, ln);
@@ -16,7 +17,6 @@ int GUpsetPlan::prepare() {
   // check graph is create or not.
   auto schema = _store->getSchema();
   if (schema.empty()) return ECode_Fail;
-  _class = "default";
   return ECode_Success;
 }
 

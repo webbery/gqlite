@@ -1,5 +1,16 @@
 #pragma once
 #include "gqlite.h"
+#include <string>
+
+inline std::string replace_all(const std::string& input) {
+  std::string data(input);
+  size_t pos = 0;
+  while ((pos = data.find("'", pos)) != std::string::npos) {
+      data = data.replace(pos, 1, "\\'");
+      pos += 2;
+  }
+  return data;
+}
 
 inline int gqlite_exec_callback(gqlite_result* params)
 {

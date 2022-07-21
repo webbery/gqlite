@@ -60,6 +60,7 @@ set(VNET_SOURCE ./vnet.cpp
 set(MOVIELENS_SOURCE ./movielens.cpp)
 
 add_executable(grammar ${TEST_GRAMMAR_SOURCE})
+add_compile_definitions(BINARY_DIR="${zstd_BINARY_DIR}/lib")
 add_executable(storage ${STORAGE_SOURCE})
 add_executable(regress ${REGRESS_SOURCE})
 add_executable(algorithm ${OLGRITHM_SOURCE})

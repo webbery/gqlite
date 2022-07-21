@@ -40,10 +40,10 @@ TEST_CASE("init movies") {
     if (movie_id == nullptr) return;
     int id = atoi(movie_id);
     char* movie_title = strtok(nullptr, ",");
-    std::string title(movie_title);
+    std::string title = replace_all(movie_title);
     char* movie_genres = strtok(nullptr, ",");
-    std::string genres(movie_genres);
-    std::string data = title + "," + genres;
+    std::string genres = replace_all(movie_genres);
+
     char upset[512]= {0};
     sprintf(upset, "{upset: 'movie', vertex: [[%d, {title: '%s', genres: '%s'}]]}", id, title.c_str(), genres.c_str());
     gqlite_exec(pHandle, upset, gqlite_exec_callback, nullptr, &ptr);

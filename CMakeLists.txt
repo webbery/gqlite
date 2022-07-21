@@ -95,19 +95,22 @@ add_subdirectory(tool)
 
 message("USE COMPILER: " ${CMAKE_CXX_COMPILER_ID})
 add_definitions(-DYY_NO_UNISTD_H)
+add_compile_definitions(BINARY_DIR="${zstd_BINARY_DIR}/lib")
 add_library(gqlite
 	${BASE_SOURCES} ${StorageEngine_SOURCES} ${Struct_SOURCES}
 	${Type_SOURCES} ${System_SOURCES} ${Feature_SOURCES} ${GQL_SOURCES} ${Operand_SOURCES}
 	${Match_SOURCES} ${Distance_SOURCES} ${Graph_SOURCES} ${Path_SOURCES} ${Analysis_SOURCES}
 	${Query_SOURCES} ${HNSW_SOURCES} ${Language_SOURCES} ${Memory_SOURCES} ${Plan_SOURCES}
 	${Walk_SOURCES})
-target_link_libraries(gqlite mdbx-static fmt::fmt)
-if (${ENABLE_SANITIZE})
+target_link_libraries(gqlite mdbx-static fmt::fmt )
 if (WIN32)
 else (WIN32)
-	target_link_libraries(gqlite asan)
+	link_directories(${zstd_BINARY_DIR}/lib)
+	target_link_libraries(gqlite zstd_static)
+	# if (${ENABLE_SANITIZE})
+	# 	target_link_libraries(gqlite asan)
+	# endif ()
 endif(WIN32)
-endif()
 
 add_dependencies(gqlite generated_tokens generated_grammar)
 

@@ -71,7 +71,7 @@ void successful_test(gqlite* pHandle, char* ptr) {
   TEST_COMMAND("show graph");
   TEST_GRAMMAR("{create: 'ga', group: ['g', 'e'], index: ['keyword', 'color', 'create_time']}");
   TEST_COMMAND("show graph 'ga'");
-  TEST_GRAMMAR("{upset: 'movie', vertex: [[328, {title: 'Tales from the Crypt Presents: Demon Knight (1995)', genres: 'Horror|Thriller'}]]}");
+  TEST_GRAMMAR("{upset: 'g', vertex: [[328, {title: 'Tale\\'s from the Crypt Presents: Demon Knight (1995)', genres: 'Horror|Thriller'}]]}");
   //TEST_GRAMMAR("{upset: 'g', vertex: [['v1']]}");
   TEST_QUERY("{query: vertex, in: 'ga'}", 0);
   //printf(NORMAL"Test [%d]:\t%s\n", ++test_id, "{query: vertex, in: 'ga'}");

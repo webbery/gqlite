@@ -1,6 +1,11 @@
 #include "StorageEngine.h"
 #include <regex>
 #include <zstd.h>
+
+#ifdef WIN32
+#pragma comment(lib, BINARY_DIR "/" CMAKE_INTDIR "/zstd_static.lib")
+#endif
+
 #define GRAPH_EXCEPTION_CATCH(expr) try{\
   expr;\
 }catch(std::exception& err) {printf("exception %s [%d]: %s\n", __FILE__, __LINE__, err.what());}
@@ -164,11 +169,11 @@ int GStorageEngine::read(const std::string& prop, const std::string& key, std::s
 }
 
 int GStorageEngine::write(const std::string& prop, uint64_t key, void* value, size_t len) {
-  // assert(isMapExist(prop));
+  assert(isMapExist(prop));
   mdbx::slice data(value, len);
   auto handle = getOrCreateHandle(prop, mdbx::key_mode::ordinal);
   // compress
-  // size_t inSize = ZSTD_CStreamInSize();
+  size_t inSize = ZSTD_CStreamInSize();
   ::put(_txn, handle, key, data);
   return ECode_Success;
 
