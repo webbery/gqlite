@@ -27,7 +27,7 @@ TEST_CASE("init movies") {
   gqlite_open(&pHandle);
   char* ptr = nullptr;
   gqlite_exec(pHandle,
-    "{create: 'movielens',"
+    "{create: 'movielens_db',"
       "group: ["
         "{movie: ['title', 'genres']},"
         "{tag: ['user_id', 'movie_id', 'tag']},"

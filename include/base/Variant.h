@@ -1,7 +1,7 @@
 #pragma once
 #include <type_traits>
 #include <typeindex>
-#include <tuple>
+#include <cstring>
 
 namespace gql {
   /**
@@ -45,11 +45,31 @@ namespace gql {
         VariantStorage<Args...>::Release(id, data);
       }
     }
+    
+    inline static void move(std::type_index ot, void* od, void* nd) {
+      if (ot == std::type_index(typeid(T))) {
+        new(nd) T(std::move(*reinterpret_cast<T*>(od)));
+      }
+      else {
+        VariantStorage<Args...>::move(ot, od, nd);
+      }
+    }
+    
+    inline static void copy(std::type_index ot, const void* od, const void* nd) {
+      if (ot == std::type_index(typeid(T))) {
+        new(const_cast<void*>(nd)) T(*reinterpret_cast<T*>(const_cast<void*>(od)));
+      }
+      else {
+        VariantStorage<Args...>::copy(ot, od, nd);
+      }
+    }
   };
 
   template<> struct VariantStorage<> {
     inline static void Release(std::type_index id, void* data) {
     }
+    inline static void move(std::type_index ot, void* od, void* nd) {}
+    inline static void copy(std::type_index ot, const void* od, const void* nd) {}
   };
 }
 
@@ -78,14 +98,28 @@ class Variant {
 
   template<typename T>
   void Set(T&& value) {
-    _Storage::Release(_tindex, _data);
+    _Storage::Release(_tindex, &_data);
     using U = typename std::remove_reference<T>::type;
-    U* ptr = new(_data)U(std::forward<T>(value));
+    new(_data)U(std::forward<T>(value));
     _tindex = std::type_index(typeid(T));
     _indx = IndexVisitor<typename std::remove_cv<U>::type, Types...>::value;
   }
 public:
   Variant():_tindex(typeid(void)) {}
+  ~Variant() {
+    _Storage::Release(_tindex, &_data);
+  }
+  Variant(const Variant& other)
+    :_tindex(other._tindex)
+    ,_indx(other._indx)
+    { _Storage::copy(other._tindex, &other._data, &_data); }
+   
+  Variant(Variant&& other)
+    :_tindex(other._tindex)
+    ,_indx(other._indx)
+    {
+      _Storage::move(other._tindex, &other._data, &_data);
+    }
 
   template<typename T,
     class = typename std::enable_if<
@@ -97,16 +131,28 @@ public:
   }
 
   template<typename T>
-  Variant operator = (const T& value) {
+  Variant& operator = (const T& value) {
     Set(value);
+    return *this;
+  }
+  
+  Variant& operator = (const Variant& other) {
+    _tindex = other._tindex;
+    _Storage::copy(other._tindex, &other._data, &_data);
+    return *this;
+  }
+  
+  Variant& operator = (Variant&& other) {
+    _tindex = other._tindex;
+    _Storage::move(other._tindex, &other._data, &_data);
     return *this;
   }
 
   template<typename T>
   T& Get() {
-    if (_tindex != std::type_index(typeid(T))) {
-      throw std::bad_cast();
-    }
+    //if (_tindex != std::type_index(typeid(T))) {
+      //throw std::bad_cast();
+    //}
     return *(T*)(&_data);
   }
 

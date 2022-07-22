@@ -25,7 +25,9 @@ GUtilPlan::GUtilPlan(GVirtualNetwork* vn, GStorageEngine* store, GCreateStmt* st
           std::vector<std::string> props;
           GArrayExpression* array = reinterpret_cast<GArrayExpression*>(node->_value);
           for (auto prop: *array) {
-            props.emplace_back(GetString(prop));
+            std::string s = GetString(prop);
+            
+            props.emplace_back(s);
           }
           _vParams2.emplace_back(props);
         }
@@ -50,7 +52,7 @@ int GUtilPlan::execute(gqlite_callback) {
     StoreOption opt;
     opt.compress = 1;
     CHECK_RETURN(_store->open(std::get<std::string>(_var).c_str(), opt));
-    for (auto item: _vParams1) {
+    for (auto& item : _vParams1) {
       MapInfo info = {0};
       info.key_type = 0;
       info.value_type = ClassType::String;
