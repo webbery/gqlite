@@ -39,7 +39,7 @@ GUtilPlan::GUtilPlan(GVirtualNetwork* vn, GStorageEngine* store, GCreateStmt* st
 GUtilPlan::GUtilPlan(GVirtualNetwork* vn, GStorageEngine* store, GDropStmt* stmt)
 :GPlan(vn, store) {
   _type = UtilType::Drop;
-  _var = std::variant<std::string>{stmt->name()};
+  _var = stmt->name();
 }
 
 int GUtilPlan::execute(gqlite_callback) {
@@ -54,7 +54,7 @@ int GUtilPlan::execute(gqlite_callback) {
       MapInfo info = {0};
       info.key_type = 0;
       info.value_type = ClassType::String;
-      _store->addMap(std::get<0>(item), info);
+      _store->addMap(std::get<std::string>(item), info);
     }
     break;
   case UtilType::Drop:

@@ -1,8 +1,8 @@
 #pragma once
 #include "Plan.h"
-#include <variant>
 #include "base/lang/lang.h"
 #include "base/lang/AST.h"
+#include "base/Variant.h"
 
 struct GASTNode;
 class GUpsetPlan: public GPlan {
@@ -13,7 +13,7 @@ public:
   virtual int execute(gqlite_callback);
 
 private:
-  using key_t = std::variant<std::string, uint64_t>;
+  using key_t = Variant<std::string, uint64_t>;
 
   struct UpsetVisitor {
     GUpsetPlan& _plan;
@@ -41,10 +41,10 @@ private:
       GLiteral* literal = (GLiteral*)(stmt->key()->_value);
       switch (literal->kind()) {
       case AttributeKind::Number:
-        _plan._key = key_t{ atoi(literal->raw().c_str()) };
+        _plan._key = atoi(literal->raw().c_str());
         break;
       default:
-        _plan._key = key_t{ literal->raw() };
+        _plan._key = literal->raw();
         break;
       }
       accept(stmt->vertex(), *this, path);

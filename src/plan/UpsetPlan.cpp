@@ -26,12 +26,12 @@ int GUpsetPlan::execute(gqlite_callback) {
     switch (_key.index()) {
     case 0:
     {
-      std::string k = std::get<0>(_key);
+      std::string k = std::get<std::string>(_key);
       uik = unicode32(k);
     }
       break;
     case 1:
-      uik = std::get<1>(_key);
+      uik = std::get<uint64_t>(_key);
       break;
     }
     // generate key

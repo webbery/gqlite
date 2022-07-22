@@ -1,8 +1,8 @@
 #pragma once
 #include "Plan.h"
-#include <variant>
 #include <string>
 #include "base/lang/ASTNode.h"
+#include "base/Variant.h"
 
 struct GASTNode;
 class GVirtualNetwork;
@@ -24,12 +24,12 @@ private:
    * @brief for creation, _var is graph name
    * 
    */
-  std::variant<std::string> _var;
+  Variant<std::string> _var;
   /**
    * @brief for creation, _vParams1 are groups name
    * 
    */
-  std::vector<std::variant<std::string>> _vParams1;
+  std::vector<Variant<std::string>> _vParams1;
   /**
    * @brief for creation, _vParams2 are group's property
    * 
@@ -39,6 +39,6 @@ private:
    * @brief for creation, _vParams3 are indexes
    * 
    */
-  std::vector<std::variant<std::string>> _vParams3;
+  std::vector<Variant<std::string>> _vParams3;
 
 };
