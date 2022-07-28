@@ -96,6 +96,7 @@ int HungorianAlgorithm::solve(const Eigen::MatrixXd& input, std::list<std::pair<
     // fmt::print("step 2:\ntotal {}\n", total);
     size_t times = 0;
     Eigen::MatrixXd mTempInf = result;
+    Eigen::MatrixXd mSubMat = result;
     Eigen::MatrixXd mTempLine = Eigen::MatrixXd::Zero(result.rows(), result.cols());
     Eigen::MatrixXd mTempLineCross = Eigen::MatrixXd::Zero(result.rows(), result.cols());
     do {
@@ -122,19 +123,21 @@ int HungorianAlgorithm::solve(const Eigen::MatrixXd& input, std::list<std::pair<
       if (rValue > cValue) {
         auto rows = mTempInf.row(vRows[ridx]);
         rows = (rows.array() == 0).select(INFINITY, rows);
+        mSubMat.row(vRows[ridx]) = Eigen::VectorXd::Ones(result.cols()) * INFINITY;
         mTempLine.row(vRows[ridx]) = result.row(vRows[ridx]);
         mTempLineCross.row(vRows[ridx]) += Eigen::VectorXd::Ones(result.cols());
         ridx += 1;
       } else {
         auto cols = mTempInf.col(vCols[cidx]);
         cols = (cols.array() == 0).select(INFINITY, cols);
+        mSubMat.col(vCols[cidx]) = Eigen::VectorXd::Ones(result.cols()) * INFINITY;
         mTempLine.col(vCols[cidx]) = result.col(vCols[cidx]);
         mTempLineCross.col(vCols[cidx]) += Eigen::VectorXd::Ones(result.cols());
         cidx += 1;
       }
       times += 1;
 #ifdef _PRINT_FORMAT_
-    fmt::print("replaced: {}\n{}\n", mTempInf, mTempInf.size());
+    fmt::print("replaced: {}\n{}\nmSubMat:{}\n", mTempInf, mTempInf.size(), mSubMat);
 #endif
     } while (mTempInf.count() < mTempInf.size());
     if (times >= input.rows()) {
@@ -143,30 +146,35 @@ int HungorianAlgorithm::solve(const Eigen::MatrixXd& input, std::list<std::pair<
 #endif
       break;
     }
-    double minimal = mTempInf.minCoeff();
+    double minimal = mSubMat.minCoeff();
     double maximal = mTempLineCross.maxCoeff();
 #ifdef _PRINT_FORMAT_
   // fmt::print("{}", minial);
   // fmt::print("step 2:\nsort rows {}, cols {}\n", vRows, vCols);
   step4:
-  fmt::print("before:\n{}\n", mTempInf);
+    fmt::print("before:\n{}\n", mTempInf);
 #endif
-    mTempInf -= Eigen::MatrixXd::Ones(mTempInf.rows(), mTempInf.cols()) * minimal;
-    mTempInf = (mTempInf.array() == INFINITY).select(0, mTempInf);
+    mSubMat -= Eigen::MatrixXd::Ones(mSubMat.rows(), mSubMat.cols()) * minimal;
+    Eigen::MatrixXd mTemp = (mSubMat.array() != INFINITY).select(0, mTempInf);
+    mSubMat = (mSubMat.array() == INFINITY).select(0, mSubMat);
+    //mTempInf = mTemp + mSubMat;
 #ifdef _PRINT_FORMAT_
-  fmt::print("after:\n{}\n", mTempInf);
+  fmt::print("after:\n{}\ntemp: {}\nsub: {}\n", mTempInf, mTemp, mSubMat);
 #endif
     auto pluss = (mTempLineCross.array() == maximal).select(minimal, Eigen::MatrixXd::Zero(result.rows(), result.cols()));
 #ifdef _PRINT_FORMAT_
   fmt::print("line:\n{}\n", mTempLine);
   std::cout<< pluss<<std::endl;
 #endif
-    result = mTempInf + mTempLine + pluss;
+    result = mSubMat + mTempLine + pluss;
 #ifdef _PRINT_FORMAT_
   fmt::print("result:\n{}\n", result);
 #endif
   } while (true);
   // get position of matched
+#ifdef _PRINT_FORMAT_
+  fmt::print("before result:\n{}\n", result);
+#endif
   auto indexes = get_valid_indexes(result);
   auto itr = indexes.begin();
   for (size_t offset = 0; offset < input.rows(); ++itr, ++offset);
