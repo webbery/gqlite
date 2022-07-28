@@ -1,5 +1,6 @@
 #include <catch.hpp>
 #include <fstream>
+#include <stdio.h>
 #include <string>
 #include "gqlite.h"
 #include "../tool/stdout.h"
@@ -48,4 +49,7 @@ TEST_CASE("init movies") {
     sprintf(upset, "{upset: 'movie', vertex: [[%d, {title: '%s', genres: '%s'}]]}", id, title.c_str(), genres.c_str());
     gqlite_exec(pHandle, upset, gqlite_exec_callback, nullptr, &ptr);
   });
+  gqlite_exec(pHandle,
+    "{query: movie, in: 'movielens'}",
+    gqlite_exec_callback, nullptr, &ptr);
 }

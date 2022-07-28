@@ -1,6 +1,8 @@
 #include "StorageEngine.h"
 #include <regex>
+#include <stdio.h>
 #include <zstd.h>
+#include <iostream>
 
 #ifdef WIN32
 #pragma comment(lib, BINARY_DIR "/" CMAKE_INTDIR "/zstd_static.lib")
@@ -67,39 +69,41 @@ int GStorageEngine::open(const char* filename, StoreOption option) {
 #define DEFAULT_MAX_PROPS  64
   operator_param.max_maps = DEFAULT_MAX_PROPS;
 
-  _env = env_managed(std::string(filename), create_param, operator_param);
+  _env = env_managed(option.directory + filename, create_param, operator_param);
   int ret = startTrans();
   mdbx::map_handle handle = openSchema();
-  mdbx::slice data = ::get(_txn, handle, SCHEMA_BASIC);
+  thread_local auto id = std::this_thread::get_id();
+  mdbx::slice data = ::get(_txns[id], handle, SCHEMA_BASIC);
   if (data.size()) {
     std::vector<uint8_t> v(data.byte_ptr(), data.byte_ptr() + data.size());
     _schema = nlohmann::json::from_cbor(v);
   }
+  _schema[SCHEMA_GRAPH_NAME] = filename;
   initMap(option);
   // _env.close_map(handle);
   return ret;
 }
 
-void GStorageEngine::close() {
-  if (_txn) {
+void GStorageEngine::close()
+{
+  thread_local auto id = std::this_thread::get_id();
+  if (_txns.count(id) && _txns[id].is_readwrite()) {
     if (!_schema.empty()) {
       mdbx::map_handle handle = openSchema();
       std::vector<uint8_t> v = nlohmann::json::to_cbor(_schema);
       mdbx::slice data(v.data(), v.size());
-      ::put(_txn, handle, SCHEMA_BASIC, data);
+      ::put(_txns[id], handle, SCHEMA_BASIC, data);
       // _env.close_map(handle);
     }
-    // for (auto itr = _mHandle.begin(); itr != _mHandle.end(); ++itr) {
-    //   _env.close_map(itr->second);
-    // }
-    // _mHandle.clear();
-    _txn.commit();
+    _txns[id].commit();
   }
+  _txns.clear();
 }
 
 mdbx::map_handle GStorageEngine::openSchema() {
   mdbx::map_handle schema;
-  GRAPH_EXCEPTION_CATCH(schema = _txn.create_map(DB_SCHEMA, mdbx::key_mode::usual, mdbx::value_mode::single));
+  thread_local auto id = std::this_thread::get_id();
+  GRAPH_EXCEPTION_CATCH(schema = _txns[id].create_map(DB_SCHEMA, mdbx::key_mode::usual, mdbx::value_mode::single));
   return schema;
 }
 
@@ -124,11 +128,19 @@ void GStorageEngine::addMap(const std::string& prop, MapInfo type) {
   }
 }
 
+bool GStorageEngine::compare(const std::string& left, const std::string& right)
+{
+  if (left == right) return true;
+  if (left[left.size()] == '\0' && left.substr(0, left.size() - 1) == right) return true;
+  if (right[right.size()] == '\0' && right.substr(0, right.size() - 1) == left) return true;
+  return false;
+}
+
 bool GStorageEngine::isMapExist(const std::string& prop) {
   if (_schema.empty()) return false;
   const auto& props = _schema[SCHEMA_CLASS];
   for (auto itr = props.begin(); itr != props.end(); ++itr) {
-    if ((*itr)[SCHEMA_CLASS_NAME] == prop) return true;
+    if (compare((*itr)[SCHEMA_CLASS_NAME], prop)) return true;
   }
   return false;
 }
@@ -137,32 +149,35 @@ nlohmann::json GStorageEngine::getProp(const std::string& prop)
 {
   const auto& props = _schema[SCHEMA_CLASS];
   for (auto itr = props.begin(); itr != props.end(); ++itr) {
-    if ((*itr)[SCHEMA_CLASS_NAME] == prop) return *itr;
+    if (compare((*itr)[SCHEMA_CLASS_NAME], prop)) return *itr;
   }
   assert(false);
 }
 
 mdbx::map_handle GStorageEngine::getOrCreateHandle(const std::string& prop, mdbx::key_mode mode) {
-  if (_mHandle.count(prop) == 0) {
+  thread_local auto id = std::this_thread::get_id();
+  if (_mHandles[id].count(prop) == 0) {
     mdbx::map_handle propMap;
-    GRAPH_EXCEPTION_CATCH(propMap = _txn.create_map(prop, mode, mdbx::value_mode::single));
-    _mHandle[prop] = propMap;
+    GRAPH_EXCEPTION_CATCH(propMap = _txns[id].create_map(prop, mode, mdbx::value_mode::single));
+    _mHandles[id][prop] = propMap;
   }
-  return _mHandle[prop];
+  return _mHandles[id][prop];
 }
 
 int GStorageEngine::write(const std::string& prop, const std::string& key, void* value, size_t len) {
-  // assert(isMapExist(prop));
+  assert(isMapExist(prop));
   mdbx::slice data(value, len);
   auto handle = getOrCreateHandle(prop, mdbx::key_mode::usual);
-  ::put(_txn, handle, key, data);
+  thread_local auto id = std::this_thread::get_id();
+  ::put(_txns[id], handle, key, data);
   return ECode_Success;
 }
 
 int GStorageEngine::read(const std::string& prop, const std::string& key, std::string& value) {
-  // assert(isMapExist(prop));
+  assert(isMapExist(prop));
   auto handle = getOrCreateHandle(prop, mdbx::key_mode::usual);
-  mdbx::slice data = ::get(_txn, handle, key);
+  thread_local auto id = std::this_thread::get_id();
+  mdbx::slice data = ::get(_txns[id], handle, key);
   if (data.empty()) return ECode_DATUM_Not_Exist;
   value.assign((char*)data.data(), data.size());
   return ECode_Success;
@@ -174,14 +189,17 @@ int GStorageEngine::write(const std::string& prop, uint64_t key, void* value, si
   auto handle = getOrCreateHandle(prop, mdbx::key_mode::ordinal);
   // compress
   size_t inSize = ZSTD_CStreamInSize();
-  ::put(_txn, handle, key, data);
+  thread_local auto id = std::this_thread::get_id();
+  ::put(_txns[id], handle, key, data);
+  //printf("write: %d\n", key);
   return ECode_Success;
 
 }
 int GStorageEngine::read(const std::string& prop, uint64_t key, std::string& value) {
   assert(isMapExist(prop));
   auto handle = getOrCreateHandle(prop, mdbx::key_mode::ordinal);
-  mdbx::slice data = ::get(_txn, handle, key);
+  thread_local auto id = std::this_thread::get_id();
+  mdbx::slice data = ::get(_txns[id], handle, key);
   if (data.empty()) return ECode_DATUM_Not_Exist;
   value.assign((char*)data.data(), data.size());
   return ECode_Success;
@@ -203,16 +221,29 @@ GStorageEngine::cursor GStorageEngine::getCursor(const std::string& prop)
   else {
     handle = getOrCreateHandle(prop, mdbx::key_mode::usual);
   }
-  return _txn.open_cursor(handle);
+  thread_local auto id = std::this_thread::get_id();
+  return _txns[id].open_cursor(handle);
 }
 
-int GStorageEngine::startTrans() {
-  _txn = _env.start_write();
-  if (!_txn) return ECODE_NULL_PTR;
+int GStorageEngine::startTrans(ReadWriteOption opt) {
+  thread_local auto id = std::this_thread::get_id();
+  mdbx::txn_managed txn;
+  if (_txns.count(id) == 0) {
+    if (opt == ReadWriteOption::read_only) {
+      txn = _env.start_read();
+    }
+    else {
+      txn = _env.start_write();
+    }
+    if (!txn) return ECODE_NULL_PTR;
+    _txns[id] = std::move(txn);
+  }
   return ECode_Success;
 }
 
 int GStorageEngine::finishTrans() {
-  _txn.commit();
+  thread_local auto id = std::this_thread::get_id();
+  if (_txns.count(id) == 0) return ECode_TRANSTION_Not_Exist;
+  _txns[id].commit();
   return ECode_Success;
 }

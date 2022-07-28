@@ -26,6 +26,7 @@
 #define ECode_DISK_OPEN_FAIL        300
 #define ECode_DB_Drop_Fail          301
 #define ECode_DATUM_Not_Exist       400
+#define ECode_TRANSTION_Not_Exist   500
 
 typedef void* gqlite;
 

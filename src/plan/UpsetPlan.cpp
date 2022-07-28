@@ -22,20 +22,19 @@ int GUpsetPlan::prepare() {
 
 int GUpsetPlan::execute(gqlite_callback) {
   if (_store) {
-    uint32_t uik = 0;
-    switch (_key.index()) {
-    case 0:
-    {
-      std::string k = std::get<std::string>(_key);
-      uik = unicode32(k);
+    for (auto itr = _vertexes.begin(), end = _vertexes.end(); itr != end; ++itr) {
+      const auto& key = itr->first;
+      int ret = ECode_Success;
+      key.visit(
+        [&](std::string k) {
+          uint32_t uik = unicode32(k);
+          ret = _store->write(_class, uik, itr->second.data(), itr->second.size());
+        },
+        [&](uint64_t k) {
+          ret = _store->write(_class, k, itr->second.data(), itr->second.size());
+        });
+      if (ret != ECode_Success) return ret;
     }
-      break;
-    case 1:
-      uik = std::get<uint64_t>(_key);
-      break;
-    }
-    // generate key
-    _store->write(_class, uik, _value.data(), _value.size());
   }
   return 0;
 }

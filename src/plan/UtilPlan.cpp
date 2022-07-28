@@ -48,6 +48,7 @@ int GUtilPlan::execute(gqlite_callback) {
   switch (_type)
   {
   case UtilType::Creation:
+  {
     if (!_store) return ECode_DISK_OPEN_FAIL;
     StoreOption opt;
     opt.compress = 1;
@@ -56,8 +57,11 @@ int GUtilPlan::execute(gqlite_callback) {
       MapInfo info = {0};
       info.key_type = 0;
       info.value_type = ClassType::String;
-      _store->addMap(std::get<std::string>(item), info);
+      std::string v = std::get<std::string>(item);
+      printf("add map: %s\n", v.c_str());
+      _store->addMap(v, info);
     }
+  }
     break;
   case UtilType::Drop:
   {

@@ -39,6 +39,7 @@ enum NodeType {
   ObjectExpression,
   GQLExpression,
   CallExpression,
+  MemberExpression,
 };
 
 enum AttributeKind {

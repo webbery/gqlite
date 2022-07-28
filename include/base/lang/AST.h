@@ -60,6 +60,10 @@ template <> struct GTypeTraits<NodeType::GroupStatement> {
   typedef GGroupStmt type;
 };
 
+template <> struct GTypeTraits<NodeType::MemberExpression> {
+  typedef GMemberExpression type;
+};
+
 /******************************
  * accept function will visit all nodes start from input node.
  * We define ourself's visitor to process nodes when type is matched.

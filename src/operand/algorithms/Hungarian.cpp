@@ -155,11 +155,11 @@ int HungorianAlgorithm::solve(const Eigen::MatrixXd& input, std::list<std::pair<
     fmt::print("before:\n{}\n", mTempInf);
 #endif
     mSubMat -= Eigen::MatrixXd::Ones(mSubMat.rows(), mSubMat.cols()) * minimal;
-    Eigen::MatrixXd mTemp = (mSubMat.array() != INFINITY).select(0, mTempInf);
+    // Eigen::MatrixXd mTemp = (mSubMat.array() != INFINITY).select(0, mTempInf);
     mSubMat = (mSubMat.array() == INFINITY).select(0, mSubMat);
     //mTempInf = mTemp + mSubMat;
 #ifdef _PRINT_FORMAT_
-  fmt::print("after:\n{}\ntemp: {}\nsub: {}\n", mTempInf, mTemp, mSubMat);
+  fmt::print("after:\n{}\nsub: {}\n", mTempInf, mSubMat);
 #endif
     auto pluss = (mTempLineCross.array() == maximal).select(minimal, Eigen::MatrixXd::Zero(result.rows(), result.cols()));
 #ifdef _PRINT_FORMAT_

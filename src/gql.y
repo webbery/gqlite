@@ -88,7 +88,7 @@ struct GASTNode* INIT_NUMBER_AST(T& v) {
 
 %type <__node> a_graph_expr
 %type <__node> json
-%type <__node> value number
+%type <__node> value number right_value
 %type <__node> values
 %type <__node> object
 %type <__node> array
@@ -274,7 +274,13 @@ a_group: VAR_STRING
                 
               };
 a_simple_query: 
-          RANGE_BEGIN query_kind COMMA a_graph_expr RANGE_END
+           RANGE_BEGIN query_kind RANGE_END
+                {
+                  GQueryStmt* queryStmt = new GQueryStmt($2, nullptr, nullptr);
+                  $$ = NewAst(NodeType::QueryStatement, queryStmt, nullptr, 0);
+                  stm._errorCode = ECode_Success;
+                }
+        |  RANGE_BEGIN query_kind COMMA a_graph_expr RANGE_END
                 {
                   GQueryStmt* queryStmt = new GQueryStmt($2, $4, nullptr);
                   $$ = NewAst(NodeType::QueryStatement, queryStmt, nullptr, 0);
@@ -290,8 +296,8 @@ query_kind: OP_QUERY COLON query_kind_expr { $$ = $3; }
         |   OP_QUERY COLON match_expr { $$ = $3; };
 query_kind_expr: 
           KW_VERTEX { $$ = INIT_STRING_AST("vertex"); }
-        | KW_EDGE { $$ = INIT_STRING_AST("edge"); }
-        | KW_PATH { $$ = INIT_STRING_AST("path");}
+        |  KW_EDGE { $$ = INIT_STRING_AST("edge"); }
+        |  VAR_STRING { $$ = INIT_STRING_AST($1); free($1); }
         | a_graph_properties { $$ = $1; };
 match_expr: //{->: 'alias'}
           RANGE_BEGIN a_match RANGE_END { $$ = $2; };
@@ -372,19 +378,32 @@ graph_properties:
                 $$ = $1;
               };
 graph_property:
-          KW_VERTEX dot VAR_STRING {
-            $$ = NewAst(NodeType::VariableDeclarator, INIT_STRING_AST($3), nullptr, 0);
-            free($3);
-          }
-        | KW_EDGE dot VAR_STRING
+          KW_VERTEX dot VAR_STRING
               {
+                GMemberExpression* expr = new GMemberExpression(INIT_STRING_AST("vertex"), INIT_STRING_AST($3));
+                $$ = NewAst(NodeType::MemberExpression, expr, nullptr, 0);
                 free($3);
               }
-        | KW_VERTEX dot function_call {}
-        | KW_EDGE dot function_call
+        | KW_EDGE dot VAR_STRING
               {
-                auto scope = INIT_STRING_AST("edge");
+                GMemberExpression* expr = new GMemberExpression(INIT_STRING_AST("edge"), INIT_STRING_AST($3));
+                $$ = NewAst(NodeType::MemberExpression, expr, nullptr, 0);
+                free($3);
+              }
+        |  VAR_STRING dot VAR_STRING
+              {
+                GMemberExpression* expr = new GMemberExpression(INIT_STRING_AST($1), INIT_STRING_AST($3));
+                $$ = NewAst(NodeType::MemberExpression, expr, nullptr, 0);
+                free($3);
+                free($1);
+              }
+        | KW_VERTEX dot function_call {}
+        | KW_EDGE dot function_call {}
+        | VAR_STRING dot function_call
+              {
+                auto scope = INIT_STRING_AST($1);
                 $$ = NewAst(NodeType::VariableDeclarator, scope, $3, 1);
+                free($1);
               };
 vertex_list: LEFT_SQUARE vertexes RIGHT_SQUARE
               {
@@ -450,7 +469,8 @@ edge: LEFT_SQUARE VAR_STRING COMMA a_edge COMMA VAR_STRING RIGHT_SQUARE
               };
 json: value { $$ = $1; };
 value: object { $$ = $1; }
-        | array { $$ = $1; }
+        | array { $$ = $1; };
+right_value: value { $$ = $1; }
         | number { $$ = $1; }
         | VAR_BASE64
               {
@@ -479,7 +499,7 @@ properties: property {
                 props->addElement($3);
                 $$ = $1;
               };
-property: VAR_STRING COLON value
+property: VAR_STRING COLON right_value
               {
                 GProperty* prop = new GProperty($1, $3);
                 free($1);
@@ -540,12 +560,12 @@ array:    LEFT_SQUARE RIGHT_SQUARE { $$ = nullptr; }
               {
                 $$ = $2;
               };
-values: value {
+values: right_value {
                 GArrayExpression* values = new GArrayExpression();
                 values->addElement($1);
                 $$ = NewAst(NodeType::ArrayExpression, values, nullptr, 0);
               }
-        | values COMMA value
+        | values COMMA right_value
               {
                 GArrayExpression* values = (GArrayExpression*)$1->_value;
                 values->addElement($3);

@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.0)
 
 project(GQLlite)
 
+# set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_FLAGS_RELEASE "$ENV{CXXFLAGS} -openmp -march=native -fpic -ftree-vectorize -Ofast")
 IF (WIN32)

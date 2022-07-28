@@ -5,6 +5,7 @@
 #include <functional>
 #include <json.hpp>
 
+#define SCHEMA_GRAPH_NAME       "name"
 #define SCHEMA_CLASS            "cls"
 #define SCHEMA_CLASS_INFO       "info"
 #define SCHEMA_CLASS_NAME       "name"
@@ -12,6 +13,8 @@
 
 #define SCHEMA_GLOBAL           "__global"
 #define GLOBAL_COMPRESS_LEVEL   "__lvl"
+
+#define GQL_VERSION             "0.0.1"
 
 enum class ClassType : uint8_t {
     Undefined,
@@ -28,6 +31,13 @@ struct alignas(8) MapInfo {
 
 struct StoreOption {
   uint8_t       compress;   /**< compress level: 0~ */
+  std::string   directory;  /**< directory of graph file */
+};
+
+enum class ReadWriteOption {
+  read_only,
+  write_only,
+  read_write
 };
 
 class GStorageEngine {
@@ -51,6 +61,7 @@ public:
     int open(const char* filename, StoreOption option);
 
     void close();
+    void close(mdbx::txn_managed& txn);
 
     /** Add new class to graph schema.
      * It will create a new map with `prop`, which key type is info.key_type.
@@ -83,6 +94,7 @@ public:
      * Get the schema of current graph instance.
      * Schema is a json which format as follows:
      *   {
+     *     name: graph_name(filename)
      *     version: 0.0.1(example),
      *     class(which values are map name): [Movie, Actor, ...],
      *     Movie(class detail): [{Score: value type}, {Title: string}, {WebID:...}, ...],
@@ -91,7 +103,7 @@ public:
      */
     nlohmann::json& getSchema() { return _schema; }
 
-    int startTrans();
+    int startTrans(ReadWriteOption opt = ReadWriteOption::read_write);
 
     int finishTrans();
 
@@ -109,6 +121,10 @@ public:
     int injectNodeUpdateFunc();
 
 private:
+  /**
+   * @brief because json lib return string without '\0', so write this method
+   */
+  bool compare(const std::string& left, const std::string& right);
     bool isMapExist(const std::string& prop);
     nlohmann::json getProp(const std::string& prop);
     mdbx::map_handle getOrCreateHandle(const std::string& prop, mdbx::key_mode mode);
@@ -121,8 +137,9 @@ private:
 
 private:
     mdbx::env_managed _env;
-    mdbx::txn_managed _txn;
-    std::map<std::string, mdbx::map_handle> _mHandle;
+    std::map<std::thread::id, mdbx::txn_managed> _txns;
+    using handle_t = std::map<std::string, mdbx::map_handle>;
+    std::map<std::thread::id, handle_t> _mHandles;
     /**
      * schema: {
      *   prop: [ {name: 'xx', type: undefined/str/number} ]

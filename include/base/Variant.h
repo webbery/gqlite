@@ -63,6 +63,24 @@ namespace gql {
         VariantStorage<Args...>::copy(ot, od, nd);
       }
     }
+
+    inline static bool equal(std::type_index id, void* data1, void* data2) {
+      if (id == std::type_index(typeid(T))) {
+        return *static_cast<T*>(data1) == *static_cast<T*>(data2);
+      }
+      else {
+        return VariantStorage<Args...>::equal(id, data1, data2);
+      }
+    }
+
+    inline static bool less_than(std::type_index id, void* data1, void* data2) {
+      if (id == std::type_index(typeid(T))) {
+        return *static_cast<T*>(data1) < *static_cast<T*>(data2);
+      }
+      else {
+        return VariantStorage<Args...>::less_than(id, data1, data2);
+      }
+    }
   };
 
   template<> struct VariantStorage<> {
@@ -70,7 +88,31 @@ namespace gql {
     }
     inline static void move(std::type_index ot, void* od, void* nd) {}
     inline static void copy(std::type_index ot, const void* od, const void* nd) {}
+    inline static bool equal(std::type_index id, void* data1, void* data2) { return false; }
+    inline static bool less_than(std::type_index id, void* data1, void* data2) { return false; }
   };
+
+  template<typename Ret, typename Cls, typename Mult, typename... Params>
+  struct _function_traits{
+    using is_multable = Mult;
+    enum {arity = sizeof...(Params) };
+    using return_type = Ret;
+
+    template<size_t i>
+    struct arg {
+      typedef typename std::tuple_element<i, std::tuple<Params...>>::type type;
+    };
+  };
+
+  template<class F>
+  struct function_traits : function_traits<decltype(&F::operator())> {
+  };
+
+  template<class Ret, class Cls, class... Args>
+  struct function_traits<Ret(Cls::*)(Args...)> : _function_traits<Ret, Cls, std::true_type, Args...>{};
+
+  template<class Ret, class Cls, class... Args>
+  struct function_traits<Ret(Cls::*)(Args...)const> : _function_traits<Ret, Cls, std::false_type, Args...> {};
 }
 
 template<typename... Types>
@@ -148,8 +190,22 @@ public:
     return *this;
   }
 
+  bool operator == (const Variant& other) const {
+    if (other._tindex == this->_tindex && other._indx == this->_indx) {
+      return _Storage::equal(_tindex, &_data, &other._data);
+    }
+    return false;
+  }
+
+  bool operator < (const Variant& other) const {
+    if (other._tindex == this->_tindex && other._indx == this->_indx) {
+      return _Storage::less_than(_tindex, &const_cast<Variant&>(other)._data , &const_cast<Variant&>(*this)._data);
+    }
+    throw std::bad_cast();
+  }
+
   template<typename T>
-  T& Get() {
+  T& Get() const {
     //if (_tindex != std::type_index(typeid(T))) {
       //throw std::bad_cast();
     //}
@@ -157,15 +213,34 @@ public:
   }
 
   template<size_t Idx>
-  decltype(auto) Get() {
+  decltype(auto) Get() const {
     //static constexpr size_t cnt = sizeof...(Types);
     // static_assert(Idx < cnt);
     using T = typename TypeVisitor<Idx, Types...>::type;
+    //static_assert(std::is_same<T, std::string>::value);
     return *(T*)(&_data);
   }
 
-  size_t index() {
+  size_t index() const {
     return _indx;
+  }
+
+  template<typename Func>
+  void visit(Func&& f) const {
+    using T = typename std::remove_cv<gql::function_traits<Func>::arg<0>::type>::type;
+    if (_tindex == typeid(T)) {
+      f(Get<T>());
+    }
+  }
+  template<typename Func, typename... Rest>
+  void visit(Func&& f, Rest&&... rest) const {
+    using T = typename std::remove_cv<gql::function_traits<Func>::arg<0>::type>::type;
+    if (_tindex == typeid(T)) {
+      visit(std::forward<Func>(f));
+    }
+    else {
+      visit(std::forward<Rest>(rest)...);
+    }
   }
 
 private:
