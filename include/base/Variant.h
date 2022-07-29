@@ -227,14 +227,14 @@ public:
 
   template<typename Func>
   void visit(Func&& f) const {
-    using T = typename std::remove_cv<gql::function_traits<Func>::arg<0>::type>::type;
+    using T = typename std::remove_cv<typename gql::function_traits<Func>::template arg<0>::type>::type;
     if (_tindex == typeid(T)) {
       f(Get<T>());
     }
   }
   template<typename Func, typename... Rest>
   void visit(Func&& f, Rest&&... rest) const {
-    using T = typename std::remove_cv<gql::function_traits<Func>::arg<0>::type>::type;
+    using T = typename std::remove_cv<typename gql::function_traits<Func>::template arg<0>::type>::type;
     if (_tindex == typeid(T)) {
       visit(std::forward<Func>(f));
     }

@@ -3,6 +3,7 @@
 #include <mdbx.h++>
 #include <map>
 #include <functional>
+#include <thread>
 #include <json.hpp>
 
 #define SCHEMA_GRAPH_NAME       "name"
