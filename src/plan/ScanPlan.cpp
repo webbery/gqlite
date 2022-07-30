@@ -72,9 +72,10 @@ int GScanPlan::scan(gqlite_callback cb)
           result.nodes->_vertex->uid = atoi((char*)data.key.byte_ptr());
           size_t len = data.value.size();
           result.nodes->_vertex->properties = new char[len];
+          result.nodes->_next = nullptr;
           memcpy(result.nodes->_vertex->properties, data.value.byte_ptr(), sizeof(char) * len);
           cb(&result);
-          delete result.nodes->_vertex->properties;
+          delete[] result.nodes->_vertex->properties;
           delete result.nodes->_vertex;
           delete result.nodes;
         }
