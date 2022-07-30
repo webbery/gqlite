@@ -132,10 +132,10 @@ class Variant {
   };
 
   template<typename T, typename... Args> struct IndexVisitor;
-  template<typename T, typename... Args> struct IndexVisitor { static constexpr size_t value = 0; };
+  template<typename T, typename... Args> struct IndexVisitor { static constexpr int value = -1; };
   template<typename T, typename Head, typename... Rest>
   struct IndexVisitor<T, Head, Rest...> {
-    static constexpr size_t value = (std::is_same<T, Head>::value ? 0 : IndexVisitor<T, Rest...>::value + 1);
+    static constexpr int value = (std::is_same<T, Head>::value ? 0 : IndexVisitor<T, Rest...>::value + 1);
   };
 
   template<typename T>

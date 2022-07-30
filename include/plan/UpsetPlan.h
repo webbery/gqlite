@@ -141,7 +141,7 @@ private:
       key_t k;
       switch (literal->kind()) {
       case AttributeKind::Number:
-        k = atoi(literal->raw().c_str());
+        k = (uint64_t)atoll(literal->raw().c_str());
         // printf("upset key: %d\n", k.Get<int>());
         break;
       default:

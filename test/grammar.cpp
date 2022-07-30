@@ -6,7 +6,7 @@
 #define RED "\033[0;32;31m"
 
 int test_id = 0;
-size_t result_count = 0;
+size_t current_count = 0;
 #define TEST_GRAMMAR(nogql) {\
     ptr = nullptr;\
     printf(NORMAL"Test [%d]:\t%s\n", ++test_id, nogql); \
@@ -29,9 +29,12 @@ size_t result_count = 0;
 {\
   ptr = nullptr;\
   printf(NORMAL"Test [%d]:\t%s\n", ++test_id, nogql);\
-  result_count = count;\
+  current_count = 0;\
   if (gqlite_exec(pHandle, nogql, gqlite_exec_assert_callback, nullptr, &ptr)) {\
     printf(RED"exec error: %s\n" NORMAL, ptr);\
+  }\
+  if (current_count != count) {\
+    printf(RED"expect result count: %d, but recieved count: %d\n" NORMAL, count, current_count);\
   }\
   if (ptr) gqlite_free(ptr);\
 }
@@ -39,9 +42,7 @@ size_t result_count = 0;
 int gqlite_exec_assert_callback(gqlite_result* params)
 {
   if (params) {
-    if (result_count != params->count) {
-      printf(RED"expect result count: %d, but recieved count: %d\n" NORMAL, result_count, params->count);
-    }
+    current_count += params->count;
   }
   return 0;
 }
@@ -72,14 +73,8 @@ void successful_test(gqlite* pHandle, char* ptr) {
   TEST_GRAMMAR("{create: 'ga', group: ['g', 'e'], index: ['keyword', 'color', 'create_time']}");
   TEST_COMMAND("show graph 'ga'");
   TEST_GRAMMAR("{upset: 'g', vertex: [[328, {title: 'Tale\\'s from the Crypt Presents: Demon Knight (1995)', genres: 'Horror|Thriller'}]]}");
-  //TEST_GRAMMAR("{upset: 'g', vertex: [['v1']]}");
   TEST_QUERY("{query: g}", 1);
   TEST_QUERY("{query: g, in: 'ga'}", 1);
-  //printf(NORMAL"Test [%d]:\t%s\n", ++test_id, "{query: vertex, in: 'ga'}");
-  //  if (gqlite_exec(pHandle, "{query: vertex, in: 'ga'}", gqlite_exec_assert_callback, nullptr, &ptr)) {
-  //      printf(RED"exec error: %s\n", ptr); 
-  //  }
-  //gqlite_free(ptr); 
   TEST_GRAMMAR(
     "{"
       "upset: 'g',"
@@ -91,21 +86,15 @@ void successful_test(gqlite* pHandle, char* ptr) {
         "['v5', {keyword: [], create_time: 1}]"
     "]"
     "}");
-  TEST_QUERY("{query: 'g', in: 'ga'}", 4);
+  TEST_QUERY("{query: 'g', in: 'ga'}", 6);
   TEST_GRAMMAR("{remove: 'g', vertex: ['v2']}");
-  //printf(NORMAL"Test [%d]:\t%s\n", ++test_id, "{remove: 'ga', vertex: ['v2']}");
-  //ptr = nullptr;
-  //  if (gqlite_exec(pHandle, "{remove: 'ga', vertex: ['v2']}", gqlite_exec_callback, nullptr, &ptr)) {
-  //      printf(RED"exec error: %s\n", ptr);
-  //  }
-  //if (ptr) gqlite_free(ptr);
-  TEST_QUERY("{query: 'g', in: 'ga'}", 3);
-  TEST_QUERY("{query: 'g', in: 'ga', where: {create_time: {$gt: 1, $lt: 5}}}", 1);
-  TEST_QUERY("{query: 'g', in: 'ga', where: {create_time: {$gte: 1, $lt: 5}}}", 2);
+  TEST_QUERY("{query: 'g', in: 'ga'}", 5);
+  TEST_QUERY("{query: 'g', in: 'ga', where: {create_time: {$gt: 1, $lt: 5}}}", 2);
+  TEST_QUERY("{query: 'g', in: 'ga', where: {create_time: {$gte: 1, $lt: 5}}}", 4);
   TEST_QUERY("{query: 'g', in: 'ga', where: {id: 'v1'}}", 1);
   TEST_QUERY("{query: 'g', in: 'ga', where: {keyword: 'b'}}", 1);
-  TEST_QUERY("{query: 'g', in: 'ga', where: {create_time: {$gt: 1}}}", 1);
-  TEST_QUERY("{query: 'g', in: 'ga', where: {create_time: {$lt: 5}}}", 2);
+  TEST_QUERY("{query: 'g', in: 'ga', where: {create_time: {$gt: 1}}}", 2);
+  TEST_QUERY("{query: 'g', in: 'ga', where: {create_time: {$lt: 5}}}", 4);
   TEST_GRAMMAR("{query: [g.class], in: 'ga', where: {keyword: 'b'}}");
   TEST_GRAMMAR("{query: [g.class], in: 'ga', where: {keyword: 'b'}}");
   // TEST_GRAMMAR("{dump: 'nogql.gql'}");

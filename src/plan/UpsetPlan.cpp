@@ -24,7 +24,7 @@ int GUpsetPlan::execute(gqlite_callback) {
   if (_store) {
     for (auto itr = _vertexes.begin(), end = _vertexes.end(); itr != end; ++itr) {
       const auto& key = itr->first;
-      int ret = ECode_Success;
+      int ret = ECode_Fail;
       key.visit(
         [&](std::string k) {
           uint32_t uik = unicode32(k);

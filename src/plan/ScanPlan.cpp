@@ -36,7 +36,7 @@ int GScanPlan::execute(gqlite_callback cb) {
 #ifdef GQLITE_MULTI_THREAD
   _worker = std::thread(&GScanPlan::scan, this);
 #else
-  scan();
+  scan(cb);
 #endif
   return ECode_Success;
 }
@@ -48,7 +48,7 @@ int GScanPlan::interrupt()
   return ECode_Success;
 }
 
-int GScanPlan::scan()
+int GScanPlan::scan(gqlite_callback cb)
 {
   for (std::string& group : _queries)
   {
@@ -58,6 +58,36 @@ int GScanPlan::scan()
     {
       std::string str((char*)data.value.byte_ptr(), data.value.size());
       //printf("scan: %s\n", str.c_str());
+      switch (_queryType)
+      {
+      case GScanPlan::QueryType::SimpleScan:
+        if (cb) {
+          gqlite_result result;
+          result.count = 1;
+          result.type = gqlite_result_type_node;
+          result.errcode = ECode_Success;
+          result.nodes = new gqlite_node;
+          result.nodes->_type = gqlite_node_type::gqlite_node_type_vertex;
+          result.nodes->_vertex = new gqlite_vertex;
+          result.nodes->_vertex->uid = atoi((char*)data.key.byte_ptr());
+          size_t len = data.value.size();
+          result.nodes->_vertex->properties = new char[len];
+          memcpy(result.nodes->_vertex->properties, data.value.byte_ptr(), sizeof(char) * len);
+          cb(&result);
+          delete result.nodes->_vertex->properties;
+          delete result.nodes->_vertex;
+          delete result.nodes;
+        }
+        break;
+      case GScanPlan::QueryType::NNSearch:
+        break;
+      case GScanPlan::QueryType::Match:
+        break;
+      case GScanPlan::QueryType::Inference:
+        break;
+      default:
+        break;
+      }
       data = cs.to_next(false);
     }
   }

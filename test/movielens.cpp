@@ -36,6 +36,7 @@ TEST_CASE("init movies") {
       "]"
     "}",
     gqlite_exec_callback, nullptr, &ptr);
+  gqlite_free(ptr);
   readCSV("movies.csv", [&pHandle, &ptr](char* buffer) {
     char* movie_id = strtok(buffer, ",");
     if (movie_id == nullptr) return;
@@ -45,11 +46,14 @@ TEST_CASE("init movies") {
     char* movie_genres = strtok(nullptr, ",");
     std::string genres = replace_all(movie_genres);
 
-    char upset[512]= {0};
+    char upset[512] = { 0 };
     sprintf(upset, "{upset: 'movie', vertex: [[%d, {title: '%s', genres: '%s'}]]}", id, title.c_str(), genres.c_str());
     gqlite_exec(pHandle, upset, gqlite_exec_callback, nullptr, &ptr);
-  });
+    gqlite_free(ptr);
+    });
   gqlite_exec(pHandle,
-    "{query: movie, in: 'movielens'}",
-    gqlite_exec_callback, nullptr, &ptr);
+   "{query: movie, in: 'movielens_db'}",
+   gqlite_exec_callback, nullptr, &ptr);
+  gqlite_free(ptr);
+  gqlite_close(pHandle);
 }

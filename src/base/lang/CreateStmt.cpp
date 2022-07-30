@@ -15,6 +15,7 @@ GCreateStmt::~GCreateStmt()
     ptr = ptr->_children;
     FreeAst(temp);
   }
+  FreeAst(_groups);
 }
 
 std::string GCreateStmt::name() const { return _name; }

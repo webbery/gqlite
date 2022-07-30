@@ -44,7 +44,10 @@ enum gqlite_primitive_type {
 
 typedef struct _gqlite_vertex {
   // nodeid, C-style string
-  char* id;
+  union {
+    char* cid;
+    uint32_t uid;
+  };
   // node properties
   char* properties;
   uint32_t len;

@@ -26,7 +26,7 @@ inline int gqlite_exec_callback(gqlite_result* params)
         case gqlite_node_type_vertex:
         {
           gqlite_vertex* v = node->_vertex;
-          printf("id: %s, properties: %s\n", v->id, v->properties);
+          printf("id: %s, properties: %s\n", v->cid, v->properties);
         }
           break;
         case gqlite_node_type_edge:

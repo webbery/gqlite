@@ -22,7 +22,7 @@ public:
   virtual int interrupt();
 
 private:
-  int scan();
+  int scan(gqlite_callback cb = nullptr);
 
   void parseQuery(GASTNode* query);
 private:

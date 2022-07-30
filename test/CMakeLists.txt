@@ -75,7 +75,7 @@ set(grammar_LINK_OPTIONS gqlite fmt::fmt-header-only)
 set(movielens_LINK_OPTIONS gqlite)
 set(regress_LINK_OPTIONS gqlite fmt::fmt-header-only)
 IF (UNIX AND NOT APPLE)
-set(TARGETS_OF_LEAK_TO_CHECK storage vnet)
+set(TARGETS_OF_LEAK_TO_CHECK storage vnet movielens)
 
 foreach(LEAK_TARGET ${TARGETS_OF_LEAK_TO_CHECK})
 	target_compile_options(${LEAK_TARGET} PRIVATE -fsanitize=leak -fno-omit-frame-pointer)

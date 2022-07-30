@@ -42,14 +42,17 @@ void GVirtualEngine::cleanPlans(PlanList* plans) {
   PlanList* cur = plans->_parent;
   while (cur != plans)
   {
+#ifdef GQLITE_MULTI_THREAD
     if (cur->_threadable) {
       cur->_plan->interrupt();
     }
+#endif
     delete cur->_plan;
     PlanList* temp = cur;
     cur = cur->_parent;
     delete temp;
   }
+  delete cur;
 }
 
 GVirtualEngine::PlanList* GVirtualEngine::makePlans(GASTNode* ast) {
@@ -106,12 +109,13 @@ int GVirtualEngine::execCommand(GASTNode* ast)
 void GVirtualEngine::PlanVisitor::add(GPlan* plan, bool threadable)
 {
   PlanList* next = new PlanList;
+  PlanList* last = _plans->_parent;
+  last->_next = next;
+  _plans->_parent = next;
   next->_plan = plan;
   next->_next = _plans;
   next->_threadable = threadable;
-  PlanList* pl = _plans->_parent;
-  next->_parent = pl;
-  pl->_next = next;
+  next->_parent = last;
 }
 
 VisitFlow GVirtualEngine::PlanVisitor::apply(GUpsetStmt* stmt, std::list<NodeType>& path) {
