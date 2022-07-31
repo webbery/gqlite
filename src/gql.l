@@ -94,6 +94,7 @@ create              {stm._errIndx += yyleng; return KW_CREATE;};
 "commit"            { stm._errIndx += yyleng; return KW_COMMIT;};
 "limit"             { stm._errIndx += yyleng; return limit;};
 "profile"           { stm._errIndx += yyleng; return profile;};
+"dump"              { stm._errIndx += yyleng; return dump; };
 (\bf)unction        { stm._errIndx += yyleng;};
 (\bi)f              { stm._errIndx += yyleng;};
 "else"              { stm._errIndx += yyleng;};

@@ -111,7 +111,7 @@ void GStorageEngine::initMap(StoreOption option)
 {
   if (!isMapExist(MAP_BASIC)) {
     MapInfo info = { 0 };
-    info.key_type = 1;
+    info.key_type = KeyType::Uninitialize;
     info.value_type = ClassType::String;
     addMap(MAP_BASIC, info);
   }
@@ -128,7 +128,7 @@ void GStorageEngine::addMap(const std::string& prop, MapInfo type) {
   }
 }
 
-bool GStorageEngine::compare(const std::string& left, const std::string& right)
+bool GStorageEngine::compare(const std::string& left, const std::string& right) const
 {
   if (left == right) return true;
   if (left[left.size()] == '\0' && left.substr(0, left.size() - 1) == right) return true;
@@ -143,6 +143,23 @@ bool GStorageEngine::isMapExist(const std::string& prop) {
     if (compare((*itr)[SCHEMA_CLASS_NAME], prop)) return true;
   }
   return false;
+}
+
+void GStorageEngine::tryInitKeyType(const std::string& prop, KeyType type)
+{
+  static std::atomic_bool init = false;
+  if (init) return;
+  auto& props = _schema[SCHEMA_CLASS];
+  for (auto itr = props.begin(); itr != props.end(); ++itr) {
+    if (compare((*itr)[SCHEMA_CLASS_NAME], prop)) {
+      init.store(true);
+      uint8_t info = (*itr)[SCHEMA_CLASS_INFO];
+      MapInfo* p = (MapInfo*)&info;
+      if (p->key_type == KeyType::Uninitialize) p->key_type = type;
+      (*itr)[SCHEMA_CLASS_INFO] = info;
+      return;
+    }
+  }
 }
 
 nlohmann::json GStorageEngine::getProp(const std::string& prop)
@@ -166,6 +183,7 @@ mdbx::map_handle GStorageEngine::getOrCreateHandle(const std::string& prop, mdbx
 
 int GStorageEngine::write(const std::string& prop, const std::string& key, void* value, size_t len) {
   assert(isMapExist(prop));
+  tryInitKeyType(prop, KeyType::Byte);
   mdbx::slice data(value, len);
   auto handle = getOrCreateHandle(prop, mdbx::key_mode::usual);
   thread_local auto id = std::this_thread::get_id();
@@ -185,6 +203,7 @@ int GStorageEngine::read(const std::string& prop, const std::string& key, std::s
 
 int GStorageEngine::write(const std::string& prop, uint64_t key, void* value, size_t len) {
   assert(isMapExist(prop));
+  tryInitKeyType(prop, KeyType::Integer);
   mdbx::slice data(value, len);
   auto handle = getOrCreateHandle(prop, mdbx::key_mode::ordinal);
   // compress
@@ -215,7 +234,7 @@ GStorageEngine::cursor GStorageEngine::getCursor(const std::string& prop)
   size_t n = sizeof(MapInfo);
   std::memcpy(&info, &c, sizeof(MapInfo));
   mdbx::map_handle handle;
-  if (info.key_type == 0) {
+  if (info.key_type == KeyType::Integer) {
     handle = getOrCreateHandle(prop, mdbx::key_mode::ordinal);
   }
   else {
@@ -246,4 +265,17 @@ int GStorageEngine::finishTrans() {
   if (_txns.count(id) == 0) return ECode_TRANSTION_Not_Exist;
   _txns[id].commit();
   return ECode_Success;
+}
+
+KeyType GStorageEngine::getKeyType(const std::string& m) const
+{
+  const auto& props = _schema[SCHEMA_CLASS];
+  for (auto itr = props.begin(); itr != props.end(); ++itr) {
+    if (compare((*itr)[SCHEMA_CLASS_NAME], m)) {
+      uint8_t info = (*itr)[SCHEMA_CLASS_INFO];
+      MapInfo* p = (MapInfo*)&info;
+      return p->key_type;
+    }
+  }
+  return KeyType::Uninitialize;
 }

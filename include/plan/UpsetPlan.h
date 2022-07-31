@@ -51,6 +51,9 @@ private:
     VisitFlow apply(GCreateStmt* stmt, std::list<NodeType>& path) {
       return VisitFlow::Return;
     }
+    VisitFlow apply(GDumpStmt* stmt, std::list<NodeType>& path) {
+      return VisitFlow::SkipCurrent;
+    }
     VisitFlow apply(GLiteral* stmt, std::list<NodeType>& path) {
       switch (stmt->kind()) {
       case AttributeKind::Binary:
@@ -134,6 +137,9 @@ private:
     }
     VisitFlow apply(GProperty* stmt, std::list<NodeType>& path) {
       return VisitFlow::Children;
+    }
+    VisitFlow apply(GDumpStmt* stmt, std::list<NodeType>& path) {
+      return VisitFlow::SkipCurrent;
     }
     VisitFlow apply(GVertexDeclaration* stmt, std::list<NodeType>& path) {
       _plan._vertex = true;

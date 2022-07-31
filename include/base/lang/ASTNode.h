@@ -47,6 +47,9 @@ public:
   VisitFlow apply(GArrayExpression* stmt, std::list<NodeType>& path);
   VisitFlow apply(GEdgeDeclaration* stmt, std::list<NodeType>& path);
   VisitFlow apply(GDropStmt* stmt, std::list<NodeType>& path);
+  VisitFlow apply(GDumpStmt* stmt, std::list<NodeType>& path) {
+    return VisitFlow::SkipCurrent;
+  }
 
 private:
 };

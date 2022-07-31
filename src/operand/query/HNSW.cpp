@@ -22,7 +22,7 @@ GHNSWManager::~GHNSWManager()
 int GHNSWManager::load(const std::string& index_file)
 {
   if (_mHNSWs.count(index_file) == 0 ) {
-    std::vector<std::string> tokens = split(index_file.c_str(), "_");
+    std::vector<std::string> tokens = gql::split(index_file.c_str(), "_");
     _activeGraph = tokens[0];
     if (isFileExist(index_file.c_str())) {
       initHNSW(index_file, atoi(tokens[1].c_str()));

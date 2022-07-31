@@ -24,9 +24,15 @@ enum class ClassType : uint8_t {
     Custom
 };
 
+enum class KeyType : uint8_t {
+  Uninitialize,
+  Integer,
+  Byte,
+};
+
 struct alignas(8) MapInfo {
-  uint8_t       key_type : 1;    /**<  0 - interger, 1 - byte; */
-  ClassType     value_type : 5;  /**< */ 
+  KeyType       key_type : 2;    /**<  0 - uninitialize, 1 - interger, 2 - byte; */
+  ClassType     value_type : 4;  /**< */ 
   uint8_t       reserved : 2;
 };
 
@@ -121,12 +127,23 @@ public:
     int injectCostFunc();
     int injectNodeUpdateFunc();
 
+    /**
+     * @brief get map's key type
+     */
+    KeyType getKeyType(const std::string& m) const;
 private:
   /**
    * @brief because json lib return string without '\0', so write this method
    */
-  bool compare(const std::string& left, const std::string& right);
+  bool compare(const std::string& left, const std::string& right) const;
+    /**
+     * @brief check map(prop) is exist or not.
+     */
     bool isMapExist(const std::string& prop);
+    /**
+     * @brief check map's key type is init or not. If not, set it with `type`.
+     */
+    void tryInitKeyType(const std::string& prop, KeyType type);
     nlohmann::json getProp(const std::string& prop);
     mdbx::map_handle getOrCreateHandle(const std::string& prop, mdbx::key_mode mode);
     /*

@@ -114,6 +114,12 @@ void FreeNode(GASTNode* node) {
     delete ptr;
   }
     break;
+  case NodeType::DumpStatement:
+  {
+    GTypeTraits<NodeType::DumpStatement>::type* ptr = reinterpret_cast<GTypeTraits<NodeType::DumpStatement>::type*>(node->_value);
+    delete ptr;
+  }
+  break;
   default:
     break;
   }

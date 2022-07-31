@@ -64,6 +64,10 @@ template <> struct GTypeTraits<NodeType::MemberExpression> {
   typedef GMemberExpression type;
 };
 
+template <> struct GTypeTraits<NodeType::DumpStatement> {
+  typedef GDumpStmt type;
+};
+
 /******************************
  * accept function will visit all nodes start from input node.
  * We define ourself's visitor to process nodes when type is matched.
@@ -184,6 +188,12 @@ VisitFlow accept(GASTNode* node, Visitor& visitor, std::list<NodeType>& path) {
     case NodeType::DropStatement:
     {
       GTypeTraits<NodeType::DropStatement>::type* ptr = reinterpret_cast<GTypeTraits<NodeType::DropStatement>::type*>(node->_value);
+      vf = visitor.apply(ptr, path);
+    }
+    break;
+    case NodeType::DumpStatement:
+    {
+      GTypeTraits<NodeType::DumpStatement>::type* ptr = reinterpret_cast<GTypeTraits<NodeType::DumpStatement>::type*>(node->_value);
       vf = visitor.apply(ptr, path);
     }
     break;

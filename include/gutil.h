@@ -21,9 +21,18 @@
 #define DISABLE_WARNING_POP
 #endif
 
-std::vector<std::string> split(const char* str, const char* delim);
+namespace gql {
+  std::string replace_all(const std::string& input, const std::string& origin, const std::string& newer);
+  std::vector<std::string> split(const char* str, const char* delim);
 
-/**
- * @brief try generate a Unicode number by input string
- */
-uint32_t unicode32(const std::string& input);
+  /**
+   * @brief try generate a Unicode number by input string
+   */
+  uint32_t unicode32(const std::string& input);
+
+  /**
+   * @brief normalize input gql. remove `"` to `'`.
+   */
+  std::string normalize(const std::string& gql);
+
+}

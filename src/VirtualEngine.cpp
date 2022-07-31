@@ -143,3 +143,10 @@ VisitFlow GVirtualEngine::PlanVisitor::apply(GQueryStmt* stmt, std::list<NodeTyp
   //GPlan* plan = new GQueryStmt();
   return VisitFlow::Return;
 }
+
+VisitFlow GVirtualEngine::PlanVisitor::apply(GDumpStmt* stmt, std::list<NodeType>& path)
+{
+  GPlan* plan = new GUtilPlan(_vn, _store, stmt);
+  add(plan);
+  return VisitFlow::Return;
+}

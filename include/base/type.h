@@ -14,6 +14,7 @@ enum NodeType {
   RemoveStatement,
   QueryStatement,
   DropStatement,
+  DumpStatement,
   ConditionStatement,
   GroupStatement,
   IfStatement,

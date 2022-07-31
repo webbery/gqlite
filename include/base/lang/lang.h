@@ -17,4 +17,5 @@
 #include "base/lang/ObjectStmt.h"
 #include "base/lang/GroupStmt.h"
 #include "base/lang/MemberExpression.h"
+#include "base/lang/DumpStmt.h"
 #include "base/lang/ASTNode.h"

@@ -8,6 +8,7 @@ ast {upset: '废墟', vertex: [['v1', {filename: '破旧小屋.jpg', datatime: 1
 {upset: '废墟', vertex: [['v4', {filename: '垃圾堆.jpg', datatime: 1653315732}], ['v5', {group: 'HDR', filename: '海岸线.jpg', datatime: 1653315732}], ['v6', {group: '赛博朋克', filename: '机械姬.jpg', datatime: 1653315732}]]}
 {upset: '废墟', vertex: [['v7', {filename: '危楼.jpg', datatime: 1653105732}], ['v8', {group: 'HDR', filename: '山崖.jpg', datatime: 1653105732}], ['v9', {group: '赛博朋克', filename: '2022.jpg', datatime: 1653105732}]]}
 {upset: '废墟', vertex: [['v7', {filename: '破墙.jpg', datatime: 1651105732}], ['v8', {group: 'HDR', filename: '蓝天.jpg', datatime: 1651105732}], ['v9', {group: '赛博朋克', filename: '大佐.jpg', datatime: 1651105732}]]}
+{upset: '废墟', vertex: [[1, {filename: '破墙.jpg', datatime: 1651105732}]]}
 ast {query: '废墟', in: 'vertex_db', where: {group: '废墟'}}
 {query: '废墟', in: 'vertex_db', where: {group: '废墟'}}
 ast {query: '废墟', in: 'vertex_db', where: {datatime: {$lt: 1653315732}}}

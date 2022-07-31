@@ -76,7 +76,7 @@ struct GASTNode* INIT_NUMBER_AST(T& v) {
 %token KW_AST KW_ID KW_GRAPH KW_COMMIT
 %token KW_CREATE KW_DROP KW_IN KW_REMOVE KW_UPSET left_arrow right_arrow KW_BIDIRECT_RELATION KW_REST KW_DELETE
 %token OP_QUERY KW_INDEX OP_WHERE
-%token group
+%token group dump
 %token CMD_SHOW 
 %token OP_GREAT_THAN OP_LESS_THAN OP_GREAT_THAN_EQUAL OP_LESS_THAN_EQUAL OP_EQUAL OP_AND OP_OR
 %token FN_COUNT
@@ -99,7 +99,7 @@ struct GASTNode* INIT_NUMBER_AST(T& v) {
 %type <__node> vertex
 %type <__node> edge
 %type <__node> gql
-%type <__node> creation
+%type <__node> creation dump_graph
 %type <__node> upset_vertexes
 %type <__node> upset_edges
 %type <__node> a_simple_query
@@ -158,7 +158,12 @@ line_list: line
             $$ = NewAst(NodeType::GQLExpression, expr, $1, 1);
             stm._cmdtype = GQL_Drop;
           }
-        | dump { stm._cmdtype = GQL_Util; }
+        | dump_graph
+          {
+            GGQLExpression* expr = new GGQLExpression();
+            $$ = NewAst(NodeType::GQLExpression, expr, $1, 1);
+            stm._cmdtype = GQL_Util;
+          }
         ;
 utility_cmd: CMD_SHOW KW_GRAPH
           {
@@ -213,9 +218,11 @@ creation: RANGE_BEGIN KW_CREATE COLON VAR_STRING RANGE_END
                 $$ = NewAst(NodeType::CreationStatement, createStmt, nullptr, 0);
                 stm._errorCode = ECode_Success;
               };
-dump: RANGE_BEGIN KW_AST COLON VAR_STRING RANGE_END
+dump_graph: RANGE_BEGIN dump COLON VAR_STRING RANGE_END
               {
+                GDumpStmt* stmt = new GDumpStmt($4);
                 free($4);
+                $$ = NewAst(NodeType::DumpStatement, stmt, nullptr, 0);
                 stm._errorCode = ECode_Success;
               };
 upset_vertexes: RANGE_BEGIN KW_UPSET COLON VAR_STRING COMMA KW_VERTEX COLON vertex_list RANGE_END
@@ -228,9 +235,9 @@ upset_vertexes: RANGE_BEGIN KW_UPSET COLON VAR_STRING COMMA KW_VERTEX COLON vert
               };
 remove_vertexes: RANGE_BEGIN KW_REMOVE COLON VAR_STRING COMMA KW_VERTEX COLON array RANGE_END
               {
-                GRemoveStmt* rmStmt = new GRemoveStmt($4);
+                GRemoveStmt* rmStmt = new GRemoveStmt($4, $8);
                 free($4);
-                $$ = NewAst(NodeType::RemoveStatement, rmStmt, $8, 1);
+                $$ = NewAst(NodeType::RemoveStatement, rmStmt, nullptr, 0);
               };
 upset_edges: RANGE_BEGIN KW_UPSET COLON VAR_STRING COMMA KW_EDGE COLON edge_list RANGE_END
               {
@@ -431,6 +438,11 @@ vertex: LEFT_SQUARE VAR_STRING RIGHT_SQUARE
               {
                 GVertexDeclaration* decl = new GVertexDeclaration(INIT_STRING_AST($2), $4);
                 free($2);
+                $$ = NewAst(NodeType::VertexDeclaration, decl, nullptr, 0);
+              }
+        | LEFT_SQUARE VAR_INTEGER RIGHT_SQUARE
+              {
+                GVertexDeclaration* decl = new GVertexDeclaration(INIT_NUMBER_AST($2), nullptr);
                 $$ = NewAst(NodeType::VertexDeclaration, decl, nullptr, 0);
               }
         | LEFT_SQUARE VAR_INTEGER COMMA json RIGHT_SQUARE

@@ -12,9 +12,12 @@ public:
   enum class UtilType {
     Creation,
     Drop,
+    Dump,
   };
   GUtilPlan(GVirtualNetwork* vn, GStorageEngine* store, GCreateStmt* ast);
   GUtilPlan(GVirtualNetwork* vn, GStorageEngine* store, GDropStmt* ast);
+  GUtilPlan(GVirtualNetwork* vn, GStorageEngine* store, GDumpStmt* ast);
+  virtual int prepare();
   virtual int execute(gqlite_callback);
 
 private:

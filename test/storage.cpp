@@ -55,7 +55,7 @@ TEST_CASE("basic storage api") {
   engine.open("testdb", opt);
   std::cout << "schema: "<< engine.getSchema() << std::endl;
   MapInfo info;
-  info.key_type = 1;
+  info.key_type = KeyType::Byte;
   info.value_type = ClassType::String;
   info.reserved = 0;
   engine.addMap("revert_index", info);
@@ -72,7 +72,7 @@ TEST_CASE("cursor api") {
   opt.compress = 1;
   engine.open("testdb", opt);
   MapInfo info;
-  info.key_type = 0;
+  info.key_type = KeyType::Integer;
   info.value_type = ClassType::String;
   info.reserved = 0;
   const std::string propname("name");
@@ -99,7 +99,7 @@ TEST_CASE("empty storage") {
   opt.compress = 1;
   engine.open("testdb", opt);
   MapInfo info;
-  info.key_type = 1;
+  info.key_type = KeyType::Byte;
   info.value_type = ClassType::String;
   info.reserved = 0;
   engine.addMap("index", info);
@@ -117,7 +117,7 @@ TEST_CASE("movielens") {
   engine.open("mvlens", opt);
   // create movie map
   MapInfo movie;
-  movie.key_type = 0;
+  movie.key_type = KeyType::Integer;
   movie.value_type = ClassType::String;
   movie.reserved = 0;
   engine.addMap("movie", movie);
@@ -138,7 +138,7 @@ TEST_CASE("movielens") {
 
   // create rating map
   MapInfo rating;
-  rating.key_type = 0;
+  rating.key_type = KeyType::Uninitialize;
   rating.value_type = ClassType::Number;
   rating.reserved = 0;
   engine.addMap("rate", rating);
@@ -160,7 +160,7 @@ TEST_CASE("movielens") {
   CHECK(f_rate == 3.5);
 
   MapInfo tags;
-  tags.key_type = 0;
+  tags.key_type = KeyType::Integer;
   tags.value_type = ClassType::Number;
   tags.reserved = 0;
   engine.addMap("tags", rating);

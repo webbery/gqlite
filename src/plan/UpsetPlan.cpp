@@ -4,6 +4,8 @@
 #include "StorageEngine.h"
 #include "VirtualNetwork.h"
 #include "gutil.h"
+#include <fmt/printf.h>
+#include <fmt/color.h>
 
 GUpsetPlan::GUpsetPlan(GVirtualNetwork* vn, GStorageEngine* store, GUpsetStmt* ast)
 :GPlan(vn, store)
@@ -22,15 +24,23 @@ int GUpsetPlan::prepare() {
 
 int GUpsetPlan::execute(gqlite_callback) {
   if (_store) {
+    KeyType type = _store->getKeyType(_class);
     for (auto itr = _vertexes.begin(), end = _vertexes.end(); itr != end; ++itr) {
       const auto& key = itr->first;
       int ret = ECode_Fail;
       key.visit(
         [&](std::string k) {
-          uint32_t uik = unicode32(k);
-          ret = _store->write(_class, uik, itr->second.data(), itr->second.size());
+          if (type == KeyType::Integer) {
+            fmt::print(fmt::fg(fmt::color::red), "ERROR: upset fail!\nInput key type is string, but require integer\n");
+            return;
+          }
+          ret = _store->write(_class, k, itr->second.data(), itr->second.size());
         },
         [&](uint64_t k) {
+          if (type == KeyType::Byte) {
+            fmt::print(fmt::fg(fmt::color::red), "ERROR: upset fail!\nInput key type is integer, but require string\n");
+            return;
+          }
           ret = _store->write(_class, k, itr->second.data(), itr->second.size());
         });
       if (ret != ECode_Success) return ret;
