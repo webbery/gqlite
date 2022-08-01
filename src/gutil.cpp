@@ -73,7 +73,7 @@ namespace gql {
     return replace_all(result, "\\u0000", "");
   }
 
-  std::string gql::replace_all(const std::string& input, const std::string& origin, const std::string& newer)
+  std::string replace_all(const std::string& input, const std::string& origin, const std::string& newer)
   {
     std::string data(input);
     size_t pos = 0;

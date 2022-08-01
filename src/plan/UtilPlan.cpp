@@ -78,7 +78,7 @@ int GUtilPlan::execute(gqlite_callback) {
     opt.compress = 1;
     CHECK_RETURN(_store->open(std::get<std::string>(_var).c_str(), opt));
     for (auto& item : _vParams1) {
-      MapInfo info = {0};
+      MapInfo info;
       info.key_type = KeyType::Uninitialize;
       info.value_type = ClassType::String;
       std::string v = std::get<std::string>(item);
@@ -129,7 +129,7 @@ int GUtilPlan::execute(gqlite_callback) {
         continue;
       }
       auto cursor = _store->getCursor(g);
-      auto& result = cursor.to_first(false);
+      auto result = cursor.to_first(false);
       while (result)
       {
         std::string data((char*)result.value.byte_ptr(), result.value.size());

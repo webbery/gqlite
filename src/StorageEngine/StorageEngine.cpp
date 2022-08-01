@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <zstd.h>
 #include <iostream>
+#include <atomic>
 
 #ifdef WIN32
 #pragma comment(lib, BINARY_DIR "/" CMAKE_INTDIR "/zstd_static.lib")
@@ -110,7 +111,7 @@ mdbx::map_handle GStorageEngine::openSchema() {
 void GStorageEngine::initMap(StoreOption option)
 {
   if (!isMapExist(MAP_BASIC)) {
-    MapInfo info = { 0 };
+    MapInfo info;
     info.key_type = KeyType::Uninitialize;
     info.value_type = ClassType::String;
     addMap(MAP_BASIC, info);
@@ -230,7 +231,7 @@ GStorageEngine::cursor GStorageEngine::getCursor(const std::string& prop)
   mdbx::key_mode mode = mdbx::key_mode::ordinal;
   auto pp = getProp(prop);
   auto c = (uint8_t)pp[SCHEMA_CLASS_INFO];
-  MapInfo info = { 0 };
+  MapInfo info;
   size_t n = sizeof(MapInfo);
   std::memcpy(&info, &c, sizeof(MapInfo));
   mdbx::map_handle handle;
