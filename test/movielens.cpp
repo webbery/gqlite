@@ -28,6 +28,10 @@ TEST_CASE("init movies") {
   gqlite_open(&pHandle);
   char* ptr = nullptr;
   gqlite_exec(pHandle,
+    "{drop: 'movielens_db'}",
+    gqlite_exec_callback, nullptr, &ptr);
+  gqlite_free(ptr);
+  gqlite_exec(pHandle,
     "{create: 'movielens_db',"
       "group: ["
         "{movie: ['title', 'genres']},"
