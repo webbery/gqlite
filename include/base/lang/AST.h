@@ -197,6 +197,12 @@ VisitFlow accept(GASTNode* node, Visitor& visitor, std::list<NodeType>& path) {
       vf = visitor.apply(ptr, path);
     }
     break;
+    case NodeType::RemoveStatement:
+    {
+      GTypeTraits<NodeType::RemoveStatement>::type* ptr = reinterpret_cast<GTypeTraits<NodeType::RemoveStatement>::type*>(node->_value);
+      vf = visitor.apply(ptr, path);
+    }
+    break;
     default: vf = visitor.apply(node, path); break;
   }
   for (size_t idx = 0; idx < node->_size; ++idx) {

@@ -50,6 +50,9 @@ public:
   VisitFlow apply(GDumpStmt* stmt, std::list<NodeType>& path) {
     return VisitFlow::SkipCurrent;
   }
+  VisitFlow apply(GRemoveStmt* stmt, std::list<NodeType>& path) {
+    return VisitFlow::Return;
+  }
 
 private:
 };
@@ -66,4 +69,7 @@ public:
   VisitFlow apply(GCreateStmt* stmt, std::list<NodeType>& path);
   VisitFlow apply(GLiteral* stmt, std::list<NodeType>& path);
   VisitFlow apply(GArrayExpression* stmt, std::list<NodeType>& path);
+  VisitFlow apply(GRemoveStmt* stmt, std::list<NodeType>& path) {
+    return VisitFlow::Return;
+  }
 };

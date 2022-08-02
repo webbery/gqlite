@@ -2,6 +2,7 @@
 #include "gqlite.h"
 #include "StorageEngine.h"
 #include "base/lang/ASTNode.h"
+#include "plan/RemovePlan.h"
 #include "plan/UtilPlan.h"
 #include "plan/UpsetPlan.h"
 #include "plan/QueryPlan.h"
@@ -139,7 +140,7 @@ VisitFlow GVirtualEngine::PlanVisitor::apply(GDropStmt* stmt, std::list<NodeType
 VisitFlow GVirtualEngine::PlanVisitor::apply(GQueryStmt* stmt, std::list<NodeType>& path)
 {
   GPlan* scan = new GScanPlan(_vn, _store, stmt);
-  add(scan, true);
+  add(scan);
   //GPlan* plan = new GQueryStmt();
   return VisitFlow::Return;
 }
@@ -147,6 +148,13 @@ VisitFlow GVirtualEngine::PlanVisitor::apply(GQueryStmt* stmt, std::list<NodeTyp
 VisitFlow GVirtualEngine::PlanVisitor::apply(GDumpStmt* stmt, std::list<NodeType>& path)
 {
   GPlan* plan = new GUtilPlan(_vn, _store, stmt);
+  add(plan);
+  return VisitFlow::Return;
+}
+
+VisitFlow GVirtualEngine::PlanVisitor::apply(GRemoveStmt* stmt, std::list<NodeType>& path)
+{
+  GPlan* plan = new GRemovePlan(_vn, _store, stmt);
   add(plan);
   return VisitFlow::Return;
 }

@@ -85,6 +85,9 @@ private:
     VisitFlow apply(GDropStmt* stmt, std::list<NodeType>& path) {
       return VisitFlow::Return;
     }
+    VisitFlow apply(GRemoveStmt* stmt, std::list<NodeType>& path) {
+      return VisitFlow::Return;
+    }
 
     void add() {
       if (!_key.empty()) {
@@ -178,6 +181,9 @@ private:
       return VisitFlow::Children;
     }
     VisitFlow apply(GDropStmt* stmt, std::list<NodeType>& path) {
+      return VisitFlow::Return;
+    }
+    VisitFlow apply(GRemoveStmt* stmt, std::list<NodeType>& path) {
       return VisitFlow::Return;
     }
   };

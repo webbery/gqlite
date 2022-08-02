@@ -22,6 +22,17 @@ GScanPlan::GScanPlan(GVirtualNetwork* network, GStorageEngine* store, GQueryStmt
   parseQuery(query);
 }
 
+GScanPlan::GScanPlan(GVirtualNetwork* network, GStorageEngine* store, GASTNode* query, const std::string& graph)
+  :GPlan(network, store)
+  , _queryType(QueryType::SimpleScan)
+  ,_graph(graph)
+{
+  auto jsn = store->getSchema();
+  _graph = jsn[SCHEMA_GRAPH_NAME];
+
+  parseQuery(query);
+}
+
 int GScanPlan::prepare()
 {
   if (_graph.empty()) return ECode_Graph_Not_Exist;
@@ -105,7 +116,7 @@ void GScanPlan::parseQuery(GASTNode* query)
       case NodeType::MemberExpression:
         break;
       case NodeType::Literal:
-        _queries.emplace_back(GetString(query));
+        _queries.emplace_back(GetString(*itr));
         break;
       default:
         break;

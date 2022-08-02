@@ -17,6 +17,7 @@ class GScanPlan: public GPlan {
   };
 public:
   GScanPlan(GVirtualNetwork* network, GStorageEngine* store, GQueryStmt* stmt);
+  GScanPlan(GVirtualNetwork* network, GStorageEngine* store, GASTNode* query, const std::string& graph = "");
   virtual int prepare();
   virtual int execute(gqlite_callback);
   virtual int interrupt();
