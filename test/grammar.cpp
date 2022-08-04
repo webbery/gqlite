@@ -88,7 +88,7 @@ void successful_test(gqlite* pHandle, char* ptr) {
     "]"
     "}");
   TEST_QUERY("{query: 'g', in: 'ga'}", 6);
-  TEST_GRAMMAR("{remove: 'g', vertex: ['v2']}");
+  TEST_GRAMMAR("{remove: 'g', vertex: [1]}");
   TEST_QUERY("{query: 'g', in: 'ga'}", 5);
   TEST_QUERY("{query: 'g', in: 'ga', where: {create_time: {$gt: 1, $lt: 5}}}", 2);
   TEST_QUERY("{query: 'g', in: 'ga', where: {create_time: {$gte: 1, $lt: 5}}}", 4);

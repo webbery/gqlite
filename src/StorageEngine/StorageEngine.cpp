@@ -24,9 +24,9 @@ namespace {
     return txn.get(map, k, absent);
   }
 
-  mdbx::slice get(mdbx::txn_managed& txn, mdbx::map_handle& map, int32_t key)
+  mdbx::slice get(mdbx::txn_managed& txn, mdbx::map_handle& map, uint64_t key)
   {
-    mdbx::slice k(&key, sizeof(int32_t));
+    mdbx::slice k(&key, sizeof(uint64_t));
     mdbx::slice absent;
     return txn.get(map, k, absent);
   }
@@ -38,11 +38,23 @@ namespace {
     return 0;
   }
 
-  int put(mdbx::txn_managed& txn, mdbx::map_handle& map, int32_t key, mdbx::slice value)
+  int put(mdbx::txn_managed& txn, mdbx::map_handle& map, uint64_t key, mdbx::slice value)
   {
-    mdbx::slice k(&key, sizeof(int32_t));
+    mdbx::slice k(&key, sizeof(uint64_t));
     txn.put(map, k, value, mdbx::upsert);
     return 0;
+  }
+
+  int del(mdbx::txn_managed& txn, mdbx::map_handle& map, uint64_t key) {
+    mdbx::slice k(&key, sizeof(uint64_t));
+    if (txn.erase(map, k)) return 0;
+    return -1;
+  }
+
+  int del(mdbx::txn_managed& txn, mdbx::map_handle& map, const std::string& key) {
+    mdbx::slice k(key.data(), key.size());
+    if (txn.erase(map, k)) return 0;
+    return -1;
   }
 }
 
@@ -199,6 +211,24 @@ int GStorageEngine::read(const std::string& prop, const std::string& key, std::s
   mdbx::slice data = ::get(_txns[id], handle, key);
   if (data.empty()) return ECode_DATUM_Not_Exist;
   value.assign((char*)data.data(), data.size());
+  return ECode_Success;
+}
+
+int GStorageEngine::del(const std::string& mapname, const std::string& key)
+{
+  assert(isMapExist(mapname));
+  auto handle = getOrCreateHandle(mapname, mdbx::key_mode::usual);
+  thread_local auto id = std::this_thread::get_id();
+  if (::del(_txns[id], handle, key)) return ECode_Fail;
+  return ECode_Success;
+}
+
+int GStorageEngine::del(const std::string& mapname, uint64_t key)
+{
+  assert(isMapExist(mapname));
+  auto handle = getOrCreateHandle(mapname, mdbx::key_mode::ordinal);
+  thread_local auto id = std::this_thread::get_id();
+  if (::del(_txns[id], handle, key)) return ECode_Fail;
   return ECode_Success;
 }
 

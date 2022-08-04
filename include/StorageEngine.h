@@ -26,8 +26,8 @@ enum class ClassType : uint8_t {
 
 enum class KeyType : uint8_t {
   Uninitialize,
-  Integer,
-  Byte,
+  Integer = _gqlite_id_type::integer,
+  Byte = _gqlite_id_type::bytes,
 };
 
 struct alignas(8) MapInfo {
@@ -90,9 +90,11 @@ public:
      */
     int write(const std::string& mapname, const std::string& key, void* value, size_t len);
     int read(const std::string& mapname, const std::string& key, std::string& value);
+    int del(const std::string& mapname, const std::string& key);
 
     int write(const std::string& mapname, uint64_t key, void* value, size_t len);
     int read(const std::string& mapname, uint64_t key, std::string& value);
+    int del(const std::string& mapname, uint64_t key);
 
     typedef mdbx::cursor_managed  cursor;
     cursor getCursor(const std::string& mapname);

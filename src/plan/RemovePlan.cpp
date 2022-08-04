@@ -2,11 +2,13 @@
 #include <stdio.h>
 #include "base/lang/RemoveStmt.h"
 #include "plan/ScanPlan.h"
+#include "StorageEngine.h"
 
 GRemovePlan::GRemovePlan(GVirtualNetwork* network, GStorageEngine* store, GRemoveStmt* stmt)
   :GPlan(network, store)
 {
-  _scan = new GScanPlan(network, _store, stmt->node());
+  _group = stmt->name();
+  _scan = new GScanPlan(network, _store, stmt->node(), _group);
 }
 
 GRemovePlan::~GRemovePlan()
@@ -14,8 +16,26 @@ GRemovePlan::~GRemovePlan()
   delete _scan;
 }
 
-int GRemovePlan::execute(gqlite_callback)
+int GRemovePlan::execute(const std::function<ExecuteStatus(KeyType, const std::string& key, const std::string& value)>& processor)
 {
-  printf("remove\n");
+  std::vector<std::string> keys;
+  _scan->execute([&keys](KeyType, const std::string& key, const std::string& value) {
+    keys.emplace_back(key);
+    return ExecuteStatus::Continue;
+    });
+  KeyType type = _store->getKeyType(_group);
+  switch (type) {
+  case KeyType::Integer:
+    for (auto itr = keys.begin(), end = keys.end(); itr != end; ++itr)
+    {
+      uint64_t k = *(uint64_t*)(itr->data());
+      _store->del(_group, k);
+    }
+    break;
+  case KeyType::Byte:
+    break;
+  default:
+    break;
+  }
   return 0;
 }

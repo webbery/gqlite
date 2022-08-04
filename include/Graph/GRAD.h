@@ -1,6 +1,8 @@
 #pragma once
 #include <vector>
 #include <functional>
+#include <string>
+#include "base/Variant.h"
 
 struct EntityNode;
 struct AttributeNode;
@@ -11,7 +13,7 @@ struct EntityEdge {
 };
 
 struct EntityNode {
-  char* _label;
+  std::string _label;
   EntityEdge* _edges;
   size_t _esize;        /**< size of edges */
   AttributeNode* _attrs;
@@ -31,7 +33,7 @@ struct GraphPattern {
    * @brief a predicate apply to node label
    * 
    */
-  std::function<bool (char*)> _opl;
+  std::function<bool (const Variant<std::string,uint64_t>&)> _opl;
   /**
    * @brief a predicate apply to node's attribute
    * 

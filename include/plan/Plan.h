@@ -2,6 +2,8 @@
 #include "gqlite.h"
 #include <vector>
 #include <string>
+#include <functional>
+#include "StorageEngine.h"
 
 class GVirtualNetwork;
 class GStorageEngine;
@@ -11,6 +13,14 @@ void init_result_info(gqlite_result& result, const std::vector<std::string>& inf
 void release_result_info(gqlite_result& result);
 void init_result_nodes(gqlite_result& result);
 void release_result_nodes(gqlite_result& result);
+
+/**
+ * Control plan execute status.
+ */
+enum class ExecuteStatus {
+  Continue,
+  Stop
+};
 
 class GPlan {
 public:
@@ -22,7 +32,7 @@ public:
    * For example: before update execute, we should check database created or not.
    */
   virtual int prepare() { return 0; }
-  virtual int execute(gqlite_callback) = 0;
+  virtual int execute(const std::function<ExecuteStatus(KeyType, const std::string& key, const std::string& value)>& processor) = 0;
   /**
    * Try to interrupt plan when it still working
    */

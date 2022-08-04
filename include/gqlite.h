@@ -42,6 +42,11 @@ enum gqlite_primitive_type {
   gqlite_object
 };
 
+typedef enum _gqlite_id_type {
+  integer = 1,
+  bytes
+} gqlite_id_type;
+
 typedef struct _gqlite_vertex {
   // nodeid, C-style string
   union {

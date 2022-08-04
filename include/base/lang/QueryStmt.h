@@ -13,4 +13,5 @@ private:
   GASTNode* _query;
   GASTNode* _graph;
   GASTNode* _conditions;
+
 };

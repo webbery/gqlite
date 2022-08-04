@@ -22,26 +22,25 @@ int GUpsetPlan::prepare() {
   return ECode_Success;
 }
 
-int GUpsetPlan::execute(gqlite_callback) {
+int GUpsetPlan::execute(const std::function<ExecuteStatus(KeyType, const std::string& key, const std::string& value)>& processor) {
   if (_store) {
     KeyType type = _store->getKeyType(_class);
     for (auto itr = _vertexes.begin(), end = _vertexes.end(); itr != end; ++itr) {
       const auto& key = itr->first;
-      int ret = ECode_Fail;
-      key.visit(
+      int ret = key.visit(
         [&](std::string k) {
           if (type == KeyType::Integer) {
             fmt::print(fmt::fg(fmt::color::red), "ERROR: upset fail!\nInput key type is string, but require integer\n");
-            return;
+            return ECode_Fail;
           }
-          ret = _store->write(_class, k, itr->second.data(), itr->second.size());
+          return _store->write(_class, k, itr->second.data(), itr->second.size());
         },
         [&](uint64_t k) {
           if (type == KeyType::Byte) {
             fmt::print(fmt::fg(fmt::color::red), "ERROR: upset fail!\nInput key type is integer, but require string\n");
-            return;
+            return ECode_Fail;
           }
-          ret = _store->write(_class, k, itr->second.data(), itr->second.size());
+          return _store->write(_class, k, itr->second.data(), itr->second.size());
         });
       if (ret != ECode_Success) return ret;
     }

@@ -19,18 +19,19 @@ GScanPlan::GScanPlan(GVirtualNetwork* network, GStorageEngine* store, GQueryStmt
   }
 
   auto* query = stmt->query();
-  parseQuery(query);
+  parseGroup(query);
+  parseConditions(stmt->where());
 }
 
-GScanPlan::GScanPlan(GVirtualNetwork* network, GStorageEngine* store, GASTNode* query, const std::string& graph)
+GScanPlan::GScanPlan(GVirtualNetwork* network, GStorageEngine* store, GASTNode* condition, const std::string& group)
   :GPlan(network, store)
   , _queryType(QueryType::SimpleScan)
-  ,_graph(graph)
 {
   auto jsn = store->getSchema();
   _graph = jsn[SCHEMA_GRAPH_NAME];
 
-  parseQuery(query);
+  _queries.push_back(group);
+  parseConditions(condition);
 }
 
 int GScanPlan::prepare()
@@ -42,12 +43,12 @@ int GScanPlan::prepare()
   return ECode_Success;
 }
 
-int GScanPlan::execute(gqlite_callback cb) {
+int GScanPlan::execute(const std::function<ExecuteStatus(KeyType, const std::string& key, const std::string& value)>& processor) {
   _interrupt.store(false);
 #ifdef GQLITE_MULTI_THREAD
   _worker = std::thread(&GScanPlan::scan, this);
 #else
-  scan(cb);
+  scan(processor);
 #endif
   return ECode_Success;
 }
@@ -59,11 +60,12 @@ int GScanPlan::interrupt()
   return ECode_Success;
 }
 
-int GScanPlan::scan(gqlite_callback cb)
+int GScanPlan::scan(const std::function<ExecuteStatus(KeyType, const std::string& key, const std::string& value)>& cb)
 {
   for (std::string& group : _queries)
   {
     auto cs = _store->getCursor(group);
+    KeyType type = _store->getKeyType(group);
     auto data = cs.to_first(false);
     while (data)
     {
@@ -72,24 +74,20 @@ int GScanPlan::scan(gqlite_callback cb)
       switch (_queryType)
       {
       case GScanPlan::QueryType::SimpleScan:
-        if (cb) {
-          gqlite_result result;
-          result.count = 1;
-          result.type = gqlite_result_type_node;
-          result.errcode = ECode_Success;
-          result.nodes = new gqlite_node;
-          result.nodes->_type = gqlite_node_type::gqlite_node_type_vertex;
-          result.nodes->_vertex = new gqlite_vertex;
-          result.nodes->_vertex->uid = atoi((char*)data.key.byte_ptr());
-          size_t len = data.value.size();
-          result.nodes->_vertex->properties = new char[len];
-          result.nodes->_next = nullptr;
-          memcpy(result.nodes->_vertex->properties, data.value.byte_ptr(), sizeof(char) * len);
-          cb(&result);
-          delete[] result.nodes->_vertex->properties;
-          delete result.nodes->_vertex;
-          delete result.nodes;
+      {
+        Variant<std::string, uint64_t> vKey;
+        if (type == KeyType::Integer) {
+          auto v = *(uint64_t*)data.key.byte_ptr();
+          vKey = (uint64_t)v;
         }
+        else {
+          std::string key((char*)data.key.byte_ptr(), data.key.size());
+          vKey = key;
+        }
+        if (_pattern._opl(vKey)) {
+          cb(type, std::string((char*)data.key.byte_ptr(), data.key.size()), str);
+        }
+      }
         break;
       case GScanPlan::QueryType::NNSearch:
         break;
@@ -106,7 +104,7 @@ int GScanPlan::scan(gqlite_callback cb)
   return ECode_Success;
 }
 
-void GScanPlan::parseQuery(GASTNode* query)
+void GScanPlan::parseGroup(GASTNode* query)
 {
   if (query->_nodetype == NodeType::ArrayExpression) {
     GArrayExpression* arr = reinterpret_cast<GArrayExpression*>(query->_value);
@@ -126,4 +124,42 @@ void GScanPlan::parseQuery(GASTNode* query)
   else if (query->_nodetype == NodeType::Literal) {
     _queries.emplace_back(GetString(query));
   }
+}
+
+void GScanPlan::parseConditions(GASTNode* conditions)
+{
+  _pattern._opl = [](const Variant<std::string,uint64_t>&) { return true; };
+  if (conditions == nullptr) return;
+  PatternVisitor visitor(_pattern);
+  std::list<NodeType> lNodes;
+  accept(conditions, visitor, lNodes);
+  if (_pattern._edges.size() != 0) _queryType = QueryType::Match;
+}
+
+VisitFlow GScanPlan::PatternVisitor::apply(GVertexDeclaration* stmt, std::list<NodeType>& path)
+{
+  if (!stmt->vertex()) {
+    // equal id
+    std::string key = GetString(stmt->key());
+    _pattern._opl = [key](const Variant<std::string, uint64_t>& input)->bool {
+      bool ret = input.visit([key](uint64_t i) -> bool {
+        return key == std::to_string(i);
+        },
+        [key](std::string s) -> bool {
+          return key == s;
+        });
+      return ret;
+    };
+  }
+  else {
+    EntityNode* node = new EntityNode;
+    _pattern._nodes.push_back(node);
+
+  }
+  return VisitFlow::Children;
+}
+
+VisitFlow GScanPlan::PatternVisitor::apply(GLiteral* stmt, std::list<NodeType>& path)
+{
+  return VisitFlow::Children;
 }

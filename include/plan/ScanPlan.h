@@ -1,6 +1,7 @@
 #pragma once
 #include "Plan.h"
 #include "Graph/GRAD.h"
+#include "base/lang/AST.h"
 #include <string>
 #include <atomic>
 #include <thread>
@@ -17,15 +18,54 @@ class GScanPlan: public GPlan {
   };
 public:
   GScanPlan(GVirtualNetwork* network, GStorageEngine* store, GQueryStmt* stmt);
-  GScanPlan(GVirtualNetwork* network, GStorageEngine* store, GASTNode* query, const std::string& graph = "");
+  GScanPlan(GVirtualNetwork* network, GStorageEngine* store, GASTNode* condition, const std::string& graph = "");
   virtual int prepare();
-  virtual int execute(gqlite_callback);
+  virtual int execute(const std::function<ExecuteStatus(KeyType, const std::string& key, const std::string& value)>&);
   virtual int interrupt();
 
+  std::vector<std::string> groups() { return _queries; }
 private:
-  int scan(gqlite_callback cb = nullptr);
+  int scan(const std::function<ExecuteStatus(KeyType, const std::string& key, const std::string& value)>& cb);
 
-  void parseQuery(GASTNode* query);
+  void parseGroup(GASTNode* query);
+  /**
+   * parse condition node, retrieve simple condition/graph pattern or other kind of condition
+   */
+  void parseConditions(GASTNode* conditions);
+
+  struct PatternVisitor {
+    GraphPattern& _pattern;
+
+    PatternVisitor(GraphPattern& pattern) :_pattern(pattern) {}
+
+    VisitFlow apply(GASTNode* stmt, std::list<NodeType>& path) {
+      return VisitFlow::Children;
+    }
+    VisitFlow apply(GUpsetStmt* stmt, std::list<NodeType>& path) {
+      return VisitFlow::Return;
+    }
+    VisitFlow apply(GQueryStmt* stmt, std::list<NodeType>& path) {
+      return VisitFlow::Return;
+    }
+    VisitFlow apply(GGQLExpression* stmt, std::list<NodeType>& path) {
+      return VisitFlow::Children;
+    }
+    VisitFlow apply(GProperty* stmt, std::list<NodeType>& path) {
+      return VisitFlow::Return;
+    }
+    VisitFlow apply(GVertexDeclaration* stmt, std::list<NodeType>& path);
+    VisitFlow apply(GCreateStmt* stmt, std::list<NodeType>& path) { return VisitFlow::Return; }
+    VisitFlow apply(GDropStmt* stmt, std::list<NodeType>& path) { return VisitFlow::Return; }
+    VisitFlow apply(GDumpStmt* stmt, std::list<NodeType>& path) { return VisitFlow::Return; }
+    VisitFlow apply(GRemoveStmt* stmt, std::list<NodeType>& path) { return VisitFlow::Return; }
+    VisitFlow apply(GLiteral* stmt, std::list<NodeType>& path);
+    VisitFlow apply(GArrayExpression* stmt, std::list<NodeType>& path) {
+      return VisitFlow::Children;
+    }
+    VisitFlow apply(GEdgeDeclaration* stmt, std::list<NodeType>& path) {
+      return VisitFlow::Children;
+    }
+  };
 private:
   /**
    * @brief A query type that mark difference query.

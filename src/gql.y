@@ -233,7 +233,7 @@ upset_vertexes: RANGE_BEGIN KW_UPSET COLON VAR_STRING COMMA KW_VERTEX COLON vert
                 free($4);
                 $$ = NewAst(NodeType::UpsetStatement, upsetStmt, nullptr, 0);
               };
-remove_vertexes: RANGE_BEGIN KW_REMOVE COLON VAR_STRING COMMA KW_VERTEX COLON array RANGE_END
+remove_vertexes: RANGE_BEGIN KW_REMOVE COLON VAR_STRING COMMA KW_VERTEX COLON vertexes RANGE_END
               {
                 GRemoveStmt* rmStmt = new GRemoveStmt($4, $8);
                 free($4);
@@ -448,6 +448,17 @@ vertex: LEFT_SQUARE VAR_STRING RIGHT_SQUARE
         | LEFT_SQUARE VAR_INTEGER COMMA json RIGHT_SQUARE
               {
                 GVertexDeclaration* decl = new GVertexDeclaration(INIT_NUMBER_AST($2), $4);
+                $$ = NewAst(NodeType::VertexDeclaration, decl, nullptr, 0);
+              }
+        | VAR_STRING
+              {
+                GVertexDeclaration* decl = new GVertexDeclaration(INIT_STRING_AST($1), nullptr);
+                free($1);
+                $$ = NewAst(NodeType::VertexDeclaration, decl, nullptr, 0);
+              }
+        | VAR_INTEGER
+              {
+                GVertexDeclaration* decl = new GVertexDeclaration(INIT_NUMBER_AST($1), nullptr);
                 $$ = NewAst(NodeType::VertexDeclaration, decl, nullptr, 0);
               };
 edge_list: LEFT_SQUARE edges RIGHT_SQUARE {$$ = $2;};

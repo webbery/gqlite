@@ -68,7 +68,7 @@ int GUtilPlan::prepare()
   return ret;
 }
 
-int GUtilPlan::execute(gqlite_callback) {
+int GUtilPlan::execute(const std::function<ExecuteStatus(KeyType, const std::string& key, const std::string& value)>& processor) {
   switch (_type)
   {
   case UtilType::Creation:

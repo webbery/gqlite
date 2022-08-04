@@ -11,7 +11,7 @@ public:
   GUpsetPlan(GVirtualNetwork* vn, GStorageEngine* store, GUpsetStmt* stmt);
 
   virtual int prepare();
-  virtual int execute(gqlite_callback);
+  virtual int execute(const std::function<ExecuteStatus(KeyType, const std::string& key, const std::string& value)>&);
 
 private:
   using key_t = Variant<std::string, uint64_t>;

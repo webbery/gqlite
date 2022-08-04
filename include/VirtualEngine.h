@@ -73,12 +73,14 @@ private:
     PlanList* _plans = nullptr;
     GVirtualNetwork* _vn;
     GStorageEngine* _store;
-    PlanVisitor(GVirtualNetwork* vn, GStorageEngine* store):_vn(vn), _store(store){
+    gqlite_callback _cb;
+    PlanVisitor(GVirtualNetwork* vn, GStorageEngine* store, gqlite_callback cb = nullptr):_vn(vn), _store(store){
       _plans = new PlanList;
       _plans->_next = _plans;
       _plans->_parent = _plans;
       _plans->_plan = nullptr;
       _plans->_threadable = false;
+      _cb = cb;
     }
 
     /**

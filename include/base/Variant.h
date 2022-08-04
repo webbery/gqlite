@@ -226,20 +226,22 @@ public:
   }
 
   template<typename Func>
-  void visit(Func&& f) const {
+  decltype(auto) visit(Func&& f) const {
     using T = typename std::remove_cv<typename gql::function_traits<Func>::template arg<0>::type>::type;
+    using Ret = typename gql::function_traits<Func>::return_type;
     if (_tindex == typeid(T)) {
-      f(Get<T>());
+      return f(Get<T>());
     }
+    //return std::is_void<Ret>::value ? std::void_t(0) : Ret();
   }
   template<typename Func, typename... Rest>
-  void visit(Func&& f, Rest&&... rest) const {
+  decltype(auto) visit(Func&& f, Rest&&... rest) const {
     using T = typename std::remove_cv<typename gql::function_traits<Func>::template arg<0>::type>::type;
     if (_tindex == typeid(T)) {
-      visit(std::forward<Func>(f));
+      return visit(std::forward<Func>(f));
     }
     else {
-      visit(std::forward<Rest>(rest)...);
+      return visit(std::forward<Rest>(rest)...);
     }
   }
 
