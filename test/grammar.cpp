@@ -70,7 +70,7 @@ void successful_test(gqlite* pHandle, char* ptr) {
   */
   TEST_GRAMMAR("{create: 'ga', group: ['g'], index: 'keyword'}");
   TEST_COMMAND("show graph");
-  TEST_GRAMMAR("{create: 'ga', group: ['g', 'e'], index: ['keyword', 'color', 'create_time']}");
+  TEST_GRAMMAR("{create: 'ga', group: ['g', 'e', 'e2'], index: ['keyword', 'color', 'create_time']}");
   TEST_COMMAND("show graph 'ga'");
   TEST_GRAMMAR("{upset: 'g', vertex: [[328, {title: 'Tale\\'s from the Crypt Presents: Demon Knight (1995)', genres: 'Horror|Thriller'}]]}");
   TEST_GRAMMAR("{upset: 'g', vertex: [['328', {title: 'Tale\\'s from the Crypt Presents: Demon Knight (1995)', genres: 'Horror|Thriller'}]]}");
@@ -102,6 +102,7 @@ void successful_test(gqlite* pHandle, char* ptr) {
   /*
   * EDGES & LINKS
   */
+  TEST_GRAMMAR("{upset: 'tag', edge: [[474, {tag: 'robots'}, 589]]}");
   TEST_GRAMMAR(
     "{"
       "upset: 'e',"

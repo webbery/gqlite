@@ -35,8 +35,8 @@ TEST_CASE("init movies") {
     "{create: 'movielens_db',"
       "group: ["
         "{movie: ['title', 'genres']},"
-        "{tag: ['user_id', 'movie_id', 'tag']},"
-        "{rate: ['user_id', 'movie_id', 'rate']}"
+        "{tag: ['user_id', 'tag', 'movie_id']},"
+        "{rate: ['user_id', 'rate', 'movie_id']}"
       "]"
     "}",
     gqlite_exec_callback, nullptr, &ptr);
@@ -54,6 +54,21 @@ TEST_CASE("init movies") {
     sprintf(upset, "{upset: 'movie', vertex: [[%d, {title: '%s', genres: '%s'}]]}", id, title.c_str(), genres.c_str());
     gqlite_exec(pHandle, upset, gqlite_exec_callback, nullptr, &ptr);
     gqlite_free(ptr);
+    });
+  int line_num = 1;
+  readCSV("tags.csv", [&pHandle, &ptr, &line_num](char* buffer) {
+    char* user_id = strtok(buffer, ",");
+    if (user_id == nullptr) return;
+    int uid = atoi(user_id);
+    char* movie_id = strtok(nullptr, ",");
+    int mid = atoi(movie_id);
+    char* ctag = strtok(nullptr, ",");
+    std::string tag = replace_all(ctag);
+    char upset[512] = { 0 };
+    sprintf(upset, "{upset: 'tag', edge: [[%d, {tag: '%s'}, %d]]}", uid, tag.c_str(), mid);
+    gqlite_exec(pHandle, upset, gqlite_exec_callback, nullptr, &ptr);
+    gqlite_free(ptr);
+    line_num++;
     });
   gqlite_exec(pHandle,
    "{query: movie, in: 'movielens_db'}",

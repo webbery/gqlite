@@ -489,6 +489,11 @@ edge: LEFT_SQUARE VAR_STRING COMMA a_edge COMMA VAR_STRING RIGHT_SQUARE
                 free($2);
                 GEdgeDeclaration* edge = new GEdgeDeclaration(from_value, from_value, INIT_STRING_AST("--"));
                 $$ = NewAst(NodeType::EdgeDeclaration, edge, nullptr, 0);
+              }
+        | LEFT_SQUARE VAR_INTEGER COMMA a_edge COMMA VAR_INTEGER RIGHT_SQUARE
+              {
+                GEdgeDeclaration* edge = new GEdgeDeclaration(INIT_NUMBER_AST($2), INIT_NUMBER_AST($6), $4);
+                $$ = NewAst(NodeType::EdgeDeclaration, edge, nullptr, 0);
               };
 json: value { $$ = $1; };
 value: object { $$ = $1; }
@@ -604,7 +609,11 @@ a_link_condition:
 a_edge:
         | right_arrow { $$ = INIT_STRING_AST("->");}
         | left_arrow { $$ = INIT_STRING_AST("<-"); }
-        | KW_BIDIRECT_RELATION { $$ = INIT_STRING_AST("--"); };
+        | KW_BIDIRECT_RELATION { $$ = INIT_STRING_AST("--"); }
+        | object
+              {
+                $$ = $1;
+              };
 a_value:
         | VAR_STRING
               {

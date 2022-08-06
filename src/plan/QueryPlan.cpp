@@ -9,6 +9,11 @@ GQueryPlan::GQueryPlan(GVirtualNetwork* network, GStorageEngine* store, GQuerySt
   _scan = new GScanPlan(network, store, stmt);
 }
 
+GQueryPlan::~GQueryPlan()
+{
+  delete _scan;
+}
+
 int GQueryPlan::prepare()
 {
   return 0;

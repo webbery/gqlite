@@ -232,7 +232,7 @@ public:
     if (_tindex == typeid(T)) {
       return f(Get<T>());
     }
-    //return std::is_void<Ret>::value ? std::void_t(0) : Ret();
+    throw std::bad_cast();
   }
   template<typename Func, typename... Rest>
   decltype(auto) visit(Func&& f, Rest&&... rest) const {
