@@ -3,7 +3,6 @@
 #include <cassert>
 #include <catch.hpp>
 #include <fstream>
-#include "Type/Vertex.h"
 
 #define GRAPH_NAME  "g1"
 

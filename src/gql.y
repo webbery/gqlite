@@ -91,7 +91,7 @@ struct GASTNode* INIT_NUMBER_AST(T& v) {
 %type <__node> value number right_value
 %type <__node> values
 %type <__node> object
-%type <__node> array
+%type <__node> array a_vector vector_list
 %type <__node> properties
 %type <__node> where_expr
 %type <__node> function_call function_params
@@ -495,6 +495,9 @@ edge: LEFT_SQUARE VAR_STRING COMMA a_edge COMMA VAR_STRING RIGHT_SQUARE
                 GEdgeDeclaration* edge = new GEdgeDeclaration(INIT_NUMBER_AST($2), INIT_NUMBER_AST($6), $4);
                 $$ = NewAst(NodeType::EdgeDeclaration, edge, nullptr, 0);
               };
+a_vector: LEFT_SQUARE vector_list RIGHT_SQUARE {};
+vector_list: number {}
+        | vector_list COMMA number {};
 json: value { $$ = $1; };
 value: object { $$ = $1; }
         | array { $$ = $1; };

@@ -169,7 +169,9 @@ private:
     }
     VisitFlow apply(GArrayExpression* stmt, std::list<NodeType>& path) {
       for (auto itr = stmt->begin(), end = stmt->end(); itr != end; ++itr) {
-        accept(*itr, *this, path);
+        VisitFlow vf = accept(*itr, *this, path);
+        if (vf == VisitFlow::Children || vf == VisitFlow::SkipCurrent) continue;
+        return vf;
       }
       return VisitFlow::Children;
     }

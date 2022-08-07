@@ -85,7 +85,7 @@ VisitFlow GUpsetPlan::UpsetVisitor::apply(GEdgeDeclaration* stmt, std::list<Node
     gql::edge_id eid = gql::make_edge_id(false, from, to);
     _plan._edges[eid] = edge;
   }
-  return VisitFlow::Children;
+  return VisitFlow::Return;
 }
 
 VisitFlow GUpsetPlan::UpsetVisitor::apply(GVertexDeclaration* stmt, std::list<NodeType>& path)
@@ -95,7 +95,7 @@ VisitFlow GUpsetPlan::UpsetVisitor::apply(GVertexDeclaration* stmt, std::list<No
   accept(stmt->vertex(), jv, path);
   jv.add();
   _plan._vertexes[getLiteral(stmt->key())] = jv._jsonify.dump();
-  return VisitFlow::Children;
+  return VisitFlow::Return;
 }
 
 GUpsetPlan::key_t GUpsetPlan::UpsetVisitor::getLiteral(GASTNode* node)

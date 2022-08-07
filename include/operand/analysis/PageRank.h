@@ -1,13 +1,13 @@
 #pragma once
 #include <Eigen/Core>
-#include "SubGraph.h"
+#include "VirtualNetwork.h"
 
 class GPageRank {
 public:
-  void analysis(const GSubGraph& g);
+  void analysis(const GVirtualNetwork& g);
 
 private:
-  void analysisOfMatrix(const GSubGraph& g);
+  void analysisOfMatrix(const GVirtualNetwork& g);
 };
 
 Eigen::MatrixXd operator - (const GPageRank& left, const GPageRank& right);

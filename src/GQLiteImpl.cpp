@@ -4,7 +4,6 @@
 #include "Error.h"
 #include "Memory.h"
 #include "StorageEngine.h"
-#include "SubGraph.h"
 #ifdef _WIN32
 #include <io.h>
 #define isatty(x) _isatty(x)

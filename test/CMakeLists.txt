@@ -31,7 +31,6 @@ set(OLGRITHM_SOURCE ./algorithm.cpp
 	../src/operand/SimilarityOp.cpp
 	../src/operand/GraphType.cpp
 	../src/StorageEngine/SubGraph.cpp
-	../src/Type/Vertex.cpp
 	../src/Type/Edge.cpp
 	../src/Graph/BipartiteGraph.cpp
 	../src/operand/distance/EditDistance.cpp
@@ -63,7 +62,7 @@ add_executable(grammar ${TEST_GRAMMAR_SOURCE})
 add_compile_definitions(BINARY_DIR="${zstd_BINARY_DIR}/lib")
 add_executable(storage ${STORAGE_SOURCE})
 add_executable(regress ${REGRESS_SOURCE})
-add_executable(algorithm ${OLGRITHM_SOURCE})
+# add_executable(algorithm ${OLGRITHM_SOURCE})
 add_executable(query ${QUERY_SOURCE})
 add_executable(ptree ${PTREE_SOURCE})
 add_executable(vnet ${VNET_SOURCE})
@@ -84,7 +83,7 @@ foreach(LEAK_TARGET ${TARGETS_OF_LEAK_TO_CHECK})
 endforeach()
 ENDIF ()
 
-set_property(TARGET algorithm PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/test")
+# set_property(TARGET algorithm PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/test")
 target_link_libraries(grammar PUBLIC ${grammar_LINK_OPTIONS})
 target_link_libraries(regress PUBLIC ${regress_LINK_OPTIONS})
 add_dependencies(storage zstd)
@@ -94,7 +93,7 @@ target_link_libraries(storage PUBLIC ${storage_LINK_OPTIONS} ${zstd_BINARY_DIR}/
 ELSE()
 target_link_libraries(storage PUBLIC ${storage_LINK_OPTIONS})
 ENDIF()
-target_link_libraries(algorithm fmt::fmt-header-only)
+# target_link_libraries(algorithm fmt::fmt-header-only)
 target_link_libraries(query fmt::fmt-header-only)
 target_link_libraries(movielens PUBLIC ${movielens_LINK_OPTIONS})
 IF (WIN32)
@@ -113,7 +112,7 @@ ENDIF ()
 # )
 # add_dependencies(storage before_test)
 add_test(NAME storage COMMAND storage)
-add_test(NAME algorithm COMMAND algorithm)
+# add_test(NAME algorithm COMMAND algorithm)
 add_test(NAME query COMMAND query)
 add_test(NAME grammar COMMAND grammar)
 add_test(NAME ptree COMMAND ptree)

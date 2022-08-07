@@ -1,10 +1,10 @@
 #pragma once
 #include <Eigen/Core>
-#include "SubGraph.h"
+#include "VirtualNetwork.h"
 
 class GDegreeCentrality {
 public:
-  void analysis(const GSubGraph& g);
+  void analysis(const GVirtualNetwork& g);
 
   const std::vector<double>& value() const { return _value; }
 private:

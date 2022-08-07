@@ -1,6 +1,5 @@
 #pragma once
 #include <queue>
-#include "SubGraph.h"
 #include "operand/algorithms/Hungarian.h"
 
 class GSubGraph;
@@ -16,12 +15,12 @@ namespace {
   };
 
   struct CostNode: public GNode<CostNode> {
-    CostNode(GVertex* replaced, GVertex* vertex, float cost, CostNode* next)
-      : _replaced(replaced), _vertex(vertex), _cost(cost){ _next = next;}
-    // vertex that will be replaced
-    GVertex* _replaced;
-    // replace vertex with this one
-    GVertex* _vertex;
+  //  CostNode(GVertex* replaced, GVertex* vertex, float cost, CostNode* next)
+  //    : _replaced(replaced), _vertex(vertex), _cost(cost){ _next = next;}
+  //  // vertex that will be replaced
+  //  GVertex* _replaced;
+  //  // replace vertex with this one
+  //  GVertex* _vertex;
     float _cost;
   };
 
@@ -29,11 +28,7 @@ namespace {
     return left._cost < right._cost;
   }
   
-  GSubGraph apply(const GSubGraph& g, const CostNode* nodes) {
-    GSubGraph newgraph = g;
 
-    return newgraph;
-  }
 }
 
 class GraphEditDistance {

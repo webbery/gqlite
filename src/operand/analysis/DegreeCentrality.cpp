@@ -1,10 +1,10 @@
 #include "operand/analysis/DegreeCentrality.h"
 
-void GDegreeCentrality::analysis(const GSubGraph& g) {
-  size_t idx = 0;
-  for (auto vitr = g.vertex_begin(), vend = g.vertex_end(); vitr != vend; ++vitr) {
-      _value.push_back(vitr->second->edge_size());
-  }
+void GDegreeCentrality::analysis(const GVirtualNetwork& g) {
+  //size_t idx = 0;
+  //for (auto vitr = g.vertex_begin(), vend = g.vertex_end(); vitr != vend; ++vitr) {
+  //    _value.push_back(vitr->second->edge_size());
+  //}
 }
 
 Eigen::MatrixXd operator - (const GDegreeCentrality& left, const GDegreeCentrality& right) {
