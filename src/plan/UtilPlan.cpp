@@ -106,8 +106,15 @@ int GUtilPlan::execute(const std::function<ExecuteStatus(KeyType, const std::str
     auto& schema = _store->getSchema();
     auto& groups = schema[SCHEMA_CLASS];
     // create graph
+    std::string groupsName;
     for (auto& group : groups) {
+      std::string name = group[SCHEMA_CLASS_NAME];
+      if (name == MAP_BASIC) continue;
+      groupsName += name;
+      groupsName += ",";
     }
+    groupsName.pop_back();
+    fmt::printf("{create: '%s', group: [%s]}\n", graph, groupsName);
     // upset group
     for (auto& group : groups) {
       std::string g = group[SCHEMA_CLASS_NAME];

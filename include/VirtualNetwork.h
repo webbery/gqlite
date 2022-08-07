@@ -3,6 +3,7 @@
 #include <mutex>
 #include <condition_variable>
 #include "Graph/Node.h"
+#include "Graph/Edge.h"
 #include "walk/WalkFactory.h"
 #include "base/parallel/parlay/sequence.h"
 #include "base/system/EventEmitter.h"

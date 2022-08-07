@@ -3,12 +3,14 @@
 #include "base/lang/lang.h"
 #include "base/lang/AST.h"
 #include "base/Variant.h"
+#include "gutil.h"
 #include "json.hpp"
 
 struct GASTNode;
 class GUpsetPlan: public GPlan {
 public:
   GUpsetPlan(GVirtualNetwork* vn, GStorageEngine* store, GUpsetStmt* stmt);
+  ~GUpsetPlan();
 
   virtual int prepare();
   virtual int execute(const std::function<ExecuteStatus(KeyType, const std::string& key, const std::string& value)>&);
@@ -24,8 +26,8 @@ private:
     std::string _key;           /** current read key */
     using var_t = Variant<std::string, double, int>;
     std::vector<var_t> _values; /** current read value in _key */
-    GUpsetPlan& _plan;
-    JSONVisitor(GUpsetPlan& plan): _plan(plan) {}
+    //GUpsetPlan& _plan;
+    JSONVisitor(GUpsetPlan& plan) {}
     
     VisitFlow apply(GASTNode* stmt, std::list<NodeType>& path) {
       return VisitFlow::Children;
@@ -119,6 +121,20 @@ private:
           }
         }
       }
+      else {
+        if (_values.size() == 1) {
+          _values[0].visit(
+            [&](int value) {
+              _jsonify = value;
+            },
+            [&](double value) {
+              _jsonify = value;
+            },
+              [&](std::string value) {
+              _jsonify = value;
+            });
+        }
+      }
     }
   };
 
@@ -144,26 +160,7 @@ private:
     VisitFlow apply(GDumpStmt* stmt, std::list<NodeType>& path) {
       return VisitFlow::SkipCurrent;
     }
-    VisitFlow apply(GVertexDeclaration* stmt, std::list<NodeType>& path) {
-      _plan._vertex = true;
-      GLiteral* literal = (GLiteral*)(stmt->key()->_value);
-      key_t k;
-      switch (literal->kind()) {
-      case AttributeKind::Number:
-        k = (uint64_t)atoll(literal->raw().c_str());
-        // printf("upset key: %d\n", k.Get<int>());
-        break;
-      default:
-        k = literal->raw();
-        // printf("upset key: %s\n", k.Get<std::string>().c_str());
-        break;
-      }
-      JSONVisitor jv(_plan);
-      accept(stmt->vertex(), jv, path);
-      jv.add();
-      _plan._vertexes[k] = jv._jsonify.dump();
-      return VisitFlow::Children;
-    }
+    VisitFlow apply(GVertexDeclaration* stmt, std::list<NodeType>& path);
     VisitFlow apply(GCreateStmt* stmt, std::list<NodeType>& path) {
       return VisitFlow::Return;
     }
@@ -176,21 +173,24 @@ private:
       }
       return VisitFlow::Children;
     }
-    VisitFlow apply(GEdgeDeclaration* stmt, std::list<NodeType>& path) {
-      _plan._vertex = false;
-      return VisitFlow::Children;
-    }
+    VisitFlow apply(GEdgeDeclaration* stmt, std::list<NodeType>& path);
     VisitFlow apply(GDropStmt* stmt, std::list<NodeType>& path) {
       return VisitFlow::Return;
     }
     VisitFlow apply(GRemoveStmt* stmt, std::list<NodeType>& path) {
       return VisitFlow::Return;
     }
+    key_t getLiteral(GASTNode* node);
   };
 
   friend struct UpsetVisitor;
+
+private:
+  bool upsetVertex();
+  bool upsetEdge();
 private:
   bool _vertex;       /**< true if upset target is vertex, else is edge */
   std::string _class;
   std::map<key_t, std::string> _vertexes;
+  std::map<gql::edge_id, std::string> _edges;
 };

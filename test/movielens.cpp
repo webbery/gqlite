@@ -74,5 +74,12 @@ TEST_CASE("init movies") {
    "{query: movie, in: 'movielens_db'}",
    gqlite_exec_callback, nullptr, &ptr);
   gqlite_free(ptr);
+  gqlite_exec(pHandle,
+    "{query: tag, in: 'movielens_db'}",
+    gqlite_exec_callback, nullptr, &ptr);
+  gqlite_free(ptr);
+  readCSV("ratings.csv", [&pHandle, &ptr, &line_num](char* buffer) {
+    });
+  gqlite_exec(pHandle, "{dump: 'movielens_db'}", gqlite_exec_callback, nullptr, &ptr);
   gqlite_close(pHandle);
 }
