@@ -123,7 +123,7 @@ create              {stm._errIndx += yyleng; return KW_CREATE;};
                         stm._errIndx += yyleng;
                         return VAR_INTEGER;
                     };
-[0-9]+.[0-9]*       {
+[0-9]+.[0-9]+       {
                         std::string s(yytext, yyleng);
                         yylval->__f = std::stof(s);
                         stm._errIndx += yyleng;

@@ -39,20 +39,20 @@ public:
   template<GraphMetric Metric>
   double measure(IGraph* from, IGraph* to) {
     // <vertex of `from` will be replaced, vertexes of `to`>
-    std::priority_queue<CostNode> open;
-    auto first = from.vertex_begin()->second;
-    for (auto itr = to.vertex_begin(), end = to.vertex_end(); itr != end; ++itr) {
-      // insert substitude operation, first will be replaced by second
-      open.push({first, itr->second, 0, nullptr});
-    }
-    // insert empty operation for deletion
-    open.push({first, nullptr, 0, nullptr});
-    HungorianAlgorithm alg;
-    while (true) {
-      CostNode top = open.top();
-      double h_p = 0;
-      // int result = alg.solve(, h_p);
-    }
+    // std::priority_queue<CostNode> open;
+    // auto first = from.vertex_begin()->second;
+    // for (auto itr = to.vertex_begin(), end = to.vertex_end(); itr != end; ++itr) {
+    //   // insert substitude operation, first will be replaced by second
+    //   open.push({first, itr->second, 0, nullptr});
+    // }
+    // // insert empty operation for deletion
+    // open.push({first, nullptr, 0, nullptr});
+    // HungorianAlgorithm alg;
+    // while (true) {
+    //   CostNode top = open.top();
+    //   double h_p = 0;
+    //   // int result = alg.solve(, h_p);
+    // }
     return 0;
   }
 private:
