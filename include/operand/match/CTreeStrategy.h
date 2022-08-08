@@ -3,5 +3,5 @@
 
 class CTreeStrategy : public IMatchStrategy {
 public:
-  virtual int match(SubGraph* subgraph, SubGraph* graph);
+  virtual int match(IGraph* subgraph, IGraph* graph);
 };

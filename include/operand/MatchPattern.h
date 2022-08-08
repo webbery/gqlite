@@ -5,17 +5,17 @@ enum MatchPattern {
   ClosureTree
 };
 
-class SubGraph;
+class IGraph;
 class IMatchStrategy {
 public:
-  virtual int match(SubGraph* subgraph, SubGraph* graph) = 0;
+  virtual int match(IGraph* subgraph, IGraph* graph) = 0;
 };
 
 class MatchStrategyContext {
 public:
   void setStrategy(IMatchStrategy* strategy) { this->_strategy = std::shared_ptr<IMatchStrategy>(strategy); }
 
-  int match(SubGraph* subgraph, SubGraph* graph) {
+  int match(IGraph* subgraph, IGraph* graph) {
       return _strategy->match(subgraph, graph);
   }
 
@@ -33,4 +33,4 @@ public:
   virtual IMatchStrategy* createMatchStrategy(MatchPattern);
 };
 
-int match(SubGraph* subgraph, SubGraph* graph, MatchPattern pattern);
+int match(IGraph* subgraph, IGraph* graph, MatchPattern pattern);

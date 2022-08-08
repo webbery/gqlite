@@ -1,8 +1,8 @@
 #pragma once
 #include <queue>
 #include "operand/algorithms/Hungarian.h"
+#include "Graph/IGraph.h"
 
-class GSubGraph;
 enum GraphMetric {
   WeightedBipartite,
   MaxNum
@@ -37,7 +37,7 @@ public:
    * K. Riesen, S. Fankhauser, and H. Bunke. Speeding up graph edit distance computation with a bipartite heuristic
    */
   template<GraphMetric Metric>
-  double measure(const GSubGraph& from, const GSubGraph& to) {
+  double measure(IGraph* from, IGraph* to) {
     // <vertex of `from` will be replaced, vertexes of `to`>
     std::priority_queue<CostNode> open;
     auto first = from.vertex_begin()->second;
@@ -61,7 +61,7 @@ private:
 class GEdgeEditDistance {
 public:
   template<GraphMetric Metric>
-  double measure(const GSubGraph& g1, const GSubGraph& g2) {
+  double measure(IGraph* g1, IGraph* g2) {
     return 0;
   }
 };
