@@ -2,7 +2,11 @@
 #include <stdint.h>
 
 #ifdef _WIN32
+#ifdef gqlite_EXPORTS
+#define SYMBOL_EXPORT __declspec(dllexport)
+#else
 #define SYMBOL_EXPORT
+#endif
 #else
 #define SYMBOL_EXPORT __attribute__((visibility("default")))
 #endif
