@@ -19,7 +19,7 @@ if(CMAKE_SYSTEM_NAME MATCHES "Windows")
 set(OPTION_SOURCE ../tool/getopt.c)
 else()
 set(OPTION_SOURCE)
-endif(CMAKE_SYSTEM_NAME MATCHES "Windows")
+endif()
 
 set(REGRESS_SOURCE
 	${OPTION_SOURCE}

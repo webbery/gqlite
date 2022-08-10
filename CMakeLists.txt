@@ -107,8 +107,11 @@ aux_source_directory(src/walk Walk_SOURCES)
 add_subdirectory(third_party/libmdbx)
 add_subdirectory(third_party/zstd/build/cmake)
 add_subdirectory(third_party/fmt)
+option(GQLITE_BUILD_TEST    "build gqlite test"   OFF)
+if (GQLITE_BUILD_TEST)
 enable_testing()
 add_subdirectory(test)
+endif()
 add_subdirectory(tool)
 
 # message("USE COMPILER: " ${CMAKE_CXX_COMPILER_ID})
@@ -143,6 +146,9 @@ endif(WIN32)
 
 add_dependencies(gqlite generated_tokens generated_grammar)
 
+install(TARGETS gqlite DESTINATION lib)
+install(TARGETS gql DESTINATION bin)
+install(FILES include/gqlite.h DESTINATION include)
 # message(debug: ${Type_SOURCES})
 # add_custom_command(
 #   TARGET gqlite
