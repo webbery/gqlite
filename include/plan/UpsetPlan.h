@@ -5,6 +5,7 @@
 #include "base/Variant.h"
 #include "gutil.h"
 #include "json.hpp"
+#include "Graph/GRAD.h"
 
 struct GASTNode;
 class GUpsetPlan: public GPlan {
@@ -16,8 +17,6 @@ public:
   virtual int execute(const std::function<ExecuteStatus(KeyType, const std::string& key, const std::string& value)>&);
 
 private:
-  using key_t = Variant<std::string, uint64_t>;
-
   /**
    * @brief JSONVisitor travels vertex/edge property and retrieve their infomation
    */

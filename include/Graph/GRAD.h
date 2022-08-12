@@ -3,6 +3,7 @@
 #include <functional>
 #include <string>
 #include "base/Variant.h"
+#include "Type/GQLType.h"
 
 struct EntityNode;
 struct AttributeNode;
@@ -12,14 +13,27 @@ struct EntityEdge {
   char* _label;
 };
 
+using key_t = Variant<std::string, uint64_t>;
+using attribute_t = Variant<std::string, double, gql::GDatetime>;
+using predicate_t = Variant<std::function<bool(const key_t&)>, std::function<bool(const attribute_t&)>>;
+using attr_node_t = std::string;
+
 struct EntityNode {
   std::string _label;
   EntityEdge* _edges;
   size_t _esize;        /**< size of edges */
-  AttributeNode* _attrs;
+  std::vector<attr_node_t> _attrs;
 };
 
-struct AttributeNode {};
+struct AttributeNode {
+  std::string _name;
+};
+
+enum class LogicalPredicate {
+  And = 0,
+  Or = 1,
+  Max
+};
 
 // describe the graph match pattern.
 // It come from query condition.
@@ -29,14 +43,6 @@ struct GraphPattern {
   std::vector<EntityNode*> _nodes;
   std::vector<EntityEdge*> _edges;
 
-  /**
-   * @brief a predicate apply to node label
-   * 
-   */
-  std::function<bool (const Variant<std::string,uint64_t>&)> _opl;
-  /**
-   * @brief a predicate apply to node's attribute
-   * 
-   */
-  std::function<bool (node_t)> _opa;
+  std::vector< predicate_t > _node_predicates[(long)LogicalPredicate::Max];
+  
 };

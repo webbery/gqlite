@@ -7,7 +7,7 @@
 #else
 #define SYMBOL_EXPORT
 #endif
-#else
+#else // UNIX
 #define SYMBOL_EXPORT __attribute__((visibility("default")))
 #endif
 

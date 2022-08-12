@@ -98,7 +98,7 @@ VisitFlow GUpsetPlan::UpsetVisitor::apply(GVertexDeclaration* stmt, std::list<No
   return VisitFlow::Return;
 }
 
-GUpsetPlan::key_t GUpsetPlan::UpsetVisitor::getLiteral(GASTNode* node)
+key_t GUpsetPlan::UpsetVisitor::getLiteral(GASTNode* node)
 {
   GLiteral* literal = (GLiteral*)(node->_value);
   key_t k;

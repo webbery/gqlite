@@ -34,6 +34,14 @@ GScanPlan::GScanPlan(GVirtualNetwork* network, GStorageEngine* store, GASTNode* 
   parseConditions(condition);
 }
 
+GScanPlan::~GScanPlan()
+{
+  for (EntityNode* node : _pattern._nodes) {
+    delete node;
+  }
+  _pattern._nodes.clear();
+}
+
 int GScanPlan::prepare()
 {
   if (_graph.empty()) return ECode_Graph_Not_Exist;
@@ -75,7 +83,7 @@ int GScanPlan::scan(const std::function<ExecuteStatus(KeyType, const std::string
       {
       case GScanPlan::QueryType::SimpleScan:
       {
-        Variant<std::string, uint64_t> vKey;
+        key_t vKey;
         if (type == KeyType::Integer) {
           auto v = *(uint64_t*)data.key.byte_ptr();
           vKey = (uint64_t)v;
@@ -84,7 +92,21 @@ int GScanPlan::scan(const std::function<ExecuteStatus(KeyType, const std::string
           std::string key((char*)data.key.byte_ptr(), data.key.size());
           vKey = key;
         }
-        if (_pattern._opl(vKey)) {
+        bool result = true;
+        for (auto& pred : _pattern._node_predicates[(long)LogicalPredicate::And]) {
+          result &= pred.visit([&vKey](std::function<bool(const key_t&)> op) {
+            return op(vKey);
+            },
+            [](std::function<bool(const attribute_t&)> op) {
+              //return op(vKey);
+              return true;
+            });
+          if (!result) ECode_Success;
+        }
+        for (auto& pred: _pattern._node_predicates[(long)LogicalPredicate::Or])
+        {
+        }
+        if (result) {
           cb(type, std::string((char*)data.key.byte_ptr(), data.key.size()), str);
         }
       }
@@ -128,7 +150,7 @@ void GScanPlan::parseGroup(GASTNode* query)
 
 void GScanPlan::parseConditions(GASTNode* conditions)
 {
-  _pattern._opl = [](const Variant<std::string,uint64_t>&) { return true; };
+  //_pattern._opl = [](const Variant<std::string,uint64_t>&) { return true; };
   if (conditions == nullptr) return;
   PatternVisitor visitor(_pattern);
   std::list<NodeType> lNodes;
@@ -141,7 +163,7 @@ VisitFlow GScanPlan::PatternVisitor::apply(GVertexDeclaration* stmt, std::list<N
   if (!stmt->vertex()) {
     // equal id
     std::string key = GetString(stmt->key());
-    _pattern._opl = [key](const Variant<std::string, uint64_t>& input)->bool {
+    predicate_t pred = static_cast<std::function<bool(const key_t&)>>([key](const Variant<std::string, uint64_t>& input)->bool {
       bool ret = input.visit([key](uint64_t i) -> bool {
         return key == std::to_string(i);
         },
@@ -149,10 +171,15 @@ VisitFlow GScanPlan::PatternVisitor::apply(GVertexDeclaration* stmt, std::list<N
           return key == s;
         });
       return ret;
-    };
+    });
+    _pattern._node_predicates[(long)LogicalPredicate::And].push_back(pred);
   }
   else {
     EntityNode* node = new EntityNode;
+    VertexJsonVisitor visitor(_pattern, node);
+    std::list<NodeType> lNodes;
+    accept(stmt->vertex(), visitor, lNodes);
+    //node->_attrs.push_back()
     _pattern._nodes.push_back(node);
 
   }
@@ -160,6 +187,26 @@ VisitFlow GScanPlan::PatternVisitor::apply(GVertexDeclaration* stmt, std::list<N
 }
 
 VisitFlow GScanPlan::PatternVisitor::apply(GLiteral* stmt, std::list<NodeType>& path)
+{
+  return VisitFlow::Children;
+}
+
+VisitFlow GScanPlan::VertexJsonVisitor::apply(GProperty* stmt, std::list<NodeType>& path)
+{
+  return VisitFlow::Children;
+}
+
+VisitFlow GScanPlan::VertexJsonVisitor::apply(GVertexDeclaration* stmt, std::list<NodeType>& path)
+{
+  return VisitFlow::Children;
+}
+
+VisitFlow GScanPlan::VertexJsonVisitor::apply(GLiteral* stmt, std::list<NodeType>& path)
+{
+  return VisitFlow::Children;
+}
+
+VisitFlow GScanPlan::VertexJsonVisitor::apply(GArrayExpression* stmt, std::list<NodeType>& path)
 {
   return VisitFlow::Children;
 }
