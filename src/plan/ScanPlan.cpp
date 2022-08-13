@@ -83,7 +83,7 @@ int GScanPlan::scan(const std::function<ExecuteStatus(KeyType, const std::string
       {
       case GScanPlan::QueryType::SimpleScan:
       {
-        key_t vKey;
+        gkey_t vKey;
         if (type == KeyType::Integer) {
           auto v = *(uint64_t*)data.key.byte_ptr();
           vKey = (uint64_t)v;
@@ -94,7 +94,7 @@ int GScanPlan::scan(const std::function<ExecuteStatus(KeyType, const std::string
         }
         bool result = true;
         for (auto& pred : _pattern._node_predicates[(long)LogicalPredicate::And]) {
-          result &= pred.visit([&vKey](std::function<bool(const key_t&)> op) {
+          result &= pred.visit([&vKey](std::function<bool(const gkey_t&)> op) {
             return op(vKey);
             },
             [](std::function<bool(const attribute_t&)> op) {
@@ -150,11 +150,12 @@ void GScanPlan::parseGroup(GASTNode* query)
 
 void GScanPlan::parseConditions(GASTNode* conditions)
 {
-  //_pattern._opl = [](const Variant<std::string,uint64_t>&) { return true; };
   if (conditions == nullptr) return;
-  PatternVisitor visitor(_pattern);
+  EntityNode* node = new EntityNode;
+  PatternVisitor visitor(_pattern, node);
   std::list<NodeType> lNodes;
   accept(conditions, visitor, lNodes);
+  _pattern._nodes.push_back(node);
   if (_pattern._edges.size() != 0) _queryType = QueryType::Match;
 }
 
@@ -163,7 +164,7 @@ VisitFlow GScanPlan::PatternVisitor::apply(GVertexDeclaration* stmt, std::list<N
   if (!stmt->vertex()) {
     // equal id
     std::string key = GetString(stmt->key());
-    predicate_t pred = static_cast<std::function<bool(const key_t&)>>([key](const Variant<std::string, uint64_t>& input)->bool {
+    predicate_t pred = static_cast<std::function<bool(const gkey_t&)>>([key](const Variant<std::string, uint64_t>& input)->bool {
       bool ret = input.visit([key](uint64_t i) -> bool {
         return key == std::to_string(i);
         },
@@ -174,20 +175,97 @@ VisitFlow GScanPlan::PatternVisitor::apply(GVertexDeclaration* stmt, std::list<N
     });
     _pattern._node_predicates[(long)LogicalPredicate::And].push_back(pred);
   }
-  else {
-    EntityNode* node = new EntityNode;
-    VertexJsonVisitor visitor(_pattern, node);
-    std::list<NodeType> lNodes;
-    accept(stmt->vertex(), visitor, lNodes);
-    //node->_attrs.push_back()
-    _pattern._nodes.push_back(node);
-
-  }
   return VisitFlow::Children;
 }
 
 VisitFlow GScanPlan::PatternVisitor::apply(GLiteral* stmt, std::list<NodeType>& path)
 {
+  return VisitFlow::Children;
+}
+
+VisitFlow GScanPlan::PatternVisitor::apply(GArrayExpression* stmt, std::list<NodeType>& path)
+{
+  // vertex condition or others
+  for (auto itr = stmt->begin(), end = stmt->end(); itr != end; ++itr) {
+    GASTNode* ptr = (*itr)->_children;
+    for (size_t indx = 0; indx < (*itr)->_size; ++indx) {
+      GASTNode* children = ptr + indx;
+      accept(children, *this, path);
+    }
+  }
+  return VisitFlow::Children;
+}
+
+VisitFlow GScanPlan::PatternVisitor::apply(GASTNode* stmt, std::list<NodeType>& path)
+{
+  // object of vertex condition
+  return VisitFlow::Children;
+}
+
+VisitFlow GScanPlan::PatternVisitor::apply(GProperty* stmt, std::list<NodeType>& path)
+{
+  std::string key = stmt->key();
+  static std::string last_key;
+  auto getLiteral = [](GASTNode* node) {
+    attribute_t v;
+    if (node->_nodetype != NodeType::Literal) return v;
+    GLiteral* literal = (GLiteral*)node->_value;
+    switch (literal->kind()) {
+    case AttributeKind::String:
+      v = literal->raw();
+      break;
+    case AttributeKind::Integer:
+    case AttributeKind::Number:
+      v = (double)atof(literal->raw().c_str());
+      break;
+    default:
+      break;
+    }
+    return v;
+  };
+  if (key == "lt") {
+    _node->_attrs.push_back(last_key);
+    attribute_t attr = getLiteral(stmt->value());
+    predicate_t pred = static_cast<std::function<bool(const attribute_t&)>>([attr](const attribute_t& input)->bool {
+      return input < attr;
+      });
+    _pattern._node_predicates[(long)LogicalPredicate::And].push_back(pred);
+  }
+  else if (key == "gt") {
+    _node->_attrs.push_back(last_key);
+    attribute_t attr = getLiteral(stmt->value());
+    predicate_t pred = static_cast<std::function<bool(const attribute_t&)>>([attr](const attribute_t& input)->bool {
+      return input > attr;
+      });
+    _pattern._node_predicates[(long)LogicalPredicate::And].push_back(pred);
+  }
+  else if (key == "lte") {
+    _node->_attrs.push_back(last_key);
+    attribute_t attr = getLiteral(stmt->value());
+    predicate_t pred = static_cast<std::function<bool(const attribute_t&)>>([attr](const attribute_t& input)->bool {
+      return input <= attr;
+      });
+    _pattern._node_predicates[(long)LogicalPredicate::And].push_back(pred);
+  }
+  else if (key == "gte") {
+    _node->_attrs.push_back(last_key);
+    attribute_t attr = getLiteral(stmt->value());
+    predicate_t pred = static_cast<std::function<bool(const attribute_t&)>>([attr](const attribute_t& input)->bool {
+      return input >= attr;
+      });
+    _pattern._node_predicates[(long)LogicalPredicate::And].push_back(pred);
+  }
+  else {
+    last_key = key;
+    attribute_t attr = getLiteral(stmt->value());
+    if (!attr.empty()) {
+      _node->_attrs.push_back(last_key);
+      predicate_t pred = static_cast<std::function<bool(const attribute_t&)>>([attr](const attribute_t& input)->bool {
+        return input == attr;
+        });
+      _pattern._node_predicates[(long)LogicalPredicate::And].push_back(pred);
+    }
+  }
   return VisitFlow::Children;
 }
 

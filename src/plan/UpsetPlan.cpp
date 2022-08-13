@@ -74,8 +74,8 @@ bool GUpsetPlan::upsetEdge()
 VisitFlow GUpsetPlan::UpsetVisitor::apply(GEdgeDeclaration* stmt, std::list<NodeType>& path)
 {
   _plan._vertex = false;
-  key_t from = getLiteral(stmt->from());
-  key_t to = getLiteral(stmt->to());
+  gkey_t from = getLiteral(stmt->from());
+  gkey_t to = getLiteral(stmt->to());
   JSONVisitor jv(_plan);
   accept(stmt->link(), jv, path);
   jv.add();
@@ -98,10 +98,10 @@ VisitFlow GUpsetPlan::UpsetVisitor::apply(GVertexDeclaration* stmt, std::list<No
   return VisitFlow::Return;
 }
 
-key_t GUpsetPlan::UpsetVisitor::getLiteral(GASTNode* node)
+gkey_t GUpsetPlan::UpsetVisitor::getLiteral(GASTNode* node)
 {
   GLiteral* literal = (GLiteral*)(node->_value);
-  key_t k;
+  gkey_t k;
   switch (literal->kind()) {
   case AttributeKind::Number:
     k = (uint64_t)atoll(literal->raw().c_str());

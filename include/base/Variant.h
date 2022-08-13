@@ -81,6 +81,14 @@ namespace gql {
         return VariantStorage<Args...>::less_than(id, data1, data2);
       }
     }
+    inline static bool less_than_equal(std::type_index id, void* data1, void* data2) {
+      if (id == std::type_index(typeid(T))) {
+        return *static_cast<T*>(data1) <= *static_cast<T*>(data2);
+      }
+      else {
+        return VariantStorage<Args...>::less_than_equal(id, data1, data2);
+      }
+    }
   };
 
   template<> struct VariantStorage<> {
@@ -90,6 +98,7 @@ namespace gql {
     inline static void copy(std::type_index ot, const void* od, const void* nd) {}
     inline static bool equal(std::type_index id, void* data1, void* data2) { return false; }
     inline static bool less_than(std::type_index id, void* data1, void* data2) { return false; }
+    inline static bool less_than_equal(std::type_index id, void* data1, void* data2) { return false; }
   };
 
   template<typename Ret, typename Cls, typename Mult, typename... Params>
@@ -190,9 +199,13 @@ public:
     return *this;
   }
 
+  constexpr bool empty() {
+    return _indx < 0;
+  }
+
   bool operator == (const Variant& other) const {
     if (other._tindex == this->_tindex && other._indx == this->_indx) {
-      return _Storage::equal(_tindex, &_data, &other._data);
+      return _Storage::equal(_tindex, (void*)&_data, (void*)&other._data);
     }
     return false;
   }
@@ -204,6 +217,21 @@ public:
     throw std::bad_cast();
   }
 
+  bool operator <= (const Variant& other) const {
+    if (other._tindex == this->_tindex && other._indx == this->_indx) {
+      return _Storage::less_than_equal(_tindex, &const_cast<Variant&>(other)._data, &const_cast<Variant&>(*this)._data);
+    }
+    throw std::bad_cast();
+  }
+
+  bool operator > (const Variant& other) const {
+    return !operator <= (other);
+  }
+
+  bool operator >= (const Variant& other) const {
+    return !operator < (other);
+  }
+
   template<typename T>
   T& Get() const {
     //if (_tindex != std::type_index(typeid(T))) {
@@ -212,7 +240,7 @@ public:
     return *(T*)(&_data);
   }
 
-  template<size_t Idx>
+  template<int Idx>
   decltype(auto) Get() const {
     //static constexpr size_t cnt = sizeof...(Types);
     // static_assert(Idx < cnt);
@@ -221,7 +249,7 @@ public:
     return *(T*)(&_data);
   }
 
-  size_t index() const {
+  int index() const {
     return _indx;
   }
 
@@ -248,15 +276,15 @@ public:
 private:
   char _data[gql::MaxSizeType<Types...>::value];
   std::type_index _tindex;
-  size_t _indx;
+  int _indx;
 };
 
 namespace std {
-  template <size_t _Idx, class... _Types>
-  constexpr decltype(auto) get(
-    Variant<_Types...>& _Var) {
-    return _Var.template Get<_Idx>();
-  }
+  //template <size_t _Idx, class... _Types>
+  //constexpr decltype(auto) get(
+  //  Variant<_Types...>& _Var) {
+  //  return _Var.template Get<_Idx>();
+  //}
 
   template <typename _Type, class... _Types>
   constexpr decltype(auto) get(

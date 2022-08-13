@@ -13,9 +13,9 @@ struct EntityEdge {
   char* _label;
 };
 
-using key_t = Variant<std::string, uint64_t>;
+using gkey_t = Variant<std::string, uint64_t>;
 using attribute_t = Variant<std::string, double, gql::GDatetime>;
-using predicate_t = Variant<std::function<bool(const key_t&)>, std::function<bool(const attribute_t&)>>;
+using predicate_t = Variant<std::function<bool(const gkey_t&)>, std::function<bool(const attribute_t&)>>;
 using attr_node_t = std::string;
 
 struct EntityNode {

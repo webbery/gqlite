@@ -157,6 +157,7 @@ VisitFlow accept(GASTNode* node, Visitor& visitor, std::list<NodeType>& path) {
       }
     }
     break;
+    case NodeType::BinaryExpression:
     case NodeType::Property:
     {
       GTypeTraits<NodeType::Property>::type* ptr = reinterpret_cast<GTypeTraits<NodeType::Property>::type*>(node->_value);

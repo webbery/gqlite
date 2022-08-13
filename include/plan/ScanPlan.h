@@ -37,12 +37,11 @@ private:
 
   struct PatternVisitor {
     GraphPattern& _pattern;
+    EntityNode* _node;
 
-    PatternVisitor(GraphPattern& pattern) :_pattern(pattern) {}
+    PatternVisitor(GraphPattern& pattern, EntityNode* node) :_pattern(pattern), _node(node) {}
 
-    VisitFlow apply(GASTNode* stmt, std::list<NodeType>& path) {
-      return VisitFlow::Children;
-    }
+    VisitFlow apply(GASTNode* stmt, std::list<NodeType>& path);
     VisitFlow apply(GUpsetStmt* stmt, std::list<NodeType>& path) {
       return VisitFlow::Return;
     }
@@ -52,18 +51,14 @@ private:
     VisitFlow apply(GGQLExpression* stmt, std::list<NodeType>& path) {
       return VisitFlow::Children;
     }
-    VisitFlow apply(GProperty* stmt, std::list<NodeType>& path) {
-      return VisitFlow::Return;
-    }
+    VisitFlow apply(GProperty* stmt, std::list<NodeType>& path);
     VisitFlow apply(GVertexDeclaration* stmt, std::list<NodeType>& path);
     VisitFlow apply(GCreateStmt* stmt, std::list<NodeType>& path) { return VisitFlow::Return; }
     VisitFlow apply(GDropStmt* stmt, std::list<NodeType>& path) { return VisitFlow::Return; }
     VisitFlow apply(GDumpStmt* stmt, std::list<NodeType>& path) { return VisitFlow::Return; }
     VisitFlow apply(GRemoveStmt* stmt, std::list<NodeType>& path) { return VisitFlow::Return; }
     VisitFlow apply(GLiteral* stmt, std::list<NodeType>& path);
-    VisitFlow apply(GArrayExpression* stmt, std::list<NodeType>& path) {
-      return VisitFlow::Children;
-    }
+    VisitFlow apply(GArrayExpression* stmt, std::list<NodeType>& path);
     VisitFlow apply(GEdgeDeclaration* stmt, std::list<NodeType>& path) {
       return VisitFlow::Children;
     }

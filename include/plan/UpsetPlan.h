@@ -181,7 +181,7 @@ private:
     VisitFlow apply(GRemoveStmt* stmt, std::list<NodeType>& path) {
       return VisitFlow::Return;
     }
-    key_t getLiteral(GASTNode* node);
+    gkey_t getLiteral(GASTNode* node);
   };
 
   friend struct UpsetVisitor;
@@ -192,6 +192,6 @@ private:
 private:
   bool _vertex;       /**< true if upset target is vertex, else is edge */
   std::string _class;
-  std::map<key_t, std::string> _vertexes;
+  std::map<gkey_t, std::string> _vertexes;
   std::map<gql::edge_id, std::string> _edges;
 };

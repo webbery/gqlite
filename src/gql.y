@@ -78,7 +78,7 @@ struct GASTNode* INIT_NUMBER_AST(T& v) {
 %token OP_QUERY KW_INDEX OP_WHERE
 %token group dump
 %token CMD_SHOW 
-%token OP_GREAT_THAN OP_LESS_THAN OP_GREAT_THAN_EQUAL OP_LESS_THAN_EQUAL equal and or
+%token OP_GREAT_THAN OP_LESS_THAN OP_GREAT_THAN_EQUAL OP_LESS_THAN_EQUAL equal AND OR
 %token FN_COUNT
 %token dot
 %token limit profile
@@ -563,13 +563,13 @@ property: VAR_STRING COLON right_value
                 GProperty* prop = new GProperty("lt", $3);
                 $$ = NewAst(NodeType::BinaryExpression, prop, nullptr, 0);
               }
-        | and COLON array
+        | AND COLON array
               {
                 struct GASTNode* key = INIT_STRING_AST("and");
                 // struct GASTNode* value = INIT_NUMBER_AST($3, NodeType::ArrayExpression);
                 // $$ = NewAst(NodeType::Property, nullptr, key, value);
               }
-        | or COLON array
+        | OR COLON array
               {
                 struct GASTNode* key = INIT_STRING_AST("or");
                 // struct GASTNode* value = INIT_NUMBER_AST($3, NodeType::ArrayExpression);
