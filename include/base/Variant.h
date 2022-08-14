@@ -212,14 +212,14 @@ public:
 
   bool operator < (const Variant& other) const {
     if (other._tindex == this->_tindex && other._indx == this->_indx) {
-      return _Storage::less_than(_tindex, &const_cast<Variant&>(other)._data , &const_cast<Variant&>(*this)._data);
+      return _Storage::less_than(_tindex, &const_cast<Variant&>(*this)._data , &const_cast<Variant&>(other)._data);
     }
     throw std::bad_cast();
   }
 
   bool operator <= (const Variant& other) const {
     if (other._tindex == this->_tindex && other._indx == this->_indx) {
-      return _Storage::less_than_equal(_tindex, &const_cast<Variant&>(other)._data, &const_cast<Variant&>(*this)._data);
+      return _Storage::less_than_equal(_tindex, &const_cast<Variant&>(*this)._data, &const_cast<Variant&>(other)._data);
     }
     throw std::bad_cast();
   }

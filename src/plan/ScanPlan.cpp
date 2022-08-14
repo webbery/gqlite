@@ -4,6 +4,7 @@
 #include "gqlite.h"
 #include "StorageEngine.h"
 #include <filesystem>
+#include "json.hpp"
 
 GScanPlan::GScanPlan(GVirtualNetwork* network, GStorageEngine* store, GQueryStmt* stmt)
 :GPlan(network, store)
@@ -92,16 +93,36 @@ int GScanPlan::scan(const std::function<ExecuteStatus(KeyType, const std::string
           std::string key((char*)data.key.byte_ptr(), data.key.size());
           vKey = key;
         }
+        nlohmann::json jsn;
+        std::vector<std::string>::iterator aitr;
+        if (_pattern._nodes.size()) {
+          jsn = nlohmann::json::parse(str);
+          aitr = _pattern._nodes[0]->_attrs.begin();
+        }
         bool result = true;
-        for (auto& pred : _pattern._node_predicates[(long)LogicalPredicate::And]) {
-          result &= pred.visit([&vKey](std::function<bool(const gkey_t&)> op) {
+        auto& andPreds = _pattern._node_predicates[(long)LogicalPredicate::And];
+        for (auto& predItr = andPreds.begin(), end = andPreds.end(); predItr != end; ++predItr) {
+          result &= (*predItr).visit([&vKey](std::function<bool(const gkey_t&)> op) {
             return op(vKey);
             },
-            [](std::function<bool(const attribute_t&)> op) {
-              //return op(vKey);
-              return true;
+            [&jsn, &aitr](std::function<bool(const attribute_t&)> op) {
+              auto value = jsn[*aitr];
+              bool ret = false;
+              switch (value) {
+              case nlohmann::json::value_t::number_float:
+              case nlohmann::json::value_t::number_integer:
+                ret = op((double)value);
+                break;
+              case nlohmann::json::value_t::string:
+                ret = op((std::string)value);
+                break;
+              default:
+                break;
+              }
+              ++aitr;
+              return ret;
             });
-          if (!result) ECode_Success;
+          if (!result) break;
         }
         for (auto& pred: _pattern._node_predicates[(long)LogicalPredicate::Or])
         {
@@ -252,6 +273,19 @@ VisitFlow GScanPlan::PatternVisitor::apply(GProperty* stmt, std::list<NodeType>&
     attribute_t attr = getLiteral(stmt->value());
     predicate_t pred = static_cast<std::function<bool(const attribute_t&)>>([attr](const attribute_t& input)->bool {
       return input >= attr;
+      });
+    _pattern._node_predicates[(long)LogicalPredicate::And].push_back(pred);
+  }
+  else if (key == "id") {
+    std::string key = GetString(stmt->value());
+    predicate_t pred = static_cast<std::function<bool(const gkey_t&)>>([key](const Variant<std::string, uint64_t>& input)->bool {
+      bool ret = input.visit([key](uint64_t i) -> bool {
+        return key == std::to_string(i);
+        },
+        [key](std::string s) -> bool {
+          return key == s;
+        });
+      return ret;
       });
     _pattern._node_predicates[(long)LogicalPredicate::And].push_back(pred);
   }
