@@ -122,22 +122,13 @@ mdbx::map_handle GStorageEngine::openSchema() {
 
 void GStorageEngine::initMap(StoreOption option)
 {
-  if (!isMapExist(MAP_BASIC)) {
-    MapInfo info;
-    info.key_type = KeyType::Uninitialize;
-    info.value_type = ClassType::String;
-    addMap(MAP_BASIC, info);
-  }
+  addMap(MAP_BASIC, KeyType::Uninitialize);
   _schema[SCHEMA_GLOBAL][GLOBAL_COMPRESS_LEVEL] = option.compress;
 }
 
-void GStorageEngine::addMap(const std::string& prop, MapInfo type) {
+void GStorageEngine::addMap(const std::string& prop, KeyType type) {
   if (!isMapExist(prop)) {
-    nlohmann::json info;
-    info[SCHEMA_CLASS_NAME] = prop;
-    uint8_t value = *(uint8_t*)&type;
-    info[SCHEMA_CLASS_INFO] = value;
-    _schema[SCHEMA_CLASS].push_back(info);
+    _schema[SCHEMA_CLASS][prop][SCHEMA_CLASS_KEY] = type;
   }
 }
 
@@ -152,36 +143,82 @@ bool GStorageEngine::compare(const std::string& left, const std::string& right) 
 bool GStorageEngine::isMapExist(const std::string& prop) {
   if (_schema.empty()) return false;
   const auto& props = _schema[SCHEMA_CLASS];
-  for (auto itr = props.begin(); itr != props.end(); ++itr) {
-    if (compare((*itr)[SCHEMA_CLASS_NAME], prop)) return true;
-  }
-  return false;
+  if (props.is_null()) return false;
+  return props.count(prop) != 0;
 }
 
 void GStorageEngine::tryInitKeyType(const std::string& prop, KeyType type)
 {
-  static std::atomic_bool init = false;
+  static bool init = false;
   if (init) return;
-  auto& props = _schema[SCHEMA_CLASS];
-  for (auto itr = props.begin(); itr != props.end(); ++itr) {
-    if (compare((*itr)[SCHEMA_CLASS_NAME], prop)) {
-      init.store(true);
-      uint8_t info = (*itr)[SCHEMA_CLASS_INFO];
-      MapInfo* p = (MapInfo*)&info;
-      if (p->key_type == KeyType::Uninitialize) p->key_type = type;
-      (*itr)[SCHEMA_CLASS_INFO] = info;
-      return;
+  init = true;
+  _schema[SCHEMA_CLASS][prop][SCHEMA_CLASS_KEY] = type;
+}
+
+void GStorageEngine::tryInitAttributeType(nlohmann::json& attributes, const std::string& attr, const nlohmann::json& value)
+{
+  if (attributes.count(attr) == 0) {
+    if (attributes.size() > 255) {
+      // throw error?
+      throw std::exception();
     }
+    uint8_t index = attributes.size();
+    switch ((nlohmann::json::value_t)value) {
+    case nlohmann::json::value_t::object:
+      if (value.count("_obj_type")) {
+        attributes[attr] = std::pair((AttributeKind)value["_obj_type"], index);
+      }
+      else {
+        attributes[attr] = std::pair(AttributeKind::String, index);
+      }
+      break;
+    case nlohmann::json::value_t::array:
+    case nlohmann::json::value_t::string:
+      attributes[attr] = std::pair(AttributeKind::String, index);
+      break;
+    case nlohmann::json::value_t::number_integer:
+    case nlohmann::json::value_t::number_unsigned:
+    case nlohmann::json::value_t::number_float:
+      attributes[attr] = std::pair(AttributeKind::Number, index);
+      break;
+    case nlohmann::json::value_t::binary:
+      attributes[attr] = std::pair(AttributeKind::Binary, index);
+      break;
+    default:
+      break;
+    }
+  }
+}
+
+void GStorageEngine::appendValue(uint8_t attrIndex, AttributeKind kind, const nlohmann::json& value, std::string& data)
+{
+  data.push_back(attrIndex);
+  switch (kind)
+  {
+  case AttributeKind::String:
+    data.append(value.dump());
+    break;
+  case AttributeKind::Binary:
+    break;
+  case AttributeKind::Number:
+  {
+    double v = value;
+    char buf[sizeof(double)] = { 0 };
+    std::memcpy(buf, &v, sizeof(double));
+    data.append(buf, sizeof(double));
+  }
+  break;
+  case AttributeKind::Datetime:
+    break;
+  default:
+    break;
   }
 }
 
 nlohmann::json GStorageEngine::getProp(const std::string& prop)
 {
   const auto& props = _schema[SCHEMA_CLASS];
-  for (auto itr = props.begin(); itr != props.end(); ++itr) {
-    if (compare((*itr)[SCHEMA_CLASS_NAME], prop)) return *itr;
-  }
-  assert(false);
+  return props[prop];
 }
 
 mdbx::map_handle GStorageEngine::getOrCreateHandle(const std::string& prop, mdbx::key_mode mode) {
@@ -204,6 +241,39 @@ int GStorageEngine::write(const std::string& prop, const std::string& key, void*
   return ECode_Success;
 }
 
+int GStorageEngine::write(const std::string& mapname, const std::string& key, const nlohmann::json& value)
+{
+  tryInitKeyType(mapname, KeyType::Byte);
+  auto& attributes = _schema[SCHEMA_CLASS][mapname][SCHEMA_CLASS_VALUE];
+  // convert json to gqlite store format: attribute index(max value is 256), [if binary, here put size]data, index, data, ...
+  for (auto itr = value.begin(), end = value.end(); itr!=end;++itr)
+  {
+    const std::string& attr = itr.key();
+    auto& value = itr.value();
+    tryInitAttributeType(attributes, attr, value);
+    //std::pair<AttributeKind, uint8_t> info = attributes[attr];
+    //appendValue(info.second, info.first, value, data);
+  }
+  std::string data = value.dump();
+  return write(mapname, key, data.data(), data.size());
+}
+
+int GStorageEngine::write(const std::string& mapname, uint64_t key, const nlohmann::json& value)
+{
+  tryInitKeyType(mapname, KeyType::Integer);
+  auto& attributes = _schema[SCHEMA_CLASS][mapname][SCHEMA_CLASS_VALUE];
+  for (auto itr = value.begin(), end = value.end(); itr != end; ++itr) {
+    const std::string& attr = itr.key();
+    auto& value = itr.value();
+    std::string sv = value.dump();
+    tryInitAttributeType(attributes, attr, value);
+    //std::pair<AttributeKind, uint8_t> info = attributes[attr];
+    //appendValue(info.second, info.first, value, data);
+  }
+  std::string data = value.dump();
+  return write(mapname, key, data.data(), data.size());
+}
+
 int GStorageEngine::read(const std::string& prop, const std::string& key, std::string& value) {
   assert(isMapExist(prop));
   auto handle = getOrCreateHandle(prop, mdbx::key_mode::usual);
@@ -211,6 +281,22 @@ int GStorageEngine::read(const std::string& prop, const std::string& key, std::s
   mdbx::slice data = ::get(_txns[id], handle, key);
   if (data.empty()) return ECode_DATUM_Not_Exist;
   value.assign((char*)data.data(), data.size());
+  return ECode_Success;
+}
+
+int GStorageEngine::read(const std::string& mapname, const std::string& key, nlohmann::json& value)
+{
+  return ECode_Success;
+}
+
+int GStorageEngine::read(const std::string& mapname, uint64_t key, nlohmann::json& value)
+{
+  return ECode_Success;
+}
+
+int GStorageEngine::parse(const std::string& data, nlohmann::json& value)
+{
+
   return ECode_Success;
 }
 
@@ -260,12 +346,9 @@ GStorageEngine::cursor GStorageEngine::getCursor(const std::string& prop)
   assert(isMapExist(prop));
   mdbx::key_mode mode = mdbx::key_mode::ordinal;
   auto pp = getProp(prop);
-  auto c = (uint8_t)pp[SCHEMA_CLASS_INFO];
-  MapInfo info;
-  size_t n = sizeof(MapInfo);
-  std::memcpy(&info, &c, sizeof(MapInfo));
+  auto type = (KeyType)pp[SCHEMA_CLASS_KEY];
   mdbx::map_handle handle;
-  if (info.key_type == KeyType::Integer) {
+  if (type == KeyType::Integer) {
     handle = getOrCreateHandle(prop, mdbx::key_mode::ordinal);
   }
   else {
@@ -300,13 +383,6 @@ int GStorageEngine::finishTrans() {
 
 KeyType GStorageEngine::getKeyType(const std::string& m) const
 {
-  const auto& props = _schema[SCHEMA_CLASS];
-  for (auto itr = props.begin(); itr != props.end(); ++itr) {
-    if (compare((*itr)[SCHEMA_CLASS_NAME], m)) {
-      uint8_t info = (*itr)[SCHEMA_CLASS_INFO];
-      MapInfo* p = (MapInfo*)&info;
-      return p->key_type;
-    }
-  }
-  return KeyType::Uninitialize;
+  if (_schema[SCHEMA_CLASS][m].empty()) return KeyType::Uninitialize;
+  return _schema[SCHEMA_CLASS][m][SCHEMA_CLASS_KEY];
 }

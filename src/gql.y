@@ -51,7 +51,7 @@ void yyerror(YYLTYPE* yyllocp, yyscan_t unused, GVirtualEngine& stm, const char*
 }
 
 struct GASTNode* INIT_STRING_AST(const char* key) {
-  size_t len = strlen(key) + 1;
+  size_t len = strlen(key);
   // void* s = malloc(len);
   // memcpy(s, key, len);
   // printf("|-> %s\n", key);
@@ -496,7 +496,12 @@ edge: LEFT_SQUARE VAR_STRING COMMA a_edge COMMA VAR_STRING RIGHT_SQUARE
                 $$ = NewAst(NodeType::EdgeDeclaration, edge, nullptr, 0);
               };
 a_vector: LEFT_SQUARE vector_list RIGHT_SQUARE {};
-vector_list: number {}
+vector_list: number
+              {
+                GArrayExpression* elemts = new GArrayExpression();
+                props->addElement($1);
+                $$ = NewAst(NodeType::ArrayExpression, props, nullptr, 0);
+              }
         | vector_list COMMA number {};
 json: value { $$ = $1; };
 value: object { $$ = $1; }
@@ -509,7 +514,11 @@ right_value: value { $$ = $1; }
                 free($1);
                 $$ = NewAst(NodeType::Literal, bin, nullptr, 0);
               }
-        | VAR_DATETIME {}
+        | VAR_DATETIME
+              {
+                GLiteralDatetime* dt = new GLiteralDatetime($1);
+                $$ = NewAst(NodeType::Literal, dt, nullptr, 0);
+              }
         | VAR_STRING
               {
                 $$ = INIT_STRING_AST($1);

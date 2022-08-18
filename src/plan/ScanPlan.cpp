@@ -5,6 +5,7 @@
 #include "StorageEngine.h"
 #include <filesystem>
 #include "json.hpp"
+#include "Type/Datetime.h"
 
 GScanPlan::GScanPlan(GVirtualNetwork* network, GStorageEngine* store, GQueryStmt* stmt)
 :GPlan(network, store)
@@ -101,14 +102,14 @@ int GScanPlan::scan(const std::function<ExecuteStatus(KeyType, const std::string
         }
         bool result = true;
         auto& andPreds = _pattern._node_predicates[(long)LogicalPredicate::And];
-        for (auto& predItr = andPreds.begin(), end = andPreds.end(); predItr != end; ++predItr) {
+        for (auto predItr = andPreds.begin(), end = andPreds.end(); predItr != end; ++predItr) {
           result &= (*predItr).visit([&vKey](std::function<bool(const gkey_t&)> op) {
             return op(vKey);
             },
             [&jsn, &aitr](std::function<bool(const attribute_t&)> op) {
               auto value = jsn[*aitr];
               bool ret = false;
-              switch (value) {
+              switch ((nlohmann::json::value_t)value) {
               case nlohmann::json::value_t::number_float:
               case nlohmann::json::value_t::number_integer:
                 ret = op((double)value);
@@ -234,6 +235,12 @@ VisitFlow GScanPlan::PatternVisitor::apply(GProperty* stmt, std::list<NodeType>&
     switch (literal->kind()) {
     case AttributeKind::String:
       v = literal->raw();
+      break;
+    case AttributeKind::Datetime:
+    {
+      gql::GDatetime d(atoll(literal->raw().c_str()));
+      v = d;
+    }
       break;
     case AttributeKind::Integer:
     case AttributeKind::Number:

@@ -43,10 +43,11 @@ enum NodeType {
   MemberExpression,
 };
 
-enum AttributeKind {
+enum class AttributeKind {
   Number,
   Integer,
   String,
   Binary,
   Datetime,
+  Vector,
 };

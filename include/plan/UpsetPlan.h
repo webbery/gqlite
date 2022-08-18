@@ -1,11 +1,52 @@
 #pragma once
 #include "Plan.h"
+#include "Type/Binary.h"
 #include "base/lang/lang.h"
 #include "base/lang/AST.h"
 #include "base/Variant.h"
 #include "gutil.h"
 #include "json.hpp"
 #include "Graph/GRAD.h"
+
+#define ATTRIBUTE_SET(item) \
+  [&](int value) {\
+    item[_key] = value;\
+  },\
+  [&](double value) {\
+    item[_key] = value;\
+  },\
+  [&](std::string value) {\
+    item[_key] = value;\
+  },\
+  [&](gql::GBinary value) {\
+    item[_key] = nlohmann::json::binary(value.raw());\
+  },\
+  [&](gql::GDatetime value) {\
+    item[_key] = { {"value", value.value()}, {"_obj_type", AttributeKind::Datetime} };\
+  },\
+  [&](gql::vector_double value) {\
+    item[_key] = { {"value", value.value()}, {"_obj_type", AttributeKind::Vector} };\
+  }
+
+#define ATTRIBUTE_PUSH(item) \
+  [&](int value) {\
+    item.push_back(value);\
+  },\
+  [&](double value) {\
+    item.push_back(value);\
+  },\
+  [&](std::string value) {\
+    item.emplace_back(value);\
+  },\
+  [&](gql::GBinary value) {\
+    item.emplace_back(nlohmann::json::binary(value.raw()));\
+  },\
+  [&](gql::GDatetime value) {\
+    item.push_back({ {"value", value.value()}, {"_obj_type", AttributeKind::Datetime} });\
+  },\
+  [&](gql::vector_double value) {\
+    item[_key] = { {"value", value.value()}, {"_obj_type", AttributeKind::Vector} };\
+  }
 
 struct GASTNode;
 class GUpsetPlan: public GPlan {
@@ -23,8 +64,7 @@ private:
   struct JSONVisitor {
     nlohmann::json _jsonify;    /** read property as an json */
     std::string _key;           /** current read key */
-    using var_t = Variant<std::string, double, int>;
-    std::vector<var_t> _values; /** current read value in _key */
+    std::vector<attribute_t> _values; /** current read value in _key */
     //GUpsetPlan& _plan;
     JSONVisitor(GUpsetPlan& plan) {}
     
@@ -58,9 +98,18 @@ private:
     VisitFlow apply(GLiteral* stmt, std::list<NodeType>& path) {
       switch (stmt->kind()) {
       case AttributeKind::Binary:
-        // TODO:
+      {
+        gql::GBinary bin(stmt->raw().c_str());
+        _values.emplace_back(bin);
+      }
         break;
       case AttributeKind::Datetime:
+      {
+        gql::GDatetime date(atoll(stmt->raw().c_str()));
+        _values.emplace_back(date);
+      }
+        break;
+      case AttributeKind::Vector:
         // TODO:
         break;
       case AttributeKind::Integer:
@@ -93,45 +142,18 @@ private:
     void add() {
       if (!_key.empty()) {
         if (_values.size() == 1) {
-          _values[0].visit(
-            [&](int value) {
-              _jsonify[_key] = value;
-            },
-            [&](double value) {
-              _jsonify[_key] = value;
-            },
-            [&](std::string value) {
-              _jsonify[_key] = value;
-            });
+          _values[0].visit(ATTRIBUTE_SET(_jsonify[_key]));
         }
         else {
           for (auto& item : _values)
           {
-            item.visit(
-              [&](int value) {
-                _jsonify[_key].push_back(value);
-              },
-              [&](double value) {
-                _jsonify[_key].push_back(value);
-              },
-              [&](std::string value) {
-                _jsonify[_key].emplace_back(value);
-              });
+            item.visit(ATTRIBUTE_PUSH(_jsonify[_key]));
           }
         }
       }
       else {
         if (_values.size() == 1) {
-          _values[0].visit(
-            [&](int value) {
-              _jsonify = value;
-            },
-            [&](double value) {
-              _jsonify = value;
-            },
-              [&](std::string value) {
-              _jsonify = value;
-            });
+          _values[0].visit(ATTRIBUTE_SET(_jsonify));
         }
       }
     }
@@ -192,6 +214,6 @@ private:
 private:
   bool _vertex;       /**< true if upset target is vertex, else is edge */
   std::string _class;
-  std::map<gkey_t, std::string> _vertexes;
+  std::map<gkey_t, nlohmann::json> _vertexes;
   std::map<gql::edge_id, std::string> _edges;
 };

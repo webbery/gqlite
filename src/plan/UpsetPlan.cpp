@@ -48,14 +48,14 @@ bool GUpsetPlan::upsetVertex()
           fmt::print(fmt::fg(fmt::color::red), "ERROR: upset fail!\nInput key type is string, but require integer\n");
           return ECode_Fail;
         }
-        return _store->write(_class, k, itr->second.data(), itr->second.size());
+        return _store->write(_class, k, itr->second);
       },
       [&](uint64_t k) {
         if (type == KeyType::Byte) {
           fmt::print(fmt::fg(fmt::color::red), "ERROR: upset fail!\nInput key type is integer, but require string\n");
           return ECode_Fail;
         }
-        return _store->write(_class, k, itr->second.data(), itr->second.size());
+        return _store->write(_class, k, itr->second);
       });
     if (ret != ECode_Success) return ret;
   }
@@ -94,7 +94,7 @@ VisitFlow GUpsetPlan::UpsetVisitor::apply(GVertexDeclaration* stmt, std::list<No
   JSONVisitor jv(_plan);
   accept(stmt->vertex(), jv, path);
   jv.add();
-  _plan._vertexes[getLiteral(stmt->key())] = jv._jsonify.dump();
+  _plan._vertexes[getLiteral(stmt->key())] = jv._jsonify;
   return VisitFlow::Children;
 }
 
@@ -105,6 +105,8 @@ gkey_t GUpsetPlan::UpsetVisitor::getLiteral(GASTNode* node)
   switch (literal->kind()) {
   case AttributeKind::Number:
     k = (uint64_t)atoll(literal->raw().c_str());
+    break;
+  case AttributeKind::Datetime:
     break;
   default:
     k = literal->raw();

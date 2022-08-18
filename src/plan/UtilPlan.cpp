@@ -78,12 +78,9 @@ int GUtilPlan::execute(const std::function<ExecuteStatus(KeyType, const std::str
     opt.compress = 1;
     CHECK_RETURN(_store->open(std::get<std::string>(_var).c_str(), opt));
     for (auto& item : _vParams1) {
-      MapInfo info;
-      info.key_type = KeyType::Uninitialize;
-      info.value_type = ClassType::String;
       std::string v = std::get<std::string>(item);
       //printf("add map: %s\n", v.c_str());
-      _store->addMap(v, info);
+      _store->addMap(v, KeyType::Uninitialize);
     }
   }
     break;
@@ -107,8 +104,8 @@ int GUtilPlan::execute(const std::function<ExecuteStatus(KeyType, const std::str
     auto& groups = schema[SCHEMA_CLASS];
     // create graph
     std::string groupsName;
-    for (auto& group : groups) {
-      std::string name = group[SCHEMA_CLASS_NAME];
+    for (auto& itr = groups.begin(); itr != groups.end(); ++itr) {
+      std::string name = itr.key();
       if (name == MAP_BASIC) continue;
       groupsName += name;
       groupsName += ",";
@@ -116,17 +113,16 @@ int GUtilPlan::execute(const std::function<ExecuteStatus(KeyType, const std::str
     groupsName.pop_back();
     fmt::printf("{create: '%s', group: [%s]}\n", graph, groupsName);
     // upset group
-    for (auto& group : groups) {
-      std::string g = group[SCHEMA_CLASS_NAME];
-      uint8_t u8 = group[SCHEMA_CLASS_INFO];
-      MapInfo* info = reinterpret_cast<MapInfo*>(&u8);
+    for (auto& itr = groups.begin(); itr != groups.end(); ++itr) {
+      std::string g = itr.key();
+      KeyType type = (*itr)[SCHEMA_CLASS_KEY];
       std::function<std::string(const std::string&)> converter;
-      if (info->key_type == KeyType::Byte) {
+      if (type == KeyType::Byte) {
         converter = [](const std::string& s) {
           return s;
         };
       }
-      else if (info->key_type == KeyType::Integer) {
+      else if (type == KeyType::Integer) {
         converter = [](const std::string& s) {
           uint64_t val = *(uint64_t*)s.data();
           return std::to_string(val);

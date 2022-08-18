@@ -2,13 +2,14 @@
 #include "gqlite.h"
 #include <mdbx.h++>
 #include <map>
-#include <functional>
 #include <thread>
-#include <json.hpp>
+#include "json.hpp"
+#include "base/type.h"
 
 #define SCHEMA_GRAPH_NAME       "name"
 #define SCHEMA_CLASS            "cls"
-#define SCHEMA_CLASS_INFO       "info"
+#define SCHEMA_CLASS_KEY        "key_type"
+#define SCHEMA_CLASS_VALUE      "val_type"
 #define SCHEMA_CLASS_NAME       "name"
 #define MAP_BASIC               "__basic"
 
@@ -75,9 +76,9 @@ public:
      * Example:
      *   In MovieLens, it has class like `MOVIE`, `ACTOR`, `USER` etc.
      * @param mapname new map name
-     * @param info  map information.
+     * @param type  map key type.
      */
-    void addMap(const std::string& mapname, MapInfo info);
+    void addMap(const std::string& mapname, KeyType type);
 
     /** 
      * @brief Record an node/edge information to disk
@@ -95,6 +96,16 @@ public:
     int write(const std::string& mapname, uint64_t key, void* value, size_t len);
     int read(const std::string& mapname, uint64_t key, std::string& value);
     int del(const std::string& mapname, uint64_t key);
+
+    int write(const std::string& mapname, const std::string& key, const nlohmann::json& value);
+    int read(const std::string& mapname, const std::string& key, nlohmann::json& value);
+    int write(const std::string& mapname, uint64_t key, const nlohmann::json& value);
+    int read(const std::string& mapname, uint64_t key, nlohmann::json& value);
+
+    /**
+     * @brief parse a string to json which get from cursor
+     */
+    int parse(const std::string& data, nlohmann::json& value);
 
     typedef mdbx::cursor_managed  cursor;
     cursor getCursor(const std::string& mapname);
@@ -146,6 +157,11 @@ private:
      * @brief check map's key type is init or not. If not, set it with `type`.
      */
     void tryInitKeyType(const std::string& prop, KeyType type);
+    /**
+     * @brief check every attribute is init or not. If not, set index and its attribute's name.
+     */
+    void tryInitAttributeType(nlohmann::json& attributes, const std::string& attr, const nlohmann::json& value);
+    void appendValue(uint8_t attrIndex, AttributeKind kind, const nlohmann::json& value, std::string& data);
     nlohmann::json getProp(const std::string& prop);
     mdbx::map_handle getOrCreateHandle(const std::string& prop, mdbx::key_mode mode);
     /*
@@ -164,6 +180,7 @@ private:
      * schema: {
      *   prop: [ {name: 'xx', type: undefined/str/number} ]
      * }
+     * prop contain current map information, include key type, attribute's name and its types.
      */
     nlohmann::json _schema;
 };

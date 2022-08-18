@@ -100,4 +100,40 @@ namespace gql
 
         return ret;
     }
+
+    GBinary::GBinary(const char* base64)
+    {
+      _bin = base64_decode(base64);
+    }
+
+    bool GBinary::operator<=(const GBinary& other) const
+    {
+      return _bin <= other._bin;
+    }
+
+    bool GBinary::operator>=(const GBinary& other) const
+    {
+      return _bin >= other._bin;
+    }
+
+    bool GBinary::operator>(const GBinary& other) const
+    {
+      return _bin > other._bin;
+    }
+
+    bool GBinary::operator<(const GBinary& other) const
+    {
+      return _bin < other._bin;
+    }
+
+    bool GBinary::operator!=(const GBinary& other) const
+    {
+      return _bin != other._bin;
+    }
+
+    bool GBinary::operator==(const GBinary& other) const
+    {
+      return _bin == other._bin;
+    }
+
 } // namespace gql

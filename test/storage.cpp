@@ -53,11 +53,7 @@ TEST_CASE("basic storage api") {
   opt.compress = 1;
   engine.open("testdb", opt);
   std::cout << "schema: "<< engine.getSchema() << std::endl;
-  MapInfo info;
-  info.key_type = KeyType::Byte;
-  info.value_type = ClassType::String;
-  info.reserved = 0;
-  engine.addMap("revert_index", info);
+  engine.addMap("revert_index", KeyType::Byte);
   std::string value("hello gqlite");
   engine.write("revert_index", "key", value.data(), value.size());
   std::string result;
@@ -70,12 +66,8 @@ TEST_CASE("cursor api") {
   StoreOption opt;
   opt.compress = 1;
   engine.open("testdb", opt);
-  MapInfo info;
-  info.key_type = KeyType::Integer;
-  info.value_type = ClassType::String;
-  info.reserved = 0;
   const std::string propname("name");
-  engine.addMap(propname, info);
+  engine.addMap(propname, KeyType::Integer);
   int32_t key = 0;
   for (size_t idx = 1; idx < 50; ++idx) {
     std::string value = std::to_string(idx);
@@ -97,11 +89,7 @@ TEST_CASE("empty storage") {
   StoreOption opt;
   opt.compress = 1;
   engine.open("testdb", opt);
-  MapInfo info;
-  info.key_type = KeyType::Byte;
-  info.value_type = ClassType::String;
-  info.reserved = 0;
-  engine.addMap("index", info);
+  engine.addMap("index", KeyType::Byte);
   std::string value;
   engine.write("index", "key", value.data(), value.size());
   std::string result;
@@ -115,11 +103,7 @@ TEST_CASE("movielens") {
   opt.compress = 1;
   engine.open("mvlens", opt);
   // create movie map
-  MapInfo movie;
-  movie.key_type = KeyType::Integer;
-  movie.value_type = ClassType::String;
-  movie.reserved = 0;
-  engine.addMap("movie", movie);
+  engine.addMap("movie", KeyType::Integer);
   readCSV("movies.csv", [&engine](char* buffer) {
     char* movie_id = strtok(buffer, ",");
     if (movie_id == nullptr) return;
@@ -136,11 +120,7 @@ TEST_CASE("movielens") {
   CHECK(a_movie == "Copycat (1995),Crime|Drama|Horror|Mystery|Thriller");
 
   // create rating map
-  MapInfo rating;
-  rating.key_type = KeyType::Uninitialize;
-  rating.value_type = ClassType::Number;
-  rating.reserved = 0;
-  engine.addMap("rate", rating);
+  engine.addMap("rate", KeyType::Uninitialize);
   readCSV("ratings.csv", [&engine](char* buffer) {
     char* user_id = strtok(buffer, ",");
     if (user_id == nullptr) return;
@@ -158,11 +138,7 @@ TEST_CASE("movielens") {
   float f_rate = *(float*)a_rate.data();
   CHECK(f_rate == 3.5);
 
-  MapInfo tags;
-  tags.key_type = KeyType::Integer;
-  tags.value_type = ClassType::Number;
-  tags.reserved = 0;
-  engine.addMap("tags", rating);
+  engine.addMap("tags", KeyType::Integer);
   readCSV("tags.csv", [&engine](char* buffer) {
     char* user_id = strtok(buffer, ",");
     if (user_id == nullptr) return;
