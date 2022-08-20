@@ -104,7 +104,7 @@ int GUtilPlan::execute(const std::function<ExecuteStatus(KeyType, const std::str
     auto& groups = schema[SCHEMA_CLASS];
     // create graph
     std::string groupsName;
-    for (auto& itr = groups.begin(); itr != groups.end(); ++itr) {
+    for (auto itr = groups.begin(); itr != groups.end(); ++itr) {
       std::string name = itr.key();
       if (name == MAP_BASIC) continue;
       groupsName += name;
@@ -113,7 +113,7 @@ int GUtilPlan::execute(const std::function<ExecuteStatus(KeyType, const std::str
     groupsName.pop_back();
     fmt::printf("{create: '%s', group: [%s]}\n", graph, groupsName);
     // upset group
-    for (auto& itr = groups.begin(); itr != groups.end(); ++itr) {
+    for (auto itr = groups.begin(); itr != groups.end(); ++itr) {
       std::string g = itr.key();
       KeyType type = (*itr)[SCHEMA_CLASS_KEY];
       std::function<std::string(const std::string&)> converter;

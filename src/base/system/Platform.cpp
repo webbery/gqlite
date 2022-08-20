@@ -10,7 +10,7 @@
 #endif
 
 #ifdef __linux
-void cpuid(int info[4], int InfoType)
+void _cpuid(int info[4], int InfoType)
 {
   __cpuid_count(InfoType, 0, info[0], info[1], info[2], info[3]);
 }
@@ -19,24 +19,24 @@ void cpuid(int info[4], int InfoType)
 void isSSESupport(bool& sse2, bool& avx, bool& avx2)
 {
   int info[4];
-  cpuid(info, 0);
+  _cpuid(info, 0);
   int nIds = info[0];
-  cpuid(info, 0x80000000);
+  _cpuid(info, 0x80000000);
   unsigned nExIds = info[0];
   if (nIds >= 0x00000001) {
-    cpuid(info, 0x00000001);
+    _cpuid(info, 0x00000001);
     sse2 = (info[3] & ((int)1 << 26)) != 0;
     avx = (info[2] & ((int)1 << 28)) != 0;
     avx2 = false;
   }
   else if (nIds >= 0x00000007) {
-    cpuid(info, 0x00000007);
+    _cpuid(info, 0x00000007);
     sse2 = true;
     avx = (info[1] & ((int)1 << 5)) != 0;
     avx2 = false;
   }
   else if (nIds >= 0x80000001) {
-    cpuid(info, 0x80000001);
+    _cpuid(info, 0x80000001);
     sse2 = true;
     avx = false;
     avx2 = false;

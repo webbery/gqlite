@@ -3,7 +3,7 @@
 #include <vector>
 #include <array>
 #include <map>
-#include "operand/query/HNSW/hnswlib.h"
+//#include "operand/query/HNSW/hnswlib.h"
 #define MAX_LAYER_SIZE  4
 #define MAX_NEIGHBOR_SIZE   8
 #define MAX_DIMENSION     128
@@ -42,17 +42,17 @@ private:
     LayerVertex* _nextLayerVertex;
   };
 
-  struct HNSW {
-    hnswlib::L2Space* _pSpace;
-    hnswlib::HierarchicalNSW<float>* _instance;
-  };
+  //struct HNSW {
+  //  hnswlib::L2Space* _pSpace;
+  //  hnswlib::HierarchicalNSW<float>* _instance;
+  //};
 
 private:
   NSWDistance _distype;
   std::array<LayerVertex*, MAX_LAYER_SIZE> _layers;
   std::array<size_t, MAX_LAYER_SIZE> _sizes;
-  std::map<std::string, HNSW*> _mHNSWs;
+  //std::map<std::string, HNSW*> _mHNSWs;
   std::string _activeGraph;
   std::string _activeFilename;
-  HNSW* _activeHNSW;
+  //HNSW* _activeHNSW;
 };

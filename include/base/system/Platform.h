@@ -1,10 +1,10 @@
 #pragma once
 
 #ifdef _WIN32
-#define cpuid(info, x)    __cpuidex(info, x, 0)
+#define _cpuid(info, x)    __cpuidex(info, x, 0)
 #elif __linux__
 #include <cpuid.h>
-void cpuid(int info[4], int InfoType);
+void _cpuid(int info[4], int InfoType);
 #endif
 
 void isSSESupport(bool& sse2, bool& avx, bool& avx2);
