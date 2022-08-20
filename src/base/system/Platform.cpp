@@ -7,9 +7,8 @@
 #else
 #include <execinfo.h>
 #include <signal.h>
-#endif
+#include <cpuid.h>
 
-#ifdef __linux
 void _cpuid(int info[4], int InfoType)
 {
   __cpuid_count(InfoType, 0, info[0], info[1], info[2], info[3]);

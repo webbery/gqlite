@@ -2,8 +2,7 @@
 
 #ifdef _WIN32
 #define _cpuid(info, x)    __cpuidex(info, x, 0)
-#elif __linux__
-#include <cpuid.h>
+#else
 void _cpuid(int info[4], int InfoType);
 #endif
 
