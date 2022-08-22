@@ -2,16 +2,18 @@
 #include <random>
 #include <fmt/printf.h>
 #include <fmt/ranges.h>
+#include "StorageEngine.h"
 
 const int dim = 128;
 const int num_elements = 20;
 
 int main() {
-  GHNSWManager* instance = new GHNSWManager("default");
+  GStorageEngine* storage = new GStorageEngine();
+  GHNSW* instance = new GHNSW(storage, "default", "hnsw");
   std::default_random_engine random;
   std::uniform_real_distribution<float> dis;
   for (int idx = 0; idx < num_elements; ++idx) {
-    std::vector<float> vec(dim);
+    std::vector<double> vec(dim);
     for (int i = 0; i < dim; ++i) {
       vec[i] = dis(random);
     }
@@ -19,11 +21,10 @@ int main() {
     //fmt::print("upset: 'vertex_db', vertex: [['{}', @filename: '{}.jpg', feature_name: {}$]\n", key, key, vec);
      instance->add(idx, vec);
   }
-  std::vector< std::vector<float> > cond;
+  std::vector< std::vector<double> > cond;
   instance->get({ 1 }, cond);
   std::vector<size_t> ids;
   instance->query(cond[0], 1, ids);
   //assert(ids.size() >= 1);
-  instance->save("query.indx");
   delete instance;
 }

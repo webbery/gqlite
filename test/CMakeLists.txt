@@ -41,8 +41,7 @@ set(OLGRITHM_SOURCE ./algorithm.cpp
 
 set(QUERY_SOURCE ./query.cpp
 	../src/operand/query/HNSW.cpp
-	../src/operand/query/HNSW/space_l2.cpp
-	../src/operand/query/HNSW/space_ip.cpp
+	../src/StorageEngine/StorageEngine.cpp
 	../src/gutil.cpp
 	../src/base/system/Platform.cpp
 )
@@ -51,9 +50,11 @@ set(PTREE_SOURCE ./ptree.cpp)
 set(VNET_SOURCE ./vnet.cpp
 	../src/walk/WalkFactory.cpp
 	../src/walk/RandomWalk.cpp
+	../src/walk/BSFWalk.cpp
 	../src/base/system/EventEmitter.cpp
 	../src/Graph/EntityNode.cpp
 	../src/Graph/EntityEdge.cpp
+	../src/StorageEngine/Loader.cpp
 	../src/VirtualNetwork.cpp)
 
 set(MOVIELENS_SOURCE ./movielens.cpp)
@@ -87,14 +88,16 @@ ENDIF ()
 target_link_libraries(grammar PUBLIC ${grammar_LINK_OPTIONS})
 target_link_libraries(regress PUBLIC ${regress_LINK_OPTIONS})
 add_dependencies(storage zstd)
+add_dependencies(query zstd)
 IF (UNIX)
 link_directories(${zstd_BINARY_DIR}/lib)
 target_link_libraries(storage PUBLIC ${storage_LINK_OPTIONS} ${zstd_BINARY_DIR}/lib/libzstd.a)
+target_link_libraries(query PUBLIC ${storage_LINK_OPTIONS} ${zstd_BINARY_DIR}/lib/libzstd.a)
 ELSE()
 target_link_libraries(storage PUBLIC ${storage_LINK_OPTIONS})
+target_link_libraries(query PUBLIC ${storage_LINK_OPTIONS})
 ENDIF()
 # target_link_libraries(algorithm fmt::fmt-header-only)
-target_link_libraries(query fmt::fmt-header-only)
 target_link_libraries(movielens PUBLIC ${movielens_LINK_OPTIONS})
 IF (WIN32)
 target_link_libraries(vnet PRIVATE ${vnet_LINK_OPTIONS})

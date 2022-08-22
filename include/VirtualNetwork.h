@@ -16,6 +16,7 @@ class GAttributeNode;
 class GVirtualNetwork {
 public:
   using node_t = GMap::node_t;
+  using edge_t = GMap::edge_t;
   using node_attr_t = GMap::node_attr_t;
   using node_literal_t = GMap::node_literal_t;
 
@@ -34,18 +35,48 @@ public:
   void startWalk();
   void stopWalk();
   
-  void addNode(node_t id, const std::vector<node_attr_t>& attr, const std::vector<node_literal_t>& value);
-  void addEdge(uint32_t id);
+  /**
+   * @brief 
+   * 
+   * @param id 
+   * @param attr 
+   * @param value 
+   */
+  void addNode(node_t id, const std::vector<node_attr_t>& attr, const nlohmann::json& value);
+
+  /**
+   * @brief add an edge. It only discribe one direction. If it is a bidirection, another edge must be added.
+   * 
+   * @param id edge id
+   * @param from out node
+   * @param to in node
+   * @param attr edge attributes index
+   * @param value edge attributes data
+   */
+  void addEdge(edge_t id, node_t from, node_t to,
+    const std::vector<node_attr_t>& attr = std::vector<node_attr_t>(), const nlohmann::json& value = nlohmann::json());
   void release();
 
-  template<typename Visitor>
-  void visit(VisitSelector selector, Visitor visitor) {
+  /**
+   * @brief visit virtual network
+   * 
+   * @tparam Visitor 
+   * @tparam DataLoader 
+   * @param selector select which node to be visit, such BSF/random walk
+   * @param visitor how to visit node's element
+   * @param loader if node is not exist, try to load a batch nodes that will be visited.
+   */
+  template<typename Visitor, typename DataLoader>
+  void visit(VisitSelector selector, Visitor visitor, DataLoader loader) {
     GWalkFactory* factory = new GWalkFactory();
     std::shared_ptr<IWalkStrategy> strategy = factory->createStrategy(selector);
 
     // wait for start
-    _event.on((int)VNMessage::FirstNodeLoaded, [strategy](const std::any&) {
-      // strategy->walk(_vg, visitor);
+    _event.on((int)VNMessage::FirstNodeLoaded, [&_vg = this->_vg, visitor, strategy, loader](const std::any&) {
+      WalkResult result = strategy->walk(_vg, visitor);
+      if (result & WalkResult::WR_Preload) {
+        loader.load();
+      }
     });
     _event.on((int)VNMessage::LastNodeLoaded, [](const std::any&) {
     });
@@ -53,6 +84,7 @@ public:
     });
     _event.on((int)VNMessage::WalkStop, [](const std::any&) {
     });
+    loader.load();
     delete factory;
   }
 

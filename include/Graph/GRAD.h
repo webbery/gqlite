@@ -37,6 +37,7 @@ enum class LogicalPredicate {
 
 // describe the graph match pattern.
 // It come from query condition.
+// this GRAD is data structure, which different from gql_mal
 struct GraphPattern {
   using node_t = uint32_t;
 

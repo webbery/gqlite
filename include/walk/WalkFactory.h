@@ -17,11 +17,21 @@ enum class VisitSelector {
   RandomWalk
 };
 
+/**
+ * @brief walk result. If a node is visited, 0 bit will be set 1.
+ * 
+ */
+enum WalkResult {
+  WR_UnVisit = 0,
+  WR_Visited = 0x1,
+  WR_Preload = 0x2,
+};
+
 class IWalkStrategy {
 public:
   virtual ~IWalkStrategy(){
   }
-  virtual int walk(virtual_graph_t& vg, std::function<void(GNode*)>) = 0;
+  virtual WalkResult walk(virtual_graph_t& vg, std::function<void(GNode*)>) = 0;
 };
 
 class GWalkFactory {

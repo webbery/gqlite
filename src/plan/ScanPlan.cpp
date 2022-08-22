@@ -1,6 +1,7 @@
 #include "plan/ScanPlan.h"
 #include "base/lang/ASTNode.h"
 #include "base/lang/QueryStmt.h"
+#include "base/system/Observer.h"
 #include "gqlite.h"
 #include "StorageEngine.h"
 #include <filesystem>
@@ -38,10 +39,20 @@ GScanPlan::GScanPlan(GVirtualNetwork* network, GStorageEngine* store, GASTNode* 
 
 GScanPlan::~GScanPlan()
 {
+  for (IObserver* observer: _observers)
+  {
+    delete observer;
+  }
+  _observers.clear();
   for (EntityNode* node : _pattern._nodes) {
     delete node;
   }
   _pattern._nodes.clear();
+}
+
+void GScanPlan::addObserver(IObserver* observer)
+{
+  _observers.push_back(observer);
 }
 
 int GScanPlan::prepare()
@@ -129,7 +140,11 @@ int GScanPlan::scan(const std::function<ExecuteStatus(KeyType, const std::string
         {
         }
         if (result) {
-          cb(type, std::string((char*)data.key.byte_ptr(), data.key.size()), str);
+          std::string k((char*)data.key.byte_ptr(), data.key.size());
+          if (cb) cb(type, k, str);
+          for (IObserver* observer: _observers) {
+            observer->update(type, k, jsn);
+          }
         }
       }
         break;

@@ -9,27 +9,28 @@
 #define MAX_DIMENSION     128
 #define MAX_INDEX_COUNT   1*1024*1024
 
-class GHNSWManager {
+class GStorageEngine;
+class GHNSW {
 public:
-  ~GHNSWManager();
+  ~GHNSW();
   enum NSWDistance {
     Descart
   };
-  GHNSWManager(const char* graph);
   /**
-   * @param index_file an index file with [graph]_[dim]_[index].indx
+   * hnsw is saved by storage, which is a k-v database.
+   * @param index_name an reverted index which key is point id, and value is near point's id
+   * @param graph a filename that save to disk
    */
-  int load(const std::string& index_file);
-  int save(const std::string& index_file);
-  int flush();
-  static void release(GHNSWManager* hnsw);
-  int add(size_t sid, const std::vector<float>& vec);
+  GHNSW(GStorageEngine* storage, const char* index_name, const char* graph = nullptr);
+  void release(GHNSW* hnsw);
+  int add(uint64_t sid, const std::vector<double>& vec);
   int erase(size_t sid);
-  int query(const std::vector<float>& vec, size_t topK, std::vector<size_t>& ids);
-  int get(const std::vector<size_t>& ids, std::vector<std::vector<float> >& vecs);
+  int query(const std::vector<double>& vec, size_t topK, std::vector<uint64_t>& ids);
+  int get(const std::vector<uint64_t>& ids, std::vector<std::vector<double> >& vecs);
 
 private:
   bool initHNSW(const std::string& key, size_t dim);
+  void load();
 
   struct InternalVertex {
     std::string _id;
@@ -53,6 +54,10 @@ private:
   std::array<size_t, MAX_LAYER_SIZE> _sizes;
   //std::map<std::string, HNSW*> _mHNSWs;
   std::string _activeGraph;
-  std::string _activeFilename;
+  /**
+   * an index name in graph database
+   */
+  std::string _index;
+  GStorageEngine* _storage;
   //HNSW* _activeHNSW;
 };

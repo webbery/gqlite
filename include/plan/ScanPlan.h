@@ -6,6 +6,7 @@
 #include <atomic>
 #include <thread>
 #include <vector>
+#include "base/system/Observer.h"
 
 class GQueryStmt;
 struct GASTNode;
@@ -21,6 +22,7 @@ public:
   GScanPlan(GVirtualNetwork* network, GStorageEngine* store, GASTNode* condition, const std::string& graph = "");
   ~GScanPlan();
 
+  void addObserver(IObserver* observer);
   virtual int prepare();
   virtual int execute(const std::function<ExecuteStatus(KeyType, const std::string& key, const std::string& value)>&);
   virtual int interrupt();
@@ -114,4 +116,5 @@ private:
   GraphPattern _pattern;
   std::vector<std::string> _queries;
   std::string _graph;
+  std::vector<IObserver*> _observers;
 };

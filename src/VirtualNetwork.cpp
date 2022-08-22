@@ -13,20 +13,27 @@ GVirtualNetwork::~GVirtualNetwork() {
   _event.join();
 }
 
-void GVirtualNetwork::addNode(uint32_t id, const std::vector<node_attr_t>& attr, const std::vector<node_literal_t>& value) {
+void GVirtualNetwork::addNode(node_t id, const std::vector<node_attr_t>& attr, const nlohmann::json& value) {
   if (_vg.size() >= _maxMemory) {
     // detach nodes in future
     std::future<size_t> fut = std::async(&GVirtualNetwork::clean, this);
+    fut.get();
   }
   // add nodes
-  GMap::node_cellection collection;
-  if (_vg._nodes.count(id)) {
-
-  }
-  // _vg._nodes[id] = 
+  GMap::node_attrs_t attrs(attr.begin(), attr.end());
+  GMap::edges_t edges;
+  GMap::node_cellection collection = std::make_tuple(edges, attrs, value);
+  // cover if exist
+  _vg._nodes[id] = collection;
 }
 
-void GVirtualNetwork::addEdge(uint32_t id) {}
+void GVirtualNetwork::addEdge(edge_t id, node_t from, node_t to,
+  const std::vector<node_attr_t>& attr, const nlohmann::json& value) {
+  //
+  assert(_vg._nodes.count(from));
+  assert(_vg._nodes.count(to));
+
+}
 
 void GVirtualNetwork::release() {
   std::any arg = std::make_any<int>(0);

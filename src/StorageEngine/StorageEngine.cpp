@@ -97,6 +97,12 @@ int GStorageEngine::open(const char* filename, StoreOption option) {
   return ret;
 }
 
+bool GStorageEngine::isOpen()
+{
+  if (_schema.empty()) return false;
+  return true;
+}
+
 void GStorageEngine::close()
 {
   thread_local auto id = std::this_thread::get_id();

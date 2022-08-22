@@ -10,7 +10,7 @@ class GRandomWalk : public IWalkStrategy {
 public:
   GRandomWalk(double dumping = 0.9);
 
-  virtual int walk(virtual_graph_t& vg, std::function<void(GNode*)>);
+  virtual WalkResult walk(virtual_graph_t& vg, std::function<void(GNode*)>);
 
 private:
   // GVertex* next();

@@ -3,15 +3,27 @@
 #include "base/system/Platform.h"
 #include "gutil.h"
 #include "gqlite.h"
+#include "StorageEngine.h"
 
-GHNSWManager::GHNSWManager(const char* graph)
-  :_activeGraph(graph)
-  //,_activeHNSW(nullptr)
+GHNSW::GHNSW(GStorageEngine* storage, const char* index_name, const char* graph /*= nullptr*/)
+  :_storage(storage), _index(index_name)
 {
-  
+  if (!_storage->isOpen()) {
+    StoreOption option;
+    option.compress = 1;
+    _storage->open(graph, option);
+  }
+  std::string level_0(_index);
+  std::string level_1 = level_0 + ":1";
+  std::string level_2 = level_0 + ":2";
+  std::string level_3 = level_0 + ":3";
+  _storage->addMap(level_3, KeyType::Integer);
+  _storage->addMap(level_2, KeyType::Integer);
+  _storage->addMap(level_1, KeyType::Integer);
+  _storage->addMap(level_0, KeyType::Integer);
 }
 
-GHNSWManager::~GHNSWManager()
+GHNSW::~GHNSW()
 {
   //for (auto item : _mHNSWs) {
     //if (item.second->_instance) delete item.second->_instance;
@@ -19,7 +31,7 @@ GHNSWManager::~GHNSWManager()
   //}
 }
 
-int GHNSWManager::load(const std::string& index_file)
+void GHNSW::load()
 {
   //if (_mHNSWs.count(index_file) == 0 ) {
   //  std::vector<std::string> tokens = gql::split(index_file.c_str(), "_");
@@ -29,39 +41,34 @@ int GHNSWManager::load(const std::string& index_file)
   //    return ECode_Success;
   //  }
   //}
-  return ECode_Index_File_Not_Exist;
 }
 
-int GHNSWManager::save(const std::string& index_file)
-{
-  //if (_activeHNSW) {
-    //_activeHNSW->_instance->saveIndex(index_file);
-  //}
-  return 0;
-}
-
-void GHNSWManager::release(GHNSWManager* hnsw)
+void GHNSW::release(GHNSW* hnsw)
 {
   if (hnsw) delete hnsw;
 }
 
-int GHNSWManager::add(size_t sid, const std::vector<float>& vec)
+int GHNSW::add(uint64_t sid, const std::vector<double>& vec)
 {
-  //if (_activeFilename.size() == 0 || _mHNSWs.count(_activeFilename) == 0) {
-    std::string filename = _activeGraph + "_" + std::to_string(vec.size()) + "_0.indx";
-    initHNSW(filename, vec.size());
-  //}
-  //_activeHNSW->_instance->addPoint((void*)vec.data(), sid);
+  // check sid exist in disk or not
+  std::string value;
+
+  if (_storage->read(_index, sid, value) == ECode_DATUM_Not_Exist) {
+
+  }
+  else {
+    // update vector
+  }
   return 0;
 }
 
-int GHNSWManager::erase(size_t sid)
+int GHNSW::erase(size_t sid)
 {
   //_activeHNSW->_instance->markDelete(sid);
   return 0;
 }
 
-int GHNSWManager::query(const std::vector<float>& vec, size_t topK, std::vector<size_t>& ids)
+int GHNSW::query(const std::vector<double>& vec, size_t topK, std::vector<uint64_t>& ids)
 {
   //std::priority_queue<std::pair<float, size_t>> result = _activeHNSW->_instance->searchKnn((void*)vec.data(), topK);
   //while (result.size()) {
@@ -72,7 +79,7 @@ int GHNSWManager::query(const std::vector<float>& vec, size_t topK, std::vector<
   return 0;
 }
 
-int GHNSWManager::get(const std::vector<size_t>& ids, std::vector<std::vector<float> >& vecs)
+int GHNSW::get(const std::vector<size_t>& ids, std::vector<std::vector<double> >& vecs)
 {
   for (auto& id : ids) {
     //std::vector<float> data = _activeHNSW->_instance->getDataByLabel<float>(id);
@@ -81,9 +88,9 @@ int GHNSWManager::get(const std::vector<size_t>& ids, std::vector<std::vector<fl
   return 0;
 }
 
-bool GHNSWManager::initHNSW(const std::string& key, size_t dim)
+bool GHNSW::initHNSW(const std::string& key, size_t dim)
 {
-  _activeFilename = key;
+  _index = key;
   //HNSW* pHNSW = new HNSW();
   //pHNSW->_pSpace = new hnswlib::L2Space(dim);
   //pHNSW->_instance = new hnswlib::HierarchicalNSW<float>(pHNSW->_pSpace, MAX_INDEX_COUNT);

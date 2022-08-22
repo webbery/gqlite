@@ -67,6 +67,7 @@ public:
      * @param filename database filename
      */
     int open(const char* filename, StoreOption option);
+    bool isOpen();
 
     void close();
     void close(mdbx::txn_managed& txn);
