@@ -29,5 +29,7 @@ int main() {
   std::vector<size_t> ids;
   //instance->query(cond[0], 1, ids);
   //assert(ids.size() >= 1);
+  delete storage;
+  delete net;
   delete instance;
 }
