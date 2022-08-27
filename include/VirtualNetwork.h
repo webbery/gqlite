@@ -75,15 +75,15 @@ public:
     std::shared_ptr<IWalkStrategy> strategy = factory->createStrategy(selector);
 
     // wait for start
-    _event.on((int)VNMessage::NodeLoaded, [this, visitor, strategy, loader](const std::any&) {
+    _event.on((int)VNMessage::NodeLoaded, [this, visitor, strategy, loader](const std::any& ) {
       int result = strategy->walk(_vg, visitor);
-      printf("walk\n");
       if (result & WalkResult::WR_Preload) {
+        std::any a;
         if (loader.load()) {
-          _event.emit((int)VNMessage::NodeLoaded, std::any());
+          _event.emit((int)VNMessage::NodeLoaded,a);
         }
         else {
-          _event.emit((int)VNMessage::LastNodeLoaded, std::any());
+          _event.emit((int)VNMessage::LastNodeLoaded, a);
         }
       }
     });
@@ -92,14 +92,15 @@ public:
       });
     _event.on((int)VNMessage::WalkInterrupt, [](const std::any&) {
     });
-    _event.on((int)VNMessage::WalkStop, [](const std::any&) {
+    _event.on((int)VNMessage::WalkStop, [](const std::any& a) {
       printf("stop\n");
       });
+    std::any a;
     if (loader.load()) {
-      _event.emit((int)VNMessage::NodeLoaded, std::any());
+      _event.emit((int)VNMessage::NodeLoaded, a);
     }
     else {
-      _event.emit((int)VNMessage::LastNodeLoaded, std::any());
+      _event.emit((int)VNMessage::LastNodeLoaded, a);
     }
     delete factory;
   }
