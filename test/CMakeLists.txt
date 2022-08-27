@@ -42,8 +42,10 @@ set(OLGRITHM_SOURCE ./algorithm.cpp
 set(QUERY_SOURCE ./query.cpp
 	../src/operand/query/HNSW.cpp
 	../src/StorageEngine/StorageEngine.cpp
+	../src/VirtualNetwork.cpp
 	../src/gutil.cpp
 	../src/base/system/Platform.cpp
+	../src/base/system/EventEmitter.cpp
 )
 
 set(PTREE_SOURCE ./ptree.cpp)

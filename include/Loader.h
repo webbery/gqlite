@@ -1,8 +1,10 @@
 #pragma once
 
+class GScanPlan;
 class GLoader {
 public:
-  GLoader();
+  GLoader(GScanPlan* plan);
 
+  bool load();
 private:
 };

@@ -9,6 +9,7 @@
 #define MAX_DIMENSION     128
 #define MAX_INDEX_COUNT   1*1024*1024
 
+class GVirtualNetwork;
 class GStorageEngine;
 class GHNSW {
 public:
@@ -21,7 +22,7 @@ public:
    * @param index_name an reverted index which key is point id, and value is near point's id
    * @param graph a filename that save to disk
    */
-  GHNSW(GStorageEngine* storage, const char* index_name, const char* graph = nullptr);
+  GHNSW(GVirtualNetwork* network, GStorageEngine* store, const char* index_name, const char* graph = nullptr);
   void release(GHNSW* hnsw);
   int add(uint64_t sid, const std::vector<double>& vec);
   int erase(size_t sid);
@@ -59,5 +60,6 @@ private:
    */
   std::string _index;
   GStorageEngine* _storage;
+  GVirtualNetwork* _network;
   //HNSW* _activeHNSW;
 };

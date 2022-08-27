@@ -3,10 +3,13 @@
 #include "base/system/Platform.h"
 #include "gutil.h"
 #include "gqlite.h"
+#include "VirtualNetwork.h"
 #include "StorageEngine.h"
 
-GHNSW::GHNSW(GStorageEngine* storage, const char* index_name, const char* graph /*= nullptr*/)
-  :_storage(storage), _index(index_name)
+GHNSW::GHNSW(GVirtualNetwork* network, GStorageEngine* store, const char* index_name, const char* graph /*= nullptr*/)
+  :_network(network)
+  ,_storage(store)
+  , _index(index_name)
 {
   if (!_storage->isOpen()) {
     StoreOption option;

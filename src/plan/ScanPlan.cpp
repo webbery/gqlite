@@ -11,6 +11,7 @@
 GScanPlan::GScanPlan(GVirtualNetwork* network, GStorageEngine* store, GQueryStmt* stmt)
 :GPlan(network, store)
 , _queryType(QueryType::SimpleScan)
+, _state(ScanState::Stop)
 {
   auto* ptr = stmt->graph();
   if (ptr) {
@@ -66,6 +67,7 @@ int GScanPlan::prepare()
 
 int GScanPlan::execute(const std::function<ExecuteStatus(KeyType, const std::string& key, const std::string& value)>& processor) {
   _interrupt.store(false);
+  start();
 #ifdef GQLITE_MULTI_THREAD
   _worker = std::thread(&GScanPlan::scan, this);
 #else
@@ -81,13 +83,41 @@ int GScanPlan::interrupt()
   return ECode_Success;
 }
 
+void GScanPlan::start()
+{
+  _state = ScanState::Scanning;
+  _scanRecord._itr = _queries.end();
+}
+
+void GScanPlan::pause()
+{
+  _state = ScanState::Pause;
+}
+
+void GScanPlan::goon()
+{
+  _state = ScanState::Scanning;
+}
+
+void GScanPlan::stop()
+{
+  _state = ScanState::Stop;
+}
+
 int GScanPlan::scan(const std::function<ExecuteStatus(KeyType, const std::string& key, const std::string& value)>& cb)
 {
-  for (std::string& group : _queries)
+  if (_queries.size() == 0) return ECode_Success;
+  std::vector<std::string>::iterator itr = _queries.begin();
+  GStorageEngine::cursor cursor = _store->getCursor(*itr);
+  auto data = cursor.to_first(false);
+  if (_scanRecord._itr != _queries.end()) {
+    itr = _scanRecord._itr;
+    cursor = std::move(_scanRecord._cursor);
+  }
+  while (itr != _queries.end())
   {
-    auto cs = _store->getCursor(group);
+    std::string group = *itr;
     KeyType type = _store->getKeyType(group);
-    auto data = cs.to_first(false);
     while (data)
     {
       std::string str((char*)data.value.byte_ptr(), data.value.size());
@@ -157,8 +187,14 @@ int GScanPlan::scan(const std::function<ExecuteStatus(KeyType, const std::string
       default:
         break;
       }
-      data = cs.to_next(false);
+      data = cursor.to_next(false);
+      if (pauseExit(cursor, itr) || stopExit())
+        return ECode_Success;
     }
+    ++itr;
+    if (itr == _queries.end()) break;
+    cursor = _store->getCursor(*itr);
+    data = cursor.to_first(false);
   }
   return ECode_Success;
 }
@@ -194,6 +230,24 @@ void GScanPlan::parseConditions(GASTNode* conditions)
   accept(conditions, visitor, lNodes);
   _pattern._nodes.push_back(node);
   if (_pattern._edges.size() != 0) _queryType = QueryType::Match;
+}
+
+bool GScanPlan::pauseExit(GStorageEngine::cursor& cursor, std::vector<std::string>::iterator itr)
+{
+  if (_state == ScanState::Pause) {
+    _scanRecord._itr = itr;
+    _scanRecord._cursor = std::move(cursor);
+    return true;
+  }
+  return false;
+}
+
+bool GScanPlan::stopExit()
+{
+  if (_state == ScanState::Stop) {
+    return true;
+  }
+  return false;
 }
 
 VisitFlow GScanPlan::PatternVisitor::apply(GVertexDeclaration* stmt, std::list<NodeType>& path)

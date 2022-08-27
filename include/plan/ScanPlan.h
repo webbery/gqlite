@@ -6,6 +6,7 @@
 #include <atomic>
 #include <thread>
 #include <vector>
+#include <stack>
 #include "base/system/Observer.h"
 
 class GQueryStmt;
@@ -17,6 +18,12 @@ class GScanPlan: public GPlan {
     Match,          /**< subgraph match */
     Inference,      /**< bayes network inference */
   };
+
+  enum class ScanState {
+    Stop,
+    Scanning,
+    Pause
+  };
 public:
   GScanPlan(GVirtualNetwork* network, GStorageEngine* store, GQueryStmt* stmt);
   GScanPlan(GVirtualNetwork* network, GStorageEngine* store, GASTNode* condition, const std::string& graph = "");
@@ -27,6 +34,11 @@ public:
   virtual int execute(const std::function<ExecuteStatus(KeyType, const std::string& key, const std::string& value)>&);
   virtual int interrupt();
 
+  void start();
+  void pause();
+  void goon();
+  void stop();
+
   std::vector<std::string> groups() { return _queries; }
 private:
   int scan(const std::function<ExecuteStatus(KeyType, const std::string& key, const std::string& value)>& cb);
@@ -36,6 +48,10 @@ private:
    * parse condition node, retrieve simple condition/graph pattern or other kind of condition
    */
   void parseConditions(GASTNode* conditions);
+
+  bool pauseExit(GStorageEngine::cursor& cursor, std::vector<std::string>::iterator itr);
+
+  bool stopExit();
 
   struct PatternVisitor {
     GraphPattern& _pattern;
@@ -117,4 +133,18 @@ private:
   std::vector<std::string> _queries;
   std::string _graph;
   std::vector<IObserver*> _observers;
+  /**
+   * scan status.
+   */
+  ScanState _state;
+
+  struct ScanStackRecord {
+    /**
+   * this cursor will be reset when state is stop.
+   * Or continue when go on.
+   */
+    GStorageEngine::cursor _cursor;
+    std::vector<std::string>::iterator _itr;
+  };
+  ScanStackRecord _scanRecord;
 };

@@ -3,13 +3,15 @@
 #include <fmt/printf.h>
 #include <fmt/ranges.h>
 #include "StorageEngine.h"
+#include "VirtualNetwork.h"
 
 const int dim = 128;
 const int num_elements = 20;
 
 int main() {
   GStorageEngine* storage = new GStorageEngine();
-  GHNSW* instance = new GHNSW(storage, "default", "hnsw");
+  GVirtualNetwork* net = new GVirtualNetwork(100);
+  GHNSW* instance = new GHNSW(net, storage, "default", "hnsw");
   std::default_random_engine random;
   std::uniform_real_distribution<float> dis;
   for (int idx = 0; idx < num_elements; ++idx) {
