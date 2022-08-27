@@ -10,9 +10,9 @@ GRandomWalk::GRandomWalk(double dumping)
 {
 }
 
-WalkResult GRandomWalk::walk(virtual_graph_t& vg, std::function<void(GNode*)> f) {
+int GRandomWalk::walk(virtual_graph_t& vg, std::function<void(GNode*)> f) {
   // auto itr = vg._mNodesInstance.begin();
-  return WalkResult::WR_Visited;
+  return WalkResult::WR_Visited|WalkResult::WR_Preload;
 }
 // GVertex* GRandomWalk::next() {
 //   if (_current) {

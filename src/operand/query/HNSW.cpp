@@ -79,7 +79,7 @@ int GHNSW::query(const std::vector<double>& vec, size_t topK, std::vector<uint64
   return 0;
 }
 
-int GHNSW::get(const std::vector<size_t>& ids, std::vector<std::vector<double> >& vecs)
+int GHNSW::get(const std::vector<uint64_t>& ids, std::vector<std::vector<double> >& vecs)
 {
   for (auto& id : ids) {
     //std::vector<float> data = _activeHNSW->_instance->getDataByLabel<float>(id);

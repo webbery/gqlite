@@ -79,6 +79,11 @@ add_definitions(-DGQL_LEVEL_DEBUG)
 add_definitions(-D_PRINT_FORMAT_)
 endif (${ENABLE_PRINT})
 
+option(GQLITE_ENABLE_COMPRESS "enable compress, but not support yet" false)
+if (${ENABLE_PRINT})
+add_definitions(-D_ENABLE_COMPRESS_)
+endif ()
+
 add_definitions(-DTHREAD_COUNT=4)
 
 include_directories(./include ./third_party/libmdbx ./third_party/eigen ./third_party/fmt/include ./third_party/zstd/lib)

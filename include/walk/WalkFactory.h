@@ -31,7 +31,7 @@ class IWalkStrategy {
 public:
   virtual ~IWalkStrategy(){
   }
-  virtual WalkResult walk(virtual_graph_t& vg, std::function<void(GNode*)>) = 0;
+  virtual int walk(virtual_graph_t& vg, std::function<void(GNode*)>) = 0;
 };
 
 class GWalkFactory {

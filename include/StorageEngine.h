@@ -3,6 +3,7 @@
 #include <mdbx.h++>
 #include <map>
 #include <thread>
+#include <zstd.h>
 #include "json.hpp"
 #include "base/type.h"
 
@@ -15,6 +16,7 @@
 
 #define SCHEMA_GLOBAL           "__global"
 #define GLOBAL_COMPRESS_LEVEL   "__lvl"
+#define GLOBAL_COMPRESS_DICT     "__dict"
 
 #define GQL_VERSION             "0.0.1"
 
@@ -172,6 +174,9 @@ private:
 
     void initMap(StoreOption );
 
+    void initDict(int compressLvl);
+    void releaseDict();
+
 private:
     mdbx::env_managed _env;
     std::map<std::thread::id, mdbx::txn_managed> _txns;
@@ -184,4 +189,7 @@ private:
      * prop contain current map information, include key type, attribute's name and its types.
      */
     nlohmann::json _schema;
+    ZSTD_CDict* _cdict;
+    ZSTD_DDict* _ddict;
+    ZSTD_CCtx* _cctx;
 };

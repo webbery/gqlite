@@ -1,7 +1,6 @@
 #include "StorageEngine.h"
 #include <regex>
 #include <stdio.h>
-#include <zstd.h>
 #include <iostream>
 #include <atomic>
 
@@ -58,8 +57,10 @@ namespace {
   }
 }
 
-GStorageEngine::GStorageEngine() {
-
+GStorageEngine::GStorageEngine()
+  :_cdict(nullptr)
+  ,_ddict(nullptr)
+, _cctx(nullptr) {
 }
 
 GStorageEngine::~GStorageEngine() {
@@ -93,7 +94,7 @@ int GStorageEngine::open(const char* filename, StoreOption option) {
   }
   _schema[SCHEMA_GRAPH_NAME] = filename;
   initMap(option);
-  // _env.close_map(handle);
+  initDict(option.compress);
   return ret;
 }
 
@@ -117,6 +118,7 @@ void GStorageEngine::close()
     _txns[id].commit();
   }
   _txns.clear();
+  releaseDict();
 }
 
 mdbx::map_handle GStorageEngine::openSchema() {
@@ -129,7 +131,40 @@ mdbx::map_handle GStorageEngine::openSchema() {
 void GStorageEngine::initMap(StoreOption option)
 {
   addMap(MAP_BASIC, KeyType::Uninitialize);
-  _schema[SCHEMA_GLOBAL][GLOBAL_COMPRESS_LEVEL] = option.compress;
+}
+
+void GStorageEngine::initDict(int compressLvl)
+{
+  if (compressLvl > 3 || compressLvl <= 0) compressLvl = 1;
+  if (_schema[SCHEMA_GLOBAL][GLOBAL_COMPRESS_LEVEL].empty()) {
+    _schema[SCHEMA_GLOBAL][GLOBAL_COMPRESS_LEVEL] = compressLvl;
+  }
+  else {
+    compressLvl = _schema[SCHEMA_GLOBAL][GLOBAL_COMPRESS_LEVEL];
+  }
+  static std::map<int, size_t> dictSize = {
+    {1, 32 * 1024},
+    {2, 64 * 1024},
+    {3, 1024 * 1024},
+  };
+  if (_schema[SCHEMA_GLOBAL].count(GLOBAL_COMPRESS_DICT)) {
+    std::vector<uint8_t> bin = _schema[SCHEMA_GLOBAL][GLOBAL_COMPRESS_DICT];
+    if (bin.size() >= dictSize[compressLvl] - 5)
+      _ddict = ZSTD_createDDict(bin.data(), bin.size());
+  }
+  else {
+    char* buffer = (char*)malloc(dictSize[compressLvl]);
+    _cdict = ZSTD_createCDict(buffer, dictSize[compressLvl], compressLvl);
+    free(buffer);
+  }
+  _cctx = ZSTD_createCCtx();
+}
+
+void GStorageEngine::releaseDict()
+{
+  if (_cctx) ZSTD_freeCCtx(_cctx);
+  if (_cdict) ZSTD_freeCDict(_cdict);
+  if (_ddict) ZSTD_freeDDict(_ddict);
 }
 
 void GStorageEngine::addMap(const std::string& prop, KeyType type) {
@@ -240,10 +275,22 @@ mdbx::map_handle GStorageEngine::getOrCreateHandle(const std::string& prop, mdbx
 int GStorageEngine::write(const std::string& prop, const std::string& key, void* value, size_t len) {
   assert(isMapExist(prop));
   tryInitKeyType(prop, KeyType::Byte);
-  mdbx::slice data(value, len);
   auto handle = getOrCreateHandle(prop, mdbx::key_mode::usual);
   thread_local auto id = std::this_thread::get_id();
+
+  size_t cSize = len;
+#ifdef _ENABLE_COMPRESS_
+  void* buffer = malloc(2 * len);
+  if (_cdict) ZSTD_compress_usingCDict(_cctx, buffer, 2 * len, value, len, _cdict);
+  //else if (_ddict) ZSTD_compress_usingDDict(_cctx, buffer,)
+#else
+  void* buffer = value;
+#endif
+  mdbx::slice data(buffer, cSize);
   ::put(_txns[id], handle, key, data);
+#ifdef _ENABLE_COMPRESS_
+  free(buffer);
+#endif
   return ECode_Success;
 }
 
@@ -327,13 +374,21 @@ int GStorageEngine::del(const std::string& mapname, uint64_t key)
 int GStorageEngine::write(const std::string& prop, uint64_t key, void* value, size_t len) {
   assert(isMapExist(prop));
   tryInitKeyType(prop, KeyType::Integer);
-  mdbx::slice data(value, len);
   auto handle = getOrCreateHandle(prop, mdbx::key_mode::ordinal);
   // compress
-  size_t inSize = ZSTD_CStreamInSize();
+#ifdef _ENABLE_COMPRESS_
+  void* buffer = malloc(2 * len);
+  size_t cSize = ZSTD_compress_usingCDict(_cctx, buffer, 2* len, value, len, _cdict);
+#else
+  void* buffer = value;
+  size_t cSize = len;
+#endif
   thread_local auto id = std::this_thread::get_id();
+  mdbx::slice data(buffer, cSize);
   ::put(_txns[id], handle, key, data);
-  //printf("write: %d\n", key);
+#ifdef _ENABLE_COMPRESS_
+  free(buffer);
+#endif
   return ECode_Success;
 
 }

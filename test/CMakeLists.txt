@@ -54,6 +54,7 @@ set(VNET_SOURCE ./vnet.cpp
 	../src/base/system/EventEmitter.cpp
 	../src/Graph/EntityNode.cpp
 	../src/Graph/EntityEdge.cpp
+	../src/ScanObserver.cpp
 	../src/StorageEngine/Loader.cpp
 	../src/VirtualNetwork.cpp)
 

@@ -21,7 +21,7 @@ public:
   using node_literal_t = GMap::node_literal_t;
 
   enum class VNMessage {
-    FirstNodeLoaded = 1,
+    NodeLoaded = 1,
     LastNodeLoaded = 2,
     WalkInterrupt = 3,    //
     WalkStart = 4,
@@ -42,7 +42,7 @@ public:
    * @param attr 
    * @param value 
    */
-  void addNode(node_t id, const std::vector<node_attr_t>& attr, const nlohmann::json& value);
+  int addNode(node_t id, const std::vector<node_attr_t>& attr, const nlohmann::json& value);
 
   /**
    * @brief add an edge. It only discribe one direction. If it is a bidirection, another edge must be added.
@@ -53,8 +53,11 @@ public:
    * @param attr edge attributes index
    * @param value edge attributes data
    */
-  void addEdge(edge_t id, node_t from, node_t to,
+  int addEdge(edge_t id, node_t from, node_t to,
     const std::vector<node_attr_t>& attr = std::vector<node_attr_t>(), const nlohmann::json& value = nlohmann::json());
+
+  void join();
+
   void release();
 
   /**
@@ -72,19 +75,32 @@ public:
     std::shared_ptr<IWalkStrategy> strategy = factory->createStrategy(selector);
 
     // wait for start
-    _event.on((int)VNMessage::FirstNodeLoaded, [&_vg = this->_vg, visitor, strategy, loader](const std::any&) {
-      WalkResult result = strategy->walk(_vg, visitor);
+    _event.on((int)VNMessage::NodeLoaded, [this, visitor, strategy, loader](const std::any&) {
+      int result = strategy->walk(_vg, visitor);
+      printf("walk\n");
       if (result & WalkResult::WR_Preload) {
-        loader.load();
+        if (loader.load()) {
+          _event.emit((int)VNMessage::NodeLoaded, std::any());
+        }
+        else {
+          _event.emit((int)VNMessage::LastNodeLoaded, std::any());
+        }
       }
     });
     _event.on((int)VNMessage::LastNodeLoaded, [](const std::any&) {
-    });
+      printf("finish\n");
+      });
     _event.on((int)VNMessage::WalkInterrupt, [](const std::any&) {
     });
     _event.on((int)VNMessage::WalkStop, [](const std::any&) {
-    });
-    loader.load();
+      printf("stop\n");
+      });
+    if (loader.load()) {
+      _event.emit((int)VNMessage::NodeLoaded, std::any());
+    }
+    else {
+      _event.emit((int)VNMessage::LastNodeLoaded, std::any());
+    }
     delete factory;
   }
 

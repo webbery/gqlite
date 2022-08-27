@@ -1,6 +1,7 @@
 #include <catch.hpp>
 #include <thread>
 #include <mutex>
+#include <chrono>
 #include "VirtualNetwork.h"
 
 std::mutex prod_mut;
@@ -21,20 +22,23 @@ public:
   void operator()(GNode*) {}
 };
 
+int cnt = 0;
 class NodeLoader {
 public:
-  NodeLoader(GVirtualNetwork* net): _net(net) {}
+  NodeLoader(GVirtualNetwork* net) : _net(net) { cnt = 0; }
 
-  void load() const {
-    prod_mut.lock();
+  bool load() const {
+    if (++cnt > maxTimes || is_exit) return false;
     for (auto& item : nodes) {
-      _net->addNode(item.first, std::get<1>(item.second), std::get<2>(item.second));
+      if (_net->addNode(item.first, std::get<1>(item.second), std::get<2>(item.second))) return false;
     }
-    _net->addEdge(0, 4, 5);
-    _net->addEdge(1, 5, 4);
-    prod_mut.unlock();
+    printf("current cnt: %d\n", cnt);
+    if (_net->addEdge(0, 4, 5)) return false;
+    if (_net->addEdge(1, 5, 4)) return false;
+    return true;
   }
 private:
+  static const int maxTimes = 10;
   GVirtualNetwork* _net;
 };
 /**
@@ -45,9 +49,9 @@ TEST_CASE("random walk algorithm") {
   NodeVisitor visitor;
   NodeLoader loader(net);
   net->visit(VisitSelector::RandomWalk, visitor, loader);
-  is_exit.store(true);
-  net->release();
+  net->join();
   delete net;
+  assert(cnt == 11);
   // fmt::print("walk: {}\n", vnames);
 }
 
@@ -57,6 +61,7 @@ TEST_CASE("bread search first walk algorithm") {
   NodeLoader loader(net);
   net->visit(VisitSelector::BreadSearchFirst, visitor, loader);
   is_exit.store(true);
-  net->release();
+  // std::this_thread::sleep_for(std::chrono::milliseconds(40));
   delete net;
+  //assert(cnt == 11);
 }

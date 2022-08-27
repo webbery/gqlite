@@ -139,6 +139,7 @@ int main(int argc, char** argv) {
     int lineno = 0;
     while (fs.getline(gql, LINE_MAX_SIZE)) {
       char* ptr = nullptr;
+      if (strlen(gql) == 0) break;
       // execute script
       std::cout << "["<< lineno<<"]:\t" << gql << std::endl;
       int value = gqlite_exec(gHandle, gql, gqlite_exec_callback, nullptr, &ptr);

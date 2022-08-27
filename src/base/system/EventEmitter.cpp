@@ -3,24 +3,33 @@
 #include <chrono>
 #include <thread>
 
+int GEventEmitter::_id = 0;
+
 GEventEmitter::GEventEmitter()
 :_scheduler(new parlay::scheduler<Job>)
+, _interrupt(false)
 {}
 
 GEventEmitter::~GEventEmitter() {
-  join();
-  for (Job* job: _jobs) {
-    while(job->state() == JobStatus::Working) continue;
+  if (_scheduler) {
+    delete _scheduler;
+    _scheduler = nullptr;
+  }
+  for (auto job : _jobs) {
     delete job;
   }
+  _jobs.clear();
 }
 
 void GEventEmitter::emit(int event, std::any& args) {
+  if (_interrupt) return;
   if (_listeners.count(event)) {
-    Job* job = new Job(_listeners[event], args);
+    Job* job = new Job(_interrupt, _listeners[event], args);
     _jobs.push_back(job);
+    printf("emit::add job %d\n", job->_id);
     _scheduler->spawn(job);
   }
+  scavenger();
 }
 
 void GEventEmitter::on(int event, std::function<void(const std::any&)> f) {
@@ -32,8 +41,45 @@ void GEventEmitter::clear() {
 }
 
 void GEventEmitter::join() {
+  while (_jobs.size()) {
+    Job* job = _jobs.front();
+    _scheduler->wait([job, &jobs = this->_jobs]() {
+      if (job->state() == JobStatus::Finished) {
+        jobs.erase(jobs.begin());
+        printf("join::delete job %d\n", job->_id);
+        delete job;
+        return true;
+      }
+      return false;
+    }, true);
+  }
   if (_scheduler) {
     delete _scheduler;
     _scheduler = nullptr;
+  }
+}
+
+void GEventEmitter::finish()
+{
+  _interrupt = true;
+  _scheduler->finish();
+}
+
+bool GEventEmitter::is_finish()
+{
+  return _interrupt;
+}
+
+void GEventEmitter::scavenger()
+{
+  for (auto itr = _jobs.begin(); itr != _jobs.end(); ) {
+    if ((*itr)->state() == JobStatus::Finished) {
+      printf("scavenger delete job %d\n", (*itr)->_id);
+      delete* itr;
+      itr = _jobs.erase(itr);
+    }
+    else {
+      ++itr;
+    }
   }
 }

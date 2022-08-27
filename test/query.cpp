@@ -23,8 +23,9 @@ int main() {
   }
   std::vector< std::vector<double> > cond;
   instance->get({ 1 }, cond);
+  //assert(cond.size() == 1);
   std::vector<size_t> ids;
-  instance->query(cond[0], 1, ids);
+  //instance->query(cond[0], 1, ids);
   //assert(ids.size() >= 1);
   delete instance;
 }

@@ -3,5 +3,5 @@
 
 class GBSFWalk : public IWalkStrategy {
 public:
-  WalkResult walk(virtual_graph_t& vg, std::function<void(GNode*)>);
+  int walk(virtual_graph_t& vg, std::function<void(GNode*)>);
 };
