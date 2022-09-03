@@ -12,7 +12,7 @@ using virtual_graph_t = GMap;
 enum class VisitSelector {
   BreadSearchFirst,
   DeepSearchFirst,
-  AStarSearch,
+  AStarWalk,
   Dijk,
   RandomWalk
 };
@@ -29,13 +29,19 @@ enum WalkResult {
 
 class IWalkStrategy {
 public:
+  using node_t = GMap::node_t;
+  using node_info = GMap::node_collection;
+  
   virtual ~IWalkStrategy(){
   }
-  virtual int walk(virtual_graph_t& vg, std::function<void(GNode*)>) = 0;
+
+  virtual void stand(virtual_graph_t& vg) = 0;
+  virtual int walk(virtual_graph_t& vg, std::function<void(node_t, const node_info&)>) = 0;
 };
 
 class GWalkFactory {
 public:
-  virtual std::shared_ptr<IWalkStrategy> createStrategy(VisitSelector selector);
+  virtual std::shared_ptr<IWalkStrategy> createStrategy(VisitSelector selector, const std::string& prop,
+    std::function<double(const IWalkStrategy::node_info& ,const IWalkStrategy::node_info&)> f);
   
 };

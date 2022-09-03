@@ -8,13 +8,20 @@ enum class EdgeKind: uint8_t {
   MAX
 };
 
+struct alignas(8) EdgeStatus {
+  bool updated : 1;      // is this node updated
+  bool hold : 1;
+  EdgeKind kind : 3;
+  /**
+   * High bit means direction. 1 - is direction, 0 - is bidirection
+   * Low bit means direction is out or in. 0 - out, 1 - in
+   * Bidirection must be 00. Other wise 01 mean special case to be check.
+   * Direction can be 10/11.
+   */
+  uint8_t direction : 2;
+};
+
 class GEdge {
 public:
   virtual ~GEdge() {}
-  struct alignas(8) Status {
-    bool updated: 1;      // is this node updated
-    bool hold: 1;
-    EdgeKind kind: 3;
-    uint8_t direction: 1;  // 1 is bidirection, 0 is direction. Other wise it can be delete.
-  };
 };

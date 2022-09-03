@@ -5,10 +5,12 @@
 #include "gqlite.h"
 #include "VirtualNetwork.h"
 #include "StorageEngine.h"
+#include "Type/Vector.h"
 
-GHNSW::GHNSW(GVirtualNetwork* network, GStorageEngine* store, const char* index_name, const char* graph /*= nullptr*/)
+GHNSW::GHNSW(GVirtualNetwork* network, GStorageEngine* store, const char* index_name, const char* prop, const char* graph /*= nullptr*/)
   :_network(network)
   ,_storage(store)
+  , _property(prop)
   , _index(index_name)
 {
   if (!_storage->isOpen()) {
@@ -16,14 +18,21 @@ GHNSW::GHNSW(GVirtualNetwork* network, GStorageEngine* store, const char* index_
     option.compress = 1;
     _storage->open(graph, option);
   }
-  std::string level_0(_index);
-  std::string level_1 = level_0 + ":1";
-  std::string level_2 = level_0 + ":2";
-  std::string level_3 = level_0 + ":3";
-  _storage->addMap(level_3, KeyType::Integer);
-  _storage->addMap(level_2, KeyType::Integer);
-  _storage->addMap(level_1, KeyType::Integer);
-  _storage->addMap(level_0, KeyType::Integer);
+  for (uint8_t level = 0; level < MAX_LAYER_SIZE; ++level) {
+    std::string name = _index + ":" + std::to_string(level);
+    _storage->addMap(name, KeyType::Integer);
+  }
+  unsigned int seed = 120;
+  _levelGenerator.seed(seed);
+
+}
+
+void GHNSW::init(size_t M, size_t ef_construction)
+{
+  _M = M;
+  _ef = ef_construction;
+  _revSize = log(1.0 * M);
+  _mult = 1 / _revSize;
 }
 
 GHNSW::~GHNSW()
@@ -34,30 +43,103 @@ GHNSW::~GHNSW()
   //}
 }
 
-void GHNSW::load()
+int GHNSW::getLayer(double reverse_size)
 {
-  //if (_mHNSWs.count(index_file) == 0 ) {
-  //  std::vector<std::string> tokens = gql::split(index_file.c_str(), "_");
-  //  _activeGraph = tokens[0];
-  //  if (isFileExist(index_file.c_str())) {
-  //    initHNSW(index_file, atoi(tokens[1].c_str()));
-  //    return ECode_Success;
-  //  }
-  //}
+  std::uniform_real_distribution<double> distribution(0.0, 1.0);
+  double r = -log(distribution(_levelGenerator)) * reverse_size;
+  return (int)r;
 }
 
-void GHNSW::release(GHNSW* hnsw)
+std::vector<node_t> GHNSW::queryLayer(const std::vector<double>& q, node_t ep, size_t topK, uint8_t layer)
 {
-  if (hnsw) delete hnsw;
+  std::list<node_t> candidates;
+  candidates.push_back(ep);
+  std::map<double, node_t> nearest_neighbors;
+  auto neighbors = neighborhood(ep, layer);
+  for (node_t neighbor : neighbors) {
+    std::vector<double> nv = id2vector(neighbor);
+    double dist = gql::distance2(q, nv);
+    nearest_neighbors[dist] = ep;
+  }
+
+  while (candidates.size()) {
+    node_t elm = candidates.front();
+    candidates.pop_front();
+    std::vector<double> v = id2vector(elm);
+    node_t farest = nearest_neighbors.rbegin()->second;
+    std::vector<double> f = id2vector(farest);
+    double farest_distance = gql::distance2(q, f);
+    if (gql::distance2(v, q) > farest_distance) break;
+
+    auto neighbors = neighborhood(elm, layer);
+    for (node_t neighbor : neighbors) {
+      if (_network->isVisited(neighbor)) continue;
+      //_network->visit()
+      farest = nearest_neighbors.rbegin()->second;
+      auto e = id2vector(neighbor);
+      f = id2vector(farest);
+      double near_distance = gql::distance2(e, q);
+      if (near_distance < farest_distance || nearest_neighbors.size() < topK) {
+        candidates.push_back(neighbor);
+        nearest_neighbors[near_distance] = neighbor;
+        if (nearest_neighbors.size() > topK) {
+          nearest_neighbors.erase(std::prev(nearest_neighbors.end()));
+        }
+      }
+    }
+  }
+  std::vector<node_t> elements(nearest_neighbors.size());
+  size_t idx = 0;
+  for (auto& pair : nearest_neighbors) {
+    elements[idx++] = pair.second;
+  }
+  return elements;
 }
 
-int GHNSW::add(uint64_t sid, const std::vector<double>& vec)
+std::vector<node_t> GHNSW::knnSearch(const std::vector<double>& vec, size_t topK)
+{
+  int8_t level = MAX_LAYER_SIZE - 1;
+  auto indxCursor = _storage->getCursor(_index + ":" + std::to_string(level));
+  auto data = indxCursor.to_first(false);
+  std::vector<node_t> revIndexes;
+  node_t* start = (node_t*)data.value.byte_ptr();
+  revIndexes.insert(revIndexes.end(), start, start + data.value.size() / sizeof(node_t));
+  node_t nearest = revIndexes[0];
+  while (level > 0) {
+    std::vector<node_t> elements = queryLayer(vec, nearest, topK, level);
+    nearest = elements[0];
+    --level;
+  }
+  return queryLayer(vec, nearest, topK, 0);
+}
+
+std::vector<double> GHNSW::id2vector(node_t id)
+{
+  std::string pt;
+  _storage->read(_property, static_cast<uint64_t>(id), pt);
+  std::vector<double> epVector;
+  epVector.insert(epVector.end(), pt.data(), pt.data() + pt.size());
+  return epVector;
+}
+
+std::set<node_t> GHNSW::neighborhood(node_t id, uint8_t layer)
+{
+  return _network->neighbors(id);
+}
+
+void GHNSW::release()
+{
+}
+
+int GHNSW::add(uint64_t sid, const std::vector<double>& vec, bool persistence)
 {
   // check sid exist in disk or not
   std::string value;
-
+  NodeVisitor visitor;
+  NodeLoader loader;
   if (_storage->read(_index, sid, value) == ECode_DATUM_Not_Exist) {
-
+    uint8_t level = getLayer(_revSize);
+    _network->visit(VisitSelector::AStarWalk, _property, visitor, loader);
   }
   else {
     // update vector
@@ -91,13 +173,3 @@ int GHNSW::get(const std::vector<uint64_t>& ids, std::vector<std::vector<double>
   return 0;
 }
 
-bool GHNSW::initHNSW(const std::string& key, size_t dim)
-{
-  _index = key;
-  //HNSW* pHNSW = new HNSW();
-  //pHNSW->_pSpace = new hnswlib::L2Space(dim);
-  //pHNSW->_instance = new hnswlib::HierarchicalNSW<float>(pHNSW->_pSpace, MAX_INDEX_COUNT);
-  //_mHNSWs[_activeFilename] = pHNSW;
-  //_activeHNSW = pHNSW;
-  return true;
-}

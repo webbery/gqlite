@@ -11,7 +11,7 @@ const int num_elements = 20;
 int main() {
   GStorageEngine* storage = new GStorageEngine();
   GVirtualNetwork* net = new GVirtualNetwork(100);
-  GHNSW* instance = new GHNSW(net, storage, "default", "hnsw");
+  GHNSW* instance = new GHNSW(net, storage, "default", "hnsw", "hnsw");
   std::default_random_engine random;
   std::uniform_real_distribution<float> dis;
   for (int idx = 0; idx < num_elements; ++idx) {
@@ -21,7 +21,7 @@ int main() {
     }
     std::string key = std::to_string(idx + 1);
     //fmt::print("upset: 'vertex_db', vertex: [['{}', @filename: '{}.jpg', feature_name: {}$]\n", key, key, vec);
-     instance->add(idx, vec);
+     instance->add(idx, vec, false);
   }
   std::vector< std::vector<double> > cond;
   instance->get({ 1 }, cond);

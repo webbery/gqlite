@@ -8,14 +8,17 @@
 
 class GRandomWalk : public IWalkStrategy {
 public:
-  GRandomWalk(double dumping = 0.9);
+  GRandomWalk(const std::string& prop, double dumping = 0.9);
 
-  virtual int walk(virtual_graph_t& vg, std::function<void(GNode*)>);
+  virtual void stand(virtual_graph_t& vg);
+  virtual int walk(virtual_graph_t& vg, std::function<void(node_t, const node_info&)>);
 
 private:
   // GVertex* next();
   
 private:
+  std::string _prop;
+
   std::default_random_engine _re;
   std::normal_distribution<> _distribution;
   double _dumping;

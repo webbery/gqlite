@@ -41,9 +41,14 @@ set(OLGRITHM_SOURCE ./algorithm.cpp
 
 set(QUERY_SOURCE ./query.cpp
 	../src/operand/query/HNSW.cpp
+	../src/Type/Vector.cpp
 	../src/StorageEngine/StorageEngine.cpp
 	../src/VirtualNetwork.cpp
 	../src/gutil.cpp
+	../src/walk/AStarWalk.cpp
+	../src/walk/RandomWalk.cpp
+	../src/walk/BSFWalk.cpp
+	../src/walk/WalkFactory.cpp
 	../src/base/system/Platform.cpp
 	../src/base/system/EventEmitter.cpp
 )
@@ -52,6 +57,7 @@ set(PTREE_SOURCE ./ptree.cpp)
 set(VNET_SOURCE ./vnet.cpp
 	../src/walk/WalkFactory.cpp
 	../src/walk/RandomWalk.cpp
+	../src/walk/AStarWalk.cpp
 	../src/walk/BSFWalk.cpp
 	../src/base/system/EventEmitter.cpp
 	../src/Graph/EntityNode.cpp

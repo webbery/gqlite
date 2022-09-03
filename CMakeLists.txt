@@ -51,21 +51,21 @@ ENDIF ()
 include(GetGitRevisionDescription.cmake)
 get_git_head_revision(GIT_REFSPEC GIT_REVISION_SHA)
 
-find_program(VALGRIND valgrind)
-if(VALGRIND)
-	# LY: cmake is ugly and nasty.
-	#      - therefore memcheck-options should be defined before including ctest;
-	#      - otherwise ctest may ignore it.
-	set(MEMORYCHECK_SUPPRESSIONS_FILE
-		"${CMAKE_CURRENT_SOURCE_DIR}/test/valgrind_suppress.txt"
-		CACHE FILEPATH "Suppressions file for Valgrind" FORCE)
-	set(MEMORYCHECK_COMMAND_OPTIONS
-		"--suppressions=${MEMORYCHECK_SUPPRESSIONS_FILE}"
-	# set(MEMORYCHECK_COMMAND_OPTIONS
-	# 	"--trace-children=yes --leak-check=full --track-origins=yes --error-exitcode=42 --error-markers=@ --errors-for-leak-kinds=definite --suppressions=${MEMORYCHECK_SUPPRESSIONS_FILE}"
-		CACHE STRING "Valgrind options" FORCE)
-	# include(CTest)
-endif()
+# find_program(VALGRIND valgrind)
+# if(VALGRIND)
+# 	# LY: cmake is ugly and nasty.
+# 	#      - therefore memcheck-options should be defined before including ctest;
+# 	#      - otherwise ctest may ignore it.
+# 	set(MEMORYCHECK_SUPPRESSIONS_FILE
+# 		"${CMAKE_CURRENT_SOURCE_DIR}/test/valgrind_suppress.txt"
+# 		CACHE FILEPATH "Suppressions file for Valgrind" FORCE)
+# 	set(MEMORYCHECK_COMMAND_OPTIONS
+# 		"--suppressions=${MEMORYCHECK_SUPPRESSIONS_FILE}"
+# 	# set(MEMORYCHECK_COMMAND_OPTIONS
+# 	# 	"--trace-children=yes --leak-check=full --track-origins=yes --error-exitcode=42 --error-markers=@ --errors-for-leak-kinds=definite --suppressions=${MEMORYCHECK_SUPPRESSIONS_FILE}"
+# 		CACHE STRING "Valgrind options" FORCE)
+# 	# include(CTest)
+# endif()
 
 # get_git_unix_timestamp(GIT_REVISION_UNIX_TIMESTAMP)
 # message(GIT: ${GIT_REFSPEC}, commit: ${GIT_REVISION_SHA})

@@ -2,8 +2,6 @@
 #include <map>
 #include <mutex>
 #include <condition_variable>
-#include "Graph/Node.h"
-#include "Graph/Edge.h"
 #include "walk/WalkFactory.h"
 #include "base/parallel/parlay/sequence.h"
 #include "base/system/EventEmitter.h"
@@ -70,10 +68,10 @@ public:
    * @param loader if node is not exist, try to load a batch nodes that will be visited.
    */
   template<typename Visitor, typename DataLoader>
-  void visit(VisitSelector selector, Visitor visitor, DataLoader loader) {
+  void visit(VisitSelector selector, const std::string& prop, Visitor visitor, DataLoader loader,
+              std::function<double(const IWalkStrategy::node_info&, const IWalkStrategy::node_info&)> f = nullptr) {
     GWalkFactory* factory = new GWalkFactory();
-    std::shared_ptr<IWalkStrategy> strategy = factory->createStrategy(selector);
-
+    std::shared_ptr<IWalkStrategy> strategy = factory->createStrategy(selector, prop, f);
     // wait for start
     _event.on((int)VNMessage::NodeLoaded, [this, visitor, strategy, loader](const std::any& ) {
       int result = strategy->walk(_vg, visitor);
@@ -97,6 +95,7 @@ public:
       });
     std::any a;
     if (loader.load()) {
+      strategy->stand(_vg);
       _event.emit((int)VNMessage::NodeLoaded, a);
     }
     else {
@@ -105,6 +104,22 @@ public:
     delete factory;
   }
 
+  template<typename T, typename Visitor, typename DataLoader>
+  void node(T key, Visitor visitor) {
+    node_attrs_t attrs;
+    nlohmann::json json;
+    if (!_vg.visit(key, attrs, json)) {
+      // load data
+
+    }
+  }
+
+  std::set<node_t> neighbors(node_t node);
+
+  template<typename T>
+  bool isVisited(T key) {
+    return _vg.is_visited(key);
+  }
 private:
   size_t clean() { _vg.clean(); return 0;}
 
