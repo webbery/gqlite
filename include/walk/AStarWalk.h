@@ -29,11 +29,11 @@ public:
     , _heuristic(h)
   {}
 
-  virtual void stand(virtual_graph_t& vg, node_t id = 0) {
+  void stand(virtual_graph_t& vg, node_t id = (node_t)0) {
     gql::stand(vg, _queue, id);
   }
 
-  virtual int walk(virtual_graph_t& vg, std::function<void(node_t, const node_info&)>) {
+  int walk(virtual_graph_t& vg, std::function<void(node_t, const node_info&)>) {
     if (vg.size() == 0) return WalkResult::WR_Preload;
     do
     {
