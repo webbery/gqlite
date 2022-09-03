@@ -7,7 +7,7 @@
 #include <list>
 #include <map>
 #include <random>
-#include "walk/WalkFactory.h"
+#include "walk/AStarWalk.h"
 
 #define MAX_LAYER_SIZE  4
 #define MAX_NEIGHBOR_SIZE   8
@@ -16,6 +16,26 @@
 
 class GVirtualNetwork;
 class GStorageEngine;
+
+namespace gql {
+  class GHNSWHeuristic : public IAStarHeuristic {
+  public:
+    GHNSWHeuristic() :IAStarHeuristic((node_t)0) {}
+    double operator()(const node_info& cur, const node_info& node) {
+      return 0;
+    }
+
+    void update(node_t target) {
+      _target = target;
+    }
+  };
+  class GHNSWAStarSelector : public IAStarWalkSelector< GHNSWHeuristic > {
+  public:
+    GHNSWAStarSelector(GHNSWHeuristic& h) : IAStarWalkSelector("", h) {}
+
+    void start(node_t id) { _pos = id; }
+  };
+}
 class GHNSW {
 public:
   ~GHNSW();
@@ -85,7 +105,7 @@ private:
 private:
   class NodeVisitor {
   public:
-    void operator()(IWalkStrategy::node_t, const IWalkStrategy::node_info&) {}
+    void operator()(node_t, const node_info&) {}
   };
 
   class NodeLoader {
@@ -107,6 +127,8 @@ private:
   std::string _index;
   std::string _property;
   GStorageEngine* _storage;
+  gql::GHNSWHeuristic _heuristic;
+  gql::GHNSWAStarSelector* _selector;
   GVirtualNetwork* _network;
   
   std::default_random_engine _levelGenerator;

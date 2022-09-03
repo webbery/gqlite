@@ -3,6 +3,7 @@
 #include <mutex>
 #include <chrono>
 #include "VirtualNetwork.h"
+#include "walk/AStarWalk.h"
 
 std::mutex prod_mut;
 std::atomic_bool is_exit(false);
@@ -61,7 +62,7 @@ Edge RomaniaEdges = {
 
 class NodeVisitor {
 public:
-  void operator()(IWalkStrategy::node_t, const IWalkStrategy::node_info&) {}
+  void operator()(node_t, const node_info&) {}
 };
 
 int cnt = 0;
@@ -105,25 +106,84 @@ public:
     }
   }
 };
+
+class RomaniaHeuristic : public IAStarHeuristic {
+public:
+  RomaniaHeuristic(node_t target):IAStarHeuristic(target){
+    _distance2Bucharest = {
+      {(node_t)3, 366}, {(node_t)13,0}, {(node_t)10, 160}, {(node_t)7, 242}, {(node_t)20, 161},{(node_t)11, 176},{(node_t)14, 77},
+      {(node_t)19, 151}, {(node_t)16, 226},{(node_t)5,244},{(node_t)6, 241}, {(node_t)15, 234}, {(node_t)1, 380}, {(node_t)12, 100},
+      {(node_t)9, 193}, {(node_t)8, 253}, {(node_t)4, 329}, {(node_t)17, 80}, {(node_t)18, 199}, {(node_t)2, 374}
+    };
+  }
+  int operator()(const node_info& cur, const node_info& node) {
+    auto edges_1 = std::get<0>(cur);
+    auto edges_2 = std::get<0>(node);
+    std::vector<edge_t> edges(1);
+    auto itr = std::set_intersection(edges_1.begin(), edges_1.end(), edges_2.begin(), edges_2.end(), edges.begin());
+    if (itr - edges.begin()) {
+      edge_t id = edges[0];
+      return (double)std::get<1>(RomaniaEdges[id]);
+    }
+    return std::numeric_limits<double>::max();
+  }
+
+  std::list<node_t> path() { return _path; }
+private:
+  std::map<node_t, int> _distance2Bucharest;
+};
+
+class AStarSelector: public IAStarWalkSelector< RomaniaHeuristic >{
+public:
+  AStarSelector(RomaniaHeuristic& h): IAStarWalkSelector("", h) {
+  }
+
+  void start(node_t from) {
+    _pos = from;
+  }
+};
+
+class BFSHeuristic : public IAStarHeuristic {
+public:
+  BFSHeuristic() :IAStarHeuristic((node_t)0) {}
+  int operator()(const node_info& cur, const node_info& node) {
+    return ++_order;
+  }
+
+private:
+  uint32_t _order = 0;;
+};
+
+class BFSSelector : public IAStarWalkSelector<BFSHeuristic> {
+public:
+  BFSSelector(BFSHeuristic& h) : IAStarWalkSelector("", h) {
+  }
+
+  void start(node_t from) {
+    _pos = from;
+  }
+};
 /**
  * https://people.math.osu.edu/husen.1/teaching/571/random_walks.pdf
  */
-TEST_CASE("random walk algorithm") {
-  GVirtualNetwork* net = new GVirtualNetwork(10);
-  NodeVisitor visitor;
-  NodeLoader loader(net);
-  net->visit(VisitSelector::RandomWalk, "", visitor, loader);
-  net->join();
-  delete net;
-  assert(cnt == 11);
-  // fmt::print("walk: {}\n", vnames);
-}
+//TEST_CASE("random walk algorithm") {
+//  GVirtualNetwork* net = new GVirtualNetwork(10);
+//  NodeVisitor visitor;
+//  NodeLoader loader(net);
+//  net->visit(VisitSelector::RandomWalk, "", visitor, loader);
+//  net->join();
+//  delete net;
+//  assert(cnt == 11);
+//  // fmt::print("walk: {}\n", vnames);
+//}
 
 TEST_CASE("bread search first walk algorithm") {
   GVirtualNetwork* net = new GVirtualNetwork(100);
   NodeVisitor visitor;
   NodeLoader loader(net);
-  net->visit(VisitSelector::BreadSearchFirst, "", visitor, loader);
+  BFSHeuristic h;
+  BFSSelector selector(h);
+  net->visit(selector, visitor, loader);
   is_exit.store(true);
   // std::this_thread::sleep_for(std::chrono::milliseconds(40));
   delete net;
@@ -135,25 +195,25 @@ TEST_CASE("A* walk algorithm") {
   GVirtualNetwork* net = new GVirtualNetwork(10);
   NodeVisitor visitor;
   RomaniaLoader loader;
+  RomaniaHeuristic h((node_t)13);
   loader.loadRomania(net);
-  std::map<node_t, int> distance2Bucharest = {
-    {(node_t)3, 366}, {(node_t)13,0}, {(node_t)10, 160}, {(node_t)7, 242}, {(node_t)20, 161},{(node_t)11, 176},{(node_t)14, 77},
-    {(node_t)19, 151}, {(node_t)16, 226},{(node_t)5,244},{(node_t)6, 241}, {(node_t)15, 234}, {(node_t)1, 380}, {(node_t)12, 100},
-    {(node_t)9, 193}, {(node_t)8, 253}, {(node_t)4, 329}, {(node_t)17, 80}, {(node_t)18, 199}, {(node_t)2, 374}
-  };
-  net->visit(VisitSelector::AStarWalk, "", visitor, loader, [&distance2Bucharest, &romaniaEdges = RomaniaEdges](const IWalkStrategy::node_info& cur, const IWalkStrategy::node_info& node) {
-    auto edges_1 = std::get<0>(cur);
-    auto edges_2 = std::get<0>(node);
-    std::vector<edge_t> edges(1);
-    auto itr = std::set_intersection(edges_1.begin(), edges_1.end(), edges_2.begin(), edges_2.end(), edges.begin());
-    if (itr - edges.begin()) {
-      edge_t id = edges[0];
-      return (double)std::get<1>(romaniaEdges[id]);
-    }
-    return std::numeric_limits<double>::max();
-    });
-  is_exit.store(true);
+  AStarSelector selector(h);
+  selector.start((node_t)0);
+  net->visit(selector, visitor, loader);
   net->join();
+  is_exit.store(true);
+  std::list<node_t>& path = h.path();
+  assert(path.size() == 4);
+  for (auto itr = path.begin(); itr != path.end(); ++itr) {
+    std::string addr = std::get<2>(RomaniaNodes[*itr])[1];
+    printf("%s -> ", addr.c_str());
+  }
+  printf("\n");
+  auto itr = path.begin();
+  assert(*itr++ == (node_t)1);
+  assert(*itr++ == (node_t)8);
+  assert(*itr++ == (node_t)11);
+  assert(*itr++ == (node_t)13);
   delete net;
   // fmt::print("walk: {}\n", vnames);
 }

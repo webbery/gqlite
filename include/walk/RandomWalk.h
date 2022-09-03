@@ -6,7 +6,7 @@
 #include <condition_variable>
 #include <mutex>
 
-class GRandomWalk : public IWalkStrategy {
+class GRandomWalk {
 public:
   GRandomWalk(const std::string& prop, double dumping = 0.9);
 

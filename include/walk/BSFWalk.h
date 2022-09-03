@@ -1,7 +1,7 @@
 #pragma once
 #include "WalkFactory.h"
 
-class GBSFWalk : public IWalkStrategy {
+class GBSFWalk {
 public:
   GBSFWalk(const std::string& prop);
 

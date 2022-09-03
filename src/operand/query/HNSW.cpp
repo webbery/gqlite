@@ -22,6 +22,9 @@ GHNSW::GHNSW(GVirtualNetwork* network, GStorageEngine* store, const char* index_
     std::string name = _index + ":" + std::to_string(level);
     _storage->addMap(name, KeyType::Integer);
   }
+
+  _selector = new gql::GHNSWAStarSelector(_heuristic);
+
   unsigned int seed = 120;
   _levelGenerator.seed(seed);
 
@@ -37,6 +40,7 @@ void GHNSW::init(size_t M, size_t ef_construction)
 
 GHNSW::~GHNSW()
 {
+  delete _selector;
   //for (auto item : _mHNSWs) {
     //if (item.second->_instance) delete item.second->_instance;
     //if (item.second->_pSpace) delete item.second->_pSpace;
@@ -139,7 +143,7 @@ int GHNSW::add(uint64_t sid, const std::vector<double>& vec, bool persistence)
   NodeLoader loader;
   if (_storage->read(_index, sid, value) == ECode_DATUM_Not_Exist) {
     uint8_t level = getLayer(_revSize);
-    _network->visit(VisitSelector::AStarWalk, _property, visitor, loader);
+    _network->visit(*_selector, visitor, loader);
   }
   else {
     // update vector

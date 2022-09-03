@@ -11,6 +11,16 @@ class GNode;
 
 class GEntityNode;
 class GAttributeNode;
+
+class GEmptyHeuristic {
+public:
+  double operator()(const node_info& cur, const node_info& node) {
+    return 0;
+  }
+
+  bool success(const std::list<node_t>& ) { return true; }
+};
+
 class GVirtualNetwork {
 public:
   using node_t = GMap::node_t;
@@ -67,14 +77,13 @@ public:
    * @param visitor how to visit node's element
    * @param loader if node is not exist, try to load a batch nodes that will be visited.
    */
-  template<typename Visitor, typename DataLoader>
-  void visit(VisitSelector selector, const std::string& prop, Visitor visitor, DataLoader loader,
-              std::function<double(const IWalkStrategy::node_info&, const IWalkStrategy::node_info&)> f = nullptr) {
-    GWalkFactory* factory = new GWalkFactory();
-    std::shared_ptr<IWalkStrategy> strategy = factory->createStrategy(selector, prop, f);
+  template<typename Selector, typename Visitor, typename DataLoader>
+  void visit(Selector& selector, Visitor visitor, DataLoader loader) {
+    //GWalkFactory* factory = new GWalkFactory();
+    //std::shared_ptr<IWalkStrategy> strategy = factory->createStrategy(selector, prop, heuristic);
     // wait for start
-    _event.on((int)VNMessage::NodeLoaded, [this, visitor, strategy, loader](const std::any& ) {
-      int result = strategy->walk(_vg, visitor);
+    _event.on((int)VNMessage::NodeLoaded, [this, visitor, loader, &selector](const std::any& ) {
+      int result = selector.walk(_vg, visitor);
       if (result & WalkResult::WR_Preload) {
         std::any a;
         if (loader.load()) {
@@ -95,20 +104,19 @@ public:
       });
     std::any a;
     if (loader.load()) {
-      strategy->stand(_vg);
+      selector.stand(_vg);
       _event.emit((int)VNMessage::NodeLoaded, a);
     }
     else {
       _event.emit((int)VNMessage::LastNodeLoaded, a);
     }
-    delete factory;
+    //delete factory;
   }
 
   template<typename T, typename Visitor, typename DataLoader>
   void node(T key, Visitor visitor) {
-    node_attrs_t attrs;
-    nlohmann::json json;
-    if (!_vg.visit(key, attrs, json)) {
+    GMap::node_collection collection;
+    if (!_vg.visit(key, collection)) {
       // load data
 
     }
