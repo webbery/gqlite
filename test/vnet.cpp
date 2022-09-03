@@ -202,7 +202,7 @@ TEST_CASE("A* walk algorithm") {
   net->visit(selector, visitor, loader);
   net->join();
   is_exit.store(true);
-  std::list<node_t>& path = h.path();
+  const std::list<node_t>& path = h.path();
   assert(path.size() == 4);
   for (auto itr = path.begin(); itr != path.end(); ++itr) {
     std::string addr = std::get<2>(RomaniaNodes[*itr])[1];
