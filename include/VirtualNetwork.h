@@ -2,6 +2,7 @@
 #include <map>
 #include <mutex>
 #include <condition_variable>
+#include <list>
 #include "walk/WalkFactory.h"
 #include "base/parallel/parlay/sequence.h"
 #include "base/system/EventEmitter.h"
