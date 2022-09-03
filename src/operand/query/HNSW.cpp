@@ -141,7 +141,7 @@ int GHNSW::add(uint64_t sid, const std::vector<double>& vec, bool persistence)
   std::string value;
   NodeVisitor visitor;
   NodeLoader loader;
-  if (_storage->read(_index, sid, value) == ECode_DATUM_Not_Exist) {
+  if (_storage->read(_index + ":0", sid, value) == ECode_DATUM_Not_Exist) {
     uint8_t level = getLayer(_revSize);
     _network->visit(*_selector, visitor, loader);
   }
