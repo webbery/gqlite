@@ -1,13 +1,25 @@
 #pragma once
 #include "WalkFactory.h"
+#include "walk/AStarWalk.h"
 
-class GBSFWalk {
+class GBFSHeuristic: public IAStarHeuristic {
 public:
-  GBSFWalk(const std::string& prop);
+  GBFSHeuristic(node_t target): IAStarHeuristic(target), _order(0) {}
 
-  void stand(virtual_graph_t& vg);
-  int walk(virtual_graph_t& vg, std::function<void(node_t, const node_info&)>);
+  double operator()(const node_info& cur, const node_info& node) {
+    return _order += 0.00005;
+  }
 
 private:
-  std::string _prop;
+  double _order;
+};
+
+class GBFSSelector : public IAStarWalkSelector<GBFSHeuristic> {
+public:
+  GBFSSelector(GBFSHeuristic& h) : IAStarWalkSelector(h) {
+  }
+
+  void start(node_t from) {
+    _pos = from;
+  }
 };

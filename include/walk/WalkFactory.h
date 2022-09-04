@@ -28,4 +28,4 @@ enum WalkResult {
   WR_Stop = 0x4,
 };
 
-using node_info = GMap::node_collection;
+using node_info = std::pair<node_t, GMap::node_collection>;

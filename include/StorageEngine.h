@@ -148,10 +148,6 @@ public:
      */
     KeyType getKeyType(const std::string& m) const;
 private:
-  /**
-   * @brief because json lib return string without '\0', so write this method
-   */
-  bool compare(const std::string& left, const std::string& right) const;
     /**
      * @brief check map(prop) is exist or not.
      */

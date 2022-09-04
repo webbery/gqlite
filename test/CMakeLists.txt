@@ -47,18 +47,14 @@ set(QUERY_SOURCE ./query.cpp
 	../src/gutil.cpp
 	../src/walk/AStarWalk.cpp
 	../src/walk/RandomWalk.cpp
-	../src/walk/BSFWalk.cpp
-	../src/walk/WalkFactory.cpp
 	../src/base/system/Platform.cpp
 	../src/base/system/EventEmitter.cpp
 )
 
 set(PTREE_SOURCE ./ptree.cpp)
 set(VNET_SOURCE ./vnet.cpp
-	../src/walk/WalkFactory.cpp
 	../src/walk/RandomWalk.cpp
 	../src/walk/AStarWalk.cpp
-	../src/walk/BSFWalk.cpp
 	../src/base/system/EventEmitter.cpp
 	../src/Graph/EntityNode.cpp
 	../src/Graph/EntityEdge.cpp
@@ -91,6 +87,8 @@ foreach(LEAK_TARGET ${TARGETS_OF_LEAK_TO_CHECK})
 	target_link_options(${LEAK_TARGET} PRIVATE -fsanitize=address -fno-omit-frame-pointer)
 	set(${LEAK_TARGET}_LINK_OPTIONS ${${LEAK_TARGET}_LINK_OPTIONS} asan)
 endforeach()
+ELSE()
+#add_definitions(-D_CRTDBG_MAP_ALLOC)
 ENDIF ()
 
 # set_property(TARGET algorithm PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/test")

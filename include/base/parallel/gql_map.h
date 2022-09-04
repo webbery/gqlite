@@ -32,6 +32,8 @@ public:
   using pam_node = std::map<node_t, node_collection>;
   using pam_edge = std::map<edge_t, edge_collection>;
 
+  ~GMap() { printf("~GMap()\n"); }
+
   size_t size() { return _nodes.size() + _edges.size(); }
   size_t node_size() { return _nodes.size(); }
   size_t edge_size() { return _edges.size(); }
@@ -80,7 +82,7 @@ public:
       edge_t& edgeID = edges[idx];
       node_t to = std::get<0>(_edges[edgeID]).second;
       n.insert(to);
-    });
+      });
     return n;
   }
 
@@ -92,7 +94,6 @@ private:
   parlay::sequence<node_t> _visitedNodes;
   pam_node _nodes;
   pam_edge _edges;
-
 };
 
 using node_t = GMap::node_t;

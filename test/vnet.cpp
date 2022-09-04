@@ -4,6 +4,8 @@
 #include <chrono>
 #include "VirtualNetwork.h"
 #include "walk/AStarWalk.h"
+#include "walk/BSFWalk.h"
+#include "walk/RandomWalk.h"
 
 std::mutex prod_mut;
 std::atomic_bool is_exit(false);
@@ -117,13 +119,14 @@ public:
     };
   }
   int operator()(const node_info& cur, const node_info& node) {
-    auto edges_1 = std::get<0>(cur);
-    auto edges_2 = std::get<0>(node);
+    auto edges_1 = std::get<0>(std::get<1>(cur));
+    auto edges_2 = std::get<0>(std::get<1>(node));
     std::vector<edge_t> edges(1);
     auto itr = std::set_intersection(edges_1.begin(), edges_1.end(), edges_2.begin(), edges_2.end(), edges.begin());
     if (itr - edges.begin()) {
       edge_t id = edges[0];
-      return (double)std::get<1>(RomaniaEdges[id]);
+      node_t nid = std::get<0>(cur);
+      return (double)std::get<1>(RomaniaEdges[id]) + _distance2Bucharest[nid];
     }
     return std::numeric_limits<double>::max();
   }
@@ -135,7 +138,7 @@ private:
 
 class AStarSelector: public IAStarWalkSelector< RomaniaHeuristic >{
 public:
-  AStarSelector(RomaniaHeuristic& h): IAStarWalkSelector("", h) {
+  AStarSelector(RomaniaHeuristic& h): IAStarWalkSelector(h) {
   }
 
   void start(node_t from) {
@@ -143,72 +146,53 @@ public:
   }
 };
 
-class BFSHeuristic : public IAStarHeuristic {
-public:
-  BFSHeuristic() :IAStarHeuristic((node_t)0) {}
-  int operator()(const node_info& cur, const node_info& node) {
-    return ++_order;
-  }
-
-private:
-  uint32_t _order = 0;;
-};
-
-class BFSSelector : public IAStarWalkSelector<BFSHeuristic> {
-public:
-  BFSSelector(BFSHeuristic& h) : IAStarWalkSelector("", h) {
-  }
-
-  void start(node_t from) {
-    _pos = from;
-  }
-};
 /**
  * https://people.math.osu.edu/husen.1/teaching/571/random_walks.pdf
  */
-//TEST_CASE("random walk algorithm") {
-//  GVirtualNetwork* net = new GVirtualNetwork(10);
-//  NodeVisitor visitor;
-//  NodeLoader loader(net);
-//  net->visit(VisitSelector::RandomWalk, "", visitor, loader);
-//  net->join();
-//  delete net;
-//  assert(cnt == 11);
-//  // fmt::print("walk: {}\n", vnames);
-//}
-
-TEST_CASE("bread search first walk algorithm") {
-  GVirtualNetwork* net = new GVirtualNetwork(100);
+TEST_CASE("random walk algorithm") {
+  GVirtualNetwork* net = new GVirtualNetwork(10);
   NodeVisitor visitor;
   NodeLoader loader(net);
-  BFSHeuristic h;
-  BFSSelector selector(h);
+  GRandomWalkSelector selector("");
   net->visit(selector, visitor, loader);
-  is_exit.store(true);
-  // std::this_thread::sleep_for(std::chrono::milliseconds(40));
+  net->join();
   delete net;
-  //assert(cnt == 11);
+  assert(cnt == 11);
+  // fmt::print("walk: {}\n", vnames);
 }
+
+//TEST_CASE("bread search first walk algorithm") {
+//  GVirtualNetwork* net = new GVirtualNetwork(100);
+//  NodeVisitor visitor;
+//  NodeLoader loader(net);
+//  GBFSHeuristic h((node_t)100);
+//  GBFSSelector selector(h);
+//  net->visit(selector, visitor, loader);
+//  is_exit.store(true);
+//  // std::this_thread::sleep_for(std::chrono::milliseconds(40));
+//  delete net;
+//  //assert(cnt == 11);
+//}
 
 TEST_CASE("A* walk algorithm") {
   is_exit.store(false);
   GVirtualNetwork* net = new GVirtualNetwork(10);
   NodeVisitor visitor;
   RomaniaLoader loader;
-  RomaniaHeuristic h((node_t)13);
   loader.loadRomania(net);
+  RomaniaHeuristic h((node_t)13);
   AStarSelector selector(h);
   selector.start((node_t)0);
   net->visit(selector, visitor, loader);
   net->join();
   is_exit.store(true);
   const std::list<node_t>& path = h.path();
-  assert(path.size() == 4);
   for (auto itr = path.begin(); itr != path.end(); ++itr) {
     std::string addr = std::get<2>(RomaniaNodes[*itr])[1];
     printf("%s -> ", addr.c_str());
   }
   printf("\n");
+  assert(path.size() == 4);
   auto itr = path.begin();
   assert(*itr++ == (node_t)1);
   assert(*itr++ == (node_t)8);

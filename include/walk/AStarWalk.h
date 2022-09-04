@@ -24,9 +24,8 @@ namespace gql {
 template<typename Heuristuc, typename Compare = std::less<gql::Order>>
 class GAStarWalk {
 public:
-  GAStarWalk(const std::string& prop, Heuristuc& h)
-    :_prop(prop)
-    , _heuristic(h)
+  GAStarWalk(Heuristuc& h)
+    :_heuristic(h)
   {}
 
   void stand(virtual_graph_t& vg, node_t id = (node_t)0) {
@@ -53,7 +52,7 @@ public:
         if (!_heuristicCache.count(id)) {
           GMap::node_collection collections;
           if (vg.visit(id, collections)) {
-            value = _heuristic(curInfo, collections);
+            value = _heuristic({ id_path.back(), curInfo }, { id, collections });
             _heuristicCache[id] = value;
             _visited.push_back(id);
             gql::Order order{ id_path, value };
@@ -86,14 +85,13 @@ private:
    * @brief record some node heuristic value. So if it's value is calculated, it will save in cache.
    */
   std::map<node_t, double> _heuristicCache;
-  std::string _prop;
   std::list<node_t> _visited;
 };
 
 template<typename Heuristic>
 class IAStarWalkSelector {
 public:
-  IAStarWalkSelector(const std::string& prop, Heuristic& h) : _walker(prop, h), _pos((node_t)0){}
+  IAStarWalkSelector(Heuristic& h) : _walker(h), _pos((node_t)0){}
   void stand(virtual_graph_t& vg) { _walker.stand(vg, _pos); }
 
   int walk(virtual_graph_t& vg, std::function<void(node_t, const node_info&)> f) {

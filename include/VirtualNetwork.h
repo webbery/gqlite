@@ -83,15 +83,15 @@ public:
     //GWalkFactory* factory = new GWalkFactory();
     //std::shared_ptr<IWalkStrategy> strategy = factory->createStrategy(selector, prop, heuristic);
     // wait for start
-    _event.on((int)VNMessage::NodeLoaded, [this, visitor, loader, &selector](const std::any& ) {
-      int result = selector.walk(_vg, visitor);
+    _event.on((int)VNMessage::NodeLoaded, [&event = this->_event,&vg = this->_vg, visitor, loader, &selector](const std::any& ) {
+      int result = selector.walk(vg, visitor);
       if (result & WalkResult::WR_Preload) {
         std::any a;
         if (loader.load()) {
-          _event.emit((int)VNMessage::NodeLoaded,a);
+          event.emit((int)VNMessage::NodeLoaded,a);
         }
         else {
-          _event.emit((int)VNMessage::LastNodeLoaded, a);
+          event.emit((int)VNMessage::LastNodeLoaded, a);
         }
       }
     });
@@ -111,7 +111,6 @@ public:
     else {
       _event.emit((int)VNMessage::LastNodeLoaded, a);
     }
-    //delete factory;
   }
 
   template<typename T, typename Visitor, typename DataLoader>

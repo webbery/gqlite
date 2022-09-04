@@ -173,14 +173,6 @@ void GStorageEngine::addMap(const std::string& prop, KeyType type) {
   }
 }
 
-bool GStorageEngine::compare(const std::string& left, const std::string& right) const
-{
-  if (left == right) return true;
-  if (left[left.size()] == '\0' && left.substr(0, left.size() - 1) == right) return true;
-  if (right[right.size()] == '\0' && right.substr(0, right.size() - 1) == left) return true;
-  return false;
-}
-
 bool GStorageEngine::isMapExist(const std::string& prop) {
   if (_schema.empty()) return false;
   const auto& props = _schema[SCHEMA_CLASS];

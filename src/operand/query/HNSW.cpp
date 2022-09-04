@@ -131,22 +131,44 @@ std::set<node_t> GHNSW::neighborhood(node_t id, uint8_t layer)
   return _network->neighbors(id);
 }
 
+std::set<node_t> GHNSW::selectNeighbors(node_t id, const std::map<node_t, std::vector<double>>& candidates, uint8_t count)
+{
+  std::set<node_t> n;
+  return n;
+}
+
+bool GHNSW::addDisk(node_t sid, uint8_t& level)
+{
+  std::string value;
+  if (_storage->read(_index + ":0", (uint64_t)sid, value) == ECode_DATUM_Not_Exist) {
+    level = getLayer(_revSize);
+    for (uint8_t idx = 0; idx <= level; ++idx) {
+      _storage->write(_index + ":" + std::to_string(idx), static_cast<uint64_t>(sid), value.data(), value.size());
+    }
+    return true;
+  }
+  for (; level < MAX_LAYER_SIZE; ++level)
+  {
+    if (_storage->read(_index + ":" + std::to_string(level + 1), (uint64_t)sid, value) == ECode_DATUM_Not_Exist) {
+      break;
+    }
+  }
+  return false;
+}
+
 void GHNSW::release()
 {
 }
 
-int GHNSW::add(uint64_t sid, const std::vector<double>& vec, bool persistence)
+int GHNSW::add(node_t sid, const std::vector<double>& vec, bool persistence)
 {
   // check sid exist in disk or not
-  std::string value;
-  NodeVisitor visitor;
-  NodeLoader loader;
-  if (_storage->read(_index + ":0", sid, value) == ECode_DATUM_Not_Exist) {
-    uint8_t level = getLayer(_revSize);
-    _network->visit(*_selector, visitor, loader);
-  }
-  else {
-    // update vector
+  uint8_t L = 0;
+  uint8_t newLevel = 0;
+  if (addDisk(sid, L)) newLevel = L;
+  else newLevel = getLayer(_revSize);
+  for (uint8_t level =L; level < newLevel + 1; ++level)
+  {
   }
   return 0;
 }

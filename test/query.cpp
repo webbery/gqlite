@@ -21,7 +21,7 @@ int main() {
     }
     std::string key = std::to_string(idx + 1);
     //fmt::print("upset: 'vertex_db', vertex: [['{}', @filename: '{}.jpg', feature_name: {}$]\n", key, key, vec);
-     instance->add(idx, vec, false);
+     instance->add(static_cast<node_t>(idx), vec, false);
   }
   std::vector< std::vector<double> > cond;
   instance->get({ 1 }, cond);

@@ -4,18 +4,18 @@
 #include <fmt/ranges.h>
 #endif
 
-GRandomWalk::GRandomWalk(const std::string& prop, double dumping)
+GRandomWalkSelector::GRandomWalkSelector(const std::string& prop, double dumping)
 : _distribution(0.5, 0.5)
 , _dumping(dumping)
 {
 }
 
-void GRandomWalk::stand(virtual_graph_t& vg)
+void GRandomWalkSelector::stand(virtual_graph_t& vg)
 {
 
 }
 
-int GRandomWalk::walk(virtual_graph_t& vg, std::function<void(node_t, const node_info&)> f) {
+int GRandomWalkSelector::walk(virtual_graph_t& vg, std::function<void(node_t, const node_info&)> f) {
   // auto itr = vg._mNodesInstance.begin();
   return WalkResult::WR_Visited|WalkResult::WR_Preload;
 }

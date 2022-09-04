@@ -31,7 +31,7 @@ namespace gql {
   };
   class GHNSWAStarSelector : public IAStarWalkSelector< GHNSWHeuristic > {
   public:
-    GHNSWAStarSelector(GHNSWHeuristic& h) : IAStarWalkSelector("", h) {}
+    GHNSWAStarSelector(GHNSWHeuristic& h) : IAStarWalkSelector(h) {}
 
     void start(node_t id) { _pos = id; }
   };
@@ -67,7 +67,7 @@ public:
    * @param persistence true means add element to disk only. If false, it will construct virtual graph and save to disk too.
    * @return int 
    */
-  int add(uint64_t sid, const std::vector<double>& vec, bool persistence);
+  int add(node_t sid, const std::vector<double>& vec, bool persistence);
   int erase(size_t sid);
   int query(const std::vector<double>& vec, size_t topK, std::vector<uint64_t>& ids);
   int get(const std::vector<uint64_t>& ids, std::vector<std::vector<double> >& vecs);
@@ -90,6 +90,10 @@ private:
   std::vector<double> id2vector(node_t id);
 
   std::set<node_t> neighborhood(node_t id, uint8_t layer);
+
+  std::set<node_t> selectNeighbors(node_t id, const std::map<node_t, std::vector<double>>& candidates, uint8_t count);
+
+  bool addDisk(node_t id, uint8_t& level);
 
   struct InternalVertex {
     std::string _id;

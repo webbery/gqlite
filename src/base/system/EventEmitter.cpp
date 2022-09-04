@@ -43,6 +43,7 @@ void GEventEmitter::clear() {
 void GEventEmitter::join() {
   while (_jobs.size()) {
     Job* job = _jobs.front();
+    printf("before delete job\n");
     _scheduler->wait([job, &jobs = this->_jobs]() {
       if (job->state() == JobStatus::Finished) {
         jobs.erase(jobs.begin());
@@ -53,6 +54,7 @@ void GEventEmitter::join() {
       return false;
     }, true);
   }
+  printf("before delete scheduler\n");
   if (_scheduler) {
     delete _scheduler;
     _scheduler = nullptr;
