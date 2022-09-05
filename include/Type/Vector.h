@@ -4,22 +4,24 @@
 #include <vector>
 #include <cassert>
 #include <stdio.h>
+#include "base/system/Platform.h"
 
-#ifdef __GNUC__
-#include <x86intrin.h>
-  #ifdef __SSE__
-  #endif
-#elif __clang__
-#elif _MSC_VER
+#ifdef _WIN32
 #include <intrin.h>
-
+#else
+  #if defined(__x86_64__) || defined(_M_X64) || defined(__i386__)
+    #include <x86intrin.h>
+  #elif defined(__ARM_ARCH__)
+#include <arm_neon.h>
+  #endif
 #endif
 
 namespace gql {
-
+#if defined(__x86_64__) || defined(_M_X64) || defined(__i386__)
   double sse2_distance2(const std::vector<double>& v1, const std::vector<double>& v2);
   double avx_distance2(const std::vector<double>& v1, const std::vector<double>& v2);
-
+#elif defined(__ARM_ARCH__)
+#endif
   double distance2(const std::vector<double>& v1, const std::vector<double>& v2);
   double distance2(const std::vector<double>& v);
 

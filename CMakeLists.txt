@@ -23,31 +23,53 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Zc:__cplusplus")
 # endforeach()
 ELSEIF (APPLE)
 set(CMAKE_CXX_FLAGS_RELEASE "$ENV{CXXFLAGS} -fpic -ftree-vectorize -Ofast")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native -fpic -ftree-vectorize -mfma -mavx")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpic -ftree-vectorize -mavx")
+# if (CMAKE_SYSTEM_NAME MATCHES "Android")
+# add_definitions(-DANDROID_ARM_NEON=TRUE)
+# else ()
+# set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native -mfma")
+# endif()
 ELSEIF (UNIX)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native -lrt -fpic -ftree-vectorize -fopenmp  -mfma -mavx")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpic -ftree-vectorize -fopenmp")
 set(CMAKE_C_FLAGS "-Wno-writable-strings -Wno-comment")
-	if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-		include(CodeCoverage.cmake)
-		APPEND_COVERAGE_COMPILER_FLAGS()
-		setup_target_for_coverage_gcovr_xml(
-			${PROJECT_NAME}_coverage NAME coverage
-			EXCLUDE
-				"include/json.hpp"
-				"tool/*"
-				"include/gql.hpp"
-				"include/gql.cpp"
-				"tool/getopt.c"
-				"tool/getopt.h"
-				"test/uint.hpp"
-				"third_party/catch2/catch.hpp"
-				"include/base/parallel/pam/*"
-				"include/base/parallel/parlay/*"
-		)
+
+if (CMAKE_SYSTEM_NAME MATCHES "Android")
+# ANDDOID 
+	add_definitions(-DANDROID_ARM_NEON=TRUE)
+	if (ANDROID_ABI MATCHES "armeabi-v7a")
+		add_definitions(-D__ARM_ARCH_2__)
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mfpu=neon")
+	elseif(ANDROID_ABI MATCHES "x86_64")
+		add_definitions(-D__x86_64__)
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mavx")
 	endif()
+else ()
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -lrt -march=native -mfma -mavx")
+endif()
+
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+	include(CodeCoverage.cmake)
+	APPEND_COVERAGE_COMPILER_FLAGS()
+	setup_target_for_coverage_gcovr_xml(
+		${PROJECT_NAME}_coverage NAME coverage
+		EXCLUDE
+			"include/json.hpp"
+			"tool/*"
+			"include/gql.hpp"
+			"include/gql.cpp"
+			"tool/getopt.c"
+			"tool/getopt.h"
+			"test/uint.hpp"
+			"third_party/catch2/catch.hpp"
+			"include/base/parallel/pam/*"
+			"include/base/parallel/parlay/*"
+	)
+endif()
 # ctest_coverage(BUILD test)
 ELSE ()
 ENDIF ()
+
+
 include(GetGitRevisionDescription.cmake)
 get_git_head_revision(GIT_REFSPEC GIT_REVISION_SHA)
 
@@ -114,6 +136,9 @@ add_subdirectory(third_party/zstd/build/cmake)
 add_subdirectory(third_party/fmt)
 option(GQLITE_BUILD_TEST    "build gqlite test"   OFF)
 if (GQLITE_BUILD_TEST)
+if (CMAKE_SYSTEM_NAME MATCHES "Android")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -funwind-tables -ffunction-sections")
+endif(CMAKE_SYSTEM_NAME MATCHES "Android")
 enable_testing()
 add_subdirectory(test)
 endif()

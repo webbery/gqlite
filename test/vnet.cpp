@@ -6,6 +6,7 @@
 #include "walk/AStarWalk.h"
 #include "walk/BSFWalk.h"
 #include "walk/RandomWalk.h"
+#include "walk/BidirectionWalk.h"
 
 std::mutex prod_mut;
 std::atomic_bool is_exit(false);
@@ -118,16 +119,21 @@ public:
       {(node_t)9, 193}, {(node_t)8, 253}, {(node_t)4, 329}, {(node_t)17, 80}, {(node_t)18, 199}, {(node_t)2, 374}
     };
   }
-  int operator()(const node_info& cur, const node_info& node) {
+  double operator()(const node_info& cur, const node_info& node) {
     auto edges_1 = std::get<0>(std::get<1>(cur));
     auto edges_2 = std::get<0>(std::get<1>(node));
     std::vector<edge_t> edges(1);
     auto itr = std::set_intersection(edges_1.begin(), edges_1.end(), edges_2.begin(), edges_2.end(), edges.begin());
     if (itr - edges.begin()) {
       edge_t id = edges[0];
-      node_t nid = std::get<0>(cur);
-      return (double)std::get<1>(RomaniaEdges[id]) + _distance2Bucharest[nid];
+      return (double)std::get<1>(RomaniaEdges[id]);
     }
+    return std::numeric_limits<double>::max();
+  }
+
+  double h(node_t id) {
+    if (_distance2Bucharest.count(id))
+      return _distance2Bucharest[id];
     return std::numeric_limits<double>::max();
   }
 
@@ -161,20 +167,21 @@ TEST_CASE("random walk algorithm") {
   // fmt::print("walk: {}\n", vnames);
 }
 
-//TEST_CASE("bread search first walk algorithm") {
-//  GVirtualNetwork* net = new GVirtualNetwork(100);
-//  NodeVisitor visitor;
-//  NodeLoader loader(net);
-//  GBFSHeuristic h((node_t)100);
-//  GBFSSelector selector(h);
-//  net->visit(selector, visitor, loader);
-//  is_exit.store(true);
-//  // std::this_thread::sleep_for(std::chrono::milliseconds(40));
-//  delete net;
-//  //assert(cnt == 11);
-//}
+TEST_CASE("bread search first walk algorithm") {
+ GVirtualNetwork* net = new GVirtualNetwork(100);
+ NodeVisitor visitor;
+ NodeLoader loader(net);
+ GBFSHeuristic h((node_t)100);
+ GBFSSelector selector(h);
+ net->visit(selector, visitor, loader);
+ is_exit.store(true);
+ // std::this_thread::sleep_for(std::chrono::milliseconds(40));
+ delete net;
+ //assert(cnt == 11);
+}
 
 TEST_CASE("A* walk algorithm") {
+  printf("Start A*\n");
   is_exit.store(false);
   GVirtualNetwork* net = new GVirtualNetwork(10);
   NodeVisitor visitor;
@@ -186,17 +193,18 @@ TEST_CASE("A* walk algorithm") {
   net->visit(selector, visitor, loader);
   net->join();
   is_exit.store(true);
-  const std::list<node_t>& path = h.path();
+  auto path = h.path();
   for (auto itr = path.begin(); itr != path.end(); ++itr) {
     std::string addr = std::get<2>(RomaniaNodes[*itr])[1];
-    printf("%s -> ", addr.c_str());
+    printf("%s(%ld) -> ", addr.c_str(), *itr);
   }
   printf("\n");
-  assert(path.size() == 4);
+  assert(path.size() == 5);
   auto itr = path.begin();
   assert(*itr++ == (node_t)1);
   assert(*itr++ == (node_t)8);
-  assert(*itr++ == (node_t)11);
+  assert(*itr++ == (node_t)9);
+  assert(*itr++ == (node_t)12);
   assert(*itr++ == (node_t)13);
   delete net;
   // fmt::print("walk: {}\n", vnames);

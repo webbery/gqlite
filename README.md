@@ -19,6 +19,7 @@ This is the expriments for testing abilities of graph database in ending device.
 	* 3.1. [ubuntu](#ubuntu)
 	* 3.2. [macos](#macos)
 	* 3.3. [windows](#windows)
+	* 3.4. [android](#android)
 * 4. [Graph Query Language](#GraphQueryLanguage)
 	* 4.1. [Create Graph](#CreateGraph)
 	* 4.2. [Data Types](#DataTypes)
@@ -55,28 +56,35 @@ Walking is used to be through graph. So it's best to select a well walking metho
 | binary support | support binary data | &check; | 0.0.1 |
 | drop graph | | &check; | 0.0.1 |
 | delete vertex | | &check; | 0.0.1 |
-| upset edge | | - | 0.1.0 |
+| upset edge | | &check; | 0.1.0 |
 | query edge | | -| 0.1.0 |
-| delete edge | | - | 0.1.0 |
+| delete edge | | &check; | 0.1.0 |
 | conectivity | | - | 0.1.0 |
 | N-adjacent | | - | 0.1.0 |
-| walk of BFS | | - | 0.1.0 |
+| walk of BFS | | &check; | 0.1.0 |
 | walk of DFS | | - | 0.1.0 |
 | walk of dijk | | - | 0.1.0 |
 | js support | implement a subset/extend of javasript for complex query. |  | 0.2.0 |
-| walk of A* | A* algrithm for graph search |  | 0.2.0 |
+| walk of A* | A* algrithm for graph search | &check; | 0.2.0 |
+| HNSW | vector search engine | - | 0.2.0 |
 | GiST index | boosting for more type search |  | 0.3.0 |
 | extension support | interface for GiST |  | 0.3.0 |
+| graph match |  | - | 0.4.0 |
 | HMM | bayes network support |  | 0.4.0 |
 | CRF | bayes network support |  | 0.4.0 |
 
 ##  3. <a name='Build'></a>Build
 Use command with `git clone --recursive https://github.com/webbery/gqlite.git` to clone this repository.
 ###  3.1. <a name='ubuntu'></a>ubuntu  
-Install latest version of bison.
+Install latest version of bison.  
 ###  3.2. <a name='macos'></a>macos  
+Install latest version of bison.  
 ###  3.3. <a name='windows'></a>windows  
-An version of flex&bison is placed in dir `tool`. So it's not need to install dependency.
+An version of flex&bison is placed in dir `tool`. So it's not need to install dependency.  
+###  3.4. <a name='android'></a>android  
+NDK version: 25  
+C++: 17  
+Cross-compile on Ubuntu/MacOS. Becasue cross-compile libzstd encounter some problem on Windows.  
 
 ##  4. <a name='GraphQueryLanguage'></a>Graph Query Language
 ###  4.1. <a name='CreateGraph'></a>Create Graph

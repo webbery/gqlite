@@ -28,10 +28,14 @@ printf(LEVEL "[%s:%d] [%s] " fmt "\033[22;0m\n",\
 
 class graph_bad_cast : public std::bad_cast {
 public:
-  graph_bad_cast(const char* msg): _info(msg){}
+  graph_bad_cast(const char* msg)
+  : _info(msg)
+  {}
 
-  virtual const char* what() const
-#ifdef __linux__
+  virtual const char* what() const 
+#if (defined __clang__)
+  noexcept
+#elif (defined __GNUC__)
   _GLIBCXX_USE_NOEXCEPT
 #elif __APPLE__
   _NOEXCEPT

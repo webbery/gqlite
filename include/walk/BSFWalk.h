@@ -10,6 +10,10 @@ public:
     return _order += 0.00005;
   }
 
+  double h(node_t id) {
+    return 0;
+  }
+
 private:
   double _order;
 };

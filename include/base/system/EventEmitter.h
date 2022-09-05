@@ -35,20 +35,19 @@ private:
   class Job {
   public:
     Job(std::atomic_bool& interrupt, std::function<void(const std::any&)> f, const std::any& args)
-      :_args(args), _f(f), _state(JobStatus::Ready), _intterrupt(interrupt){ _id = ++GEventEmitter::_id; }
+      :_args(args), _f(f), state(JobStatus::Ready), _intterrupt(interrupt){ _id = ++GEventEmitter::_id; }
     void operator()() {
-      if (_intterrupt) return;
+      if (_intterrupt.load()) return;
       printf("start task: %d\n", _id);
-      _state.store(JobStatus::Working);
+      state.store(JobStatus::Working);
       _f(_args);
-      _state.store(JobStatus::Finished);
+      state.store(JobStatus::Finished);
       printf("finish task: %d\n", _id);
     }
 
-    int state() { return _state.load(); }
     int _id;
+    std::atomic_char state;   /**< 0: ready, 1: working, 2: finished */
   private:
-    std::atomic_char _state;   /**< 0: ready, 1: working, 2: finished */
     std::function<void(const std::any&)> _f;
     std::any _args;
     std::atomic_bool& _intterrupt;
@@ -62,4 +61,5 @@ private:
   parlay::scheduler<Job>* _scheduler;
   std::vector<Job*> _jobs;
   std::atomic_bool _interrupt;
+  std::atomic_bool _joinable;
 };

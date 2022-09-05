@@ -78,8 +78,8 @@ public:
     std::set<node_t> n;
     node_collection collection = _nodes[id];
     edges_t& edges = std::get<0>(collection);
-    parlay::parallel_for(0, edges.size(), [&](size_t idx) {
-      edge_t& edgeID = edges[idx];
+
+    std::for_each(edges.begin(), edges.end(), [&](edge_t edgeID) {
       node_t to = std::get<0>(_edges[edgeID]).second;
       n.insert(to);
       });

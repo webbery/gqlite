@@ -54,7 +54,7 @@ static struct option lopts[] = {
 static void print_usage() {
   int idx = 0;
   while (help[idx]) {
-    printf(help[idx]);
+    printf("%s", help[idx]);
     idx++;
   }
 }
