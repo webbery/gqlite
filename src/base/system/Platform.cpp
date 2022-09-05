@@ -7,16 +7,19 @@
 #else
 #include <execinfo.h>
 #include <signal.h>
-#include <cpuid.h>
+  #if !(defined (ANDROID))
+  #include <cpuid.h>
 
-void _cpuid(int info[4], int InfoType)
-{
-  __cpuid_count(InfoType, 0, info[0], info[1], info[2], info[3]);
-}
+  void _cpuid(int info[4], int InfoType)
+  {
+    __cpuid_count(InfoType, 0, info[0], info[1], info[2], info[3]);
+  }
+  #endif
 #endif
 
 void isSSESupport(bool& sse2, bool& avx, bool& avx2)
 {
+#if !(defined (ANDROID))
   int info[4];
   _cpuid(info, 0);
   int nIds = info[0];
@@ -40,6 +43,7 @@ void isSSESupport(bool& sse2, bool& avx, bool& avx2)
     avx = false;
     avx2 = false;
   }
+#endif
 }
 
 bool isFileExist(const char* file)
@@ -67,8 +71,8 @@ std::string get_file_name(const char* pathname) {
   return fullpath.substr(pos + 1, fullpath.size() - pos - 1);
 }
 
-#ifdef _WIN32
-#else
+#if (defined _WIN32) || (defined ANDROID)
+#elif (defined __linux__)
 void GqliteBackTrace(int signalNum) {
 #define MAX_STACK_SIZE  100
   void* msg[MAX_STACK_SIZE];
@@ -84,8 +88,8 @@ void GqliteBackTrace(int signalNum) {
 #endif
 
 bool enableStackTrace(bool enable) {
-#ifdef _WIN32
-#else
+#if (defined _WIN32) || (defined ANDROID)
+#elif (defined __linux__)
   struct sigaction newAct;
   newAct.sa_handler = GqliteBackTrace;
   sigemptyset( &newAct.sa_mask );

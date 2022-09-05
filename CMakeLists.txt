@@ -23,31 +23,41 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Zc:__cplusplus")
 # endforeach()
 ELSEIF (APPLE)
 set(CMAKE_CXX_FLAGS_RELEASE "$ENV{CXXFLAGS} -fpic -ftree-vectorize -Ofast")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native -fpic -ftree-vectorize -mfma -mavx")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpic -ftree-vectorize -mfma -mavx")
+if (CMAKE_SYSTEM_NAME MATCHES "Android")
+else ()
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
+endif()
 ELSEIF (UNIX)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native -lrt -fpic -ftree-vectorize -fopenmp  -mfma -mavx")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpic -ftree-vectorize -fopenmp  -mfma -mavx")
 set(CMAKE_C_FLAGS "-Wno-writable-strings -Wno-comment")
-	if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-		include(CodeCoverage.cmake)
-		APPEND_COVERAGE_COMPILER_FLAGS()
-		setup_target_for_coverage_gcovr_xml(
-			${PROJECT_NAME}_coverage NAME coverage
-			EXCLUDE
-				"include/json.hpp"
-				"tool/*"
-				"include/gql.hpp"
-				"include/gql.cpp"
-				"tool/getopt.c"
-				"tool/getopt.h"
-				"test/uint.hpp"
-				"third_party/catch2/catch.hpp"
-				"include/base/parallel/pam/*"
-				"include/base/parallel/parlay/*"
-		)
-	endif()
+if (CMAKE_SYSTEM_NAME MATCHES "Android")
+else ()
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -lrt -march=native")
+endif()
+
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+	include(CodeCoverage.cmake)
+	APPEND_COVERAGE_COMPILER_FLAGS()
+	setup_target_for_coverage_gcovr_xml(
+		${PROJECT_NAME}_coverage NAME coverage
+		EXCLUDE
+			"include/json.hpp"
+			"tool/*"
+			"include/gql.hpp"
+			"include/gql.cpp"
+			"tool/getopt.c"
+			"tool/getopt.h"
+			"test/uint.hpp"
+			"third_party/catch2/catch.hpp"
+			"include/base/parallel/pam/*"
+			"include/base/parallel/parlay/*"
+	)
+endif()
 # ctest_coverage(BUILD test)
 ELSE ()
 ENDIF ()
+
 include(GetGitRevisionDescription.cmake)
 get_git_head_revision(GIT_REFSPEC GIT_REVISION_SHA)
 

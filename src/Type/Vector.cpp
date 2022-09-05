@@ -3,6 +3,8 @@
 
 namespace gql {
 
+#if (defined (ANDROID))
+#else
   double avx_distance2(const std::vector<double>& v1, const std::vector<double>& v2)
   {
     __m256d d1, d2;
@@ -25,14 +27,6 @@ namespace gql {
     return distance;
   }
 
-  bool is_same(const std::vector<int>& v1, const std::vector<int>& v2)
-  {
-    int value = 0;
-
-    if (value == 0) return true;
-    return false;
-  }
-
   bool sse2_is_same(const std::vector<double>& v1, const std::vector<double>& v2)
   {
     if (v1.size() != v2.size()) return false;
@@ -53,29 +47,6 @@ namespace gql {
     }
     return true;
   }
-
-  bool _is_same(const std::vector<double>& v1, const std::vector<double>& v2) {
-    if (v1.size() != v2.size()) return false;
-    for (size_t index = 0; index < v1.size(); ++index)
-    {
-      if (v1[index] != v2[index]) return false;
-    }
-    return true;
-  }
-
-  bool is_same(const std::vector<double>& v1, const std::vector<double>& v2)
-  {
-    bool sse2 = false, avx = false, avx2 = false;
-    isSSESupport(sse2, avx, avx2);
-    if (avx2 || avx) {}
-    else if (sse2) {
-      return sse2_is_same(v1, v2);
-    }
-    else {
-      return _is_same(v1, v2);
-    }
-  }
-
   double sse2_distance2(const std::vector<double>& v1, const std::vector<double>& v2)
   {
     __m128d d1, d2;
@@ -95,6 +66,41 @@ namespace gql {
       distance += *(result + i);
     }
     return distance;
+  }
+#endif
+
+  bool is_same(const std::vector<int>& v1, const std::vector<int>& v2)
+  {
+    int value = 0;
+
+    if (value == 0) return true;
+    return false;
+  }
+
+  bool _is_same(const std::vector<double>& v1, const std::vector<double>& v2) {
+    if (v1.size() != v2.size()) return false;
+    for (size_t index = 0; index < v1.size(); ++index)
+    {
+      if (v1[index] != v2[index]) return false;
+    }
+    return true;
+  }
+
+  bool is_same(const std::vector<double>& v1, const std::vector<double>& v2)
+  {
+#if !(defined (ANDROID))
+    bool sse2 = false, avx = false, avx2 = false;
+    isSSESupport(sse2, avx, avx2);
+    if (avx2 || avx) {}
+    else if (sse2) {
+      return sse2_is_same(v1, v2);
+    }
+    else {
+      return _is_same(v1, v2);
+    }
+#else
+    return _is_same(v1, v2);
+#endif
   }
 
   double distance2(const std::vector<double>& v1, const std::vector<double>& v2)
