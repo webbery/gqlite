@@ -7,10 +7,15 @@
 
 struct EntityNode;
 struct AttributeNode;
+
 struct EntityEdge {
   EntityNode* _start;
   EntityNode* _end;
   char* _label;
+  /**
+   * Super Edge when _extend is true
+   */
+  bool _extend;
 };
 
 using gkey_t = Variant<std::string, uint64_t>;

@@ -4,6 +4,7 @@
 #define __X86_ARCH__
 #elif defined(__ARM_ARCH_2__) || defined(__aarch64__) || defined(_M_ARM64)
 #define __ARM_ARCH__
+#elif defined(mips) || defined(__mips__) || defined(__mips)
 #endif
 
 #ifdef _WIN32

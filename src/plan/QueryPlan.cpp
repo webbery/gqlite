@@ -31,7 +31,7 @@ int GQueryPlan::execute(const std::function<ExecuteStatus(KeyType, const std::st
       result.nodes->_type = gqlite_node_type::gqlite_node_type_vertex;
       result.nodes->_vertex = new gqlite_vertex;
       if (type == KeyType::Integer) {
-        result.nodes->_vertex->uid = atoi((char*)key.data());
+        result.nodes->_vertex->uid = atoll((char*)key.data());
       }
       else {
         result.nodes->_vertex->cid = (char*)key.data();
