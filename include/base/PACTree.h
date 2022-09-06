@@ -5,7 +5,7 @@
 #include <type_traits>
 #include <iostream>
 
-#ifdef __linux
+#if (defined __linux) && !(defined (ANDROID))
 #define _PURE_CXX _GLIBCXX_PURE
 #else
 #define _PURE_CXX
