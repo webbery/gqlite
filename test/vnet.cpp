@@ -161,20 +161,21 @@ TEST_CASE("random walk algorithm") {
   // fmt::print("walk: {}\n", vnames);
 }
 
-//TEST_CASE("bread search first walk algorithm") {
-//  GVirtualNetwork* net = new GVirtualNetwork(100);
-//  NodeVisitor visitor;
-//  NodeLoader loader(net);
-//  GBFSHeuristic h((node_t)100);
-//  GBFSSelector selector(h);
-//  net->visit(selector, visitor, loader);
-//  is_exit.store(true);
-//  // std::this_thread::sleep_for(std::chrono::milliseconds(40));
-//  delete net;
-//  //assert(cnt == 11);
-//}
+TEST_CASE("bread search first walk algorithm") {
+ GVirtualNetwork* net = new GVirtualNetwork(100);
+ NodeVisitor visitor;
+ NodeLoader loader(net);
+ GBFSHeuristic h((node_t)100);
+ GBFSSelector selector(h);
+ net->visit(selector, visitor, loader);
+ is_exit.store(true);
+ // std::this_thread::sleep_for(std::chrono::milliseconds(40));
+ delete net;
+ //assert(cnt == 11);
+}
 
 TEST_CASE("A* walk algorithm") {
+  printf("Start A*\n");
   is_exit.store(false);
   GVirtualNetwork* net = new GVirtualNetwork(10);
   NodeVisitor visitor;

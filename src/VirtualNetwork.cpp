@@ -20,7 +20,7 @@ GVirtualNetwork::GVirtualNetwork(size_t maxMem)
 }
 
 GVirtualNetwork::~GVirtualNetwork() {
-  //_event.join();
+  _event.join();
 }
 
 int GVirtualNetwork::addNode(node_t id, const std::vector<node_attr_t>& attr, const nlohmann::json& value) {
