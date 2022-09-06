@@ -61,4 +61,5 @@ private:
   parlay::scheduler<Job>* _scheduler;
   std::vector<Job*> _jobs;
   std::atomic_bool _interrupt;
+  std::atomic_bool _joinable;
 };

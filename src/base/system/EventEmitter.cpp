@@ -8,6 +8,7 @@ int GEventEmitter::_id = 0;
 GEventEmitter::GEventEmitter()
 :_scheduler(new parlay::scheduler<Job>)
 , _interrupt(false)
+, _joinable(true)
 {}
 
 GEventEmitter::~GEventEmitter() {
@@ -29,7 +30,7 @@ void GEventEmitter::emit(int event, std::any& args) {
     printf("emit::add job %d\n", job->_id);
     _scheduler->spawn(job);
   }
-  scavenger();
+  if (_joinable.load()) scavenger();
 }
 
 void GEventEmitter::on(int event, std::function<void(const std::any&)> f) {
@@ -41,6 +42,7 @@ void GEventEmitter::clear() {
 }
 
 void GEventEmitter::join() {
+  _joinable.store(false);
   while (_jobs.size()) {
     Job* job = _jobs.front();
     printf("before delete job\n");
