@@ -5,16 +5,16 @@
 #include <fmt/printf.h>
 #ifdef _WIN32
 #else
-#include <execinfo.h>
 #include <signal.h>
-  #if !(defined (ANDROID))
-  #include <cpuid.h>
+#if defined(__X86_ARCH__)
+#include <execinfo.h>
+#include <cpuid.h>
 
-  void _cpuid(int info[4], int InfoType)
-  {
-    __cpuid_count(InfoType, 0, info[0], info[1], info[2], info[3]);
-  }
-  #endif
+void _cpuid(int info[4], int InfoType)
+{
+  __cpuid_count(InfoType, 0, info[0], info[1], info[2], info[3]);
+}
+#endif // __X86_ARCH__
 #endif
 
 void isSSESupport(bool& sse2, bool& avx, bool& avx2)

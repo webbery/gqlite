@@ -7,7 +7,9 @@
 
 namespace gql {
   struct Order {
+    //std::list<std::pair<node_t, double>> _ids;
     std::list<node_t> _ids;
+    double _g;
     double _h;
 
     bool operator < (const Order& other) const {
@@ -18,10 +20,11 @@ namespace gql {
     }
   };
 
-  void stand(virtual_graph_t& vg, std::priority_queue<Order, std::vector<Order>>&, node_t id);
+  using OrderQueue = std::priority_queue<Order, std::vector<Order>, std::greater<Order>>;
+  void stand(virtual_graph_t& vg, OrderQueue&, node_t id);
 }
 
-template<typename Heuristuc, typename Compare = std::less<gql::Order>>
+template<typename Heuristuc, typename Compare = std::greater<gql::Order>>
 class GAStarWalk {
 public:
   GAStarWalk(Heuristuc& h)
@@ -43,29 +46,28 @@ public:
       if (_heuristic.success(current._ids)) return WalkResult::WR_Stop;
       _queue.pop();
       auto id_path = current._ids;
-      auto neighbors = vg.neighbors(id_path.back());
+      auto last_id = id_path.back();
+      auto neighbors = vg.neighbors(last_id);
       GMap::node_collection curInfo;
-      vg.visit(id_path.back(), curInfo);
+      _visited.insert(last_id);
+      vg.visit(last_id, curInfo);
+      double history = current._g;
       for (node_t id : neighbors) {
-        if (vg.is_visited(id)) continue;
-        double value = 0;
-        if (!_heuristicCache.count(id)) {
-          GMap::node_collection collections;
-          if (vg.visit(id, collections)) {
-            value = _heuristic({ id_path.back(), curInfo }, { id, collections });
-            _heuristicCache[id] = value;
-            _visited.push_back(id);
-            gql::Order order{ id_path, value };
-            order._ids.push_back(id);
-            _queue.push(order);
-          }
-          else {
-            beforeLoad();
-            return WalkResult::WR_Preload | WalkResult::WR_UnVisit;
-          }
+        if (_visited.count(id)) {
+          continue;
+        }
+        GMap::node_collection collections;
+        if (vg.visit(id, collections)) {
+          auto d = _heuristic({ last_id, curInfo }, { id, collections });
+          auto h = _heuristic.h(id);
+          auto g = history + d;
+          gql::Order order{ id_path, g, g + h };
+          order._ids.push_back(id);
+          _queue.push(order);
         }
         else {
-
+          beforeLoad();
+          return WalkResult::WR_Preload | WalkResult::WR_UnVisit;
         }
       }
     } while (vg.size() - _visited.size() > 0 && _queue.size());
@@ -85,7 +87,7 @@ private:
    * @brief record some node heuristic value. So if it's value is calculated, it will save in cache.
    */
   std::map<node_t, double> _heuristicCache;
-  std::list<node_t> _visited;
+  std::set<node_t> _visited;
 };
 
 template<typename Heuristic>

@@ -1,5 +1,4 @@
 #include "Type/Vector.h"
-#include "base/system/Platform.h"
 
 namespace gql {
 
