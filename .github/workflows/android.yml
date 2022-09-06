@@ -31,15 +31,17 @@ jobs:
           cd ${{github.workspace}}
           git submodule foreach 'git fetch --tags --prune --force; git fetch origin; git checkout $(git describe --tags `git rev-list --tags --max-count=1`);'
       - name: Android NDK toolchain Setup
-        uses: ravinderjangra/android-ndk-toolchain-setup@0.1
+        uses: nttld/setup-ndk@v1
         with: 
-          api: '21'
-          arch: 'arm'
-          install-location: 'toolchains'
+          ndk-version: r21e
+          add-to-path: false
+      - run: ./build.sh
+        env:
+          ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
       - name: Build
         # Build your program with the given configuration
         run: |
-          cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}} -DCMAKE_TOOLCHAIN_FILE=toolchains/build/cmake/android.toolchain.cmake -DANDROID_NDK=toolchains -DANDROID_ABI=armeabi-v7a -DANDROID_PLATFORM=android-19 -DANDROID_STL=c++_shared -DGQLITE_BUILD_TEST=TRUE
+          cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}} -DCMAKE_TOOLCHAIN_FILE=${{env.ANDROID_NDK_HOME}}/build/cmake/android.toolchain.cmake -DANDROID_NDK=${{env.ANDROID_NDK_HOME}} -DANDROID_ABI=armeabi-v7a -DANDROID_PLATFORM=android-19 -DANDROID_STL=c++_shared -DGQLITE_BUILD_TEST=TRUE
       - name: Set up JDK 1.8
         uses: actions/setup-java@v1
         with:

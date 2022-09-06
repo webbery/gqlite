@@ -3,8 +3,7 @@
 
 namespace gql {
 
-#if (defined ANDROID)
-#else
+#if defined(__x86_64__) || defined(_M_X64) || defined(__i386__)
   double avx_distance2(const std::vector<double>& v1, const std::vector<double>& v2)
   {
     __m256d d1, d2;
@@ -67,6 +66,7 @@ namespace gql {
     }
     return distance;
   }
+#else
 #endif
 
   bool is_same(const std::vector<int>& v1, const std::vector<int>& v2)
@@ -88,7 +88,7 @@ namespace gql {
 
   bool is_same(const std::vector<double>& v1, const std::vector<double>& v2)
   {
-#if !(defined (ANDROID))
+#if defined(__x86_64__) || defined(_M_X64) || defined(__i386__)
     bool sse2 = false, avx = false, avx2 = false;
     isSSESupport(sse2, avx, avx2);
     if (avx2 || avx) {}
