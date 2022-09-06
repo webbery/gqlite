@@ -5,15 +5,15 @@
 #include <cassert>
 #include <stdio.h>
 
-#ifdef __linux__
+#ifdef _WIN32
+#include <intrin.h>
+#else
   #if defined(__x86_64__) || defined(_M_X64) || defined(__i386__)
     #include <x86intrin.h>
   #else
     #ifdef __SSE__
     #endif
   #endif
-#elif _MSC_VER
-#include <intrin.h>
 #endif
 
 namespace gql {
