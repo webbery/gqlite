@@ -6,20 +6,19 @@
 #include <stdio.h>
 
 #ifdef __linux__
-  #ifdef ANDROID
+  #if (defined ANDROID)
   #else
     #include <x86intrin.h>
     #ifdef __SSE__
     #endif
   #endif
-#elif __clang__
 #elif _MSC_VER
 #include <intrin.h>
 
 #endif
 
 namespace gql {
-#if (defined (ANDROID))
+#if (defined ANDROID)
 #else
   double sse2_distance2(const std::vector<double>& v1, const std::vector<double>& v2);
   double avx_distance2(const std::vector<double>& v1, const std::vector<double>& v2);

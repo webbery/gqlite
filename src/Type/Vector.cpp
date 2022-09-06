@@ -3,7 +3,7 @@
 
 namespace gql {
 
-#if (defined (ANDROID))
+#if (defined ANDROID)
 #else
   double avx_distance2(const std::vector<double>& v1, const std::vector<double>& v2)
   {

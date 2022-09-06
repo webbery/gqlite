@@ -13,8 +13,8 @@ jobs:
     runs-on: ubuntu-latest
 
   steps:
-    - name: Checkout
-      uses: actions/checkout@v2
+    - name: checkout
+      uses: actions/checkout@v3
       with:
         submodules: recursive
     - name: third_party
@@ -30,7 +30,7 @@ jobs:
         git branch
         cd ${{github.workspace}}
         git submodule foreach 'git fetch --tags --prune --force; git fetch origin; git checkout $(git describe --tags `git rev-list --tags --max-count=1`);'
-      - name: Android NDK toolchain Setup
+    - name: Android NDK toolchain Setup
       uses: ravinderjangra/android-ndk-toolchain-setup@0.1
       with: 
         api: '21'
@@ -38,7 +38,8 @@ jobs:
         install-location: 'toolchains'
     - name: Build
       # Build your program with the given configuration
-      run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}} -DCMAKE_TOOLCHAIN_FILE=toolchains/build/cmake/android.toolchain.cmake -DANDROID_NDK=toolchains -DANDROID_ABI=armeabi-v7a -DANDROID_PLATFORM=android-19 -DANDROID_STL=c++_shared -DGQLITE_BUILD_TEST=TRUE
+      run: |
+        cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}} -DCMAKE_TOOLCHAIN_FILE=toolchains/build/cmake/android.toolchain.cmake -DANDROID_NDK=toolchains -DANDROID_ABI=armeabi-v7a -DANDROID_PLATFORM=android-19 -DANDROID_STL=c++_shared -DGQLITE_BUILD_TEST=TRUE
     - name: Set up JDK 1.8
       uses: actions/setup-java@v1
       with:
