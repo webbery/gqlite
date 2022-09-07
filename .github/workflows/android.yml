@@ -10,7 +10,7 @@ env:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
 
     steps:
       - name: checkout
@@ -53,4 +53,4 @@ jobs:
           target: default
           arch: x86
           profile: Nexus 6
-          script: ./gradlew connectedCheck --stacktrace
+          script: chmod +x ./gradlew && ./gradlew connectedCheck --stacktrace
