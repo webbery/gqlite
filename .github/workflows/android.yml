@@ -34,7 +34,7 @@ jobs:
         id: setup-ndk
         uses: nttld/setup-ndk@v1
         with: 
-          ndk-version: r21e
+          ndk-version: r25
           add-to-path: false
       - name: Configure And Build
         env:
