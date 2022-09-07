@@ -55,6 +55,6 @@ jobs:
         with:
           api-level: 29
           target: default
-          arch: x86
+          arch: arm64
           profile: Nexus 6
-          script: chmod +x ./gradlew && ./gradlew connectedCheck --stacktrace
+          script: chmod +x ${{github.workspace}}/test/android.sh && ${{github.workspace}}/test/android.sh
