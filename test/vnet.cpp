@@ -6,6 +6,7 @@
 #include "walk/AStarWalk.h"
 #include "walk/BSFWalk.h"
 #include "walk/RandomWalk.h"
+#include "walk/BidirectionWalk.h"
 
 std::mutex prod_mut;
 std::atomic_bool is_exit(false);

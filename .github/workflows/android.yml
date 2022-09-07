@@ -53,8 +53,8 @@ jobs:
       - name: Instrumentation Tests
         uses: reactivecircus/android-emulator-runner@v2
         with:
-          api-level: 29
-          target: default
+          api-level: 30
+          target: aosp_atd
           arch: arm64-v8a
           profile: Nexus 6
           script: chmod +x ${{github.workspace}}/test/android.sh && ${{github.workspace}}/test/android.sh

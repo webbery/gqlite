@@ -76,6 +76,8 @@ public:
 private:
   void beforeLoad() {}
 
+
+
 private:
   Heuristuc& _heuristic;
   /**

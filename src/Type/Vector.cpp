@@ -66,6 +66,16 @@ namespace gql {
     return distance;
   }
 #else
+  //double neon_distance2(const std::vector<double>& v1, const std::vector<double>& v2) {
+  //  int loop = v1.size() / 2;
+  //  for (int cnt = 0; cnt < loop; ++cnt) {
+  //    auto tv1 = vld1q_f64(&v1[2 * cnt]);
+  //    auto tv2 = vld1q_f64(&v2[2 * cnt]);
+  //    auto d1 = vsubq_f64(tv1, tv2);
+  //    auto d = vmulq_f64(d1, d1);
+  //  }
+  //  return 0;
+  //}
 #endif
 
   bool is_same(const std::vector<int>& v1, const std::vector<int>& v2)
