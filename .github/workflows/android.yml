@@ -36,6 +36,10 @@ jobs:
         with: 
           ndk-version: r25
           add-to-path: false
+      - name: update flex/bison
+        run: |
+          brew install bison
+          echo "$(brew --prefix bison)/bin" >> $GITHUB_PATH
       - name: Configure And Build
         env:
           ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
