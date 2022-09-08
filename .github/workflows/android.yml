@@ -10,7 +10,7 @@ env:
 
 jobs:
   build:
-    runs-on: macos-latest
+    runs-on: macos-11
 
     steps:
       - name: checkout
@@ -54,7 +54,7 @@ jobs:
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 30
-          target: aosp_atd
+          target: google_apis
           arch: x86_64
-          profile: Nexus 6
+          profile: pixel_2
           script: chmod +x ${{github.workspace}}/test/android.sh && ${{github.workspace}}/test/android.sh
