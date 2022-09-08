@@ -57,5 +57,6 @@ jobs:
           target: google_apis
           arch: x86_64
           profile: pixel_2
-          sdcard-path-or-size: /sdcard
+          sdcard-path-or-size: 100M
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           script: chmod +x ${{github.workspace}}/test/android.sh && ${{github.workspace}}/test/android.sh
