@@ -1,6 +1,6 @@
 #!/bin/bash
 
-adb shell sh mount -o rw,remount /
+adb shell mount -o rw,remount /
 
 adb shell mkdir /sdcard/test
 adb shell mkdir /sdcard/test/edge
