@@ -57,4 +57,5 @@ jobs:
           target: google_apis
           arch: x86_64
           profile: pixel_2
+          sdcard-path-or-size: /sdcard
           script: chmod +x ${{github.workspace}}/test/android.sh && ${{github.workspace}}/test/android.sh
