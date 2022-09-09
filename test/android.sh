@@ -1,6 +1,10 @@
 #!/bin/bash
 
 adb root
+adb shell avbctl disable-verification
+adb reboot
+adb root
+adb remount
 adb shell mount -o rw,remount /
 
 adb shell mkdir /storage/emulated/0/test
