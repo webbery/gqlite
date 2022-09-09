@@ -15,7 +15,7 @@ adb push build/test/vnet /storage/emulated/0/test/
 adb push build/test/storage /storage/emulated/0/test/
 adb push build/test/movielens /storage/emulated/0/test/
 adb push build/test/regress /storage/emulated/0/test/
-adb push build/test/query /storage/emulated/0/test/
+# adb push build/test/query /storage/emulated/0/test/
 adb push build/test/grammar /storage/emulated/0/test/
 adb push test/edge/grammar.gql /storage/emulated/0/test/edge/
 adb push test/error/errorinfo.gql /storage/emulated/0/test/error/
@@ -26,12 +26,10 @@ adb push test/walk/grammar.gql /storage/emulated/0/test/walk/
 adb shell sh /storage/emulated/0/test/vnet
 adb shell sh /storage/emulated/0/test/storage
 adb shell sh /storage/emulated/0/test/grammar
-adb shell sh /storage/emulated/0/test/query
+# adb shell sh /storage/emulated/0/test/query
 adb shell sh /storage/emulated/0/test/movielens
 adb shell sh /storage/emulated/0/test/regress --inputdir=/storage/emulated/0/test/vertex --outputdir=/storage/emulated/0/test/vertex
 adb shell sh /storage/emulated/0/test/regress --inputdir=/storage/emulated/0/test/edge --outputdir=/storage/emulated/0/test/edge
 adb shell sh /storage/emulated/0/test/regress --inputdir=/storage/emulated/0/test/error --outputdir=/storage/emulated/0/test/error
-adb shell sh /storage/emulated/0/test/regress --inputdir=/storage/emulated/0/test/graphs --outputdir=/storage/emulated/0/test/graphs
-adb shell sh /storage/emulated/0/test/regress --inputdir=/storage/emulated/0/test/query --outputdir=/storage/emulated/0/test/query
 adb shell sh /storage/emulated/0/test/regress --inputdir=/storage/emulated/0/test/util --outputdir=/storage/emulated/0/test/util
 adb shell sh /storage/emulated/0/test/regress --inputdir=/storage/emulated/0/test/walk --outputdir=/storage/emulated/0/test/walk
