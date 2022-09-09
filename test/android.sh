@@ -1,6 +1,7 @@
 #!/bin/bash
 
 adb root
+adb disable-verity
 adb shell mount -o rw,remount /
 
 adb shell mkdir /storage/emulated/0/test
