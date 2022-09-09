@@ -14,8 +14,8 @@ jobs:
     strategy:
       matrix:
         include:
-          - arch: x86_64
-        # arch: ['armeabi-v7a', 'x86', 'x86_64']
+          - arch: ['x86_64', 'armeabi-v7a']
+        # arch: [, 'x86', 'x86_64']
 
     steps:
       - name: checkout
