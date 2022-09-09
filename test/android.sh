@@ -3,6 +3,7 @@
 adb root
 adb shell avbctl disable-verification
 adb reboot
+adb wait-for-device
 adb root
 adb remount
 adb shell mount -o rw,remount /
