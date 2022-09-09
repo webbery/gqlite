@@ -13,7 +13,8 @@ jobs:
     runs-on: macos-11
     strategy:
       matrix:
-        arch: ['x86_64', 'armeabi-v7a']
+        arch: ['x86_64']
+        # arch: ['x86_64', 'armeabi-v7a']
 
     steps:
       - name: checkout
