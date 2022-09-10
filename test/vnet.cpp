@@ -8,7 +8,6 @@
 #include "walk/RandomWalk.h"
 #include "walk/BidirectionWalk.h"
 
-std::mutex prod_mut;
 std::atomic_bool is_exit(false);
 
 using NodeInfo = std::tuple<GMap::edges_t, std::vector<GMap::node_attr_t>, nlohmann::json>;
@@ -78,9 +77,11 @@ public:
     for (auto& item : RomaniaNodes) {
       if (_net->addNode(item.first, std::get<1>(item.second), std::get<2>(item.second))) return false;
     }
+#if defined(GQLITE_ENABLE_PRINT)
     printf("current cnt: %d\n", cnt);
-    if (_net->addEdge((edge_t)0, (GMap::node_t)4, (GMap::node_t)5)) return false;
-    if (_net->addEdge((edge_t)1, (GMap::node_t)5, (GMap::node_t)4)) return false;
+#endif
+    _net->addEdge((edge_t)0, (GMap::node_t)4, (GMap::node_t)5);
+    _net->addEdge((edge_t)1, (GMap::node_t)5, (GMap::node_t)4);
     return true;
   }
 private:
@@ -120,8 +121,8 @@ public:
     };
   }
   double operator()(const node_info& cur, const node_info& node) {
-    auto edges_1 = std::get<0>(std::get<1>(cur));
-    auto edges_2 = std::get<0>(std::get<1>(node));
+    auto edges_1 = std::get<0>(std::get<1>(cur))[0];
+    auto edges_2 = std::get<0>(std::get<1>(node))[0];
     std::vector<edge_t> edges(1);
     auto itr = std::set_intersection(edges_1.begin(), edges_1.end(), edges_2.begin(), edges_2.end(), edges.begin());
     if (itr - edges.begin()) {
@@ -207,5 +208,23 @@ TEST_CASE("A* walk algorithm") {
   assert(*itr++ == (node_t)12);
   assert(*itr++ == (node_t)13);
   delete net;
-  // fmt::print("walk: {}\n", vnames);
+}
+
+TEST_CASE("performance") {
+  GVirtualNetwork* net = new GVirtualNetwork(10);
+  NodeVisitor visitor;
+  RomaniaLoader loader;
+  loader.loadRomania(net);
+  int index = 0;
+  BENCHMARK("A* Search Benchmark") {
+    is_exit.store(false);
+    RomaniaHeuristic h((node_t)14);
+    AStarSelector selector(h);
+    selector.start((node_t)1);
+    net->visit(selector, visitor, loader);
+    net->join();
+    is_exit.store(true);
+    ++index;
+  };
+  delete net;
 }

@@ -1,5 +1,5 @@
 #pragma once
-#include "base/parallel/gql_map.h"
+#include "base/parallel/GraphModel.h"
 
 class GGreaterHeuristic {
 public:

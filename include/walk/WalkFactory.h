@@ -1,12 +1,13 @@
 #pragma once
 #include <queue>
 #include <functional>
-#include "base/parallel/gql_map.h"
+#include "base/parallel/GraphModel.h"
 
 class GNode;
 class GEntityNode;
 class GAttributeNode;
 using virtual_graph_t = GMap;
+using node_const_iterator = GMap::pam_node::const_iterator;
 // using virtual_graph_t = GMap<GNode*, std::tuple<GEntityNode*, GAttributeNode*>>;
 
 enum class VisitSelector {

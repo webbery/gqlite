@@ -38,11 +38,15 @@ private:
       :_args(args), _f(f), state(JobStatus::Ready), _intterrupt(interrupt){ _id = ++GEventEmitter::_id; }
     void operator()() {
       if (_intterrupt.load()) return;
+#if defined(GQLITE_ENABLE_PRINT)
       printf("start task: %d\n", _id);
+#endif
       state.store(JobStatus::Working);
       _f(_args);
       state.store(JobStatus::Finished);
+#if defined(GQLITE_ENABLE_PRINT)
       printf("finish task: %d\n", _id);
+#endif
     }
 
     int _id;

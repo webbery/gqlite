@@ -13,6 +13,26 @@ class GNode;
 class GEntityNode;
 class GAttributeNode;
 
+template<typename T, typename Container = std::vector<T>>
+bool addUniqueDataAndSort(Container& pDest, T src) {
+  auto ptr = std::lower_bound(pDest.begin(), pDest.end(), src);
+  if (ptr == pDest.end() || *ptr != src) {
+    pDest.insert(ptr, src);
+    return false;
+  }
+  return true;  // exist
+}
+
+template<typename T, typename Container = std::vector<T>>
+bool eraseSortedData(Container& vDest, T tgt) {
+  auto ptr = std::lower_bound(vDest.begin(), vDest.end(), tgt);
+  if (ptr != vDest.end() && *ptr == tgt) {
+    vDest.erase(ptr);
+    return true;
+  }
+  return false;
+}
+
 class GEmptyHeuristic {
 public:
   double operator()(const node_info& cur, const node_info& node) {
@@ -41,17 +61,16 @@ public:
   GVirtualNetwork(size_t maxMem);
   ~GVirtualNetwork();
 
-  void startWalk();
-  void stopWalk();
-  
   /**
    * @brief 
    * 
    * @param id 
    * @param attr 
-   * @param value 
+   * @param value
+   * @param level Hierarchical layer level
    */
-  int addNode(node_t id, const std::vector<node_attr_t>& attr, const nlohmann::json& value);
+  int addNode(node_t id, const std::vector<node_attr_t>& attr = {},
+              const nlohmann::json& value = nlohmann::json(), uint8_t level = 0);
 
   /**
    * @brief add an edge. It only discribe one direction. If it is a bidirection, another edge must be added.
@@ -63,14 +82,17 @@ public:
    * @param value edge attributes data
    */
   int addEdge(edge_t id, node_t from, node_t to,
-    const std::vector<node_attr_t>& attr = std::vector<node_attr_t>(), const nlohmann::json& value = nlohmann::json());
+    const std::vector<node_attr_t>& attr = std::vector<node_attr_t>(), const nlohmann::json& value = nlohmann::json(), int8_t level = 0);
+
+  int deleteEdge(edge_t id, bool mark = true);
 
   void join();
 
   void release();
 
   /**
-   * @brief visit virtual network
+   * @brief visit virtual network. 
+   * Note: If network is not completely build, don't use this interface.
    * 
    * @tparam Visitor 
    * @tparam DataLoader 
@@ -80,8 +102,6 @@ public:
    */
   template<typename Selector, typename Visitor, typename DataLoader>
   void visit(Selector& selector, Visitor visitor, DataLoader loader) {
-    //GWalkFactory* factory = new GWalkFactory();
-    //std::shared_ptr<IWalkStrategy> strategy = factory->createStrategy(selector, prop, heuristic);
     // wait for start
     _event.on((int)VNMessage::NodeLoaded, [&event = this->_event,&vg = this->_vg, visitor, loader, &selector](const std::any& ) {
       int result = selector.walk(vg, visitor);
@@ -96,12 +116,16 @@ public:
       }
     });
     _event.on((int)VNMessage::LastNodeLoaded, [](const std::any&) {
+#if defined(GQLITE_ENABLE_PRINT)
       printf("finish\n");
+#endif
       });
     _event.on((int)VNMessage::WalkInterrupt, [](const std::any&) {
     });
     _event.on((int)VNMessage::WalkStop, [](const std::any& a) {
+#if defined(GQLITE_ENABLE_PRINT)
       printf("stop\n");
+#endif
       });
     std::any a;
     if (loader.load()) {
@@ -113,21 +137,27 @@ public:
     }
   }
 
-  template<typename T, typename Visitor, typename DataLoader>
-  void node(T key, Visitor visitor) {
+  GMap::node_collection access(node_t key) {
     GMap::node_collection collection;
     if (!_vg.visit(key, collection)) {
       // load data
 
     }
+    return collection;
   }
 
-  std::set<node_t> neighbors(node_t node);
+  bool neighbors(node_t node, std::set<node_t>& n, int8_t level = 0);
 
   template<typename T>
   bool isVisited(T key) {
     return _vg.is_visited(key);
   }
+
+  size_t node_size();
+
+  node_const_iterator node_begin() const;
+  node_const_iterator node_end() const;
+
 private:
   size_t clean() { _vg.clean(); return 0;}
 
@@ -136,7 +166,9 @@ private:
 
   GEventEmitter _event;
 
-  virtual_graph_t _vg;
-
   std::vector<std::string> _groups;
+#if defined(_PRINT_FORMAT_)
+public:
+#endif
+  virtual_graph_t _vg;
 };

@@ -47,11 +47,12 @@ public:
       _queue.pop();
       auto id_path = current._ids;
       auto last_id = id_path.back();
-      auto neighbors = vg.neighbors(last_id);
-      GMap::node_collection curInfo;
       _visited.insert(last_id);
+      GMap::node_collection curInfo;
       vg.visit(last_id, curInfo);
       double history = current._g;
+      std::set<node_t> neighbors;
+      if (!vg.neighbors(last_id, neighbors)) continue;
       for (node_t id : neighbors) {
         if (_visited.count(id)) {
           continue;
@@ -69,6 +70,7 @@ public:
           beforeLoad();
           return WalkResult::WR_Preload | WalkResult::WR_UnVisit;
         }
+        vg.neighbors(last_id, neighbors);
       }
     } while (vg.size() - _visited.size() > 0 && _queue.size());
     return 0;

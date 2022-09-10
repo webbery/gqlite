@@ -8,8 +8,9 @@
 #include <map>
 #include <random>
 #include "walk/AStarWalk.h"
+#include "base/IDGenerator.h"
+#include "StorageEngine.h"
 
-#define MAX_LAYER_SIZE  4
 #define MAX_NEIGHBOR_SIZE   8
 #define MAX_DIMENSION     128
 #define MAX_INDEX_COUNT   1*1024*1024
@@ -60,11 +61,15 @@ public:
   void release();
 
   /**
+   * save graph to disk
+   */
+  void save();
+  /**
    * @brief 
    * 
    * @param sid 
    * @param vec 
-   * @param persistence true means add element to disk only. If false, it will construct virtual graph and save to disk too.
+   * @param persistence is true means add element to disk only. If false, it will construct virtual graph and save to disk too.
    * @return int 
    */
   int add(node_t sid, const std::vector<double>& vec, bool persistence);
@@ -81,9 +86,9 @@ private:
    * @param ep entry point
    * @param topK the number of nearest elements
    * @param layer layer number
-   * @return std::vector<uint64_t> 
+   * @return 
    */
-  std::vector<node_t> queryLayer(const std::vector<double>& vec, node_t ep, size_t topK, uint8_t layer);
+  std::list< std::tuple<node_t, double, std::vector<double>>> queryLayer(const std::vector<double>& vec, node_t ep, size_t topK, uint8_t layer);
 
   std::vector<node_t> knnSearch(const std::vector<double>& vec, size_t topK);
 
@@ -91,20 +96,29 @@ private:
 
   std::set<node_t> neighborhood(node_t id, uint8_t layer);
 
-  std::set<node_t> selectNeighbors(node_t id, const std::map<node_t, std::vector<double>>& candidates, uint8_t count);
+  std::set<node_t> selectNeighbors(const std::vector<double>& vec,
+              const std::list<std::tuple<node_t, double, std::vector<double>>>& candidates, uint8_t count, int8_t level);
 
-  bool addDisk(node_t id, uint8_t& level);
+  /**
+   * If id exist in disk, return false. Else add node to disk, put it in layer index, then return true.
+   * @param level return the top layer that is added.
+   */
+  bool addDisk(node_t id, const std::vector<double>& value, int8_t level);
+  void addNode2Edge(node_t nodeID, const std::vector<double>& vec, int8_t newLevel);
 
-  struct InternalVertex {
-    std::string _id;
-    std::vector<float> _data;
-  };
+  uint8_t getTopLevel(node_t id);
 
-  struct LayerVertex {
-    InternalVertex* _vertex;
-    std::vector< InternalVertex* > _neighbors;
-    LayerVertex* _nextLayerVertex;
-  };
+  /**
+   * Get top layer entry point
+   */
+  node_t entry(int8_t& level);
+
+  /**
+   * Construct virtual network from disk
+   */
+  void initNet();
+
+  void readEachLayer(int8_t level, std::function<void(int8_t level, const mdbx::cursor::move_result& data)> f);
 
 private:
   class NodeVisitor {
@@ -121,9 +135,6 @@ private:
 
 private:
   NSWDistance _distype;
-  std::array<LayerVertex*, MAX_LAYER_SIZE> _layers;
-  std::array<size_t, MAX_LAYER_SIZE> _sizes;
-  //std::map<std::string, HNSW*> _mHNSWs;
   std::string _activeGraph;
   /**
    * an index name in graph database
@@ -134,6 +145,7 @@ private:
   gql::GHNSWHeuristic _heuristic;
   gql::GHNSWAStarSelector* _selector;
   GVirtualNetwork* _network;
+  bool _updated;
   
   std::default_random_engine _levelGenerator;
   
@@ -151,4 +163,8 @@ private:
    * @brief normalization factor for level generation
    */
   double _revSize;
+
+  GIDGenerator<edge_t> _edgeIDGenerator;
+  // each layer nodes, for quick search in graph
+  std::array<std::set<node_t>, MAX_LAYER_SIZE> _cache;
 };

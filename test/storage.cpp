@@ -4,31 +4,6 @@
 #include <catch.hpp>
 #include <fstream>
 
-#define GRAPH_NAME  "g1"
-
-#define PRINT_NODE(g, nodeid) \
-{\
-  std::cout << "==== try to get node: "<<nodeid<<"\n";\
-  engine.getNode(g, nodeid, [](const char* key, void* value, int type, void*)->int {\
-  std::cout << "    " << key <<": ";\
-  switch (type)\
-  {\
-  case 3:\
-    std::cout << (const char*)value << std::endl;\
-    break;\
-  case 5:\
-    std::cout << *(int*)value << std::endl;\
-    break;\
-  case 6:\
-    std::cout << *(unsigned int*)value << std::endl;\
-    break;\
-  default:\
-    break;\
-  }\
-  return 0;\
-});\
-}
-
 void readCSV(const std::string& name, std::function<void(char*)> cb, bool skip_head = true) {
   std::string csv = _WORKING_DIR_ "/data/ml-latest-small/" + name;
   std::ifstream fs;
