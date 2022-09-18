@@ -194,19 +194,24 @@ TEST_CASE("A* walk algorithm") {
   net->visit(selector, visitor, loader);
   net->join();
   is_exit.store(true);
-  auto path = h.path();
-  for (auto itr = path.begin(); itr != path.end(); ++itr) {
-    std::string addr = std::get<2>(RomaniaNodes[*itr])[1];
-    printf("%s(%ld) -> ", addr.c_str(), *itr);
+  std::vector<uint64_t> path;
+  for (auto nid : h.path()) {
+    path.push_back((uint64_t)nid);
   }
-  printf("\n");
   assert(path.size() == 5);
+  //for (auto itr = path.begin(); itr != path.end(); ++itr) {
+  //  std::string addr = std::get<2>(RomaniaNodes[*itr])[1];
+  //  printf("%s(%ld) -> ", addr.c_str(), *itr);
+  //}
+  std::vector<uint64_t> ln = { 1, 8, 9, 12, 13 };
+  CHECK_THAT(path, Catch::Matchers::Equals(ln));
+  //printf("\n");
   auto itr = path.begin();
-  assert(*itr++ == (node_t)1);
-  assert(*itr++ == (node_t)8);
-  assert(*itr++ == (node_t)9);
-  assert(*itr++ == (node_t)12);
-  assert(*itr++ == (node_t)13);
+  assert(*itr++ == 1);
+  assert(*itr++ == 8);
+  assert(*itr++ == 9);
+  assert(*itr++ == 12);
+  assert(*itr++ == 13);
   delete net;
 }
 

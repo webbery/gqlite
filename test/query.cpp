@@ -26,7 +26,7 @@ TEST_CASE("add operation") {
     std::string key = std::to_string(idx + 1);
     instance->add(static_cast<node_t>(idx), vec, false);
   }
-  print(net->_vg);
+  //print(net->_vg);
   instance->save();
   delete storage;
   delete net;
