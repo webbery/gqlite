@@ -316,7 +316,8 @@ int GStorageEngine::write(const std::string& mapname, uint64_t key, const nlohma
     //appendValue(info.second, info.first, value, data);
   }
   std::string data = value.dump();
-  return write(mapname, key, data.data(), data.size());
+  write(mapname, key, data.data(), data.size());
+  return 0;
 }
 
 int GStorageEngine::read(const std::string& prop, const std::string& key, std::string& value) {

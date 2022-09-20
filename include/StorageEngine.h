@@ -7,6 +7,14 @@
 #include "json.hpp"
 #include "base/type.h"
 
+#define TEST_TIME(func) {\
+  auto startTime = std::chrono::high_resolution_clock::now();\
+  {func;}\
+  auto endTime = std::chrono::high_resolution_clock::now();\
+  std::chrono::duration<double, std::milli> fp_ms = endTime - startTime;\
+  printf("cost %fms\n",fp_ms.count());\
+}
+
 #define SCHEMA_GRAPH_NAME       "name"
 #define SCHEMA_CLASS            "cls"
 #define SCHEMA_CLASS_KEY        "key_type"

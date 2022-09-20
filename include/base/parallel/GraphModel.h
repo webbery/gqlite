@@ -4,12 +4,16 @@
 #endif
 #include <map>
 #include <set>
+#include <list>
 #include "parlay/sequence.h"
 #include "json.hpp"
 #include "Graph/Node.h"
 #include "Graph/Edge.h"
 
 #define MAX_LAYER_SIZE  4
+
+#define GetNodeStatus(node) std::get<3>(node)
+#define GetNodeConnectedEdges(node) std::get<0>(node)
 
 class GNode; 
 class GMap {
@@ -19,13 +23,15 @@ public:
   using node_literal_t = uint32_t;
 
   using nodes_t = std::pair<node_t, node_t>;
-  using node_attrs_t = parlay::sequence<node_attr_t>;
+  using node_attrs_t = std::list<node_attr_t>;
 
   enum class edge_t : uint64_t {};
   using edge_attr_t = uint8_t;
 
-  using edges_t = parlay::sequence<edge_t>;
-  using edge_attrs_t = parlay::sequence<edge_attr_t>;
+  //using edges_t = parlay::sequence<edge_t>;
+  //using edge_attrs_t = parlay::sequence<edge_attr_t>;
+  using edges_t = std::list<edge_t>;
+  using edge_attrs_t = std::list<edge_attr_t>;
 
   // <edges, attribute nodes, json info>
   // keep attribute for match topo structure
@@ -36,6 +42,7 @@ public:
 
   enum {
     no_node = UINT64_MAX,
+    no_edge = UINT64_MAX,
   };
   ~GMap() {
 #if defined(GQLITE_ENABLE_PRINT)
@@ -86,12 +93,13 @@ public:
   /**
    * return true if id's neighbors exist.
    */
-  bool neighbors(node_t id, std::set<node_t>& n, uint8_t layer = 0) {
+  bool neighbors(node_t id, std::set<node_t>& n, uint8_t level = 0) {
     if (_nodes.count(id) != 0) {
-      node_collection collection = _nodes[id];
+      node_collection& collection = _nodes[id];
       auto& edges = std::get<0>(collection);
-
-      std::for_each(edges[layer].begin(), edges[layer].end(), [&](edge_t edgeID) {
+      auto& layer = edges[level];
+      std::for_each(layer.begin(), layer.end(), [this, id, &n](edge_t edgeID) {
+        if (_edges.count(edgeID) == 0) return;
         auto status = std::get<3>(_edges[edgeID]);
         if (status.del == false) {
           node_t to = std::get<0>(_edges[edgeID]).second;
@@ -116,7 +124,11 @@ public:
   const pam_node& nodes() const { return _nodes; }
   pam_edge& edges() { return _edges; }
   const pam_edge& edges() const { return _edges; }
-
+  const edges_t& edges(node_t id, int8_t level) const {
+    const node_collection& collection = _nodes.at(id);
+    auto& edges = std::get<0>(collection);
+    return edges[level];
+  }
   
 private:
   parlay::sequence<node_t> _visitedNodes;

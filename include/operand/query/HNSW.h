@@ -72,7 +72,7 @@ public:
    * @param persistence is true means add element to disk only. If false, it will construct virtual graph and save to disk too.
    * @return int 
    */
-  int add(node_t sid, const std::vector<double>& vec, bool persistence);
+  int add(node_t sid, const std::vector<double>& vec);
   int erase(size_t sid);
   int query(const std::vector<double>& vec, size_t topK, std::vector<uint64_t>& ids);
   int get(const std::vector<uint64_t>& ids, std::vector<std::vector<double> >& vecs);
@@ -119,6 +119,8 @@ private:
   void initNet();
 
   void readEachLayer(int8_t level, std::function<void(int8_t level, const mdbx::cursor::move_result& data)> f);
+
+  void clipEdgeThenKeepNeighborSize(node_t node, int8_t level, size_t maxNeighbor);
 
 private:
   class NodeVisitor {

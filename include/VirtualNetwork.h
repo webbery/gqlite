@@ -72,6 +72,8 @@ public:
   int addNode(node_t id, const std::vector<node_attr_t>& attr = {},
               const nlohmann::json& value = nlohmann::json(), uint8_t level = 0);
 
+  int deleteNode(node_t id, bool mark = true);
+
   /**
    * @brief add an edge. It only discribe one direction. If it is a bidirection, another edge must be added.
    * 
@@ -147,6 +149,7 @@ public:
   }
 
   bool neighbors(node_t node, std::set<node_t>& n, int8_t level = 0);
+  bool neighbors(node_t node, std::set<edge_t>& n, int8_t level = 0);
 
   template<typename T>
   bool isVisited(T key) {
@@ -157,6 +160,11 @@ public:
 
   node_const_iterator node_begin() const;
   node_const_iterator node_end() const;
+
+  nlohmann::json node_info(node_t id) const;
+  nlohmann::json edge_info(edge_t id) const;
+
+  edge_t getEdgeID(node_t from, node_t to) const;
 
 private:
   size_t clean() { _vg.clean(); return 0;}

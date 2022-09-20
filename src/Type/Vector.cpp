@@ -66,17 +66,26 @@ namespace gql {
     return distance;
   }
 #else
-  //double neon_distance2(const std::vector<double>& v1, const std::vector<double>& v2) {
-  //  int loop = v1.size() / 2;
-  //  for (int cnt = 0; cnt < loop; ++cnt) {
-  //    auto tv1 = vld1q_f64(&v1[2 * cnt]);
-  //    auto tv2 = vld1q_f64(&v2[2 * cnt]);
-  //    auto d1 = vsubq_f64(tv1, tv2);
-  //    auto d = vmulq_f64(d1, d1);
-  //  }
-  //  return 0;
-  //}
+  float neon_distance2(const std::vector<float>& v1, const std::vector<float>& v2) {
+    int loop = v1.size() / 4;
+    float store[4] = {0};
+    auto dis = vld1q_f32(store);
+    for (int cnt = 0; cnt < loop; ++cnt) {
+        auto tv1 = vld1q_f32(&v1[4 * cnt]);
+        auto tv2 = vld1q_f32(&v2[4 * cnt]);
+        auto d1 = vsubq_f32(tv1, tv2);
+        auto d = vmulq_f32(d1, d1);
+        dis = vaddq_f32(dis, d);
+    }
+    vst1q_f32(store, dis);
+    float distance = 0;
+    for (int8_t i = 0; i < 4; ++i) {
+        distance += store[i];
+    }
+    return distance;
+  }
 #endif
+
 
   bool is_same(const std::vector<int>& v1, const std::vector<int>& v2)
   {
@@ -118,7 +127,21 @@ namespace gql {
     const double* p1 = &v1[0];
     const double* p2 = &v2[0];
     double v = 0;
-    for (size_t i = 0; i < v1.size(); ++i) {
+#if defined(__x86_64__) || defined(_M_X64) || defined(__i386__)
+    int rest = v1.size() % 2;
+    bool sse2 = false, avx = false, avx2 = false;
+    isSSESupport(sse2, avx, avx2);
+    if ((avx2 || avx) && v1.size() >= 4) {
+      rest = v1.size() / 4;
+      v = avx_distance2(v1, v2);
+    }
+    else if (sse2 && v1.size() >= 2) {
+      v = sse2_distance2(v1, v2);
+    }
+#else
+    int rest = v1.size();
+#endif
+    for (size_t i = v1.size() - rest; i < rest; ++i) {
       v += ((*(p1 + i)) - *(p2 + i)) * (*(p1 + i) - *(p2 + i));
     }
     return v;

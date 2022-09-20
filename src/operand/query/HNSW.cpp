@@ -16,6 +16,10 @@ namespace {
   bool operator == (const node_detail& left, const node_detail& right) {
     return std::get<0>(left) == std::get<0>(right);
   }
+
+  bool operator < (const node_detail& left, double dis) {
+    return std::get<1>(left) < dis;
+  }
 }
 
 GHNSW::GHNSW(GVirtualNetwork* network, GStorageEngine* store, const char* index_name, const char* prop, const char* graph /*= nullptr*/)
@@ -182,6 +186,7 @@ std::set<node_t> GHNSW::neighborhood(node_t id, uint8_t layer)
       node_t* nodes = (node_t*)value.data();
       n.insert(nodes, nodes + value.size() / sizeof(node_t));
     }
+    //printf("neighbor: %ld\n", n.size());
   }
   return n;
 }
@@ -227,14 +232,23 @@ void GHNSW::addNode2Edge(node_t nodeID, const std::vector<double>& vec, int8_t n
     ep = std::get<0>(node);
   }
   for (int8_t level = std::min(startLevel, newLevel); level >= 0; --level) {
-    auto W = queryLayer(vec, ep, _ef, (uint8_t)level);
+    std::list<std::tuple<node_t, double, std::vector<double>>> W;
+    //TEST_TIME(
+      W = queryLayer(vec, ep, _ef, (uint8_t)level);
+    //);
+    std::map<node_t, double> mNodes;
+    for (auto itr = W.begin(); itr != W.end(); ++itr) {
+      mNodes[std::get<0>(*itr)] = std::get<1>(*itr);
+    }
     std::set<node_t> neighbors = selectNeighbors(vec, W, _M, level);
     for (auto nid : neighbors) {
       // hnsw has no circle loop
       if (nodeID == nid) continue;
       edge_t eid = _edgeIDGenerator.generate();
-      _network->addEdge(eid, nodeID, nid, {}, {}, level);
-      _network->addEdge(eid, nid, nodeID, {}, {}, level);
+      clipEdgeThenKeepNeighborSize(nodeID, level, _M - 1);
+      clipEdgeThenKeepNeighborSize(nid, level, _M - 1);
+      _network->addEdge(eid, nodeID, nid, {}, mNodes[nid], level);
+      _network->addEdge(eid, nid, nodeID, {}, mNodes[nid], level);
     }
   }
 }
@@ -312,6 +326,29 @@ void GHNSW::readEachLayer(int8_t level, std::function<void(int8_t level, const m
   } while (true);
 }
 
+void GHNSW::clipEdgeThenKeepNeighborSize(node_t node, int8_t level, size_t maxNeighbor)
+{
+  std::set<edge_t> neighbors;
+  _network->neighbors(node, neighbors, level);
+  if (neighbors.size() >= maxNeighbor) {
+    double f = 0;
+    edge_t eid = (edge_t)GMap::no_edge;
+    std::for_each(neighbors.begin(), neighbors.end(), [&](edge_t id) {
+      double d = _network->edge_info(id);
+      if (d >= f) {
+        f = d;
+        eid = id;
+      }
+    });
+    if (eid != (edge_t)GMap::no_edge) {
+      _network->deleteEdge(eid, false);
+    }
+    else {
+      printf("WARN: node %ld not delete edge\n", node);
+    }
+  }
+}
+
 void GHNSW::release()
 {
   save();
@@ -335,7 +372,7 @@ void GHNSW::save()
   }
 }
 
-int GHNSW::add(node_t sid, const std::vector<double>& vec, bool persistence)
+int GHNSW::add(node_t sid, const std::vector<double>& vec)
 {
   if (_network->node_size() == 0) {
     initNet();
@@ -343,17 +380,18 @@ int GHNSW::add(node_t sid, const std::vector<double>& vec, bool persistence)
   // check sid exist in disk or not
   int8_t level = getLayer(_revSize);
   if (addDisk(sid, vec, level)) {
-    //printf("add node %ld, level: %d\n", sid, level);
     _network->addNode(sid, {}, {}, level);
     addNode2Edge(sid, vec, level);
     _updated = true;
-  }
+  };
   return 0;
 }
 
 int GHNSW::erase(size_t sid)
 {
-  //_activeHNSW->_instance->markDelete(sid);
+  if (_network->node_size() == 0) {
+    initNet();
+  }
   _updated = true;
   return 0;
 }
