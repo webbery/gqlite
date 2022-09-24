@@ -6,17 +6,17 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-  thread_stack_t& get_tls() {
+  thread_stack_t& __attribute__((no_instrument_function)) get_tls() {
     thread_local thread_stack_t thread_info;
     return thread_info;
   }
-  void __attribute__((no_instrument_function)) __cyg_profile_func_enter(void* func, void* caller) {
-    thread_stack_t& info = get_tls();
-  }
+  // void __attribute__((no_instrument_function)) __cyg_profile_func_enter(void* func, void* caller) {
+  //   thread_stack_t& info = get_tls();
+  // }
 
-  void __attribute__((no_instrument_function)) __cyg_profile_func_exit(void* func, void* caller) {
+  // void __attribute__((no_instrument_function)) __cyg_profile_func_exit(void* func, void* caller) {
 
-  }
+  // }
 
 #ifdef __cplusplus
 }
