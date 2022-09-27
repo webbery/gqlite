@@ -12,7 +12,7 @@
   if (ret != ECode_Success) return ret;\
 }
 
-GUtilPlan::GUtilPlan(GVirtualNetwork* vn, GStorageEngine* store, GCreateStmt* stmt)
+GUtilPlan::GUtilPlan(std::map<std::string, GVirtualNetwork*>& vn, GStorageEngine* store, GCreateStmt* stmt)
 :GPlan(vn, store) {
     _type = UtilType::Creation;
     _var = stmt->name();
@@ -35,16 +35,21 @@ GUtilPlan::GUtilPlan(GVirtualNetwork* vn, GStorageEngine* store, GCreateStmt* st
       }
     }
     GASTNode* indexes = stmt->indexes();
-    if (indexes) {}
+    if (indexes) {
+      GArrayExpression* array = (GArrayExpression*)indexes->_value;
+      for (auto item : *array) {
+        _vParams3.emplace_back(GetString(item));
+      }
+    }
 }
 
-GUtilPlan::GUtilPlan(GVirtualNetwork* vn, GStorageEngine* store, GDropStmt* stmt)
+GUtilPlan::GUtilPlan(std::map<std::string, GVirtualNetwork*>& vn, GStorageEngine* store, GDropStmt* stmt)
 :GPlan(vn, store) {
   _type = UtilType::Drop;
   _var = stmt->name();
 }
 
-GUtilPlan::GUtilPlan(GVirtualNetwork* vn, GStorageEngine* store, GDumpStmt* stmt)
+GUtilPlan::GUtilPlan(std::map<std::string, GVirtualNetwork*>& vn, GStorageEngine* store, GDumpStmt* stmt)
   : GPlan(vn, store)
 {
   _type = UtilType::Dump;
@@ -82,13 +87,20 @@ int GUtilPlan::execute(const std::function<ExecuteStatus(KeyType, const std::str
       //printf("add map: %s\n", v.c_str());
       _store->addMap(v, KeyType::Uninitialize);
     }
+    for (auto& item : _vParams3) {
+      std::string v = std::get<std::string>(item);
+      //printf("add index: %s\n", v.c_str());
+      _store->addIndex(v);
+    }
   }
     break;
   case UtilType::Drop:
   {
     std::string graph = std::get<std::string>(_var);
+    _store->close();
     if (std::filesystem::exists(graph)) {
       if (std::remove(graph.c_str())) {
+        perror("drop");
         return ECode_DB_Drop_Fail;
       }
     }

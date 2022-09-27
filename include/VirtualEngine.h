@@ -1,6 +1,7 @@
 #pragma once
 #include <stdint.h>
 #include <string>
+#include <map>
 #include "base/MemoryPool.h"
 #include "base/lang/AST.h"
 
@@ -71,10 +72,10 @@ private:
   };
   struct PlanVisitor {
     PlanList* _plans = nullptr;
-    GVirtualNetwork* _vn;
+    std::map<std::string, GVirtualNetwork*>& _vn;
     GStorageEngine* _store;
     gqlite_callback _cb;
-    PlanVisitor(GVirtualNetwork* vn, GStorageEngine* store, gqlite_callback cb = nullptr):_vn(vn), _store(store){
+    PlanVisitor(std::map<std::string, GVirtualNetwork*>& vn, GStorageEngine* store, gqlite_callback cb = nullptr):_vn(vn), _store(store){
       _plans = new PlanList;
       _plans->_next = _plans;
       _plans->_parent = _plans;
@@ -123,5 +124,5 @@ private:
 
 private:
   MemoryPool<char> _memory;
-  GVirtualNetwork* _network;
+  std::map<std::string, GVirtualNetwork*> _networks;
 };

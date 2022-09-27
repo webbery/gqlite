@@ -248,12 +248,13 @@ std::tuple<GPACNode<T>*, GPACNode<T>*, GPACNode<T>*> expose(GPACNode<T>* tree) {
   class _Compressor {};
   }
 
-  template<typename K, typename V, typename Compressor=detail::_Compressor>
+  // implement of `PaC-trees: Supporting Parallel and Compressed Purely-Functional Collections`
+  template</*typename Ver, */typename Key, typename Val, typename Compressor=detail::_Compressor>
   class GPACTree {
   public:
-    typedef K key_type;
-    typedef std::pair<const K, V> value_type;
-    typedef detail::pac_tree<key_type, value_type, Compressor, std::less<K>> ptree_type;
+    typedef Key key_type;
+    typedef std::pair<const Key, Val> value_type;
+    typedef detail::pac_tree<key_type, value_type, Compressor, std::less<Key>> ptree_type;
     typedef typename ptree_type::iterator iterator;
     typedef typename ptree_type::const_iterator const_iterator;
 
@@ -264,7 +265,7 @@ std::tuple<GPACNode<T>*, GPACNode<T>*, GPACNode<T>*> expose(GPACNode<T>* tree) {
 
     size_t size() { return _t.size(); }
     
-    void set(const K&& key, const V&& value) {
+    void set(const Key&& key, const Val&& value) {
       // typename ptree_type::node_ptr n = _t.node(nullptr, std::make_pair(key, value), nullptr);
       _t.join(_t._header, std::make_pair(key, value), nullptr);
     }

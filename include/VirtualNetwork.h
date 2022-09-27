@@ -13,26 +13,6 @@ class GNode;
 class GEntityNode;
 class GAttributeNode;
 
-template<typename T, typename Container = std::vector<T>>
-bool addUniqueDataAndSort(Container& pDest, T src) {
-  auto ptr = std::lower_bound(pDest.begin(), pDest.end(), src);
-  if (ptr == pDest.end() || *ptr != src) {
-    pDest.insert(ptr, src);
-    return false;
-  }
-  return true;  // exist
-}
-
-template<typename T, typename Container = std::vector<T>>
-bool eraseSortedData(Container& vDest, T tgt) {
-  auto ptr = std::lower_bound(vDest.begin(), vDest.end(), tgt);
-  if (ptr != vDest.end() && *ptr == tgt) {
-    vDest.erase(ptr);
-    return true;
-  }
-  return false;
-}
-
 class GEmptyHeuristic {
 public:
   double operator()(const node_info& cur, const node_info& node) {

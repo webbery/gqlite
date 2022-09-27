@@ -1,5 +1,5 @@
 #pragma once
-
+#define OBJECT_TYPE_NAME  "_obj_t"
 typedef double REAL;
 
 enum NodeType {

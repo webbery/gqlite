@@ -27,9 +27,11 @@ namespace gql {
   std::vector<std::string> split(const char* str, const char* delim);
 
   /**
-   * @brief try generate a Unicode number by input string
+   * @brief try generate an identify number by input string.
+   * Note: Because of hash collision, so don't use in product but experiment.
+   *       So the better action is to use uint64_t as id.
    */
-  uint32_t unicode32(const std::string& input);
+  uint64_t hash64(const std::string& input);
 
   /**
    * @brief normalize input gql. remove `"` to `'`.
@@ -54,4 +56,24 @@ namespace gql {
   bool is_same_edge_id(const edge_id& left, const edge_id& right);
   bool operator == (const edge_id& left, const edge_id& right);
   bool operator < (const edge_id& left, const edge_id& right);
+}
+
+template<typename T, typename Container = std::vector<T>>
+bool addUniqueDataAndSort(Container& pDest, T src) {
+  auto ptr = std::lower_bound(pDest.begin(), pDest.end(), src);
+  if (ptr == pDest.end() || *ptr != src) {
+    pDest.insert(ptr, src);
+    return false;
+  }
+  return true;  // exist
+}
+
+template<typename T, typename Container = std::vector<T>>
+bool eraseSortedData(Container& vDest, T tgt) {
+  auto ptr = std::lower_bound(vDest.begin(), vDest.end(), tgt);
+  if (ptr != vDest.end() && *ptr == tgt) {
+    vDest.erase(ptr);
+    return true;
+  }
+  return false;
 }

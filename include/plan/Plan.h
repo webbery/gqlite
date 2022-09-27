@@ -24,7 +24,7 @@ enum class ExecuteStatus {
 
 class GPlan {
 public:
-  GPlan(GVirtualNetwork* network, GStorageEngine* store);
+  GPlan(std::map<std::string, GVirtualNetwork*>& networks, GStorageEngine* store);
   virtual ~GPlan();
   
   /** After Plan created, before Plan execute,
@@ -41,7 +41,7 @@ public:
 
   inline GPlan* left() { return _left; }
 protected:
-  GVirtualNetwork* _network;
+  std::map<std::string, GVirtualNetwork*>& _networks;
   GStorageEngine* _store;
   GPlan* _left;
   GPlan* _right;

@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <iostream>
 #include <atomic>
+#include "gutil.h"
 
 #ifdef WIN32
 #pragma comment(lib, BINARY_DIR "/" CMAKE_INTDIR "/zstd_static.lib")
@@ -65,15 +66,11 @@ GStorageEngine::GStorageEngine()
 
 GStorageEngine::~GStorageEngine() {
   close();
-  if (_env) _env.close();
 }
 
 int GStorageEngine::open(const char* filename, StoreOption option) {
   if (_env) {
     this->close();
-    _env.close();
-    //mdbx::env::info info = _env.get_info();
-    //info.
   }
   env::geometry db_geometry;
   env_managed::create_parameters create_param;
@@ -119,6 +116,7 @@ void GStorageEngine::close()
   }
   _txns.clear();
   releaseDict();
+  if (_env) _env.close();
 }
 
 mdbx::map_handle GStorageEngine::openSchema() {
@@ -162,9 +160,18 @@ void GStorageEngine::initDict(int compressLvl)
 
 void GStorageEngine::releaseDict()
 {
-  if (_cctx) ZSTD_freeCCtx(_cctx);
-  if (_cdict) ZSTD_freeCDict(_cdict);
-  if (_ddict) ZSTD_freeDDict(_ddict);
+  if (_cctx) {
+    ZSTD_freeCCtx(_cctx);
+    _cctx = nullptr;
+  }
+  if (_cdict) {
+    ZSTD_freeCDict(_cdict);
+    _cdict = nullptr;
+  }
+  if (_ddict) {
+    ZSTD_freeDDict(_ddict);
+    _ddict = nullptr;
+  }
 }
 
 void GStorageEngine::addMap(const std::string& prop, KeyType type) {
@@ -173,11 +180,26 @@ void GStorageEngine::addMap(const std::string& prop, KeyType type) {
   }
 }
 
+void GStorageEngine::addIndex(const std::string& indexname)
+{
+  if (!isIndexExist(indexname)) {
+    _schema[SCHEMA_INDEX][indexname] = 0;
+  }
+}
+
 bool GStorageEngine::isMapExist(const std::string& prop) {
   if (_schema.empty()) return false;
   const auto& props = _schema[SCHEMA_CLASS];
   if (props.is_null()) return false;
   return props.count(prop) != 0;
+}
+
+bool GStorageEngine::isIndexExist(const std::string& name)
+{
+  if (_schema.empty()) return false;
+  const auto& indexes = _schema[SCHEMA_INDEX];
+  if (indexes.is_null()) return false;
+  return indexes.count(name) != 0;
 }
 
 void GStorageEngine::tryInitKeyType(const std::string& prop, KeyType type)
@@ -198,19 +220,23 @@ void GStorageEngine::tryInitAttributeType(nlohmann::json& attributes, const std:
     uint8_t index = attributes.size();
     switch ((nlohmann::json::value_t)value) {
     case nlohmann::json::value_t::object:
-      if (value.count("_obj_type")) {
-        attributes[attr] = std::pair((AttributeKind)value["_obj_type"], index);
+      if (value.count(OBJECT_TYPE_NAME)) {
+        attributes[attr] = std::pair((AttributeKind)value[OBJECT_TYPE_NAME], index);
       }
       else {
         attributes[attr] = std::pair(AttributeKind::String, index);
       }
       break;
     case nlohmann::json::value_t::array:
+      //attributes[attr] = std::pair(AttributeKind::A, index);
+      //break;
     case nlohmann::json::value_t::string:
       attributes[attr] = std::pair(AttributeKind::String, index);
       break;
     case nlohmann::json::value_t::number_integer:
     case nlohmann::json::value_t::number_unsigned:
+      attributes[attr] = std::pair(AttributeKind::Integer, index);
+      break;
     case nlohmann::json::value_t::number_float:
       attributes[attr] = std::pair(AttributeKind::Number, index);
       break;
@@ -265,7 +291,7 @@ mdbx::map_handle GStorageEngine::getOrCreateHandle(const std::string& prop, mdbx
 }
 
 int GStorageEngine::write(const std::string& prop, const std::string& key, void* value, size_t len) {
-  assert(isMapExist(prop));
+  assert(isMapExist(prop)||isIndexExist(prop));
   tryInitKeyType(prop, KeyType::Byte);
   auto handle = getOrCreateHandle(prop, mdbx::key_mode::usual);
   thread_local auto id = std::this_thread::get_id();
@@ -290,7 +316,8 @@ int GStorageEngine::write(const std::string& mapname, const std::string& key, co
 {
   tryInitKeyType(mapname, KeyType::Byte);
   auto& attributes = _schema[SCHEMA_CLASS][mapname][SCHEMA_CLASS_VALUE];
-  // convert json to gqlite store format: attribute index(max value is 256), [if binary, here put size]data, index, data, ...
+  // TODO: convert json to gqlite store format: attribute index(max value is 256), [if binary, here put size]data, index, data, ...
+  nlohmann::json store;
   for (auto itr = value.begin(), end = value.end(); itr!=end;++itr)
   {
     const std::string& attr = itr.key();
@@ -321,7 +348,7 @@ int GStorageEngine::write(const std::string& mapname, uint64_t key, const nlohma
 }
 
 int GStorageEngine::read(const std::string& prop, const std::string& key, std::string& value) {
-  assert(isMapExist(prop));
+  assert(isMapExist(prop) || isIndexExist(prop));
   auto handle = getOrCreateHandle(prop, mdbx::key_mode::usual);
   thread_local auto id = std::this_thread::get_id();
   mdbx::slice data = ::get(_txns[id], handle, key);
@@ -348,7 +375,7 @@ int GStorageEngine::parse(const std::string& data, nlohmann::json& value)
 
 int GStorageEngine::del(const std::string& mapname, const std::string& key)
 {
-  assert(isMapExist(mapname));
+  assert(isMapExist(mapname) || isIndexExist(mapname));
   auto handle = getOrCreateHandle(mapname, mdbx::key_mode::usual);
   thread_local auto id = std::this_thread::get_id();
   if (::del(_txns[id], handle, key)) return ECode_Fail;
@@ -357,7 +384,7 @@ int GStorageEngine::del(const std::string& mapname, const std::string& key)
 
 int GStorageEngine::del(const std::string& mapname, uint64_t key)
 {
-  assert(isMapExist(mapname));
+  assert(isMapExist(mapname) || isIndexExist(mapname));
   auto handle = getOrCreateHandle(mapname, mdbx::key_mode::ordinal);
   thread_local auto id = std::this_thread::get_id();
   if (::del(_txns[id], handle, key)) return ECode_Fail;
@@ -365,7 +392,7 @@ int GStorageEngine::del(const std::string& mapname, uint64_t key)
 }
 
 int GStorageEngine::write(const std::string& prop, uint64_t key, void* value, size_t len) {
-  assert(isMapExist(prop));
+  assert(isMapExist(prop) || isIndexExist(prop));
   tryInitKeyType(prop, KeyType::Integer);
   auto handle = getOrCreateHandle(prop, mdbx::key_mode::ordinal);
   // compress
@@ -386,7 +413,7 @@ int GStorageEngine::write(const std::string& prop, uint64_t key, void* value, si
 
 }
 int GStorageEngine::read(const std::string& prop, uint64_t key, std::string& value) {
-  assert(isMapExist(prop));
+  assert(isMapExist(prop) || isIndexExist(prop));
   auto handle = getOrCreateHandle(prop, mdbx::key_mode::ordinal);
   thread_local auto id = std::this_thread::get_id();
   mdbx::slice data = ::get(_txns[id], handle, key);
@@ -397,7 +424,7 @@ int GStorageEngine::read(const std::string& prop, uint64_t key, std::string& val
 
 GStorageEngine::cursor GStorageEngine::getCursor(const std::string& prop)
 {
-  assert(isMapExist(prop));
+  assert(isMapExist(prop) || isIndexExist(prop));
   mdbx::key_mode mode = mdbx::key_mode::ordinal;
   auto pp = getProp(prop);
   auto type = (KeyType)pp[SCHEMA_CLASS_KEY];
@@ -439,4 +466,14 @@ KeyType GStorageEngine::getKeyType(const std::string& m) const
 {
   if (_schema[SCHEMA_CLASS][m].empty()) return KeyType::Uninitialize;
   return _schema[SCHEMA_CLASS][m][SCHEMA_CLASS_KEY];
+}
+
+std::vector<std::string> GStorageEngine::getIndexes() const
+{
+  std::vector<std::string> v;
+  if (_schema.empty() || _schema.count(SCHEMA_INDEX) == 0 || _schema[SCHEMA_INDEX].empty()) return v;
+  for (auto itr = _schema[SCHEMA_INDEX].begin(), end = _schema[SCHEMA_INDEX].end(); itr != end;++itr) {
+    v.emplace_back(itr.key());
+  }
+  return v;
 }

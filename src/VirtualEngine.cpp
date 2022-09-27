@@ -32,11 +32,14 @@ GVirtualEngine::GVirtualEngine(size_t memsize)
 , _cmdtype(GQL_Command_Size)
 , _result_callback(nullptr)
 {
-  _network = new GVirtualNetwork(memsize);
+  //_network = new GVirtualNetwork(memsize);
 }
 
 GVirtualEngine::~GVirtualEngine() {
-  delete _network;
+  for (auto& item: _networks)
+  {
+    delete item.second;
+  }
 }
 
 void GVirtualEngine::cleanPlans(PlanList* plans) {
@@ -58,7 +61,7 @@ void GVirtualEngine::cleanPlans(PlanList* plans) {
 
 GVirtualEngine::PlanList* GVirtualEngine::makePlans(GASTNode* ast) {
   if (ast == nullptr) return nullptr;
-  PlanVisitor visitor(_network, _storage, _result_callback);
+  PlanVisitor visitor(_networks, _storage, _result_callback);
   std::list<NodeType> ln;
   accept(ast, visitor, ln);
   return visitor._plans;

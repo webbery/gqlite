@@ -13,25 +13,30 @@ namespace gql {
     return result;
   }
 
-  uint32_t unicode32(const std::string& input)
+  uint64_t hash64(const std::string& input)
   {
+    constexpr short length = 8;
     std::string str(input);
-    char rest = str.size() % 4;
+    char rest = str.size() % length;
     if (rest != 0 || str.size() == 0) {
-      rest = 4 - rest;
+      rest = length - rest;
       for (char i = 0; i < rest; ++i) {
         str += '0';
       }
     }
-    uint32_t id = 0;
-    int times = str.size() / 4;
+    uint64_t id = 0;
+    int times = str.size() / length;
     for (int i = 0; i < times; ++i) {
-      int start = 4 * i;
+      int start = length * i;
       id += (
-        uint32_t(str[start + 3]) << 24 |
-        uint32_t(str[start + 2]) << 16 |
-        uint32_t(str[start + 1]) << 8 |
-        uint32_t(str[start]));
+        uint64_t(str[start + 7]) << 56 |
+        uint64_t(str[start + 6]) << 48 |
+        uint64_t(str[start + 5]) << 40 |
+        uint64_t(str[start + 4]) << 32 |
+        uint64_t(str[start + 3]) << 24 |
+        uint64_t(str[start + 2]) << 16 |
+        uint64_t(str[start + 1]) << 8 |
+        uint64_t(str[start]));
     }
     return id;
   }

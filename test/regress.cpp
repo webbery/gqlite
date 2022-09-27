@@ -15,6 +15,7 @@
 #include <fstream>
 #include "gqlite.h"
 #include "../tool/stdout.h"
+#include "base/Debug.h"
 
 #define REGRESS_VERSION   "0.1.0"
 
@@ -108,6 +109,9 @@ void close_capture(int pipe, FILE* fp) {
 }
 
 int main(int argc, char** argv) {
+#ifdef __linux__
+  init_coredump_capture();
+#endif
   parse_opt(argc, argv);
   std::filesystem::path inputs = std::filesystem::current_path();
   if (g_inputdir != ".") inputs = g_inputdir;
@@ -133,7 +137,7 @@ int main(int argc, char** argv) {
     std::string curfile = file.path().u8string();
     if (curfile.find("current.out") != std::string::npos || curfile.find("expect.out") != std::string::npos) continue;
     // load script
-    std::cout << "***** EXECUTE: " << file.path() << " *****" <<std::endl;
+    std::cout << "***** EXECUTE: " << file.path().filename() << " *****" <<std::endl;
     std::ifstream fs;
     fs.open(file.path().u8string().c_str(), std::ios_base::in);
     int lineno = 0;
@@ -151,7 +155,7 @@ int main(int argc, char** argv) {
       lineno += 1;
       memset(gql, 0, LINE_MAX_SIZE);
     }
-    std::cout << "***** EXECUTE FINISH: " << file.path() << " *****" << std::endl;
+    std::cout << "***** EXECUTE FINISH: " << file.path().filename() << " *****" << std::endl;
   }
   gqlite_close(gHandle);
   close_capture(outfd, fp);
@@ -198,7 +202,7 @@ int main(int argc, char** argv) {
       }
     }
     else {
-      //is_ok = false;
+      is_ok = false;
     }
 #else
     // fprintf(stderr, "%s", (int)status);

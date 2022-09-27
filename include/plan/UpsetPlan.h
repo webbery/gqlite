@@ -7,6 +7,7 @@
 #include "gutil.h"
 #include "json.hpp"
 #include "Graph/GRAD.h"
+#include "operand/query/HNSW.h"
 
 #define ATTRIBUTE_SET(item) \
   [&](int value) {\
@@ -22,10 +23,10 @@
     item[_key] = nlohmann::json::binary(value.raw());\
   },\
   [&](gql::GDatetime value) {\
-    item[_key] = { {"value", value.value()}, {"_obj_type", AttributeKind::Datetime} };\
+    item[_key] = { {"value", value.value()}, {OBJECT_TYPE_NAME, AttributeKind::Datetime} };\
   },\
   [&](gql::vector_double value) {\
-    item[_key] = { {"value", value.value()}, {"_obj_type", AttributeKind::Vector} };\
+    item[_key] = { {"value", value.value()}, {OBJECT_TYPE_NAME, AttributeKind::Vector} };\
   }
 
 #define ATTRIBUTE_PUSH(item) \
@@ -42,16 +43,16 @@
     item.emplace_back(nlohmann::json::binary(value.raw()));\
   },\
   [&](gql::GDatetime value) {\
-    item.push_back({ {"value", value.value()}, {"_obj_type", AttributeKind::Datetime} });\
+    item.push_back({ {"value", value.value()}, {OBJECT_TYPE_NAME, AttributeKind::Datetime} });\
   },\
   [&](gql::vector_double value) {\
-    item[_key] = { {"value", value.value()}, {"_obj_type", AttributeKind::Vector} };\
+    item[_key] = { {"value", value.value()}, {OBJECT_TYPE_NAME, AttributeKind::Vector} };\
   }
 
 struct GASTNode;
 class GUpsetPlan: public GPlan {
 public:
-  GUpsetPlan(GVirtualNetwork* vn, GStorageEngine* store, GUpsetStmt* stmt);
+  GUpsetPlan(std::map<std::string, GVirtualNetwork*>& vn, GStorageEngine* store, GUpsetStmt* stmt);
   ~GUpsetPlan();
 
   virtual int prepare();
@@ -109,9 +110,6 @@ private:
         _values.emplace_back(date);
       }
         break;
-      case AttributeKind::Vector:
-        // TODO:
-        break;
       case AttributeKind::Integer:
         _values.push_back(atoi(stmt->raw().c_str()));
         break;
@@ -126,9 +124,7 @@ private:
       }
       return VisitFlow::Children;
     }
-    VisitFlow apply(GArrayExpression* stmt, std::list<NodeType>& path) {
-      return VisitFlow::Children;
-    }
+    VisitFlow apply(GArrayExpression* stmt, std::list<NodeType>& path);
     VisitFlow apply(GEdgeDeclaration* stmt, std::list<NodeType>& path) {
       return VisitFlow::Children;
     }
@@ -142,7 +138,7 @@ private:
     void add() {
       if (!_key.empty()) {
         if (_values.size() == 1) {
-          _values[0].visit(ATTRIBUTE_SET(_jsonify[_key]));
+          _values[0].visit(ATTRIBUTE_SET(_jsonify));
         }
         else {
           for (auto& item : _values)
@@ -211,9 +207,72 @@ private:
 private:
   bool upsetVertex();
   bool upsetEdge();
+  bool upsetIndex(const std::string& index, uint64_t id);
+  bool upsetIndex(const std::string& index, const std::string& id);
+  void addVectorIndex(const std::string& index, const std::string& id, const std::vector<double>& v);
+  void addVectorIndex(const std::string& index, uint32_t id, const std::vector<double>& v);
+  GVirtualNetwork* generateNetwork(const std::string& branch);
+
+  template<typename T>
+  bool upsetIndex(const nlohmann::json& item, const T& id) {
+    for (auto& index : _indexes) {
+      if (item.count(index) == 0) continue;
+      auto& value = item[index];
+      if (value.is_object() && value.count(OBJECT_TYPE_NAME)) {
+        switch ((AttributeKind)value[OBJECT_TYPE_NAME])
+        {
+        case AttributeKind::Vector:
+        {
+          if (!_hnsws.count(index)) {
+            // group name + index name can fix identity name
+            std::string k = _class + ":" + index;
+            GVirtualNetwork* net = generateNetwork(k);
+            _hnsws[index] = new GHNSW(net, _store, index.c_str(), (index + ":v").c_str());
+          }
+          addVectorIndex(index, id, value["value"]);
+        }
+          break;
+        default:
+          break;
+        }
+      }
+      else if (value.is_string()) {
+        std::string k = value;
+        std::string data;
+        _store->read(index, k, data);
+        std::vector<T> v((T*)data.data(), (T*)data.data() + data.size()/sizeof(T));
+        addUniqueDataAndSort(v, id);
+        _store->write(index, k, v.data(), v.size()*sizeof(T));
+      }
+      else if (value.is_number_unsigned()) {
+        uint64_t k = value;
+        std::string data;
+        _store->read(index, k, data);
+        std::vector<T> v((T*)data.data(), (T*)data.data() + data.size() / sizeof(T));
+        addUniqueDataAndSort(v, id);
+        _store->write(index, k, v.data(), v.size() * sizeof(T));
+      }
+      else if (value.is_number_integer()) {
+        int k = value;
+        std::string bin((char*)&k, sizeof(int));
+        std::string data;
+        _store->read(index, bin, data);
+        std::vector<T> v((T*)data.data(), (T*)data.data() + data.size() / sizeof(T));
+        addUniqueDataAndSort(v, id);
+        _store->write(index, bin, v.data(), v.size());
+      }
+      else {
+        printf("%s unknow type: %s", index.c_str(), value.type_name());
+      }
+    }
+    return true;
+  }
 private:
   bool _vertex;       /**< true if upset target is vertex, else is edge */
   std::string _class;
   std::map<gkey_t, nlohmann::json> _vertexes;
   std::map<gql::edge_id, std::string> _edges;
+  std::vector<std::string> _indexes;
+  // 
+  std::map<std::string, GHNSW*> _hnsws;
 };

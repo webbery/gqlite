@@ -113,10 +113,10 @@ Normaly, basic data type as follows:
     **string**: 'string'  
     **number**: 10 means integer, 10.0 means real number.   
     **array**: start as `[` and end with `]`  
-    **binary**:  start with `b`, then follow as base64 string, it will save as binary data. Such as `b'df32099'`  
-    **datetime**: start with `d`, then will try to convert following string to datetime, such as `d'1642262159'`  
+    **binary**:  start with `0b`, then follow as base64 string, it will save as binary data. Such as `0b'df32099'`  
+    **datetime**: start with `0d`, then will try to convert following string to datetime, such as `0d'1642262159'`  
     **vector**: a special type of array, which items are same type.  
-    **hash**: a special type of string, start with `h` like `h'hash'`  
+    **hash**: a special type of string, start with `0h` like `0h'hash'`  
 ###  5.3. <a name='AddVertexEdge'></a>Add Vertex & Edge
 add or update vertex:
 ```javascript

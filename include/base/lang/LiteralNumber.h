@@ -1,5 +1,6 @@
 #pragma once
 #include "Literal.h"
+#include <type_traits>
 
 template<typename T>
 class GLiteralNumber : public GLiteral {
@@ -12,7 +13,7 @@ public:
   }
 
   AttributeKind kind() const {
-    return AttributeKind::Number;
+    return std::is_floating_point<T>::value ? AttributeKind::Number : AttributeKind::Integer;
   }
   
 private:

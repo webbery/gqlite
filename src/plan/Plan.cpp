@@ -5,10 +5,10 @@ void init_result_nodes(gqlite_result& result)
 
 }
 
-GPlan::GPlan(GVirtualNetwork* network, GStorageEngine* store)
+GPlan::GPlan(std::map<std::string, GVirtualNetwork*>& networks, GStorageEngine* store)
 : _left(nullptr), _right(nullptr)
 , _store(store)
-, _network(network) {}
+, _networks(networks) {}
 
 GPlan::~GPlan() {
   if (_left) delete _left;

@@ -7,18 +7,22 @@
 #include <fmt/printf.h>
 #include <fmt/color.h>
 
-GUpsetPlan::GUpsetPlan(GVirtualNetwork* vn, GStorageEngine* store, GUpsetStmt* ast)
+GUpsetPlan::GUpsetPlan(std::map<std::string, GVirtualNetwork*>& vn, GStorageEngine* store, GUpsetStmt* ast)
 :GPlan(vn, store)
 ,_class(ast->name()) {
   UpsetVisitor visitor(*this);
   std::list<NodeType> ln;
   accept(ast->node(), visitor, ln);
+  _indexes = _store->getIndexes();
 }
 
 GUpsetPlan::~GUpsetPlan()
 {
   for (auto& item: _edges) {
     gql::release_edge_id(item.first);
+  }
+  for(auto hnsw: _hnsws) {
+    delete hnsw.second;
   }
 }
 
@@ -48,14 +52,28 @@ bool GUpsetPlan::upsetVertex()
           fmt::print(fmt::fg(fmt::color::red), "ERROR: upset fail!\nInput key type is string, but require integer\n");
           return ECode_Fail;
         }
-        return _store->write(_class, k, itr->second);
+        if (_store->write(_class, k, itr->second) == ECode_Success){
+          //printf("write: %s\n", itr->second.dump().c_str());
+          if (!_indexes.empty()) {
+            upsetIndex(itr->second, k);
+            return ECode_Success;
+          }
+        }
+        return ECode_Fail;
       },
       [&](uint64_t k) {
         if (type == KeyType::Byte) {
           fmt::print(fmt::fg(fmt::color::red), "ERROR: upset fail!\nInput key type is integer, but require string\n");
           return ECode_Fail;
         }
-        return _store->write(_class, k, itr->second);
+        if (_store->write(_class, k, itr->second) == ECode_Success){
+          //printf("write: %s\n", itr->second.dump().c_str());
+          if (!_indexes.empty()) {
+            upsetIndex(itr->second, k);
+            return ECode_Success;
+          }
+        }
+        return ECode_Fail;
       });
     if (ret != ECode_Success) return ret;
   }
@@ -69,6 +87,25 @@ bool GUpsetPlan::upsetEdge()
     _store->write(_class, sid, itr->second.data(), itr->second.size());
   }
   return ECode_Success;
+}
+
+void GUpsetPlan::addVectorIndex(const std::string& index, const std::string& id, const std::vector<double>& v)
+{
+  uint64_t uid = gql::hash64(id);
+  _hnsws[index]->add((node_t)uid, v);
+}
+
+void GUpsetPlan::addVectorIndex(const std::string& index, uint32_t id, const std::vector<double>& v)
+{
+  _hnsws[index]->add((node_t)id, v);
+}
+
+GVirtualNetwork* GUpsetPlan::generateNetwork(const std::string& branch)
+{
+  if (!_networks[branch]) {
+    _networks[branch] = new GVirtualNetwork(1024);
+  }
+  return _networks[branch];
 }
 
 VisitFlow GUpsetPlan::UpsetVisitor::apply(GEdgeDeclaration* stmt, std::list<NodeType>& path)
@@ -94,6 +131,7 @@ VisitFlow GUpsetPlan::UpsetVisitor::apply(GVertexDeclaration* stmt, std::list<No
   JSONVisitor jv(_plan);
   accept(stmt->vertex(), jv, path);
   jv.add();
+  //printf("dump:%s\n", jv._jsonify.dump().c_str());
   _plan._vertexes[getLiteral(stmt->key())] = jv._jsonify;
   return VisitFlow::Children;
 }
@@ -113,4 +151,35 @@ gkey_t GUpsetPlan::UpsetVisitor::getLiteral(GASTNode* node)
     break;
   }
   return k;
+}
+
+VisitFlow GUpsetPlan::JSONVisitor::apply(GArrayExpression* stmt, std::list<NodeType>& path)
+{
+  switch (stmt->elementType())
+  {
+  case GArrayExpression::ElementType::Number:
+  case GArrayExpression::ElementType::Integer:
+  {
+    auto itr = stmt->begin();
+    gql::vector_double vec;
+    while (itr != stmt->end()) {
+      GLiteral* ptr = (GLiteral*)(*itr)->_value;
+      switch (ptr->kind()) {
+      case AttributeKind::Integer:
+        vec.push_back(atoi(ptr->raw().c_str()));
+        break;
+      case AttributeKind::Number:
+        vec.push_back(atof(ptr->raw().c_str()));
+        break;
+      default:
+        break;
+      }
+      ++itr;
+    }
+    _values.push_back(vec);
+  }
+  return VisitFlow::SkipCurrent;
+  default:
+    return VisitFlow::Children;
+  }
 }

@@ -87,7 +87,15 @@ namespace gql {
 #endif
 
 
-  bool is_same(const std::vector<int>& v1, const std::vector<int>& v2)
+  //bool is_same(const std::vector<int>& v1, const std::vector<int>& v2)
+  //{
+  //  int value = 0;
+
+  //  if (value == 0) return true;
+  //  return false;
+  //}
+
+  bool is_same(const std::vector<uint8_t>& v1, const std::vector<uint8_t>& v2)
   {
     int value = 0;
 
@@ -154,6 +162,18 @@ namespace gql {
     for (size_t i = 0; i < v.size(); ++i) {
       result += ((*(p + i)) - *(p + i)) * (*(p + i) - *(p + i));
     }
+    return result;
+  }
+
+  uint8_t distance2(const std::vector<uint8_t>& v1, const std::vector<uint8_t>& v2)
+  {
+    uint8_t result = 0;
+    return result;
+  }
+
+  uint8_t distance2(const std::vector<uint8_t>& v)
+  {
+    uint8_t result = 0;
     return result;
   }
 

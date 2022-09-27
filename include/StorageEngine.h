@@ -20,6 +20,7 @@
 #define SCHEMA_CLASS_KEY        "key_type"
 #define SCHEMA_CLASS_VALUE      "val_type"
 #define SCHEMA_CLASS_NAME       "name"
+#define SCHEMA_INDEX            "indx"
 #define MAP_BASIC               "__basic"
 
 #define SCHEMA_GLOBAL           "__global"
@@ -91,6 +92,11 @@ public:
      */
     void addMap(const std::string& mapname, KeyType type);
 
+    /**
+     * Add new index to graph schema
+     */
+    void addIndex(const std::string& indexname);
+
     /** 
      * @brief Record an node/edge information to disk
      *        For example:
@@ -155,11 +161,15 @@ public:
      * @brief get map's key type
      */
     KeyType getKeyType(const std::string& m) const;
+    std::vector<std::string> getIndexes() const;
+    bool isIndexExist(const std::string& name);
+
 private:
     /**
      * @brief check map(prop) is exist or not.
      */
     bool isMapExist(const std::string& prop);
+
     /**
      * @brief check map's key type is init or not. If not, set it with `type`.
      */

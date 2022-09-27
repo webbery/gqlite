@@ -6,15 +6,24 @@ include_directories(../include ../third_party/catch2)
 add_definitions(-DCATCH_CONFIG_MAIN -DCATCH_CONFIG_ENABLE_BENCHMARKING)
 add_definitions(-D_WORKING_DIR_=\"${CMAKE_SOURCE_DIR}\")
 
+if (GQLITE_BUILD_TEST)
+set(SYMBOLS_SOURCE ../src/base/Debug.cpp)
+else()
+endif()
+
 set(TEST_GRAMMAR_SOURCE ./grammar.cpp)
 set(STORAGE_SOURCE
 	./storage.cpp
 	../src/StorageEngine/StorageEngine.cpp
+	../src/base/Debug.cpp
+	${SYMBOLS_SOURCE}
 	)
 set(PARSER_SOURCE
 	../src/StorageEngine/StorageEngine.cpp
 	../src/VirtualEngine.cpp
-	./parser.cpp)
+	./parser.cpp
+	${SYMBOLS_SOURCE}
+	)
 if(CMAKE_SYSTEM_NAME MATCHES "Windows")
 set(OPTION_SOURCE ../tool/getopt.c)
 else()
@@ -23,7 +32,9 @@ endif()
 
 set(REGRESS_SOURCE
 	${OPTION_SOURCE}
-	./regress.cpp)
+	./regress.cpp
+	${SYMBOLS_SOURCE}
+	)
 
 set(OLGRITHM_SOURCE ./algorithm.cpp
 	../src/base/system/Platform.cpp
@@ -37,6 +48,7 @@ set(OLGRITHM_SOURCE ./algorithm.cpp
 	../src/operand/algorithms/Hungarian.cpp
 	../src/operand/match/CTreeStrategy.cpp
 	../src/operand/analysis/DegreeCentrality.cpp
+	${SYMBOLS_SOURCE}
 )
 
 set(QUERY_SOURCE ./query.cpp
@@ -50,9 +62,12 @@ set(QUERY_SOURCE ./query.cpp
 	../src/base/DOT.cpp
 	../src/base/system/Platform.cpp
 	../src/base/system/EventEmitter.cpp
+	${SYMBOLS_SOURCE}
 )
 
-set(PTREE_SOURCE ./ptree.cpp)
+set(PTREE_SOURCE ./ptree.cpp
+	${SYMBOLS_SOURCE}
+)
 set(VNET_SOURCE ./vnet.cpp
 	../src/walk/RandomWalk.cpp
 	../src/walk/AStarWalk.cpp
@@ -61,10 +76,14 @@ set(VNET_SOURCE ./vnet.cpp
 	../src/Graph/EntityEdge.cpp
 	../src/ScanObserver.cpp
 	../src/StorageEngine/Loader.cpp
-	../src/VirtualNetwork.cpp)
+	../src/VirtualNetwork.cpp
+	${SYMBOLS_SOURCE}
+	)
 
-set(MOVIELENS_SOURCE ./movielens.cpp)
-
+set(MOVIELENS_SOURCE ./movielens.cpp
+	${SYMBOLS_SOURCE}
+)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -finstrument-functions")
 add_executable(grammar ${TEST_GRAMMAR_SOURCE})
 add_compile_definitions(BINARY_DIR="${zstd_BINARY_DIR}/lib")
 add_executable(storage ${STORAGE_SOURCE})
@@ -101,12 +120,19 @@ IF (UNIX)
 link_directories(${zstd_BINARY_DIR}/lib)
 target_link_libraries(storage PUBLIC ${storage_LINK_OPTIONS} ${zstd_BINARY_DIR}/lib/libzstd.a)
 target_link_libraries(query PUBLIC ${storage_LINK_OPTIONS} ${zstd_BINARY_DIR}/lib/libzstd.a)
+if (GQLITE_BUILD_TEST)
+target_link_libraries(storage PUBLIC ${CMAKE_DL_LIBS} m)
+target_link_libraries(query PUBLIC ${CMAKE_DL_LIBS} m)
+target_link_libraries(movielens PUBLIC ${CMAKE_DL_LIBS} m )
+target_link_libraries(grammar PUBLIC ${CMAKE_DL_LIBS} m )
+target_link_libraries(regress PUBLIC ${CMAKE_DL_LIBS} m )
+endif(GQLITE_BUILD_TEST)
 ELSE()
 target_link_libraries(storage PUBLIC ${storage_LINK_OPTIONS})
 target_link_libraries(query PUBLIC ${storage_LINK_OPTIONS})
 ENDIF()
 # target_link_libraries(algorithm fmt::fmt-header-only)
-target_link_libraries(movielens PUBLIC ${movielens_LINK_OPTIONS})
+target_link_libraries(movielens PUBLIC ${movielens_LINK_OPTIONS} )
 IF (WIN32)
 target_link_libraries(vnet PRIVATE ${vnet_LINK_OPTIONS})
 ELSE ()

@@ -57,6 +57,7 @@ typedef struct _gqlite_vertex {
     char* cid;
     uint32_t uid;
   };
+  gqlite_id_type type;
   // node properties
   char* properties;
   uint32_t len;

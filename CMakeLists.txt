@@ -171,11 +171,14 @@ add_library(gqlite
 )
 endif()
 target_link_libraries(gqlite mdbx-static fmt::fmt )
+
 add_dependencies(gqlite zstd)
 if (WIN32)
   
 else (WIN32)
-	#link_directories(${zstd_BINARY_DIR}/lib)
+	if (GQLITE_BUILD_TEST)
+		target_link_libraries(gqlite ${CMAKE_DL_LIBS} m)
+	endif(GQLITE_BUILD_TEST)
 	target_link_libraries(gqlite ${zstd_BINARY_DIR}/lib/libzstd.a)
 endif(WIN32)
 

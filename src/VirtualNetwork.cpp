@@ -2,6 +2,7 @@
 #include "VirtualNetwork.h"
 #include "Graph/Node.h"
 #include "Graph/EntityNode.h"
+#include "gutil.h"
 
 GVirtualNetwork::GVirtualNetwork(size_t maxMem)
 :_maxMemory(maxMem)

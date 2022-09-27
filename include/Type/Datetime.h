@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include "base/Variant.h"
 
 namespace gql
 {
@@ -20,3 +21,16 @@ private:
 };
 
 } // namespace gql
+
+bool operator<(const double& left, const gql::GDatetime& right);
+bool operator<(const int& left, const gql::GDatetime& right);
+bool operator>(const double& left, const gql::GDatetime& right);
+bool operator>(const int& left, const gql::GDatetime& right);
+bool operator<=(const double& left, const gql::GDatetime& right);
+bool operator<=(const int& left, const gql::GDatetime& right);
+bool operator>=(const double& left, const gql::GDatetime& right);
+bool operator>=(const int& left, const gql::GDatetime& right);
+bool operator!=(const double& left, const gql::GDatetime& right);
+bool operator!=(const int& left, const gql::GDatetime& right);
+bool operator==(const double& left, const gql::GDatetime& right);
+bool operator==(const int& left, const gql::GDatetime& right);

@@ -2,6 +2,7 @@
 #include <type_traits>
 #include <typeindex>
 #include <cstring>
+#include <tuple>
 
 namespace gql {
   /**
@@ -214,7 +215,8 @@ public:
     if (other._tindex == this->_tindex && other._indx == this->_indx) {
       return _Storage::less_than(_tindex, &const_cast<Variant&>(*this)._data , &const_cast<Variant&>(other)._data);
     }
-    throw std::bad_cast();
+    printf("ERROR: compare different type, %s and %s\n", _tindex.name(), other._tindex.name());
+    return false;
   }
 
   bool operator <= (const Variant& other) const {

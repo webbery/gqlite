@@ -8,8 +8,8 @@
 #include "json.hpp"
 #include "Type/Datetime.h"
 
-GScanPlan::GScanPlan(GVirtualNetwork* network, GStorageEngine* store, GQueryStmt* stmt)
-:GPlan(network, store)
+GScanPlan::GScanPlan(std::map<std::string, GVirtualNetwork*>& networks, GStorageEngine* store, GQueryStmt* stmt)
+:GPlan(networks, store)
 , _queryType(QueryType::SimpleScan)
 , _state(ScanState::Stop)
 {
@@ -27,8 +27,8 @@ GScanPlan::GScanPlan(GVirtualNetwork* network, GStorageEngine* store, GQueryStmt
   parseConditions(stmt->where());
 }
 
-GScanPlan::GScanPlan(GVirtualNetwork* network, GStorageEngine* store, GASTNode* condition, const std::string& group)
-  :GPlan(network, store)
+GScanPlan::GScanPlan(std::map<std::string, GVirtualNetwork*>& networks, GStorageEngine* store, GASTNode* condition, const std::string& group)
+  :GPlan(networks, store)
   , _queryType(QueryType::SimpleScan)
 {
   auto jsn = store->getSchema();
@@ -126,41 +126,22 @@ int GScanPlan::scan(const std::function<ExecuteStatus(KeyType, const std::string
       {
       case GScanPlan::QueryType::SimpleScan:
       {
-        gkey_t vKey;
-        if (type == KeyType::Integer) {
-          auto v = *(uint64_t*)data.key.byte_ptr();
-          vKey = (uint64_t)v;
-        }
-        else {
-          std::string key((char*)data.key.byte_ptr(), data.key.size());
-          vKey = key;
-        }
-        nlohmann::json jsn;
+        gkey_t vKey = getKey(type, data.key);
+        nlohmann::json jsn = nlohmann::json::parse(str);
         std::vector<std::string>::iterator aitr;
         if (_pattern._nodes.size()) {
-          jsn = nlohmann::json::parse(str);
           aitr = _pattern._nodes[0]->_attrs.begin();
         }
         bool result = true;
         auto& andPreds = _pattern._node_predicates[(long)LogicalPredicate::And];
         for (auto predItr = andPreds.begin(), end = andPreds.end(); predItr != end; ++predItr) {
-          result &= (*predItr).visit([&vKey](std::function<bool(const gkey_t&)> op) {
-            return op(vKey);
+          result &= (*predItr).visit(
+            [&vKey](std::function<bool(const gkey_t&)> op) {
+              return op(vKey);
             },
-            [&jsn, &aitr](std::function<bool(const attribute_t&)> op) {
+            [&jsn, &aitr, this](std::function<bool(const attribute_t&)> op) {
               auto value = jsn[*aitr];
-              bool ret = false;
-              switch ((nlohmann::json::value_t)value) {
-              case nlohmann::json::value_t::number_float:
-              case nlohmann::json::value_t::number_integer:
-                ret = op((double)value);
-                break;
-              case nlohmann::json::value_t::string:
-                ret = op((std::string)value);
-                break;
-              default:
-                break;
-              }
+              bool ret = predict(op, value);
               ++aitr;
               return ret;
             });
@@ -171,10 +152,11 @@ int GScanPlan::scan(const std::function<ExecuteStatus(KeyType, const std::string
         }
         if (result) {
           std::string k((char*)data.key.byte_ptr(), data.key.size());
-          if (cb) cb(type, k, str);
           for (IObserver* observer: _observers) {
             observer->update(type, k, jsn);
           }
+          beautify(jsn);
+          if (cb) cb(type, k, jsn.dump());
         }
       }
         break;
@@ -250,6 +232,80 @@ bool GScanPlan::stopExit()
   return false;
 }
 
+gkey_t GScanPlan::getKey(KeyType type, mdbx::slice& slice)
+{
+  gkey_t vKey;
+  if (type == KeyType::Integer) {
+    auto v = *(uint64_t*)slice.byte_ptr();
+    vKey = (uint64_t)v;
+  }
+  else {
+    std::string key((char*)slice.byte_ptr(), slice.size());
+    vKey = key;
+  }
+  return vKey;
+}
+
+bool GScanPlan::predict(const std::function<bool(const attribute_t&)>& op, const nlohmann::json& attr) const
+{
+  bool ret = false;
+  switch ((nlohmann::json::value_t)attr) {
+  case nlohmann::json::value_t::number_float:
+  case nlohmann::json::value_t::number_integer:
+    ret = op((double)attr);
+    break;
+  case nlohmann::json::value_t::string:
+    ret = op((std::string)attr);
+    break;
+  case nlohmann::json::value_t::object:
+    if (attr.count(OBJECT_TYPE_NAME)) {
+      switch (AttributeKind(attr[OBJECT_TYPE_NAME])) {
+      case AttributeKind::Datetime:
+      {
+        ret = op((double)attr["value"]);
+      }
+      break;
+      default:
+        break;
+      }
+    }
+    else {}
+    break;
+  default:
+    break;
+  }
+  return ret;
+}
+
+void GScanPlan::beautify(nlohmann::json& input)
+{
+  if (input.empty() || input.is_null()) return;
+  if (input.is_object()) {
+    if (input.count(OBJECT_TYPE_NAME)) {
+      switch (AttributeKind(input[OBJECT_TYPE_NAME])) {
+      case AttributeKind::Datetime:
+        input = std::string("0d") + std::to_string((time_t)input["value"]);
+        return;
+      case AttributeKind::Vector:
+        input = input["value"];
+        return;
+      default:
+        break;
+      }
+    }
+    for (auto itr = input.begin(); itr != input.end(); ++itr)
+    {
+      beautify(itr.value());
+    }
+  }
+  else if (input.is_array()) {
+    for (auto itr = input.begin(); itr != input.end(); ++itr)
+    {
+      beautify(itr.value());
+    }
+  }
+}
+
 VisitFlow GScanPlan::PatternVisitor::apply(GVertexDeclaration* stmt, std::list<NodeType>& path)
 {
   if (!stmt->vertex()) {
@@ -306,10 +362,7 @@ VisitFlow GScanPlan::PatternVisitor::apply(GProperty* stmt, std::list<NodeType>&
       v = literal->raw();
       break;
     case AttributeKind::Datetime:
-    {
-      gql::GDatetime d(atoll(literal->raw().c_str()));
-      v = d;
-    }
+      v = (double)atoll(literal->raw().c_str());
       break;
     case AttributeKind::Integer:
     case AttributeKind::Number:

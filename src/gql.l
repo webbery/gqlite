@@ -15,6 +15,9 @@
 %option reentrant bison-bridge bison-locations
 %option noinput nounput noyywrap never-interactive
 
+DIGIT   [0-9]
+DECIMAL [0-9]+.[0-9]+
+
 %%
 ^\/\/.*             { stm._errIndx += yyleng;}
 "("                 { stm._errIndx += 1; return PARAM_BEGIN;};
@@ -34,17 +37,19 @@ h'' {
                         stm._errIndx += 1;
                         return VAR_HASH;
                     };
-b64'([A-Za-z0-9+/]{4})*([A-Za-z0-9+\/]{2}==|[A-Za-z0-9+\/]{3}=)?' {
-                        yylval->__c = (char*)malloc(yyleng - 5);
-                        memcpy(yylval->__c, yytext + 4, yyleng - 6);
-                        yylval->__c[yyleng - 6] = '\0';
+0b'([A-Za-z0-9+/]{4})*([A-Za-z0-9+\/]{2}==|[A-Za-z0-9+\/]{3}=)?' {
+                        yylval->__c = (char*)malloc(yyleng - 4);
+                        memcpy(yylval->__c, yytext + 3, yyleng - 5);
+                        yylval->__c[yyleng - 5] = '\0';
                         stm._errIndx += yyleng;
+                        // printf("create base64\n");
                         return VAR_BASE64;
                     };
-d[0-9]{10}$         {
-                        memcpy(yylval->var_name, yytext + 1, yyleng - 2);
+0d[0-9]+            {
+                        memcpy(yylval->var_name, yytext + 2, yyleng - 2);
                         yylval->var_name[yyleng - 2] = '\0';
                         yylval->__datetime = strtoll(yylval->var_name, nullptr, 10);
+                        // printf("create datetime %lld, %s\n", yylval->__datetime, yylval->var_name);
                         stm._errIndx += yyleng;
                         return VAR_DATETIME;
                     };
@@ -123,13 +128,13 @@ create              {stm._errIndx += yyleng; return KW_CREATE;};
                         stm._errIndx += yyleng;
                         return VAR_INTEGER;
                     };
-[0-9]+.[0-9]+       {
+{DECIMAL}           {
                         std::string s(yytext, yyleng);
                         yylval->__f = std::stof(s);
                         stm._errIndx += yyleng;
                         return VAR_DECIMAL;
                     };
-[a-zA-Z_]+[0-9]*     {
+[a-zA-Z_]+[a-zA-Z0-9]* {
                         yylval->__c = (char*)malloc(yyleng + 1);
                         memcpy(yylval->__c, yytext, yyleng);
                         yylval->__c[yyleng] = '\0';

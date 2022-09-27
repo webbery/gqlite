@@ -4,11 +4,11 @@
 #include "plan/ScanPlan.h"
 #include "StorageEngine.h"
 
-GRemovePlan::GRemovePlan(GVirtualNetwork* network, GStorageEngine* store, GRemoveStmt* stmt)
-  :GPlan(network, store)
+GRemovePlan::GRemovePlan(std::map<std::string, GVirtualNetwork*>& networks, GStorageEngine* store, GRemoveStmt* stmt)
+  :GPlan(networks, store)
 {
   _group = stmt->name();
-  _scan = new GScanPlan(network, _store, stmt->node(), _group);
+  _scan = new GScanPlan(networks, _store, stmt->node(), _group);
 }
 
 GRemovePlan::~GRemovePlan()

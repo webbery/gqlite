@@ -27,10 +27,14 @@
 #include "gqlite.h"
 #include "linenoise.h"
 #include "stdout.h"
+#include "base/Debug.h"
 #define MAX_HISTORY_SIZE  100
 #define HISTORY_FILENAME  ".gql_history"
 
 int main(int argc, char** argv) {
+#ifdef __linux__
+  init_coredump_capture();
+#endif
   std::string dbfile = "";
   if (argc > 1) {
     dbfile = argv[1];

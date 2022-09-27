@@ -88,7 +88,7 @@ struct GASTNode* INIT_NUMBER_AST(T& v) {
 
 %type <__node> a_graph_expr
 %type <__node> json
-%type <__node> value number right_value
+%type <__node> value number right_value comparable_item
 %type <__node> values
 %type <__node> object
 %type <__node> array a_vector vector_list
@@ -507,17 +507,12 @@ json: value { $$ = $1; };
 value: object { $$ = $1; }
         | array { $$ = $1; };
 right_value: value { $$ = $1; }
-        | number { $$ = $1; }
+        | comparable_item { $$ = $1; }
         | VAR_BASE64
               {
                 GLiteralBinary* bin = new GLiteralBinary($1, "b64");
                 free($1);
                 $$ = NewAst(NodeType::Literal, bin, nullptr, 0);
-              }
-        | VAR_DATETIME
-              {
-                GLiteralDatetime* dt = new GLiteralDatetime($1);
-                $$ = NewAst(NodeType::Literal, dt, nullptr, 0);
               }
         | VAR_STRING
               {
@@ -552,22 +547,22 @@ property: VAR_STRING COLON right_value
                 GProperty* prop = new GProperty("id", value);
                 $$ = NewAst(NodeType::Property, prop, nullptr, 0);
               }
-        | OP_GREAT_THAN_EQUAL COLON number
+        | OP_GREAT_THAN_EQUAL COLON comparable_item
               {
                 GProperty* prop = new GProperty("gte", $3);
                 $$ = NewAst(NodeType::BinaryExpression, prop, nullptr, 0);
               }
-        | OP_LESS_THAN_EQUAL COLON number
+        | OP_LESS_THAN_EQUAL COLON comparable_item
               {
                 GProperty* prop = new GProperty("lte", $3);
                 $$ = NewAst(NodeType::BinaryExpression, prop, nullptr, 0);
               }
-        | OP_GREAT_THAN COLON number
+        | OP_GREAT_THAN COLON comparable_item
               {
                 GProperty* prop = new GProperty("gt", $3);
                 $$ = NewAst(NodeType::BinaryExpression, prop, nullptr, 0);
               }
-        | OP_LESS_THAN COLON number
+        | OP_LESS_THAN COLON comparable_item
               {
                 GProperty* prop = new GProperty("lt", $3);
                 $$ = NewAst(NodeType::BinaryExpression, prop, nullptr, 0);
@@ -595,6 +590,11 @@ property: VAR_STRING COLON right_value
                 GProperty* prop = new GProperty("group", value);
                 $$ = NewAst(NodeType::Property, prop, nullptr, 0);
               };
+comparable_item: number { $$ = $1; }
+        | VAR_DATETIME {
+          GLiteralDatetime* dt = new GLiteralDatetime($1);
+          $$ = NewAst(NodeType::Literal, dt, nullptr, 0);
+        };
 array:    LEFT_SQUARE RIGHT_SQUARE { $$ = nullptr; }
         | LEFT_SQUARE values RIGHT_SQUARE
               {

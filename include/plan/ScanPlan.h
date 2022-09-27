@@ -25,8 +25,8 @@ class GScanPlan: public GPlan {
     Pause
   };
 public:
-  GScanPlan(GVirtualNetwork* network, GStorageEngine* store, GQueryStmt* stmt);
-  GScanPlan(GVirtualNetwork* network, GStorageEngine* store, GASTNode* condition, const std::string& graph = "");
+  GScanPlan(std::map<std::string, GVirtualNetwork*>& networks, GStorageEngine* store, GQueryStmt* stmt);
+  GScanPlan(std::map<std::string, GVirtualNetwork*>& networks, GStorageEngine* store, GASTNode* condition, const std::string& graph = "");
   ~GScanPlan();
 
   void addObserver(IObserver* observer);
@@ -52,6 +52,11 @@ private:
   bool pauseExit(GStorageEngine::cursor& cursor, std::vector<std::string>::iterator itr);
 
   bool stopExit();
+
+  gkey_t getKey(KeyType type, mdbx::slice& slice);
+  bool predict(const std::function<bool(const attribute_t&)>& op, const nlohmann::json& attr)const;
+  // convert obj to display type
+  void beautify(nlohmann::json& input);
 
   struct PatternVisitor {
     GraphPattern& _pattern;

@@ -24,9 +24,11 @@ namespace gql {
 #endif
   double distance2(const std::vector<double>& v1, const std::vector<double>& v2);
   double distance2(const std::vector<double>& v);
+  uint8_t distance2(const std::vector<uint8_t>& v1, const std::vector<uint8_t>& v2);
+  uint8_t distance2(const std::vector<uint8_t>& v);
 
   bool is_same(const std::vector<double>& v1, const std::vector<double>& v2);
-  bool is_same(const std::vector<int>& v1, const std::vector<int>& v2);
+  bool is_same(const std::vector<uint8_t>& v1, const std::vector<uint8_t>& v2);
 
   template <typename T> struct VectorTraits;
   template <> struct VectorTraits<double> { using type = double; };
@@ -58,6 +60,8 @@ namespace gql {
     }
 
     std::vector<Tp> value()const { return _vec; }
+
+    void push_back(const Tp& v) { _vec.push_back(v); }
 
   private:
     std::vector<Tp> _vec;
