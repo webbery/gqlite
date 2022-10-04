@@ -5,6 +5,10 @@
 #include "base/MemoryPool.h"
 #include "base/lang/AST.h"
 
+// error code of parsing gql  
+#define GQL_GRAMMAR_ARRAY_FAIL    -256
+#define GQL_GRAMMAR_OBJ_FAIL      -257
+
 struct _gqlite_result;
 
 typedef int (*gqlite_callback)(_gqlite_result*);
@@ -26,6 +30,7 @@ class GVirtualNetwork;
 class GVirtualEngine {
 public:
   static uint32_t GenerateIndex();
+  static const char* GetErrorInfo(int code);
 
   GVirtualEngine(size_t);
   GVirtualEngine( const char* gql, gqlite_callback cb);

@@ -3,6 +3,8 @@ cmake_minimum_required(VERSION 3.0)
 project(GQLlite)
 
 # set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+option(GQLITE_BUILD_TEST    "build gqlite test"   OFF)
+
 set(CMAKE_CXX_STANDARD 17)
 IF (WIN32)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Zc:__cplusplus")
@@ -33,6 +35,9 @@ ELSEIF (UNIX)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpic -ftree-vectorize -fopenmp")
 set(CMAKE_C_FLAGS "-Wno-writable-strings -Wno-comment")
 
+if (GQLITE_BUILD_TEST)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O1 -fno-omit-frame-pointer -fno-optimize-sibling-calls")
+endif ()
 # ANDDOID
 if (CMAKE_SYSTEM_NAME MATCHES "Android")
 	add_definitions(-DANDROID_ARM_NEON=TRUE)
@@ -52,6 +57,9 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -lrt -march=native -mfma -mavx")
 endif()
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+	# set(CODE_COVERAGE_VERBOSE TRUE)
+	# "--rc lcov_branch_coverage=0"
+	# "--no-branch-coverage"
 	include(CodeCoverage.cmake)
 	APPEND_COVERAGE_COMPILER_FLAGS()
 	setup_target_for_coverage_gcovr_xml(
@@ -115,31 +123,12 @@ add_definitions(-DTHREAD_COUNT=4)
 
 include_directories(./include ./third_party/libmdbx ./third_party/eigen ./third_party/fmt/include ./third_party/zstd/lib)
 
-file(GLOB BASE_SOURCES "src/*.cpp")
-aux_source_directory(src/StorageEngine StorageEngine_SOURCES)
-aux_source_directory(src/Type Type_SOURCES)
-aux_source_directory(src/Feature Feature_SOURCES)
-aux_source_directory(src/gql GQL_SOURCES)
-aux_source_directory(src/base/system System_SOURCES)
-aux_source_directory(src/base/system/memory Memory_SOURCES)
-aux_source_directory(src/base/lang Language_SOURCES)
-aux_source_directory(src/base Struct_SOURCES)
-aux_source_directory(src/operand Operand_SOURCES)
-aux_source_directory(src/operand/match Match_SOURCES)
-aux_source_directory(src/operand/analysis Analysis_SOURCES)
-aux_source_directory(src/operand/distance Distance_SOURCES)
-aux_source_directory(src/operand/query Query_SOURCES)
-aux_source_directory(src/operand/query/HNSW HNSW_SOURCES)
-aux_source_directory(src/plan Plan_SOURCES)
-aux_source_directory(src/Graph Graph_SOURCES)
-aux_source_directory(src/Path Path_SOURCES)
-aux_source_directory(src/walk Walk_SOURCES)
+file(GLOB_RECURSE BASE_SOURCES "src/*.cpp")
 
 # set(FMT_CAN_MODULE ON CACHE BOOL "Build a module instead of a traditional library." FORCE)
 add_subdirectory(third_party/libmdbx)
 add_subdirectory(third_party/zstd/build/cmake)
 add_subdirectory(third_party/fmt)
-option(GQLITE_BUILD_TEST    "build gqlite test"   OFF)
 if (GQLITE_BUILD_TEST)
 if (CMAKE_SYSTEM_NAME MATCHES "Android")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -funwind-tables -ffunction-sections")
@@ -155,19 +144,11 @@ add_compile_definitions(BINARY_DIR="${zstd_BINARY_DIR}/lib")
 option(GQLITE_BUILD_SHARED    "build gqlite shared library"   OFF)
 if (GQLITE_BUILD_SHARED)
 add_library(gqlite SHARED 
-	${BASE_SOURCES} ${StorageEngine_SOURCES} ${Struct_SOURCES}
-	${Type_SOURCES} ${System_SOURCES} ${Feature_SOURCES} ${GQL_SOURCES} ${Operand_SOURCES}
-	${Match_SOURCES} ${Distance_SOURCES} ${Graph_SOURCES} ${Path_SOURCES} ${Analysis_SOURCES}
-	${Query_SOURCES} ${HNSW_SOURCES} ${Language_SOURCES} ${Memory_SOURCES} ${Plan_SOURCES}
-	${Walk_SOURCES}
+	${BASE_SOURCES}
 )
 else()
 add_library(gqlite
-	${BASE_SOURCES} ${StorageEngine_SOURCES} ${Struct_SOURCES}
-	${Type_SOURCES} ${System_SOURCES} ${Feature_SOURCES} ${GQL_SOURCES} ${Operand_SOURCES}
-	${Match_SOURCES} ${Distance_SOURCES} ${Graph_SOURCES} ${Path_SOURCES} ${Analysis_SOURCES}
-	${Query_SOURCES} ${HNSW_SOURCES} ${Language_SOURCES} ${Memory_SOURCES} ${Plan_SOURCES}
-	${Walk_SOURCES}
+	${BASE_SOURCES}
 )
 endif()
 target_link_libraries(gqlite mdbx-static fmt::fmt )
@@ -187,7 +168,6 @@ add_dependencies(gqlite generated_tokens generated_grammar)
 install(TARGETS gqlite DESTINATION lib)
 install(TARGETS gql DESTINATION bin)
 install(FILES include/gqlite.h DESTINATION include)
-# message(debug: ${Type_SOURCES})
 # add_custom_command(
 #   TARGET gqlite
 #   PRE_BUILD

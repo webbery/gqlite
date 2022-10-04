@@ -46,8 +46,10 @@ void yyerror(YYLTYPE* yyllocp, yyscan_t unused, GVirtualEngine& stm, const char*
     std::string err_offset(stm._errIndx - 1, ' ');
     err_index += err_offset + "~";
   }
-  printf("\033[22;31mError:\t%s:\033[22;0m\n\t%s\n\t%s\n",
-    msg, stm.gql().c_str(), err_index.c_str());
+  // printf("\033[22;0m%s\n%s\n",
+  //   stm.gql().c_str(), err_index.c_str());
+    printf("\033[22;31mError:\t%s:\033[22;0m\n\t%s\n\t%s\n",
+      msg, stm.gql().c_str(), err_index.c_str());
 }
 
 struct GASTNode* INIT_STRING_AST(const char* key) {
@@ -67,12 +69,12 @@ struct GASTNode* INIT_NUMBER_AST(T& v) {
 
 }
 
-%token RANGE_BEGIN RANGE_END COLON QUOTE COMMA LEFT_SQUARE RIGHT_SQUARE STAR CR PARAM_BEGIN PARAM_END
 %token <var_name> VAR_HASH
 %token <__f> VAR_DECIMAL
-%token <__c> VAR_BASE64 VAR_STRING
-%token <__int> VAR_INTEGER
-%token <__int> VAR_DATETIME
+%token <__c> VAR_BASE64 LITERAL_STRING VAR_NAME
+%token <__int> VAR_INTEGER VAR_DATETIME
+%token <__node> KW_VERTEX KW_PATH KW_EDGE
+%token RANGE_BEGIN RANGE_END COLON QUOTE COMMA LEFT_SQUARE RIGHT_SQUARE STAR CR PARAM_BEGIN PARAM_END SEMICOLON
 %token KW_AST KW_ID KW_GRAPH KW_COMMIT
 %token KW_CREATE KW_DROP KW_IN KW_REMOVE KW_UPSET left_arrow right_arrow KW_BIDIRECT_RELATION KW_REST KW_DELETE
 %token OP_QUERY KW_INDEX OP_WHERE
@@ -82,9 +84,6 @@ struct GASTNode* INIT_NUMBER_AST(T& v) {
 %token FN_COUNT
 %token dot
 %token limit profile
-%token <__node> KW_VERTEX
-%token <__node> KW_EDGE
-%token <__node> KW_PATH
 
 %type <__node> a_graph_expr
 %type <__node> json
@@ -117,9 +116,9 @@ struct GASTNode* INIT_NUMBER_AST(T& v) {
 %start line_list
 
 %%
-line_list: line
-          | line_list line
-          | line error
+line_list: line_list line SEMICOLON {}
+          | line SEMICOLON {}
+          /* | error SEMICOLON {} */
           ;
     line: gql
           {
@@ -174,7 +173,7 @@ utility_cmd: CMD_SHOW KW_GRAPH
             // release_result_info(results);
             stm._errorCode = ECode_Success;
           }
-        | CMD_SHOW KW_GRAPH VAR_STRING
+        | CMD_SHOW KW_GRAPH LITERAL_STRING
           {
             GGQLExpression* expr = new GGQLExpression(GGQLExpression::CMDType::SHOW_GRAPH_DETAIL, $3);
             free($3);
@@ -193,39 +192,32 @@ utility_cmd: CMD_SHOW KW_GRAPH
             stm._cmdtype = GQL_Util;
           }
         | profile gql {};
-creation: RANGE_BEGIN KW_CREATE COLON VAR_STRING RANGE_END
-            {
-              GCreateStmt* createStmt = new GCreateStmt($4, nullptr);
-              free($4);
-              $$ = NewAst(NodeType::CreationStatement, createStmt, nullptr, 0);
-              stm._errorCode = ECode_Success;
-            }
-        | RANGE_BEGIN KW_CREATE COLON VAR_STRING COMMA groups RANGE_END
+creation: RANGE_BEGIN KW_CREATE COLON LITERAL_STRING COMMA groups RANGE_END
             {
               GCreateStmt* createStmt = new GCreateStmt($4, $6);
               free($4);
               $$ = NewAst(NodeType::CreationStatement, createStmt, nullptr, 0);
               stm._errorCode = ECode_Success;
             }
-        | RANGE_BEGIN KW_CREATE COLON VAR_STRING COMMA KW_INDEX COLON function_call RANGE_END
+        | RANGE_BEGIN KW_CREATE COLON LITERAL_STRING COMMA KW_INDEX COLON function_call RANGE_END
               {
                 free($4);
               }
-        | RANGE_BEGIN KW_CREATE COLON VAR_STRING COMMA groups COMMA KW_INDEX COLON string_list RANGE_END
+        | RANGE_BEGIN KW_CREATE COLON LITERAL_STRING COMMA groups COMMA KW_INDEX COLON string_list RANGE_END
               {
                 GCreateStmt* createStmt = new GCreateStmt($4, $6, $10);
                 free($4);
                 $$ = NewAst(NodeType::CreationStatement, createStmt, nullptr, 0);
                 stm._errorCode = ECode_Success;
               };
-dump_graph: RANGE_BEGIN dump COLON VAR_STRING RANGE_END
+dump_graph: RANGE_BEGIN dump COLON LITERAL_STRING RANGE_END
               {
                 GDumpStmt* stmt = new GDumpStmt($4);
                 free($4);
                 $$ = NewAst(NodeType::DumpStatement, stmt, nullptr, 0);
                 stm._errorCode = ECode_Success;
               };
-upset_vertexes: RANGE_BEGIN KW_UPSET COLON VAR_STRING COMMA KW_VERTEX COLON vertex_list RANGE_END
+upset_vertexes: RANGE_BEGIN KW_UPSET COLON LITERAL_STRING COMMA KW_VERTEX COLON vertex_list RANGE_END
               {
                 // struct YYLTYPE* ltype = &@8;
                 // printf("upset_vertexes: %d, %d, %d, %d\n", ltype->first_line, ltype->first_column, ltype->last_line, ltype->last_column);
@@ -233,19 +225,19 @@ upset_vertexes: RANGE_BEGIN KW_UPSET COLON VAR_STRING COMMA KW_VERTEX COLON vert
                 free($4);
                 $$ = NewAst(NodeType::UpsetStatement, upsetStmt, nullptr, 0);
               };
-remove_vertexes: RANGE_BEGIN KW_REMOVE COLON VAR_STRING COMMA KW_VERTEX COLON vertexes RANGE_END
+remove_vertexes: RANGE_BEGIN KW_REMOVE COLON LITERAL_STRING COMMA KW_VERTEX COLON vertexes RANGE_END
               {
                 GRemoveStmt* rmStmt = new GRemoveStmt($4, $8);
                 free($4);
                 $$ = NewAst(NodeType::RemoveStatement, rmStmt, nullptr, 0);
               };
-upset_edges: RANGE_BEGIN KW_UPSET COLON VAR_STRING COMMA KW_EDGE COLON edge_list RANGE_END
+upset_edges: RANGE_BEGIN KW_UPSET COLON LITERAL_STRING COMMA KW_EDGE COLON edge_list RANGE_END
               {
                 GUpsetStmt* upsetStmt = new GUpsetStmt($4, $8);
                 free($4);
                 $$ = NewAst(NodeType::UpsetStatement, upsetStmt, nullptr, 0);
               };
-drop_graph: RANGE_BEGIN KW_DROP COLON VAR_STRING RANGE_END
+drop_graph: RANGE_BEGIN KW_DROP COLON LITERAL_STRING RANGE_END
               {
                 GDropStmt* dropStmt = new GDropStmt($4);
                 free($4);
@@ -267,13 +259,13 @@ group_list: a_group
                 array->addElement($3);
                 $$ = $1;
               };
-a_group: VAR_STRING
+a_group: LITERAL_STRING
               {
                 GGroupStmt* stmt = new GGroupStmt($1);
                 free($1);
                 $$ = NewAst(NodeType::GroupStatement, stmt, nullptr, 0);
               }
-        | RANGE_BEGIN VAR_STRING COLON string_list RANGE_END
+        | RANGE_BEGIN VAR_NAME COLON string_list RANGE_END
               {
                 GGroupStmt* stmt = new GGroupStmt($2, $4);
                 free($2);
@@ -302,9 +294,8 @@ a_simple_query:
 query_kind: OP_QUERY COLON query_kind_expr { $$ = $3; }
         |   OP_QUERY COLON match_expr { $$ = $3; };
 query_kind_expr: 
-          KW_VERTEX { $$ = INIT_STRING_AST("vertex"); }
-        |  KW_EDGE { $$ = INIT_STRING_AST("edge"); }
-        |  VAR_STRING { $$ = INIT_STRING_AST($1); free($1); }
+          KW_EDGE { $$ = INIT_STRING_AST("edge"); }
+        |  LITERAL_STRING { $$ = INIT_STRING_AST($1); free($1); }
         | a_graph_properties { $$ = $1; };
 match_expr: //{->: 'alias'}
           RANGE_BEGIN a_match RANGE_END { $$ = $2; };
@@ -313,32 +304,32 @@ a_match:  a_relation_match
                   $$ = $1;
                 }
         | a_vertex_match COMMA a_relation_match COMMA a_vertex_match {};
-a_relation_match: right_arrow COLON VAR_STRING
+a_relation_match: right_arrow COLON LITERAL_STRING
                 {
                   struct GASTNode* to_value = INIT_STRING_AST($3);
                   free($3);
                   GEdgeDeclaration* edge = new GEdgeDeclaration(nullptr, to_value, INIT_STRING_AST("->"));
                   $$ = NewAst(NodeType::EdgeDeclaration, edge, nullptr, 0);
                 }
-        | left_arrow COLON VAR_STRING
+        | left_arrow COLON LITERAL_STRING
                 {
                   struct GASTNode* to_value = INIT_STRING_AST($3);
                   free($3);
                   GEdgeDeclaration* edge = new GEdgeDeclaration(nullptr, to_value, INIT_STRING_AST("<-"));
                   $$ = NewAst(NodeType::EdgeDeclaration, edge, nullptr, 0);
                 };
-a_vertex_match: KW_VERTEX COLON VAR_STRING
+a_vertex_match: KW_VERTEX COLON LITERAL_STRING
                 {
                   free($3);
                 };
 a_graph_expr:
-          KW_IN COLON VAR_STRING
+          KW_IN COLON LITERAL_STRING
                 {
                   $$ = INIT_STRING_AST($3);
                   free($3);
                 };
 where_expr: OP_WHERE COLON json { $$ = $3; };
-string_list: VAR_STRING
+string_list: LITERAL_STRING
                 {
                   GArrayExpression* array = new GArrayExpression();
                   array->addElement(INIT_STRING_AST($1));
@@ -352,14 +343,14 @@ string_list: VAR_STRING
         | property {};
 // property_list: STAR { $$ = nullptr; }
 //         | string_list { $$ = $1; };
-strings:  VAR_STRING
+strings:  LITERAL_STRING
                 {
                   GArrayExpression* array = new GArrayExpression();
                   array->addElement(INIT_STRING_AST($1));
                   free($1);
                   $$ = NewAst(NodeType::ArrayExpression, array, nullptr, 0);
                 }
-        | strings COMMA VAR_STRING
+        | strings COMMA LITERAL_STRING
               {
                 GArrayExpression* array = (GArrayExpression*)$1->_value;
                 array->addElement(INIT_STRING_AST($3));
@@ -370,8 +361,17 @@ number: VAR_DECIMAL { $$ = INIT_NUMBER_AST($1); }
         | VAR_INTEGER { $$ = INIT_NUMBER_AST($1); };
 a_graph_properties:
           graph_property { $$ = $1; }
-        | LEFT_SQUARE graph_properties RIGHT_SQUARE { $$ = $2; };
-graph_properties: 
+        | LEFT_SQUARE graph_properties RIGHT_SQUARE { $$ = $2; }
+        | error RIGHT_SQUARE
+          {
+            printf("\033[22;31mERROR:\t%s:\033[22;0m\n",
+              "input object is not a correct json");
+            yyerrok;
+            stm._errorCode = GQL_GRAMMAR_OBJ_FAIL;
+            YYABORT;
+          }
+        ;
+graph_properties:
           graph_property
               {
                 GArrayExpression* array = new GArrayExpression();
@@ -385,19 +385,19 @@ graph_properties:
                 $$ = $1;
               };
 graph_property:
-          KW_VERTEX dot VAR_STRING
+          KW_VERTEX dot VAR_NAME
               {
                 GMemberExpression* expr = new GMemberExpression(INIT_STRING_AST("vertex"), INIT_STRING_AST($3));
                 $$ = NewAst(NodeType::MemberExpression, expr, nullptr, 0);
                 free($3);
               }
-        | KW_EDGE dot VAR_STRING
+        | KW_EDGE dot VAR_NAME
               {
                 GMemberExpression* expr = new GMemberExpression(INIT_STRING_AST("edge"), INIT_STRING_AST($3));
                 $$ = NewAst(NodeType::MemberExpression, expr, nullptr, 0);
                 free($3);
               }
-        |  VAR_STRING dot VAR_STRING
+        |  VAR_NAME dot VAR_NAME
               {
                 GMemberExpression* expr = new GMemberExpression(INIT_STRING_AST($1), INIT_STRING_AST($3));
                 $$ = NewAst(NodeType::MemberExpression, expr, nullptr, 0);
@@ -406,7 +406,7 @@ graph_property:
               }
         | KW_VERTEX dot function_call {}
         | KW_EDGE dot function_call {}
-        | VAR_STRING dot function_call
+        | VAR_NAME dot function_call
               {
                 auto scope = INIT_STRING_AST($1);
                 $$ = NewAst(NodeType::VariableDeclarator, scope, $3, 1);
@@ -428,13 +428,7 @@ vertexes: vertex
                 vertexes->addElement($3);
                 $$ = $1;
               };
-vertex: LEFT_SQUARE VAR_STRING RIGHT_SQUARE
-              {
-                GVertexDeclaration* decl = new GVertexDeclaration(INIT_STRING_AST($2), nullptr);
-                free($2);
-                $$ = NewAst(NodeType::VertexDeclaration, decl, nullptr, 0);
-              }
-        | LEFT_SQUARE VAR_STRING COMMA json RIGHT_SQUARE
+vertex: LEFT_SQUARE LITERAL_STRING COMMA json RIGHT_SQUARE
               {
                 GVertexDeclaration* decl = new GVertexDeclaration(INIT_STRING_AST($2), $4);
                 free($2);
@@ -450,7 +444,7 @@ vertex: LEFT_SQUARE VAR_STRING RIGHT_SQUARE
                 GVertexDeclaration* decl = new GVertexDeclaration(INIT_NUMBER_AST($2), $4);
                 $$ = NewAst(NodeType::VertexDeclaration, decl, nullptr, 0);
               }
-        | VAR_STRING
+        | LITERAL_STRING
               {
                 GVertexDeclaration* decl = new GVertexDeclaration(INIT_STRING_AST($1), nullptr);
                 free($1);
@@ -474,7 +468,7 @@ edges: edge
                 edges->addElement($3);
                 $$ = $1;
               };
-edge: LEFT_SQUARE VAR_STRING COMMA a_edge COMMA VAR_STRING RIGHT_SQUARE
+edge: LEFT_SQUARE LITERAL_STRING COMMA a_edge COMMA LITERAL_STRING RIGHT_SQUARE
               {
                 struct GASTNode* from_value = INIT_STRING_AST($2);
                 free($2);
@@ -483,7 +477,7 @@ edge: LEFT_SQUARE VAR_STRING COMMA a_edge COMMA VAR_STRING RIGHT_SQUARE
                 GEdgeDeclaration* edge = new GEdgeDeclaration(from_value, to_value, $4);
                 $$ = NewAst(NodeType::EdgeDeclaration, edge, nullptr, 0);
               }
-        | LEFT_SQUARE VAR_STRING RIGHT_SQUARE
+        | LEFT_SQUARE LITERAL_STRING RIGHT_SQUARE
               {
                 struct GASTNode* from_value = INIT_STRING_AST($2);
                 free($2);
@@ -514,7 +508,7 @@ right_value: value { $$ = $1; }
                 free($1);
                 $$ = NewAst(NodeType::Literal, bin, nullptr, 0);
               }
-        | VAR_STRING
+        | LITERAL_STRING
               {
                 $$ = INIT_STRING_AST($1);
                 free($1);
@@ -522,7 +516,16 @@ right_value: value { $$ = $1; }
 object: RANGE_BEGIN properties RANGE_END
             {
               $$ = NewAst(NodeType::ObjectExpression, $2, nullptr, 0);
-            };
+            }
+        | error RANGE_END
+            {
+              printf("\033[22;31mERROR:\t%s:\033[22;0m\n",
+                "input object is not a correct property");
+              yyerrok;
+              stm._errorCode = GQL_GRAMMAR_OBJ_FAIL;
+              YYABORT;
+            }
+        ;
 properties: property {
               GArrayExpression* props = new GArrayExpression();
               props->addElement($1);
@@ -534,13 +537,13 @@ properties: property {
                 props->addElement($3);
                 $$ = $1;
               };
-property: VAR_STRING COLON right_value
+property: VAR_NAME COLON right_value
               {
                 GProperty* prop = new GProperty($1, $3);
                 free($1);
                 $$ = NewAst(NodeType::Property, prop, nullptr, 0);
               }
-        | KW_ID COLON VAR_STRING
+        | KW_ID COLON LITERAL_STRING
               {
                 struct GASTNode* value = INIT_STRING_AST($3);
                 free($3);
@@ -569,21 +572,19 @@ property: VAR_STRING COLON right_value
               }
         | AND COLON array
               {
-                struct GASTNode* key = INIT_STRING_AST("and");
-                // struct GASTNode* value = INIT_NUMBER_AST($3, NodeType::ArrayExpression);
-                // $$ = NewAst(NodeType::Property, nullptr, key, value);
+                GProperty* prop = new GProperty("and", $3);
+                $$ = NewAst(NodeType::BinaryExpression, prop, nullptr, 0);
               }
         | OR COLON array
               {
-                struct GASTNode* key = INIT_STRING_AST("or");
-                // struct GASTNode* value = INIT_NUMBER_AST($3, NodeType::ArrayExpression);
-                // $$ = NewAst(NodeType::Property, nullptr, key, value);
+                GProperty* prop = new GProperty("or", $3);
+                $$ = NewAst(NodeType::BinaryExpression, prop, nullptr, 0);
               }
         | a_link_condition
               {
                 $$ = $1;
               }
-        | group COLON VAR_STRING
+        | group COLON LITERAL_STRING
               {
                 struct GASTNode* value = INIT_STRING_AST($3);
                 free($3);
@@ -595,11 +596,18 @@ comparable_item: number { $$ = $1; }
           GLiteralDatetime* dt = new GLiteralDatetime($1);
           $$ = NewAst(NodeType::Literal, dt, nullptr, 0);
         };
-array:    LEFT_SQUARE RIGHT_SQUARE { $$ = nullptr; }
+array:    LEFT_SQUARE RIGHT_SQUARE { stm._errorCode = GQL_GRAMMAR_ARRAY_FAIL; $$ = nullptr; }
         | LEFT_SQUARE values RIGHT_SQUARE
               {
                 $$ = $2;
-              };
+              }
+        | error RIGHT_SQUARE
+              {
+                printf("\033[22;31mDetail:\t%s:\033[22;0m\n",
+                  "array is not a correct array");
+                stm._errorCode = GQL_GRAMMAR_ARRAY_FAIL;
+              }
+        ;
 values: right_value {
                 GArrayExpression* values = new GArrayExpression();
                 values->addElement($1);
@@ -627,7 +635,7 @@ a_edge:
                 $$ = $1;
               };
 a_value:
-        | VAR_STRING
+        | LITERAL_STRING
               {
                 $$ = INIT_STRING_AST($1);
                 free($1);
@@ -635,7 +643,7 @@ a_value:
         | VAR_DECIMAL { $$ = INIT_NUMBER_AST($1); }
         | VAR_INTEGER { $$ = INIT_NUMBER_AST($1); };
 function_call:
-        | VAR_STRING function_params
+        | VAR_NAME function_params
               {
                 auto fname = INIT_STRING_AST($1);
                 free($1);

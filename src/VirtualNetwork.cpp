@@ -27,10 +27,10 @@ int GVirtualNetwork::addNode(node_t id, const std::vector<node_attr_t>& attr, co
     if (s.layer > level) return 0;
   }
   else {
-    GMap::node_attrs_t attrs(attr.begin(), attr.end());
-    std::array< GMap::edges_t, MAX_LAYER_SIZE> edges;
+    GMap<uint64_t, uint64_t>::node_attrs_t attrs(attr.begin(), attr.end());
+    std::array< GMap<uint64_t, uint64_t>::edges_t, MAX_LAYER_SIZE> edges;
     NodeStatus status = { false, false, false, false, NodeKind::Entity, level };
-    GMap::node_collection collection = std::make_tuple(edges, attrs, value, status);
+    GMap<uint64_t, uint64_t>::node_collection collection = std::make_tuple(edges, attrs, value, status);
     // cover if exist
     nodes[id] = collection;
   }
@@ -74,14 +74,14 @@ int GVirtualNetwork::addEdge(edge_t id, node_t from, node_t to,
     status.del = false;
     status.direction = 0b10;
     status.layer = level;
-    GMap::edge_attrs_t attrs(attr.begin(), attr.end());
-    GMap::edge_collection ec = std::make_tuple(std::pair<node_t, node_t>({ from, to }), attrs, value, status);
+    GMap<uint64_t, uint64_t>::edge_attrs_t attrs(attr.begin(), attr.end());
+    GMap<uint64_t, uint64_t>::edge_collection ec = std::make_tuple(std::pair<node_t, node_t>({ from, to }), attrs, value, status);
     _vg.edges()[id] = ec;
 
     auto& from_edges = std::get<0>(_vg.nodes()[from]);
-    addUniqueDataAndSort< edge_t, GMap::edges_t >(from_edges[level], id);
+    addUniqueDataAndSort< edge_t, GMap<uint64_t, uint64_t>::edges_t >(from_edges[level], id);
     auto& to_edges = std::get<0>(_vg.nodes()[to]);
-    addUniqueDataAndSort< edge_t, GMap::edges_t >(to_edges[level], id);
+    addUniqueDataAndSort< edge_t, GMap<uint64_t, uint64_t>::edges_t >(to_edges[level], id);
   }
   return 0;
 }
@@ -172,5 +172,5 @@ edge_t GVirtualNetwork::getEdgeID(node_t from, node_t to) const
     std::set_intersection(fromEdges.begin(), fromEdges.end(), toEdges.begin(), toEdges.end(), std::insert_iterator(conns, conns.begin()));
     if (conns.size()) return conns.front();
   }
-  return (edge_t)GMap::no_edge;
+  return (edge_t)GMap<uint64_t, uint64_t>::no_edge;
 }

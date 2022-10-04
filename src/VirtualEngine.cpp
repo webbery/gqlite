@@ -26,6 +26,17 @@ void release_result_info(gqlite_result& result) {
   free(result.infos);
 }
 
+const char* GVirtualEngine::GetErrorInfo(int code)
+{
+  switch (code)
+  {
+  case GQL_GRAMMAR_ARRAY_FAIL:
+    return "array is not correct format";
+  default:
+    return nullptr;
+  }
+}
+
 GVirtualEngine::GVirtualEngine(size_t memsize)
 : _errIndx(0)
 , _errorCode(ECode_GQL_Parse_Fail)
@@ -83,6 +94,7 @@ int GVirtualEngine::executePlans(PlanList* plans) {
 }
 
 int GVirtualEngine::execAST(GASTNode* ast) {
+  if (_errorCode < 0) return _errorCode;
   if (!ast) return ECode_Success;
   PlanList* plans = makePlans(ast);
   int ret = executePlans(plans);

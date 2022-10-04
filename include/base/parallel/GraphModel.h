@@ -15,17 +15,18 @@
 #define GetNodeStatus(node) std::get<3>(node)
 #define GetNodeConnectedEdges(node) std::get<0>(node)
 
-class GNode; 
+class GNode;
+template<typename NodeType = uint64_t, typename EdgeType = uint64_t>
 class GMap {
 public:
-  enum class node_t : uint64_t {};
+  using node_t = NodeType;
   using node_attr_t = uint8_t;
   using node_literal_t = uint32_t;
 
   using nodes_t = std::pair<node_t, node_t>;
   using node_attrs_t = std::list<node_attr_t>;
 
-  enum class edge_t : uint64_t {};
+  enum class edge_t : EdgeType {};
   using edge_attr_t = uint8_t;
 
   //using edges_t = parlay::sequence<edge_t>;
@@ -82,11 +83,11 @@ public:
     _visitedNodes.clear();
   }
 
-  pam_node::const_iterator node_begin() const {
+  typename pam_node::const_iterator node_begin() const {
     return _nodes.begin();
   }
 
-  pam_node::const_iterator node_end()const {
+  typename pam_node::const_iterator node_end()const {
     return _nodes.end();
   }
 
@@ -136,8 +137,8 @@ private:
   pam_edge _edges;
 };
 
-using node_t = GMap::node_t;
-using edge_t = GMap::edge_t;
+using node_t = GMap<uint64_t, uint64_t>::node_t;
+using edge_t = GMap<uint64_t, uint64_t>::edge_t;
 
 inline edge_t operator++(edge_t& e) {
   edge_t t = e;

@@ -1,23 +1,27 @@
 ***** EXECUTE: "grammar.gql" *****
-[0]:	{create: 'query_db', group: ['废墟', 'addr'], index: ['group', 'feature_name', 'loc']}
+[0]:	{create: 'query_db', group: ['废墟', 'addr'], index: ['group', 'feature_name', 'loc']};
 CREATE SUCCESS
-[1]:	{upset: '废墟', vertex: [['v1', {filename: '破旧小屋.jpg', datatime: 0d1653446732, feature_name: [0, 0]}], ['v2', {group: 'HDR', filename: '夕阳.jpg', datatime: 0d1653446732}], ['v3', {group: '赛博朋克', filename: '阿丽塔.jpg', datatime: 0d1653446732}]]}
+[1]:	{upset: '废墟', vertex: [['v1', {filename: '破旧小屋.jpg', datatime: 0d1653446732, feature_name: [0, 0]}], ['v2', {group: 'HDR', filename: '夕阳.jpg', datatime: 0d1653446732}], ['v3', {group: '赛博朋克', filename: '阿丽塔.jpg', datatime: 0d1653446732}]]};
 UPSET SUCCESS
-[2]:	{upset: '废墟', vertex: [['v4', {filename: '垃圾堆.jpg', datatime: 0d1653315732, feature_name: [0, 0.5]}], ['v5', {group: 'HDR', filename: '海岸线.jpg', datatime: 0d1653315732}], ['v6', {group: '赛博朋克', filename: '机械姬.jpg', datatime: 0d1653315732}]]}
+[2]:	{upset: '废墟', vertex: [['v4', {filename: '垃圾堆.jpg', datatime: 0d1653315732, feature_name: [0, 0.5]}], ['v5', {group: 'HDR', filename: '海岸线.jpg', datatime: 0d1653315732}], ['v6', {group: '赛博朋克', filename: '机械姬.jpg', datatime: 0d1653315732}]]};
 UPSET SUCCESS
-[3]:	{upset: '废墟', vertex: [['v7', {filename: '危楼.jpg', datatime: 0d1653105732, feature_name: [0, 1]}], ['v8', {group: 'HDR', filename: '山崖.jpg', datatime: 0d1653105732, feature_name: [0.5, 0]}], ['v9', {group: '赛博朋克', filename: '2022.jpg', datatime: 0d1653105732}]]}
+[3]:	{upset: '废墟', vertex: [['v7', {filename: '危楼.jpg', datatime: 0d1653105732, feature_name: [0, 1]}], ['v8', {group: 'HDR', filename: '山崖.jpg', datatime: 0d1653105732, feature_name: [0.5, 0]}], ['v9', {group: '赛博朋克', filename: '2022.jpg', datatime: 0d1653105732}]]};
 UPSET SUCCESS
-[4]:	{upset: '废墟', vertex: [['v7', {filename: '破墙.jpg', datatime: 0d1651105732, feature_name: [0, 1.5]}], ['v8', {group: 'HDR', filename: '蓝天.jpg', datatime: 0d1651105732, feature_name: [0.5, 0]}], ['v9', {group: '赛博朋克', filename: '大佐.jpg', datatime: 0d1651105732}]]}
+[4]:	{upset: '废墟', vertex: [['v7', {filename: '破墙.jpg', datatime: 0d1651105732, feature_name: [0, 1.5]}], ['v8', {group: 'HDR', filename: '蓝天.jpg', datatime: 0d1651105732, feature_name: [0.5, 0]}], ['v9', {group: '赛博朋克', filename: '大佐.jpg', datatime: 0d1651105732}]]};
 UPSET SUCCESS
-[5]:	{upset: '废墟', vertex: [['1', {filename: '破墙0.jpg', datatime: 0d5}]]}
+[5]:	{upset: '废墟', vertex: [['1', {filename: '破墙0.jpg', datatime: 0d5}]]};
 UPSET SUCCESS
-[6]:	{upset: '废墟', vertex: [[1, {filename: '破墙0.jpg', datatime: 0d1651105732}]]}
+[6]:	{upset: '废墟', vertex: ['3', '4', '5']};
 UPSET SUCCESS
-[7]:	{upset: 'addr', vertex: [[1, {filename: '破墙1.jpg', datatime: 0d1651105732}]]}
+[7]:	{upset: '废墟', vertex: [[1, {filename: '破墙0.jpg', datatime: 0d1651105732}]]};
 UPSET SUCCESS
-[8]:	{upset: 'addr', vertex: [[2, {filename: '破墙2.jpg', loc: [131.24194, 37.12532]}]]}
+[8]:	{upset: 'addr', vertex: [[1, {filename: '破墙1.jpg', datatime: 0d1651105732}]]};
 UPSET SUCCESS
-[9]:	ast {query: '废墟', in: 'vertex_db', where: {group: '废墟'}}
+[9]:	{upset: 'addr', vertex: [[2, {filename: '破墙2.jpg', loc: [131.24194, 37.12532]}]]};
+UPSET SUCCESS
+[10]:	{upset: 'addr', vertex: [3, 4, 5]};
+UPSET SUCCESS
+[11]:	ast {query: '废墟', in: 'vertex_db', where: {group: '废墟'}};
 AST:
   `- type: GQLExpression
     |- type: QueryStatement
@@ -35,15 +39,30 @@ AST:
             |- type: Literal
             |- raw: 废墟
             |- kind: String
-ast {query: '废墟', in: 'vertex_db', where: {group: '废墟'}} SUCCESS
-[10]:	{query: '废墟', in: 'vertex_db', where: {group: '废墟'}}
+ast {query: '废墟', in: 'vertex_db', where: {group: '废墟'}}; SUCCESS
+[12]:	{query: '废墟'};
+[1, {"datatime":"0d1651105732","filename":"破墙0.jpg"}]
+[3, null]
+[4, null]
+[5, null]
+[v1, {"datatime":"0d1653446732","feature_name":[0.0,0.0],"filename":"破旧小屋.jpg"}]
+[v2, {"datatime":"0d1653446732","filename":"夕阳.jpg","group":"HDR"}]
+[v3, {"datatime":"0d1653446732","filename":"阿丽塔.jpg","group":"赛博朋克"}]
+[v4, {"datatime":"0d1653315732","feature_name":[0.0,0.5],"filename":"垃圾堆.jpg"}]
+[v5, {"datatime":"0d1653315732","filename":"海岸线.jpg","group":"HDR"}]
+[v6, {"datatime":"0d1653315732","filename":"机械姬.jpg","group":"赛博朋克"}]
+[v7, {"datatime":"0d1651105732","feature_name":[0.0,1.5],"filename":"破墙.jpg"}]
+[v8, {"datatime":"0d1651105732","feature_name":[0.5,0.0],"filename":"蓝天.jpg","group":"HDR"}]
+[v9, {"datatime":"0d1651105732","filename":"大佐.jpg","group":"赛博朋克"}]
 QUERY SUCCESS
-[11]:	{query: '废墟', in: 'vertex_db', where: {group: '赛博朋克'}}
+[13]:	{query: '废墟', in: 'vertex_db', where: {group: '废墟'}};
+QUERY SUCCESS
+[14]:	{query: '废墟', in: 'vertex_db', where: {group: '赛博朋克'}};
 [v3, {"datatime":"0d1653446732","filename":"阿丽塔.jpg","group":"赛博朋克"}]
 [v6, {"datatime":"0d1653315732","filename":"机械姬.jpg","group":"赛博朋克"}]
 [v9, {"datatime":"0d1651105732","filename":"大佐.jpg","group":"赛博朋克"}]
 QUERY SUCCESS
-[12]:	ast {query: '废墟', in: 'vertex_db', where: {datatime: {$lt: 1653315732}}}
+[15]:	ast {query: '废墟', in: 'vertex_db', where: {datatime: {$lt: 1653315732}}};
 AST:
   `- type: GQLExpression
     |- type: QueryStatement
@@ -67,19 +86,19 @@ AST:
                   |- type: Literal
                   |- raw: 1653315732
                   |- kind: Unknow Property Kind: 1
-ast {query: '废墟', in: 'vertex_db', where: {datatime: {$lt: 1653315732}}} SUCCESS
-[13]:	{query: '废墟', in: 'vertex_db', where: {datatime: {$lt: 0d1653315732}}}
+ast {query: '废墟', in: 'vertex_db', where: {datatime: {$lt: 1653315732}}}; SUCCESS
+[16]:	{query: '废墟', in: 'vertex_db', where: {datatime: {$lt: 0d1653315732}}};
 [1, {"datatime":"0d1651105732","filename":"破墙0.jpg"}]
 [v7, {"datatime":"0d1651105732","feature_name":[0.0,1.5],"filename":"破墙.jpg"}]
 [v8, {"datatime":"0d1651105732","feature_name":[0.5,0.0],"filename":"蓝天.jpg","group":"HDR"}]
 [v9, {"datatime":"0d1651105732","filename":"大佐.jpg","group":"赛博朋克"}]
 QUERY SUCCESS
-[14]:	{query: '废墟', in: 'vertex_db', where: {datatime: {$gt: 0d1653315732}}}
+[17]:	{query: '废墟', in: 'vertex_db', where: {datatime: {$gt: 0d1653315732}}};
 [v1, {"datatime":"0d1653446732","feature_name":[0.0,0.0],"filename":"破旧小屋.jpg"}]
 [v2, {"datatime":"0d1653446732","filename":"夕阳.jpg","group":"HDR"}]
 [v3, {"datatime":"0d1653446732","filename":"阿丽塔.jpg","group":"赛博朋克"}]
 QUERY SUCCESS
-[15]:	{query: '废墟', in: 'vertex_db', where: {datatime: {$gte: 0d1653315732}}}
+[18]:	{query: '废墟', in: 'vertex_db', where: {datatime: {$gte: 0d1653315732}}};
 [v1, {"datatime":"0d1653446732","feature_name":[0.0,0.0],"filename":"破旧小屋.jpg"}]
 [v2, {"datatime":"0d1653446732","filename":"夕阳.jpg","group":"HDR"}]
 [v3, {"datatime":"0d1653446732","filename":"阿丽塔.jpg","group":"赛博朋克"}]
@@ -87,7 +106,7 @@ QUERY SUCCESS
 [v5, {"datatime":"0d1653315732","filename":"海岸线.jpg","group":"HDR"}]
 [v6, {"datatime":"0d1653315732","filename":"机械姬.jpg","group":"赛博朋克"}]
 QUERY SUCCESS
-[16]:	{query: '废墟', in: 'vertex_db', where: {datatime: {$lte: 0d1653446731}}}
+[19]:	{query: '废墟', in: 'vertex_db', where: {datatime: {$lte: 0d1653446731}}};
 [1, {"datatime":"0d1651105732","filename":"破墙0.jpg"}]
 [v4, {"datatime":"0d1653315732","feature_name":[0.0,0.5],"filename":"垃圾堆.jpg"}]
 [v5, {"datatime":"0d1653315732","filename":"海岸线.jpg","group":"HDR"}]
@@ -96,6 +115,22 @@ QUERY SUCCESS
 [v8, {"datatime":"0d1651105732","feature_name":[0.5,0.0],"filename":"蓝天.jpg","group":"HDR"}]
 [v9, {"datatime":"0d1651105732","filename":"大佐.jpg","group":"赛博朋克"}]
 QUERY SUCCESS
-[17]:	{drop: 'query_db'}
+[20]:	{dump: 'query_db'};
+{create: 'query_db', group: ['addr','废墟'], index: ['feature_name','group','loc']}
+{upset: '废墟', vertex: [1, {'datatime':{'_obj_t':4,'value':1651105732},'filename':'破墙0.jpg'}]}
+{upset: '废墟', vertex: [3]}
+{upset: '废墟', vertex: [4]}
+{upset: '废墟', vertex: [5]}
+{upset: '废墟', vertex: [v1, {'datatime':{'_obj_t':4,'value':1653446732},'feature_name':{'_obj_t':5,'value':[0.0,0.0]},'filename':'破旧小屋.jpg'}]}
+{upset: '废墟', vertex: [v2, {'datatime':{'_obj_t':4,'value':1653446732},'filename':'夕阳.jpg','group':'HDR'}]}
+{upset: '废墟', vertex: [v3, {'datatime':{'_obj_t':4,'value':1653446732},'filename':'阿丽塔.jpg','group':'赛博朋克'}]}
+{upset: '废墟', vertex: [v4, {'datatime':{'_obj_t':4,'value':1653315732},'feature_name':{'_obj_t':5,'value':[0.0,0.5]},'filename':'垃圾堆.jpg'}]}
+{upset: '废墟', vertex: [v5, {'datatime':{'_obj_t':4,'value':1653315732},'filename':'海岸线.jpg','group':'HDR'}]}
+{upset: '废墟', vertex: [v6, {'datatime':{'_obj_t':4,'value':1653315732},'filename':'机械姬.jpg','group':'赛博朋克'}]}
+{upset: '废墟', vertex: [v7, {'datatime':{'_obj_t':4,'value':1651105732},'feature_name':{'_obj_t':5,'value':[0.0,1.5]},'filename':'破墙.jpg'}]}
+{upset: '废墟', vertex: [v8, {'datatime':{'_obj_t':4,'value':1651105732},'feature_name':{'_obj_t':5,'value':[0.5,0.0]},'filename':'蓝天.jpg','group':'HDR'}]}
+{upset: '废墟', vertex: [v9, {'datatime':{'_obj_t':4,'value':1651105732},'filename':'大佐.jpg','group':'赛博朋克'}]}
+{dump: 'query_db'}; SUCCESS
+[21]:	{drop: 'query_db'};
 DROP SUCCESS
 ***** EXECUTE FINISH: "grammar.gql" *****

@@ -23,7 +23,7 @@ This is the expriments for testing abilities of graph database in ending device.
 	* 3.2. [macos](#macos)
 	* 3.3. [windows](#windows)
 	* 3.4. [android](#android)
-* 4. [How to use](#Howtouse)
+* 4. [How to use in C/C++](#Howtouse)
 * 5. [Graph Query Language](#GraphQueryLanguage)
 	* 5.1. [Create Graph](#CreateGraph)
 	* 5.2. [Data Types](#DataTypes)
@@ -39,12 +39,7 @@ This is the expriments for testing abilities of graph database in ending device.
 	/vscode-markdown-toc-config -->
 <!-- /vscode-markdown-toc -->
 ##  1. <a name='Designed'></a>Designed
-In order to get more inflexibility, we try to impliment graph database on this paper: GRAD: On Graph Database Modeling. But not strict.
-###  1.1. <a name='Operator'></a>Operator
-####  1.1.1. <a name='GraphMatchingimgsrchttps:render.githubusercontent.comrendermathmathP'></a>Graph Matching <img src="https://render.githubusercontent.com/render/math?math=P">
-This operator is not extactly a graph matching. It can be a fuzzy matching.
-####  1.1.2. <a name='Walkingimgsrchttps:render.githubusercontent.comrendermathmathW'></a>Walking <img src="https://render.githubusercontent.com/render/math?math=W">
-Walking is used to be through graph. So it's best to select a well walking method. Such as `Random Walk`, `A*` and so on.
+In order to get more inflexibility, we try to implement graph database on this paper: GRAD: On Graph Database Modeling. But not strict.  
 ##  2. <a name='TheSpecofImplements'></a>The Spec of Implements
 | Feature | Description | Implements | Version |
 | :--------:  | :--------: | :--------: | :--------: |
@@ -79,8 +74,65 @@ An version of flex&bison is placed in dir `tool`. So it's not need to install de
 ###  3.4. <a name='android'></a>android  
 C++: 17  
 Cross-compile on Ubuntu/MacOS. Becasue cross-compile libzstd encounter some problem on Windows.  
-##  4. <a name='Howtouse'></a>How to use  
-An example shows how to use in your program is here.  
+##  4. <a name='Howtouse'></a>How to use in C/C++  
+An simple example shows how to use in your program is here:  
+```
+#include "gqlite.h"
+
+int gqlite_exec_callback(gqlite_result* params)
+{
+  if (params) {
+    switch (params->type)
+    {
+    case gqlite_result_type_node:
+    {
+      gqlite_node* node = params->nodes;
+      while (node) {
+        switch (node->_type)
+        {
+        case gqlite_node_type_vertex:
+        {
+          gqlite_vertex* v = node->_vertex;
+          if (v->type == gqlite_id_type::integer) {
+            printf("[%d, %s]\n", v->uid, v->properties);
+          }
+          else {
+            printf("[%s, %s]\n", v->cid, v->properties);
+          }
+        }
+          break;
+        case gqlite_node_type_edge:
+          break;
+        default:
+          break;
+        }
+        node = node->_next;
+      }
+    }
+      break;
+    case gqlite_result_type_cmd:
+      for (size_t idx = 0; idx < params->count; ++idx) {
+        printf("%s\n", params->infos[idx]);
+      }
+      break;
+    default:
+      break;
+    }
+  }
+  return 0;
+}
+
+int main() {
+  gqlite* pHandle = 0;
+  gqlite_open(&pHandle);
+  char* ptr = nullptr;
+  gqlite_exec(pHandle,
+    "{create: 'example_db'}",
+    gqlite_exec_callback, nullptr, &ptr);
+  gqlite_free(ptr);
+  gqlite_close(pHandle);
+}
+```
 ##  5. <a name='GraphQueryLanguage'></a>Graph Query Language
 ###  5.1. <a name='CreateGraph'></a>Create Graph
 Create a graph is simply use `create` keyword. The keyword of `group`, means that all entity node which group belongs to. If we want to search vertex by some property, `index` keyword will regist it.

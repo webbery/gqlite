@@ -31,18 +31,24 @@ namespace {
     return txn.get(map, k, absent);
   }
 
+  //mdbx::slice get(mdbx::txn_managed& txn, mdbx::map_handle& map, uint64_t from, uint64_t to) {
+  //  assert(to >= from);
+  //  mdbx::slice f(&from, sizeof(uint64_t));
+  //  mdbx::slice t(&to, sizeof(uint64_t));
+  //  mdbx::slice absent;
+    //txn.get_equal_or_great(map, f, )
+  //}
+
   int put(mdbx::txn_managed& txn, mdbx::map_handle& map, const std::string& key, mdbx::slice value)
   {
     mdbx::slice k(key.data(), key.size());
-    txn.put(map, k, value, mdbx::upsert);
-    return 0;
+    return txn.put(map, k, &value, MDBX_put_flags_t(mdbx::upsert));
   }
 
   int put(mdbx::txn_managed& txn, mdbx::map_handle& map, uint64_t key, mdbx::slice value)
   {
     mdbx::slice k(&key, sizeof(uint64_t));
-    txn.put(map, k, value, mdbx::upsert);
-    return 0;
+    return txn.put(map, k, &value, MDBX_put_flags_t(mdbx::upsert));
   }
 
   int del(mdbx::txn_managed& txn, mdbx::map_handle& map, uint64_t key) {
@@ -58,7 +64,7 @@ namespace {
   }
 }
 
-GStorageEngine::GStorageEngine()
+GStorageEngine::GStorageEngine() noexcept
   :_cdict(nullptr)
   ,_ddict(nullptr)
 , _cctx(nullptr) {
@@ -79,8 +85,14 @@ int GStorageEngine::open(const char* filename, StoreOption option) {
   env::operate_parameters operator_param;
 #define DEFAULT_MAX_PROPS  64
   operator_param.max_maps = DEFAULT_MAX_PROPS;
-
-  _env = env_managed(option.directory + filename, create_param, operator_param);
+  std::filesystem::path p(filename);
+  std::string fullpath = p.filename().u8string();
+  if (p.is_relative()) {
+    if (!option.directory.empty()) {
+      fullpath = option.directory + filename;
+    }
+  }
+  _env = env_managed(fullpath, create_param, operator_param);
   int ret = startTrans();
   mdbx::map_handle handle = openSchema();
   thread_local auto id = std::this_thread::get_id();
@@ -89,7 +101,7 @@ int GStorageEngine::open(const char* filename, StoreOption option) {
     std::vector<uint8_t> v(data.byte_ptr(), data.byte_ptr() + data.size());
     _schema = nlohmann::json::from_cbor(v);
   }
-  _schema[SCHEMA_GRAPH_NAME] = filename;
+  _schema[SCHEMA_GRAPH_NAME] = p.filename();
   initMap(option);
   initDict(option.compress);
   return ret;
@@ -183,7 +195,7 @@ void GStorageEngine::addMap(const std::string& prop, KeyType type) {
 void GStorageEngine::addIndex(const std::string& indexname)
 {
   if (!isIndexExist(indexname)) {
-    _schema[SCHEMA_INDEX][indexname] = 0;
+    _schema[SCHEMA_INDEX][indexname] = IndexType::Uninitialize;
   }
 }
 
@@ -200,6 +212,21 @@ bool GStorageEngine::isIndexExist(const std::string& name)
   const auto& indexes = _schema[SCHEMA_INDEX];
   if (indexes.is_null()) return false;
   return indexes.count(name) != 0;
+}
+
+IndexType GStorageEngine::updateIndexType(const std::string& name, IndexType type)
+{
+  assert(isIndexExist(name));
+  if (_schema[SCHEMA_INDEX][name] == IndexType::Uninitialize) {
+    _schema[SCHEMA_INDEX][name] = type;
+  }
+  return _schema[SCHEMA_INDEX][name];
+}
+
+IndexType GStorageEngine::getIndexType(const std::string& name)
+{
+  assert(isIndexExist(name));
+  return _schema[SCHEMA_INDEX][name];
 }
 
 void GStorageEngine::tryInitKeyType(const std::string& prop, KeyType type)
@@ -357,13 +384,18 @@ int GStorageEngine::read(const std::string& prop, const std::string& key, std::s
   return ECode_Success;
 }
 
-int GStorageEngine::read(const std::string& mapname, const std::string& key, nlohmann::json& value)
+int GStorageEngine::read(const std::string& mapname, uint64_t from, uint64_t to, std::list<std::string>& value)
 {
-  return ECode_Success;
-}
-
-int GStorageEngine::read(const std::string& mapname, uint64_t key, nlohmann::json& value)
-{
+  thread_local auto id = std::this_thread::get_id();
+  auto handle = getOrCreateHandle(mapname, mdbx::key_mode::ordinal);
+  auto cursor = _txns[id].open_cursor(handle);
+  //mdbx::slice f(&from, sizeof(uint64_t));
+  mdbx::slice t(&to, sizeof(uint64_t));
+  auto result = cursor.move(mdbx::cursor::key_lowerbound, t);
+  while (result && *(uint64_t*)result.key.byte_ptr() > from)
+  {
+    value.push_back({ (char*)result.value.byte_ptr(), result.value.size() });
+  }
   return ECode_Success;
 }
 
@@ -371,6 +403,22 @@ int GStorageEngine::parse(const std::string& data, nlohmann::json& value)
 {
 
   return ECode_Success;
+}
+
+size_t GStorageEngine::estimate(const std::string& mapname)
+{
+  if (!isMapExist(mapname)) {
+    if (!isIndexExist(mapname)) {
+      return std::numeric_limits<size_t>::max();
+    }
+    return 0;
+  }
+  auto first = getMapCursor(mapname);
+  first.to_first(false);
+  if (first.on_last()) return 0;
+  auto last = getMapCursor(mapname);
+  last.to_last(false);
+  return mdbx::estimate(first, last);
 }
 
 int GStorageEngine::del(const std::string& mapname, const std::string& key)
@@ -422,18 +470,37 @@ int GStorageEngine::read(const std::string& prop, uint64_t key, std::string& val
   return ECode_Success;
 }
 
-GStorageEngine::cursor GStorageEngine::getCursor(const std::string& prop)
+GStorageEngine::cursor GStorageEngine::getMapCursor(const std::string& prop)
 {
-  assert(isMapExist(prop) || isIndexExist(prop));
-  mdbx::key_mode mode = mdbx::key_mode::ordinal;
+  assert(isMapExist(prop));
+  mdbx::map_handle handle;
   auto pp = getProp(prop);
   auto type = (KeyType)pp[SCHEMA_CLASS_KEY];
-  mdbx::map_handle handle;
   if (type == KeyType::Integer) {
     handle = getOrCreateHandle(prop, mdbx::key_mode::ordinal);
   }
   else {
     handle = getOrCreateHandle(prop, mdbx::key_mode::usual);
+  }
+  thread_local auto id = std::this_thread::get_id();
+  return _txns[id].open_cursor(handle);
+}
+
+GStorageEngine::cursor GStorageEngine::getIndexCursor(const std::string& mapname)
+{
+  assert(isIndexExist(mapname));
+  mdbx::map_handle handle;
+  switch (getIndexType(mapname)) {
+  case IndexType::Number:
+    handle = getOrCreateHandle(mapname, mdbx::key_mode::ordinal);
+    break;
+  case IndexType::Word:
+    handle = getOrCreateHandle(mapname, mdbx::key_mode::usual);
+    break;
+  default:
+    printf("other type: %s\n", mapname.c_str());
+    handle = getOrCreateHandle(mapname, mdbx::key_mode::ordinal);
+    break;
   }
   thread_local auto id = std::this_thread::get_id();
   return _txns[id].open_cursor(handle);

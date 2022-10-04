@@ -30,6 +30,7 @@ DECIMAL [0-9]+.[0-9]+
 "\["                { stm._errIndx += 1; return LEFT_SQUARE; };
 "\]"                { stm._errIndx += 1; return RIGHT_SQUARE; };
 ":"                 { stm._errIndx += 1; return COLON;};
+";"                 { stm._errIndx += 1; return SEMICOLON; }
 ","                 { stm._errIndx += 1; return COMMA;};
 h'' {
                         memcpy(yylval->var_name, yytext + 1, yyleng - 2);
@@ -58,21 +59,21 @@ h'' {
                         memcpy(yylval->__c, yytext + 1, yyleng - 2);
                         yylval->__c[yyleng - 2] = '\0';
                         stm._errIndx += yyleng;
-                        return VAR_STRING;
+                        return LITERAL_STRING;
                     };
 '[a-zA-Z]+[\w]*\.[a-zA-Z]+' {
                         yylval->__c = (char*)malloc(yyleng - 1);
                         memcpy(yylval->__c, yytext + 1, yyleng - 2);
                         yylval->__c[yyleng - 2] = '\0';
                         stm._errIndx += yyleng;
-                        return VAR_STRING;
+                        return LITERAL_STRING;
                     };
 '(\\.|[^'\\])*?'    {
                         yylval->__c = (char*)malloc(yyleng - 1);
                         memcpy(yylval->__c, yytext + 1, yyleng - 2);
                         yylval->__c[yyleng - 2] = '\0';
                         stm._errIndx += yyleng;
-                        return VAR_STRING;
+                        return LITERAL_STRING;
                     };
 "extension"         {stm._errIndx += yyleng;};
 "show"              {stm._errIndx += yyleng; return CMD_SHOW;};
@@ -105,6 +106,7 @@ create              {stm._errIndx += yyleng; return KW_CREATE;};
 "else"              { stm._errIndx += yyleng;};
 "return"            { stm._errIndx += yyleng;};
 "neighbor"          { stm._errIndx += yyleng;};
+"null"              { stm._errIndx += yyleng;}
 "$gte"              { stm._errIndx += yyleng; return OP_GREAT_THAN_EQUAL;};
 "$lte"              { stm._errIndx += yyleng; return OP_LESS_THAN_EQUAL;};
 "$gt"               { stm._errIndx += yyleng; return OP_GREAT_THAN;};
@@ -139,7 +141,7 @@ create              {stm._errIndx += yyleng; return KW_CREATE;};
                         memcpy(yylval->__c, yytext, yyleng);
                         yylval->__c[yyleng] = '\0';
                         stm._errIndx += yyleng;
-                        return VAR_STRING;
+                        return VAR_NAME;
                     };
 .
 %%

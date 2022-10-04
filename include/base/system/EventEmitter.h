@@ -37,7 +37,10 @@ private:
     Job(std::atomic_bool& interrupt, std::function<void(const std::any&)> f, const std::any& args)
       :_args(args), _f(f), state(JobStatus::Ready), _intterrupt(interrupt){ _id = ++GEventEmitter::_id; }
     void operator()() {
-      if (_intterrupt.load()) return;
+      if (_intterrupt.load()) {
+        state.store(JobStatus::Finished);
+        return;
+      }
 #if defined(GQLITE_ENABLE_PRINT)
       printf("start task: %d\n", _id);
 #endif

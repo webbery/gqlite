@@ -12,6 +12,16 @@
 class GQueryStmt;
 struct GASTNode;
 class GScanPlan: public GPlan {
+  /**
+   * Parse Stmt to Plan info list.
+   * ScanPlan execute with plan info list.
+   */
+  struct PlanInfo {
+    float cost;
+    std::string _group;
+  };
+  using ScanPlans = std::vector<PlanInfo>;
+
   enum class QueryType {
     SimpleScan,     /**< scan database with/without simple condition */
     NNSearch,       /**< use KNN search */
@@ -24,6 +34,7 @@ class GScanPlan: public GPlan {
     Scanning,
     Pause
   };
+
 public:
   GScanPlan(std::map<std::string, GVirtualNetwork*>& networks, GStorageEngine* store, GQueryStmt* stmt);
   GScanPlan(std::map<std::string, GVirtualNetwork*>& networks, GStorageEngine* store, GASTNode* condition, const std::string& graph = "");
@@ -39,9 +50,11 @@ public:
   void goon();
   void stop();
 
-  std::vector<std::string> groups() { return _queries; }
+  //std::vector<std::string> groups() { return _queries; }
 private:
   int scan(const std::function<ExecuteStatus(KeyType, const std::string& key, const std::string& value)>& cb);
+  // scan indexes
+  int scan();
 
   void parseGroup(GASTNode* query);
   /**
@@ -49,18 +62,27 @@ private:
    */
   void parseConditions(GASTNode* conditions);
 
-  bool pauseExit(GStorageEngine::cursor& cursor, std::vector<std::string>::iterator itr);
+  bool pauseExit(GStorageEngine::cursor& cursor, ScanPlans::iterator itr);
 
   bool stopExit();
 
   gkey_t getKey(KeyType type, mdbx::slice& slice);
+  bool predict(gkey_t key, nlohmann::json& row);
   bool predict(const std::function<bool(const attribute_t&)>& op, const nlohmann::json& attr)const;
   // convert obj to display type
   void beautify(nlohmann::json& input);
+  /**
+   * @brief evaluate the order of simple scan's indexes
+   * 
+   * @return std::list<size_t> 
+   */
+  ScanPlans evaluate(const ScanPlans& props);
 
   struct PatternVisitor {
     GraphPattern& _pattern;
     EntityNode* _node;
+    // and/or index
+    long _index = 0;
 
     PatternVisitor(GraphPattern& pattern, EntityNode* node) :_pattern(pattern), _node(node) {}
 
@@ -135,7 +157,7 @@ private:
   std::thread _worker;
 
   GraphPattern _pattern;
-  std::vector<std::string> _queries;
+  ScanPlans _queries;
   std::string _graph;
   std::vector<IObserver*> _observers;
   /**
@@ -149,7 +171,8 @@ private:
    * Or continue when go on.
    */
     GStorageEngine::cursor _cursor;
-    std::vector<std::string>::iterator _itr;
+    ScanPlans::iterator _itr;
   };
   ScanStackRecord _scanRecord;
+  std::list< gkey_t > _resultSet;
 };

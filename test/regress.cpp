@@ -76,7 +76,7 @@ static void parse_opt(int argc, char** argv) {
     case load_ext:
       break;
     case dbfile:
-      g_dbfile = "_regress.gdb";
+      g_dbfile = optarg;
       break;
     case dlpath:
       break;
@@ -126,7 +126,10 @@ int main(int argc, char** argv) {
   int outfd = bengin_capture(outfile.c_str(), fp);
   gqlite* gHandle = nullptr;
   if (g_dbfile.size()) {
-    g_dbfile = g_inputdir + g_dbfile;
+    std::filesystem::path p(g_dbfile);
+    if (p.is_relative()) {
+      g_dbfile = g_inputdir + g_dbfile;
+    }
     gqlite_open(&gHandle, g_dbfile.c_str());
   } else {
     gqlite_open(&gHandle);

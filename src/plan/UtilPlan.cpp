@@ -118,15 +118,27 @@ int GUtilPlan::execute(const std::function<ExecuteStatus(KeyType, const std::str
     std::string groupsName;
     for (auto itr = groups.begin(); itr != groups.end(); ++itr) {
       std::string name = itr.key();
-      if (name == MAP_BASIC) continue;
-      groupsName += name;
+      if (name == MAP_BASIC || name.find(":") != std::string::npos) continue;
+      groupsName += "'" +name + "'";
       groupsName += ",";
     }
     groupsName.pop_back();
-    fmt::printf("{create: '%s', group: [%s]}\n", graph, groupsName);
+    auto indexes = _store->getIndexes();
+    if (indexes.size()) {
+      std::string sIndexes;
+      for (auto& indx : indexes) {
+        sIndexes += "'" + indx + "',";
+      }
+      sIndexes.pop_back();
+      fmt::printf("{create: '%s', group: [%s], index: [%s]}\n", graph, groupsName, sIndexes);
+    }
+    else {
+      fmt::printf("{create: '%s', group: [%s]}\n", graph, groupsName);
+    }
     // upset group
     for (auto itr = groups.begin(); itr != groups.end(); ++itr) {
       std::string g = itr.key();
+      if (g == MAP_BASIC || g.find(":") != std::string::npos) continue;
       KeyType type = (*itr)[SCHEMA_CLASS_KEY];
       std::function<std::string(const std::string&)> converter;
       if (type == KeyType::Byte) {
@@ -143,13 +155,18 @@ int GUtilPlan::execute(const std::function<ExecuteStatus(KeyType, const std::str
       else {
         continue;
       }
-      auto cursor = _store->getCursor(g);
+      auto cursor = _store->getMapCursor(g);
       auto result = cursor.to_first(false);
       while (result)
       {
         std::string data((char*)result.value.byte_ptr(), result.value.size());
         std::string key((char*)result.key.byte_ptr(), result.key.size());
-        fmt::printf("{upset: '%s', vertex: [%s, %s]}\n", g, converter(key), gql::normalize(data));
+        if (data != "null") {
+          fmt::printf("{upset: '%s', vertex: [%s, %s]}\n", g, converter(key), gql::normalize(data));
+        }
+        else {
+          fmt::printf("{upset: '%s', vertex: [%s]}\n", g, converter(key));
+        }
         result = cursor.to_next(false);
       }
     }

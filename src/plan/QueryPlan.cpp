@@ -16,6 +16,7 @@ GQueryPlan::~GQueryPlan()
 
 int GQueryPlan::prepare()
 {
+  _scan->prepare();
   return 0;
 }
 

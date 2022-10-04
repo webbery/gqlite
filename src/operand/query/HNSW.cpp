@@ -133,12 +133,12 @@ std::list<std::tuple<node_t, double, std::vector<double>>> GHNSW::queryLayer(con
 std::vector<node_t> GHNSW::knnSearch(const std::vector<double>& vec, size_t topK)
 {
   int8_t level = MAX_LAYER_SIZE - 1;
-  auto indxCursor = _storage->getCursor(_index + ":" + std::to_string(level));
+  auto indxCursor = _storage->getMapCursor(_index + ":" + std::to_string(level));
   auto data = indxCursor.to_first(false);
   std::vector<node_t> nodes;
   while (!data) {
     if (level == 0) return nodes;
-    indxCursor = _storage->getCursor(_index + ":" + std::to_string(--level));
+    indxCursor = _storage->getMapCursor(_index + ":" + std::to_string(--level));
     data = indxCursor.to_first(false);
   }
   
@@ -307,14 +307,14 @@ void GHNSW::initNet()
 
 void GHNSW::readEachLayer(int8_t level, std::function<void(int8_t level, const mdbx::cursor::move_result& data)> f)
 {
-  auto cursor = _storage->getCursor(_index + ":" + std::to_string(level));
+  auto cursor = _storage->getMapCursor(_index + ":" + std::to_string(level));
   auto data = cursor.to_first(false);
   int8_t curLevel = level;
   auto next = [&]() {
     while (!data) {
       if (curLevel == 0) return false;
       --curLevel;
-      cursor = _storage->getCursor(_index + ":" + std::to_string(curLevel));
+      cursor = _storage->getMapCursor(_index + ":" + std::to_string(curLevel));
       data = cursor.to_first(false);
     }
     return true;
@@ -332,7 +332,7 @@ void GHNSW::clipEdgeThenKeepNeighborSize(node_t node, int8_t level, size_t maxNe
   _network->neighbors(node, neighbors, level);
   if (neighbors.size() >= maxNeighbor) {
     double f = 0;
-    edge_t eid = (edge_t)GMap::no_edge;
+    edge_t eid = (edge_t)GMap<uint64_t, uint64_t>::no_edge;
     std::for_each(neighbors.begin(), neighbors.end(), [&](edge_t id) {
       double d = _network->edge_info(id);
       if (d >= f) {
@@ -340,7 +340,7 @@ void GHNSW::clipEdgeThenKeepNeighborSize(node_t node, int8_t level, size_t maxNe
         eid = id;
       }
     });
-    if (eid != (edge_t)GMap::no_edge) {
+    if (eid != (edge_t)GMap<uint64_t, uint64_t>::no_edge) {
       _network->deleteEdge(eid, false);
     }
     else {

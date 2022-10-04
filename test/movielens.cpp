@@ -28,7 +28,7 @@ TEST_CASE("init movies") {
   gqlite_open(&pHandle);
   char* ptr = nullptr;
   gqlite_exec(pHandle,
-    "{drop: 'movielens_db'}",
+    "{drop: 'movielens_db'};",
     gqlite_exec_callback, nullptr, &ptr);
   gqlite_free(ptr);
   gqlite_exec(pHandle,
@@ -38,7 +38,7 @@ TEST_CASE("init movies") {
         "{tag: ['user_id', 'tag', 'movie_id']},"
         "{rate: ['user_id', 'rate', 'movie_id']}"
       "]"
-    "}",
+    "};",
     gqlite_exec_callback, nullptr, &ptr);
   gqlite_free(ptr);
   readCSV("movies.csv", [&pHandle, &ptr](char* buffer) {
@@ -51,7 +51,7 @@ TEST_CASE("init movies") {
     std::string genres = replace_all(movie_genres);
 
     char upset[512] = { 0 };
-    sprintf(upset, "{upset: 'movie', vertex: [[%d, {title: '%s', genres: '%s'}]]}", id, title.c_str(), genres.c_str());
+    sprintf(upset, "{upset: 'movie', vertex: [[%d, {title: '%s', genres: '%s'}]]};", id, title.c_str(), genres.c_str());
     gqlite_exec(pHandle, upset, gqlite_exec_callback, nullptr, &ptr);
     gqlite_free(ptr);
     });
@@ -65,22 +65,22 @@ TEST_CASE("init movies") {
     char* ctag = strtok(nullptr, ",");
     std::string tag = replace_all(ctag);
     char upset[512] = { 0 };
-    sprintf(upset, "{upset: 'tag', edge: [[%d, {tag: '%s'}, %d]]}", uid, tag.c_str(), mid);
+    sprintf(upset, "{upset: 'tag', edge: [[%d, {tag: '%s'}, %d]]};", uid, tag.c_str(), mid);
     gqlite_exec(pHandle, upset, gqlite_exec_callback, nullptr, &ptr);
     gqlite_free(ptr);
     line_num++;
     });
   gqlite_exec(pHandle,
-   "{query: movie, in: 'movielens_db'}",
+   "{query: 'movie', in: 'movielens_db'}",
    gqlite_exec_callback, nullptr, &ptr);
   gqlite_free(ptr);
   gqlite_exec(pHandle,
-    "{query: tag, in: 'movielens_db'}",
+    "{query: 'tag', in: 'movielens_db'}",
     gqlite_exec_callback, nullptr, &ptr);
   gqlite_free(ptr);
   readCSV("ratings.csv", [&pHandle, &ptr, &line_num](char* buffer) {
     });
-  gqlite_exec(pHandle, "{dump: 'movielens_db'}", gqlite_exec_callback, nullptr, &ptr);
+  gqlite_exec(pHandle, "{dump: 'movielens_db'};", gqlite_exec_callback, nullptr, &ptr);
   gqlite_free(ptr);
   gqlite_close(pHandle);
 }

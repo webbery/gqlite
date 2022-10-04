@@ -31,6 +31,8 @@
 #define ECode_DB_Drop_Fail          301
 #define ECode_DATUM_Not_Exist       400
 #define ECode_TRANSTION_Not_Exist   500
+#define ECode_Query_Stop            600
+#define ECode_Query_Pause           601
 
 typedef void* gqlite;
 

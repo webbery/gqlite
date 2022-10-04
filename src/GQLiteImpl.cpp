@@ -51,6 +51,9 @@ int GQLiteImpl::create(const char* filename, gqlite_open_mode mode)
   if (filename) {
     StoreOption opt;
     opt.compress = 1;
+    if (_ve->_storage == nullptr) {
+      _ve->_storage = new GStorageEngine();
+    }
     return _ve->_storage->open(filename, opt);
   }
   else {

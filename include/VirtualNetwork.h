@@ -24,10 +24,10 @@ public:
 
 class GVirtualNetwork {
 public:
-  using node_t = GMap::node_t;
-  using edge_t = GMap::edge_t;
-  using node_attr_t = GMap::node_attr_t;
-  using node_literal_t = GMap::node_literal_t;
+  using node_t = GMap<uint64_t, uint64_t>::node_t;
+  using edge_t = GMap<uint64_t, uint64_t>::edge_t;
+  using node_attr_t = GMap<uint64_t, uint64_t>::node_attr_t;
+  using node_literal_t = GMap<uint64_t, uint64_t>::node_literal_t;
 
   enum class VNMessage {
     NodeLoaded = 1,
@@ -119,8 +119,8 @@ public:
     }
   }
 
-  GMap::node_collection access(node_t key) {
-    GMap::node_collection collection;
+  GMap<uint64_t, uint64_t>::node_collection access(node_t key) {
+    GMap<uint64_t, uint64_t>::node_collection collection;
     if (!_vg.visit(key, collection)) {
       // load data
 

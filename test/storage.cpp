@@ -12,12 +12,13 @@ void readCSV(const std::string& name, std::function<void(char*)> cb, bool skip_h
   while (fs && !fs.eof())
   {
     char buff[512] = { 0 };
-    fs.getline(buff, 512);
-    if (skip_head) {
-      skip_head = false;
-      continue;
+    if (fs.getline(buff, 512)) {
+      if (skip_head) {
+        skip_head = false;
+        continue;
+      }
+      cb(buff);
     }
-    cb(buff);
   }
   fs.close();
 }
@@ -26,8 +27,9 @@ TEST_CASE("basic storage api") {
   GStorageEngine engine;
   StoreOption opt;
   opt.compress = 1;
-  engine.open("testdb", opt);
+  CHECK(engine.open("testdb", opt) == ECode_Success);
   std::cout << "schema: "<< engine.getSchema() << std::endl;
+  engine.addMap("revert_index", KeyType::Byte);
   engine.addMap("revert_index", KeyType::Byte);
   std::string value("hello gqlite");
   engine.write("revert_index", "key", value.data(), value.size());
@@ -40,7 +42,7 @@ TEST_CASE("cursor api") {
   GStorageEngine engine;
   StoreOption opt;
   opt.compress = 1;
-  engine.open("testdb", opt);
+  CHECK(engine.open("testdb", opt) == ECode_Success);
   const std::string propname("name");
   engine.addMap(propname, KeyType::Integer);
   int32_t key = 0;
@@ -48,7 +50,7 @@ TEST_CASE("cursor api") {
     std::string value = std::to_string(idx);
     engine.write(propname, idx, value.data(), value.size());
   }
-  auto cursor = engine.getCursor(propname);
+  auto cursor = engine.getMapCursor(propname);
   mdbx::cursor::move_result result = cursor.to_first(false);
   int idx = 0;
   while (result)
@@ -63,7 +65,7 @@ TEST_CASE("empty storage") {
   GStorageEngine engine;
   StoreOption opt;
   opt.compress = 1;
-  engine.open("testdb", opt);
+  CHECK(engine.open("testdb", opt) == ECode_Success);
   engine.addMap("index", KeyType::Byte);
   std::string value;
   engine.write("index", "key", value.data(), value.size());

@@ -1,16 +1,35 @@
 #include "operand/algorithms/Hungarian.h"
 #include "gqlite.h"
+#include <set>
 #include <numeric>
 #include <algorithm>
 #include <functional>
+#include <vector>
 #ifdef _PRINT_FORMAT_
 #include <iostream>
 #include <fmt/printf.h>
 #include <fmt/ranges.h>
+#include <fmt/format.h>
 #endif
-#include "Graph/BipartiteGraph.h"
+
+#ifdef _PRINT_FORMAT_
+template <> struct fmt::formatter<Eigen::MatrixXd> {
+  constexpr auto parse(format_parse_context& ctx) -> decltype(ctx.begin()) {
+    return ctx.begin();
+  }
+  template <typename FormatContext>
+  auto format(const Eigen::MatrixXd& p, FormatContext& ctx) const -> decltype(ctx.out()) {
+    Eigen::IOFormat fmt(Eigen::FullPrecision, 0, ", ", ";\n", "[", "]", "[", "]");
+    std::stringstream ss;
+    ss << p.format(fmt);
+    return format_to(ctx.out(), "{}", ss.str());
+  }
+};
+#endif
 
 namespace {
+
+
   template< typename T >
   std::vector<size_t> sort_indexes(const std::vector<T>& v) {
     std::vector<size_t> indx(v.size());

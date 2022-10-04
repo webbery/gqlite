@@ -230,6 +230,7 @@ private:
             _hnsws[index] = new GHNSW(net, _store, index.c_str(), (index + ":v").c_str());
           }
           addVectorIndex(index, id, value["value"]);
+          _store->updateIndexType(index, IndexType::Vector);
         }
           break;
         default:
@@ -243,6 +244,7 @@ private:
         std::vector<T> v((T*)data.data(), (T*)data.data() + data.size()/sizeof(T));
         addUniqueDataAndSort(v, id);
         _store->write(index, k, v.data(), v.size()*sizeof(T));
+        _store->updateIndexType(index, IndexType::Word);
       }
       else if (value.is_number_unsigned()) {
         uint64_t k = value;
@@ -251,6 +253,7 @@ private:
         std::vector<T> v((T*)data.data(), (T*)data.data() + data.size() / sizeof(T));
         addUniqueDataAndSort(v, id);
         _store->write(index, k, v.data(), v.size() * sizeof(T));
+        _store->updateIndexType(index, IndexType::Number);
       }
       else if (value.is_number_integer()) {
         int k = value;
@@ -260,6 +263,7 @@ private:
         std::vector<T> v((T*)data.data(), (T*)data.data() + data.size() / sizeof(T));
         addUniqueDataAndSort(v, id);
         _store->write(index, bin, v.data(), v.size());
+        _store->updateIndexType(index, IndexType::Number);
       }
       else {
         printf("%s unknow type: %s", index.c_str(), value.type_name());

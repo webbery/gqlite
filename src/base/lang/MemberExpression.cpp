@@ -13,3 +13,8 @@ GMemberExpression::~GMemberExpression()
   FreeAst(_prop);
   FreeAst(_obj);
 }
+
+std::string GMemberExpression::GetObjectName() const
+{
+  return GetString(_obj);
+}

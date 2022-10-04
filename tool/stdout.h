@@ -45,7 +45,7 @@ inline int gqlite_exec_callback(gqlite_result* params)
       break;
     case gqlite_result_type_cmd:
       for (size_t idx = 0; idx < params->count; ++idx) {
-        printf("%s", params->infos[idx]);
+        printf("%s\n", params->infos[idx]);
       }
       break;
     default:

@@ -83,6 +83,18 @@ set(VNET_SOURCE ./vnet.cpp
 set(MOVIELENS_SOURCE ./movielens.cpp
 	${SYMBOLS_SOURCE}
 )
+
+set(DECISION_SOURCE ./decision.cpp
+  ../src/Graph/DecisionNetwork.cpp
+  ../src/operand/algorithms/DecisionTree.cpp
+  ${SYMBOLS_SOURCE}
+)
+
+set(INFOMATION_SOURCE ./infomation.cpp
+  ../src/base/math/Entropy.cpp
+	${SYMBOLS_SOURCE}
+)
+
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -finstrument-functions")
 add_executable(grammar ${TEST_GRAMMAR_SOURCE})
 add_compile_definitions(BINARY_DIR="${zstd_BINARY_DIR}/lib")
@@ -93,6 +105,8 @@ add_executable(query ${QUERY_SOURCE})
 add_executable(ptree ${PTREE_SOURCE})
 add_executable(vnet ${VNET_SOURCE})
 add_executable(movielens ${MOVIELENS_SOURCE})
+add_executable(decision ${DECISION_SOURCE})
+add_executable(infomation ${INFOMATION_SOURCE})
 
 set(storage_LINK_OPTIONS fmt::fmt-header-only mdbx-static)
 set(vnet_LINK_OPTIONS fmt::fmt-header-only)
@@ -100,7 +114,7 @@ set(grammar_LINK_OPTIONS gqlite fmt::fmt-header-only)
 set(movielens_LINK_OPTIONS gqlite)
 set(regress_LINK_OPTIONS gqlite fmt::fmt-header-only)
 IF (UNIX AND NOT APPLE AND NOT (CMAKE_SYSTEM_NAME MATCHES "Android"))
-set(TARGETS_OF_LEAK_TO_CHECK storage vnet movielens)
+set(TARGETS_OF_LEAK_TO_CHECK storage vnet movielens decision)
 
 foreach(LEAK_TARGET ${TARGETS_OF_LEAK_TO_CHECK})
 	target_compile_options(${LEAK_TARGET} PRIVATE -fsanitize=leak -fno-omit-frame-pointer)
@@ -138,6 +152,8 @@ target_link_libraries(vnet PRIVATE ${vnet_LINK_OPTIONS})
 ELSE ()
 if (CMAKE_SYSTEM_NAME MATCHES "Android")
 target_link_libraries(vnet ${vnet_LINK_OPTIONS} log)
+target_link_libraries(decision log)
+target_link_libraries(infomation log)
 # target_link_libraries(storage log)
 # target_link_libraries(grammar log)
 # target_link_libraries(ptree log)
@@ -163,6 +179,8 @@ add_test(NAME query COMMAND query)
 add_test(NAME grammar COMMAND grammar)
 add_test(NAME ptree COMMAND ptree)
 add_test(NAME vnet COMMAND vnet)
+add_test(NAME decision COMMAND decision)
+add_test(NAME infomation COMMAND infomation)
 add_test(NAME regress_vertex COMMAND regress --inputdir=./vertex --outputdir=./vertex
 	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 add_test(NAME regress_edge COMMAND regress --inputdir=./edge --outputdir=./edge
@@ -171,7 +189,7 @@ add_test(NAME regress_query COMMAND regress --inputdir=./query --outputdir=./que
   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 add_test(NAME regress_walk COMMAND regress --inputdir=./walk --outputdir=./walk
   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
-add_test(NAME regress_util COMMAND regress --inputdir=./util --outputdir=./util
+add_test(NAME regress_util COMMAND regress --inputdir=./walk --outputdir=./util --dbfile=./vertex_db
   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 add_test(NAME regress_error COMMAND regress --inputdir=./error --outputdir=./error
   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})

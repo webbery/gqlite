@@ -1,29 +1,29 @@
-{create: 'edge_test', group: ['node', 'link']}
+{create: 'edge_test', group: ['node', 'link'], index: 'color'};
 //                      |-----|
 //      v1------v2----->v3<---|         v4
 //      /\      /\/\    /
 //      /       /  \   \/
 //    v13      v5    v6--------------v11
-{upset: 'node', vertex: [['v1', {color: '#343e58', location: [131.24194, 37.12532], create_time: 1}], ['v2', {color: '#343e58', keyword: ['a', 'b'], create_time: 1}],['v3', {text: b64'5Zyo57q/57yW56CB6Kej56CB', keyword: ['a'], create_time: 3}], ['v11']]}
-{upset: 'node', vertex: [['v4', {color: '#000000', location: [131.24194, inf], create_time: 1}], ['v5', {color: '#ffffff', keyword: [], create_time: -1}],['v6', {text: b64'5Zyo57q/57yW56CB6Kej56CB', keyword: ['a'], create_time: 1646321609}], ['v13']]}
+{upset: 'node', vertex: [['v1', {color: '#343e58', location: [131.24194, 37.12532], create_time: 1}], ['v2', {color: '#343e58', keyword: ['a', 'b'], create_time: 1}],['v3', {text: b64'5Zyo57q/57yW56CB6Kej56CB', keyword: ['a'], create_time: 3}], ['v11']]};
+{upset: 'node', vertex: [['v4', {color: '#000000', location: [131.24194, inf], create_time: 1}], ['v5', {color: '#ffffff', keyword: [], create_time: -1}],['v6', {text: b64'5Zyo57q/57yW56CB6Kej56CB', keyword: ['a'], create_time: 1646321609}], ['v13']]};
 {upset: 'link', edge: [ ['v1', --, 'v2'], ['v2', ->, 'v3'], ['v3', ->, 'v3'], ['v4'] ] }
 {upset: 'link', edge: [ ['v5', --, 'v2'], ['v6', <-, 'v3'], ['v6', ->, 'v2'], ['v13', ->, 'v1'], ['v11', --, 'v6'] ] }
-{query: 'node', in: 'edge_test'}
-{query: 'node', in: 'edge_test', where: {keyword: 'b'}}
+{query: 'node', in: 'edge_test'};
+{query: 'node', in: 'edge_test', where: {keyword: 'b'}};
 // query v1's neighbor
-{query: 'node', in: 'edge_test', where: {id: 'v1', ->: 1}}
+{query: 'node', in: 'edge_test', where: {id: 'v1', ->: 1}};
 // query edges with direction in edge_test
-{query: {->: 'alias'}, in: 'edge_test'}
+{query: {->: 'alias'}, in: 'edge_test'};
 // query a pattern 'from ---> to' which 'from' id is 'v5'
-{query: {vertex: 'from', ->: 'alias', vertex: 'to'}, in: 'edge_test', where: {id(from): 'v5'}}
+{query: {vertex: 'from', ->: 'alias', vertex: 'to'}, in: 'edge_test', where: {id(from): 'v5'}};
 // query a path from 'v5' to 'v6'
-{query: {vertex: 'from', ->: 'alias', vertex: 'to'}, in: 'edge_test', where: {id(from): 'v5', id(to): 'v6'}}
-{drop: 'edge_test'}
+{query: {vertex: 'from', ->: 'alias', vertex: 'to'}, in: 'edge_test', where: {id(from): 'v5', id(to): 'v6'}};
+{drop: 'edge_test'};
 
-{create: 'edge_test', group: [{node: ['color', 'location', 'create_time', 'keyword', 'text'], {link: ['node_id', 'relation', 'node_id']}]}
-{upset: 'node', vertex: [['v1', {color: '#343e58', location: [131.24194, 37.12532], create_time: 1}], ['v2', {color: '#343e58', keyword: ['a', 'b'], create_time: 1}],['v3', {text: b64'5Zyo57q/57yW56CB6Kej56CB', keyword: ['a'], create_time: 3}], ['v11']]}
-{upset: 'node', vertex: [['v4', {color: '#000000', location: [131.24194, inf], create_time: 1}], ['v5', {color: '#ffffff', keyword: [], create_time: -1}],['v6', {text: b64'5Zyo57q/57yW56CB6Kej56CB', keyword: ['a'], create_time: 1646321609}], ['v13']]}
-{upset: 'link', edge: [ ['v1', --, 'v2'], ['v2', ->, 'v3'], ['v3', ->, 'v3'], ['v4'] ] }
-{upset: 'link', edge: [ ['v5', --, 'v2'], ['v6', <-, 'v3'], ['v6', ->, 'v2'], ['v13', ->, 'v1'], ['v11', --, 'v6'] ] }
-{dump: 'edge_test'}
-{drop: 'edge_test'}
+{create: 'edge_test', group: [{node: ['color', 'location', 'create_time', 'keyword', 'text'], {link: ['node_id', 'relation', 'node_id']}]};
+{upset: 'node', vertex: [['v1', {color: '#343e58', location: [131.24194, 37.12532], create_time: 1}], ['v2', {color: '#343e58', keyword: ['a', 'b'], create_time: 1}],['v3', {text: b64'5Zyo57q/57yW56CB6Kej56CB', keyword: ['a'], create_time: 3}], ['v11']]};
+{upset: 'node', vertex: [['v4', {color: '#000000', location: [131.24194, inf], create_time: 1}], ['v5', {color: '#ffffff', keyword: [], create_time: -1}],['v6', {text: b64'5Zyo57q/57yW56CB6Kej56CB', keyword: ['a'], create_time: 1646321609}], ['v13']]};
+{upset: 'link', edge: [ ['v1', --, 'v2'], ['v2', ->, 'v3'], ['v3', ->, 'v3'], ['v4'] ] };
+{upset: 'link', edge: [ ['v5', --, 'v2'], ['v6', <-, 'v3'], ['v6', ->, 'v2'], ['v13', ->, 'v1'], ['v11', --, 'v6'] ] };
+{dump: 'edge_test'};
+{drop: 'edge_test'};

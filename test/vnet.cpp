@@ -10,56 +10,57 @@
 
 std::atomic_bool is_exit(false);
 
-using NodeInfo = std::tuple<GMap::edges_t, std::vector<GMap::node_attr_t>, nlohmann::json>;
-using Node = std::map<GMap::node_t, NodeInfo>;
+using net = GMap<uint64_t, uint64_t>;
+using NodeInfo = std::tuple<net::edges_t, std::vector<net::node_attr_t>, nlohmann::json>;
+using Node = std::map<net::node_t, NodeInfo>;
 Node RomaniaNodes = {
-  {(GMap::node_t)1, NodeInfo{{(edge_t)1, (edge_t)7}, {0}, {"address", "Oradea"}} },
-  {(GMap::node_t)2, NodeInfo{{(edge_t)1, (edge_t)2}, {0}, {"address", "Zerind"}}},
-  {(GMap::node_t)3, NodeInfo{{(edge_t)2, (edge_t)3, (edge_t)8}, {0}, {"address", "Arad"}}},
-  {(GMap::node_t)4, NodeInfo{{(edge_t)3, (edge_t)4}, {0}, {"address", "Timisoara"}}},
-  {(GMap::node_t)5, NodeInfo{{(edge_t)4, (edge_t)5}, {0}, {"address", "Lugoj"}} },
-  {(GMap::node_t)6, NodeInfo{{(edge_t)5, (edge_t)6}, {0}, {"address", "Mehadia"}}},
-  {(GMap::node_t)7, NodeInfo{{(edge_t)6, (edge_t)23}, {0}, {"address", "Dobreta"}}},
-  {(GMap::node_t)8, NodeInfo{{(edge_t)7, (edge_t)8, (edge_t)11, (edge_t)9}, {0}, {"address", "Sibiu"}}},
-  {(GMap::node_t)9, NodeInfo{{(edge_t)9, (edge_t)10, (edge_t)12}, {0}, {"address", "Rimnicu Vilcea"}}},
-  {(GMap::node_t)10, NodeInfo{{(edge_t)10, (edge_t)23, (edge_t)13}, {0}, {"address", "Craiova"}}},
-  {(GMap::node_t)11, NodeInfo{{(edge_t)11, (edge_t)14}, {0}, {"address", "Fagaras"}}},
-  {(GMap::node_t)12, NodeInfo{{(edge_t)12, (edge_t)13, (edge_t)15}, {0}, {"address", "Pitesti"}}},
-  {(GMap::node_t)13, NodeInfo{{(edge_t)15, (edge_t)17, (edge_t)14, (edge_t)16}, {0}, {"address", "Bucharest"}}},
-  {(GMap::node_t)14, NodeInfo{{(edge_t)16}, {0}, {"address", "Giurgiu"}}},
-  {(GMap::node_t)15, NodeInfo{{(edge_t)21}, {0}, {"address", "Neamt"}}},
-  {(GMap::node_t)16, NodeInfo{{(edge_t)21, (edge_t)20}, {0}, {"address", "Iasi"}}},
-  {(GMap::node_t)17, NodeInfo{{(edge_t)17, (edge_t)18, (edge_t)19}, {0}, {"address", "Urziceni"}}},
-  {(GMap::node_t)18, NodeInfo{{(edge_t)20, (edge_t)18}, {0}, {"address", "Vaslui"}}},
-  {(GMap::node_t)19, NodeInfo{{(edge_t)19, (edge_t)22}, {0}, {"address", "Hirsova"}}},
-  {(GMap::node_t)20, NodeInfo{{(edge_t)22}, {0}, {"address", "Eforie"}}},
+  {(net::node_t)1, NodeInfo{{(edge_t)1, (edge_t)7}, {0}, {"address", "Oradea"}} },
+  {(net::node_t)2, NodeInfo{{(edge_t)1, (edge_t)2}, {0}, {"address", "Zerind"}}},
+  {(net::node_t)3, NodeInfo{{(edge_t)2, (edge_t)3, (edge_t)8}, {0}, {"address", "Arad"}}},
+  {(net::node_t)4, NodeInfo{{(edge_t)3, (edge_t)4}, {0}, {"address", "Timisoara"}}},
+  {(net::node_t)5, NodeInfo{{(edge_t)4, (edge_t)5}, {0}, {"address", "Lugoj"}} },
+  {(net::node_t)6, NodeInfo{{(edge_t)5, (edge_t)6}, {0}, {"address", "Mehadia"}}},
+  {(net::node_t)7, NodeInfo{{(edge_t)6, (edge_t)23}, {0}, {"address", "Dobreta"}}},
+  {(net::node_t)8, NodeInfo{{(edge_t)7, (edge_t)8, (edge_t)11, (edge_t)9}, {0}, {"address", "Sibiu"}}},
+  {(net::node_t)9, NodeInfo{{(edge_t)9, (edge_t)10, (edge_t)12}, {0}, {"address", "Rimnicu Vilcea"}}},
+  {(net::node_t)10, NodeInfo{{(edge_t)10, (edge_t)23, (edge_t)13}, {0}, {"address", "Craiova"}}},
+  {(net::node_t)11, NodeInfo{{(edge_t)11, (edge_t)14}, {0}, {"address", "Fagaras"}}},
+  {(net::node_t)12, NodeInfo{{(edge_t)12, (edge_t)13, (edge_t)15}, {0}, {"address", "Pitesti"}}},
+  {(net::node_t)13, NodeInfo{{(edge_t)15, (edge_t)17, (edge_t)14, (edge_t)16}, {0}, {"address", "Bucharest"}}},
+  {(net::node_t)14, NodeInfo{{(edge_t)16}, {0}, {"address", "Giurgiu"}}},
+  {(net::node_t)15, NodeInfo{{(edge_t)21}, {0}, {"address", "Neamt"}}},
+  {(net::node_t)16, NodeInfo{{(edge_t)21, (edge_t)20}, {0}, {"address", "Iasi"}}},
+  {(net::node_t)17, NodeInfo{{(edge_t)17, (edge_t)18, (edge_t)19}, {0}, {"address", "Urziceni"}}},
+  {(net::node_t)18, NodeInfo{{(edge_t)20, (edge_t)18}, {0}, {"address", "Vaslui"}}},
+  {(net::node_t)19, NodeInfo{{(edge_t)19, (edge_t)22}, {0}, {"address", "Hirsova"}}},
+  {(net::node_t)20, NodeInfo{{(edge_t)22}, {0}, {"address", "Eforie"}}},
 };
-using EdgeInfo = std::tuple < std::pair<GMap::node_t, GMap::node_t>, int >;
-using Edge = std::map<GMap::edge_t, EdgeInfo>;
+using EdgeInfo = std::tuple < std::pair<net::node_t, net::node_t>, int >;
+using Edge = std::map<net::edge_t, EdgeInfo>;
 Edge RomaniaEdges = {
-  {(edge_t)1, EdgeInfo{{(GMap::node_t)1, (GMap::node_t)2}, 71}},
-  {(edge_t)2, EdgeInfo{{(GMap::node_t)2, (GMap::node_t)3}, 75}},
-  {(edge_t)3, EdgeInfo{{(GMap::node_t)3, (GMap::node_t)4}, 118}},
-  {(edge_t)4, EdgeInfo{{(GMap::node_t)4, (GMap::node_t)5}, 111}},
-  {(edge_t)5, EdgeInfo{{(GMap::node_t)5, (GMap::node_t)6}, 70}},
-  {(edge_t)6, EdgeInfo{{(GMap::node_t)6, (GMap::node_t)7}, 75}},
-  {(edge_t)7, EdgeInfo{{(GMap::node_t)1, (GMap::node_t)8}, 151}},
-  {(edge_t)8, EdgeInfo{{(GMap::node_t)3, (GMap::node_t)8}, 140}},
-  {(edge_t)9, EdgeInfo{{(GMap::node_t)8, (GMap::node_t)9}, 80}},
-  {(edge_t)10, EdgeInfo{{(GMap::node_t)9, (GMap::node_t)10}, 146}},
-  {(edge_t)11, EdgeInfo{{(GMap::node_t)8, (GMap::node_t)11}, 99}},
-  {(edge_t)12, EdgeInfo{{(GMap::node_t)9, (GMap::node_t)12}, 97}},
-  {(edge_t)13, EdgeInfo{{(GMap::node_t)10, (GMap::node_t)12}, 138}},
-  {(edge_t)14, EdgeInfo{{(GMap::node_t)11, (GMap::node_t)13}, 211}},
-  {(edge_t)15, EdgeInfo{{(GMap::node_t)12, (GMap::node_t)13}, 101}},
-  {(edge_t)16, EdgeInfo{{(GMap::node_t)13, (GMap::node_t)14}, 90}},
-  {(edge_t)17, EdgeInfo{{(GMap::node_t)13, (GMap::node_t)17}, 85}},
-  {(edge_t)18, EdgeInfo{{(GMap::node_t)17, (GMap::node_t)18}, 142}},
-  {(edge_t)19, EdgeInfo{{(GMap::node_t)17, (GMap::node_t)19}, 98}},
-  {(edge_t)20, EdgeInfo{{(GMap::node_t)18, (GMap::node_t)16}, 92}},
-  {(edge_t)21, EdgeInfo{{(GMap::node_t)16, (GMap::node_t)15}, 87}},
-  {(edge_t)22, EdgeInfo{{(GMap::node_t)19, (GMap::node_t)20}, 86}},
-  {(edge_t)23, EdgeInfo{{(GMap::node_t)7, (GMap::node_t)10}, 120}},
+  {(edge_t)1, EdgeInfo{{(net::node_t)1, (net::node_t)2}, 71}},
+  {(edge_t)2, EdgeInfo{{(net::node_t)2, (net::node_t)3}, 75}},
+  {(edge_t)3, EdgeInfo{{(net::node_t)3, (net::node_t)4}, 118}},
+  {(edge_t)4, EdgeInfo{{(net::node_t)4, (net::node_t)5}, 111}},
+  {(edge_t)5, EdgeInfo{{(net::node_t)5, (net::node_t)6}, 70}},
+  {(edge_t)6, EdgeInfo{{(net::node_t)6, (net::node_t)7}, 75}},
+  {(edge_t)7, EdgeInfo{{(net::node_t)1, (net::node_t)8}, 151}},
+  {(edge_t)8, EdgeInfo{{(net::node_t)3, (net::node_t)8}, 140}},
+  {(edge_t)9, EdgeInfo{{(net::node_t)8, (net::node_t)9}, 80}},
+  {(edge_t)10, EdgeInfo{{(net::node_t)9, (net::node_t)10}, 146}},
+  {(edge_t)11, EdgeInfo{{(net::node_t)8, (net::node_t)11}, 99}},
+  {(edge_t)12, EdgeInfo{{(net::node_t)9, (net::node_t)12}, 97}},
+  {(edge_t)13, EdgeInfo{{(net::node_t)10, (net::node_t)12}, 138}},
+  {(edge_t)14, EdgeInfo{{(net::node_t)11, (net::node_t)13}, 211}},
+  {(edge_t)15, EdgeInfo{{(net::node_t)12, (net::node_t)13}, 101}},
+  {(edge_t)16, EdgeInfo{{(net::node_t)13, (net::node_t)14}, 90}},
+  {(edge_t)17, EdgeInfo{{(net::node_t)13, (net::node_t)17}, 85}},
+  {(edge_t)18, EdgeInfo{{(net::node_t)17, (net::node_t)18}, 142}},
+  {(edge_t)19, EdgeInfo{{(net::node_t)17, (net::node_t)19}, 98}},
+  {(edge_t)20, EdgeInfo{{(net::node_t)18, (net::node_t)16}, 92}},
+  {(edge_t)21, EdgeInfo{{(net::node_t)16, (net::node_t)15}, 87}},
+  {(edge_t)22, EdgeInfo{{(net::node_t)19, (net::node_t)20}, 86}},
+  {(edge_t)23, EdgeInfo{{(net::node_t)7, (net::node_t)10}, 120}},
 };
 
 class NodeVisitor {
@@ -80,8 +81,8 @@ public:
 #if defined(GQLITE_ENABLE_PRINT)
     printf("current cnt: %d\n", cnt);
 #endif
-    _net->addEdge((edge_t)0, (GMap::node_t)4, (GMap::node_t)5);
-    _net->addEdge((edge_t)1, (GMap::node_t)5, (GMap::node_t)4);
+    _net->addEdge((edge_t)0, (net::node_t)4, (net::node_t)5);
+    _net->addEdge((edge_t)1, (net::node_t)5, (net::node_t)4);
     return true;
   }
 private:

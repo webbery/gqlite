@@ -273,7 +273,7 @@ function(setup_target_for_coverage_lcov)
     # Run tests
     set(LCOV_EXEC_TESTS_CMD 
         ${Coverage_EXECUTABLE} ${Coverage_EXECUTABLE_ARGS}
-    )    
+    )
     # Capturing lcov counters and generating report
     set(LCOV_CAPTURE_CMD 
         ${LCOV_PATH} ${Coverage_LCOV_ARGS} --gcov-tool ${GCOV_PATH} --directory . -b 
@@ -423,7 +423,7 @@ function(setup_target_for_coverage_gcovr_xml)
     # Running gcovr
     set(GCOVR_XML_CMD
         ${GCOVR_PATH} --xml -r ${BASEDIR} ${GCOVR_ADDITIONAL_ARGS} ${GCOVR_EXCLUDE_ARGS} 
-        --object-directory=${PROJECT_BINARY_DIR} -o ${Coverage_NAME}.xml
+        --exclude-throw-branches --exclude-unreachable-branches --object-directory=${PROJECT_BINARY_DIR} -o ${Coverage_NAME}.xml
     )
     
     if(CODE_COVERAGE_VERBOSE)

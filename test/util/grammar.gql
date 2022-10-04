@@ -1,0 +1,3 @@
+show graph;
+show graph 'vertex_db';
+{dump: 'vertex_db'};

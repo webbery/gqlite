@@ -48,7 +48,7 @@ public:
       auto id_path = current._ids;
       auto last_id = id_path.back();
       _visited.insert(last_id);
-      GMap::node_collection curInfo;
+      GMap<uint64_t, uint64_t>::node_collection curInfo;
       vg.visit(last_id, curInfo);
       double history = current._g;
       std::set<node_t> neighbors;
@@ -57,7 +57,7 @@ public:
         if (_visited.count(id)) {
           continue;
         }
-        GMap::node_collection collections;
+        GMap<uint64_t, uint64_t>::node_collection collections;
         if (vg.visit(id, collections)) {
           auto d = _heuristic({ last_id, curInfo }, { id, collections });
           auto h = _heuristic.h(id);

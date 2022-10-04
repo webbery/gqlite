@@ -2,6 +2,7 @@
 #include "gqlite.h"
 #include <mdbx.h++>
 #include <map>
+#include <list>
 #include <thread>
 #include <zstd.h>
 #include "json.hpp"
@@ -42,6 +43,13 @@ enum class KeyType : uint8_t {
   Byte = _gqlite_id_type::bytes,
 };
 
+enum class IndexType : uint8_t {
+  Uninitialize,
+  Word,
+  Number,
+  Vector,
+};
+
 struct alignas(8) MapInfo {
   KeyType       key_type : 2;    /**<  0 - uninitialize, 1 - interger, 2 - byte; */
   ClassType     value_type : 4;  /**< */ 
@@ -61,7 +69,7 @@ enum class ReadWriteOption {
 
 class GStorageEngine {
 public:
-    GStorageEngine();
+    GStorageEngine() noexcept;
     ~GStorageEngine();
 
     /** 
@@ -112,20 +120,22 @@ public:
 
     int write(const std::string& mapname, uint64_t key, void* value, size_t len);
     int read(const std::string& mapname, uint64_t key, std::string& value);
+    int read(const std::string& mapname, uint64_t from, uint64_t to, std::list<std::string>& value);
     int del(const std::string& mapname, uint64_t key);
 
     int write(const std::string& mapname, const std::string& key, const nlohmann::json& value);
-    int read(const std::string& mapname, const std::string& key, nlohmann::json& value);
     int write(const std::string& mapname, uint64_t key, const nlohmann::json& value);
-    int read(const std::string& mapname, uint64_t key, nlohmann::json& value);
 
     /**
      * @brief parse a string to json which get from cursor
      */
     int parse(const std::string& data, nlohmann::json& value);
 
+    size_t estimate(const std::string& mapname);
+
     typedef mdbx::cursor_managed  cursor;
-    cursor getCursor(const std::string& mapname);
+    cursor getMapCursor(const std::string& mapname);
+    cursor getIndexCursor(const std::string& mapname);
 
     /** 
      * Get the schema of current graph instance.
@@ -163,6 +173,8 @@ public:
     KeyType getKeyType(const std::string& m) const;
     std::vector<std::string> getIndexes() const;
     bool isIndexExist(const std::string& name);
+    IndexType updateIndexType(const std::string& name, IndexType type);
+    IndexType getIndexType(const std::string& name);
 
 private:
     /**
