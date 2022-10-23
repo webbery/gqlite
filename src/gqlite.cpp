@@ -12,6 +12,7 @@
 #define UNKNOWN_ERROR           "unknow error"
 #define Graph_Not_Exist_ERROR   "graph is not exist"
 #define Index_Not_Exist_ERROR   "index %s is not exist"
+#define GRAMMAR_ARRAY_ERROR     "input array seems not correct"
 
 std::atomic<bool> _gqlite_g_close_flag_(false);
 
@@ -114,6 +115,9 @@ SYMBOL_EXPORT char* gqlite_error(gqlite* pDb, int error)
     //sprintf(buff, Index_Not_Exist_ERROR, jsn["index"].dump().c_str());
     break;
   case ECode_GQL_Parse_Fail:
+    break;
+  case GQL_GRAMMAR_ARRAY_FAIL:
+    msg = simple_message(GRAMMAR_ARRAY_ERROR);
     break;
   case ECode_Fail:
   default:

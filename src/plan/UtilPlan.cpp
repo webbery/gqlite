@@ -143,7 +143,7 @@ int GUtilPlan::execute(const std::function<ExecuteStatus(KeyType, const std::str
       std::function<std::string(const std::string&)> converter;
       if (type == KeyType::Byte) {
         converter = [](const std::string& s) {
-          return s;
+          return "'" + s + "'";
         };
       }
       else if (type == KeyType::Integer) {

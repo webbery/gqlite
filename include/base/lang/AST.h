@@ -48,6 +48,10 @@ template <> struct GTypeTraits<NodeType::EdgeDeclaration> {
   typedef GEdgeDeclaration type;
 };
 
+template <> struct GTypeTraits<NodeType::WalkDeclaration> {
+  typedef GWalkDeclaration type;
+};
+
 template <> struct GTypeTraits<NodeType::RemoveStatement> {
   typedef GRemoveStmt type;
 };
@@ -185,6 +189,9 @@ VisitFlow accept(GASTNode* node, Visitor& visitor, std::list<NodeType>& path) {
       GTypeTraits<NodeType::EdgeDeclaration>::type* ptr = reinterpret_cast<GTypeTraits<NodeType::EdgeDeclaration>::type*>(node->_value);
       vf = visitor.apply(ptr, path);
     }
+      break;
+    case NodeType::WalkDeclaration:
+    {}
       break;
     case NodeType::DropStatement:
     {

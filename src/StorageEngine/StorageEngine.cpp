@@ -231,9 +231,7 @@ IndexType GStorageEngine::getIndexType(const std::string& name)
 
 void GStorageEngine::tryInitKeyType(const std::string& prop, KeyType type)
 {
-  static bool init = false;
-  if (init) return;
-  init = true;
+  if (_schema[SCHEMA_CLASS][prop][SCHEMA_CLASS_KEY] != KeyType::Uninitialize) return;
   _schema[SCHEMA_CLASS][prop][SCHEMA_CLASS_KEY] = type;
 }
 
@@ -318,8 +316,12 @@ mdbx::map_handle GStorageEngine::getOrCreateHandle(const std::string& prop, mdbx
 }
 
 int GStorageEngine::write(const std::string& prop, const std::string& key, void* value, size_t len) {
-  assert(isMapExist(prop)||isIndexExist(prop));
-  tryInitKeyType(prop, KeyType::Byte);
+  if (isMapExist(prop)) {
+    tryInitKeyType(prop, KeyType::Byte);
+  }
+  else if (isIndexExist(prop)) {
+    updateIndexType(prop, IndexType::Word);
+  }
   auto handle = getOrCreateHandle(prop, mdbx::key_mode::usual);
   thread_local auto id = std::this_thread::get_id();
 
@@ -341,7 +343,12 @@ int GStorageEngine::write(const std::string& prop, const std::string& key, void*
 
 int GStorageEngine::write(const std::string& mapname, const std::string& key, const nlohmann::json& value)
 {
-  tryInitKeyType(mapname, KeyType::Byte);
+  if (isMapExist(mapname)) {
+    tryInitKeyType(mapname, KeyType::Byte);
+  }
+  else if (isIndexExist(mapname)) {
+    updateIndexType(mapname, IndexType::Word);
+  }
   auto& attributes = _schema[SCHEMA_CLASS][mapname][SCHEMA_CLASS_VALUE];
   // TODO: convert json to gqlite store format: attribute index(max value is 256), [if binary, here put size]data, index, data, ...
   nlohmann::json store;
@@ -359,7 +366,12 @@ int GStorageEngine::write(const std::string& mapname, const std::string& key, co
 
 int GStorageEngine::write(const std::string& mapname, uint64_t key, const nlohmann::json& value)
 {
-  tryInitKeyType(mapname, KeyType::Integer);
+  if (isMapExist(mapname)) {
+    tryInitKeyType(mapname, KeyType::Integer);
+  }
+  else if (isIndexExist(mapname)) {
+    updateIndexType(mapname, IndexType::Number);
+  }
   auto& attributes = _schema[SCHEMA_CLASS][mapname][SCHEMA_CLASS_VALUE];
   for (auto itr = value.begin(), end = value.end(); itr != end; ++itr) {
     const std::string& attr = itr.key();
@@ -389,7 +401,6 @@ int GStorageEngine::read(const std::string& mapname, uint64_t from, uint64_t to,
   thread_local auto id = std::this_thread::get_id();
   auto handle = getOrCreateHandle(mapname, mdbx::key_mode::ordinal);
   auto cursor = _txns[id].open_cursor(handle);
-  //mdbx::slice f(&from, sizeof(uint64_t));
   mdbx::slice t(&to, sizeof(uint64_t));
   auto result = cursor.move(mdbx::cursor::key_lowerbound, t);
   while (result && *(uint64_t*)result.key.byte_ptr() > from)
@@ -407,18 +418,23 @@ int GStorageEngine::parse(const std::string& data, nlohmann::json& value)
 
 size_t GStorageEngine::estimate(const std::string& mapname)
 {
-  if (!isMapExist(mapname)) {
-    if (!isIndexExist(mapname)) {
-      return std::numeric_limits<size_t>::max();
-    }
-    return 0;
+  if (isIndexExist(mapname)) {
+    auto first = getIndexCursor(mapname);
+    first.to_first(false);
+    if (first.on_last()) return 0;
+    auto last = getIndexCursor(mapname);
+    last.to_last(false);
+    return mdbx::estimate(first, last);
   }
-  auto first = getMapCursor(mapname);
-  first.to_first(false);
-  if (first.on_last()) return 0;
-  auto last = getMapCursor(mapname);
-  last.to_last(false);
-  return mdbx::estimate(first, last);
+  if (isMapExist(mapname)) {
+    auto first = getMapCursor(mapname);
+    first.to_first(false);
+    if (first.on_last()) return 0;
+    auto last = getMapCursor(mapname);
+    last.to_last(false);
+    return mdbx::estimate(first, last);
+  }
+  return std::numeric_limits<size_t>::max();
 }
 
 int GStorageEngine::del(const std::string& mapname, const std::string& key)
@@ -440,8 +456,12 @@ int GStorageEngine::del(const std::string& mapname, uint64_t key)
 }
 
 int GStorageEngine::write(const std::string& prop, uint64_t key, void* value, size_t len) {
-  assert(isMapExist(prop) || isIndexExist(prop));
-  tryInitKeyType(prop, KeyType::Integer);
+  if (isMapExist(prop)) {
+    tryInitKeyType(prop, KeyType::Integer);
+  }
+  else if (isIndexExist(prop)) {
+    updateIndexType(prop, IndexType::Number);
+  }
   auto handle = getOrCreateHandle(prop, mdbx::key_mode::ordinal);
   // compress
 #ifdef _ENABLE_COMPRESS_
@@ -475,6 +495,7 @@ GStorageEngine::cursor GStorageEngine::getMapCursor(const std::string& prop)
   assert(isMapExist(prop));
   mdbx::map_handle handle;
   auto pp = getProp(prop);
+  std::string d = pp.dump();
   auto type = (KeyType)pp[SCHEMA_CLASS_KEY];
   if (type == KeyType::Integer) {
     handle = getOrCreateHandle(prop, mdbx::key_mode::ordinal);

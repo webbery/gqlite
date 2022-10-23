@@ -207,8 +207,10 @@ private:
 private:
   bool upsetVertex();
   bool upsetEdge();
-  bool upsetIndex(const std::string& index, uint64_t id);
-  bool upsetIndex(const std::string& index, const std::string& id);
+  bool upsetIndex(const std::string& index, const std::string& value, uint64_t id);
+  bool upsetIndex(const std::string& index, double value, uint64_t id);
+  bool upsetIndex(const std::string& index, double value, const std::string& id);
+  bool upsetIndex(const std::string& index, const std::string& value, const std::string& id);
   void addVectorIndex(const std::string& index, const std::string& id, const std::vector<double>& v);
   void addVectorIndex(const std::string& index, uint32_t id, const std::vector<double>& v);
   GVirtualNetwork* generateNetwork(const std::string& branch);
@@ -238,35 +240,31 @@ private:
         }
       }
       else if (value.is_string()) {
-        std::string k = value;
-        std::string data;
-        _store->read(index, k, data);
-        std::vector<T> v((T*)data.data(), (T*)data.data() + data.size()/sizeof(T));
-        addUniqueDataAndSort(v, id);
-        _store->write(index, k, v.data(), v.size()*sizeof(T));
-        _store->updateIndexType(index, IndexType::Word);
+        upsetIndex(index, (std::string)value, id);
       }
       else if (value.is_number_unsigned()) {
         uint64_t k = value;
-        std::string data;
-        _store->read(index, k, data);
-        std::vector<T> v((T*)data.data(), (T*)data.data() + data.size() / sizeof(T));
-        addUniqueDataAndSort(v, id);
-        _store->write(index, k, v.data(), v.size() * sizeof(T));
-        _store->updateIndexType(index, IndexType::Number);
+        upsetIndex(index, k, id);
       }
       else if (value.is_number_integer()) {
-        int k = value;
-        std::string bin((char*)&k, sizeof(int));
-        std::string data;
-        _store->read(index, bin, data);
-        std::vector<T> v((T*)data.data(), (T*)data.data() + data.size() / sizeof(T));
-        addUniqueDataAndSort(v, id);
-        _store->write(index, bin, v.data(), v.size());
-        _store->updateIndexType(index, IndexType::Number);
+        double k = value;
+        upsetIndex(index, k, id);
+      }
+      else if (value.is_array()) {
+        for (auto datum: value)
+        {
+          switch ((nlohmann::json::value_t)datum)
+          {
+          case nlohmann::json::value_t::string:
+            upsetIndex(index, (std::string)datum, id);
+            break;
+          default:
+            break;
+          }
+        }
       }
       else {
-        printf("%s unknow type: %s", index.c_str(), value.type_name());
+        printf("%s unknow type: %s\n", index.c_str(), value.type_name());
       }
     }
     return true;
@@ -274,6 +272,7 @@ private:
 private:
   bool _vertex;       /**< true if upset target is vertex, else is edge */
   std::string _class;
+  
   std::map<gkey_t, nlohmann::json> _vertexes;
   std::map<gql::edge_id, std::string> _edges;
   std::vector<std::string> _indexes;

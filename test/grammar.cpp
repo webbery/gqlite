@@ -102,13 +102,14 @@ void successful_test(gqlite* pHandle, char* ptr) {
   TEST_QUERY("{query: 'g', in: 'ga', where: {$and: [{create_time: {$lt: 5}}]}};", 3);
   TEST_QUERY("{query: 'g', in: 'ga', where: {$or: [{create_time: {$lt: 5}}]}};", 3);
   TEST_GRAMMAR("{query: 'g', in: 'ga'};");
-  TEST_GRAMMAR("{query: [g.class], in: 'ga', where: {keyword: 'b'}}");
-  TEST_GRAMMAR("{query: [g.class], in: 'ga', where: {keyword: 'b'}}");
+  TEST_GRAMMAR("{query: [g.class], in: 'ga', where: {keyword: 'b'}};");
+  TEST_GRAMMAR("{query: [g.class], in: 'ga', where: {keyword: 'b'}};");
   TEST_GRAMMAR("{dump: 'ga'};");
   /*
   * EDGES & LINKS
   */
-  TEST_GRAMMAR("{upset: 'tag', edge: [[474, {tag: 'robots'}, 589]]};");
+ 
+  TEST_GRAMMAR("{upset: 'tag', edge: [[474, {--: {tag: 'robots'} }, 589]]};");
   TEST_GRAMMAR(
     "{"
       "upset: 'e',"
@@ -125,14 +126,6 @@ void successful_test(gqlite* pHandle, char* ptr) {
       "]"
     "};"
   );
-  TEST_GRAMMAR(
-    "{"
-      "upset: 'e',"
-      "edge: ["
-        "['v3', ->, 'v3']"
-      "]"
-    "};"
-  );
   // loop circle
   TEST_GRAMMAR(
     "{"
@@ -142,18 +135,18 @@ void successful_test(gqlite* pHandle, char* ptr) {
       "]"
     "};"
   );
+  TEST_GRAMMAR(
+    "{"
+      "upset: 'e',"
+      "edge: ["
+        "['v3', ->, 'v3']"
+      "]"
+    "};"
+  );
   // query 1'st order neighber
-  TEST_QUERY("{query: 'e', in: 'ga', where: {id: 'v1', ->: 1}};", 0);
-  TEST_QUERY("{query: 'e', in: 'ga', where: {id: 'v1', --: 1}};", 1);
-  // TEST_GRAMMAR("{create: 'prefix_tree'}");
-  // TEST_GRAMMAR(
-  //   "{"
-  //     "upset: 'prefix_tree',"
-  //     "vertex: ["
-  //       "['b', {item: [['v1', {weight: 0.6}]]}]"
-  //     "]"
-  //   "}");
-  // TEST_GRAMMAR("{upset: 'prefix_tree', edge: [['b', ->, 'e']]}");
+  TEST_QUERY("{query: 'e', in: 'ga'};", 4);
+  TEST_QUERY("{query: 'e', in: 'ga', where: {id: 'v1', ->: *, step: 1}};", 0);
+  TEST_QUERY("{query: 'e', in: 'ga', where: {id: 'v1', --: *, step: 1}};", 1);
   // TEST_GRAMMAR("{query: '*', path: ['b', 'e', ...], from: 'prefix_tree'}");
   /*
   * search item with distance
@@ -166,7 +159,7 @@ void successful_test(gqlite* pHandle, char* ptr) {
   /*
   * search path from a to b
   */
-  TEST_GRAMMAR("{query: path, in: 'ga', from: 'v1', to: 'v2', where: {--: 'dijk'}};");
+  //TEST_GRAMMAR("{query: path, in: 'ga', from: 'v1', to: 'v2', where: {--: 'dijk'}};");
   // TEST_QUERY("{query: edge.type('*'), in: 'ga', where: {id: 'v1', --: 1}}", 1);
   // TEST_GRAMMAR("{walk: 'biBFS', in: 'ga', from: 'a', to: 'b'}");
   // TEST_GRAMMAR("{walk: 'AStar', in: 'ga', from: 'a', to: 'b', cost: () => {return random()}}");

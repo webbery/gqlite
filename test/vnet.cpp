@@ -144,13 +144,13 @@ private:
   std::map<node_t, int> _distance2Bucharest;
 };
 
-class AStarSelector: public IAStarWalkSelector< RomaniaHeuristic >{
+class AStarSelector: public IAStarWalkSelector<virtual_graph_t, RomaniaHeuristic >{
 public:
-  AStarSelector(RomaniaHeuristic& h): IAStarWalkSelector(h) {
+  AStarSelector(RomaniaHeuristic& h): IAStarWalkSelector<virtual_graph_t, RomaniaHeuristic >(h) {
   }
 
-  void start(node_t from) {
-    _pos = from;
+  void start(virtual_graph_t::node_t from) {
+    IAStarWalkSelector<virtual_graph_t, RomaniaHeuristic >::_pos = from;
   }
 };
 
@@ -174,7 +174,7 @@ TEST_CASE("bread search first walk algorithm") {
  NodeVisitor visitor;
  NodeLoader loader(net);
  GBFSHeuristic h((node_t)100);
- GBFSSelector selector(h);
+ GBFSSelector<virtual_graph_t> selector(h);
  net->visit(selector, visitor, loader);
  is_exit.store(true);
  // std::this_thread::sleep_for(std::chrono::milliseconds(40));

@@ -6,9 +6,9 @@
 #define NODE_CACHE_SIZE   16
 
 namespace gql {
+  template<typename _NodeKeyType>
   struct Order {
-    //std::list<std::pair<node_t, double>> _ids;
-    std::list<node_t> _ids;
+    std::list<_NodeKeyType> _ids;
     double _g;
     double _h;
 
@@ -20,22 +20,24 @@ namespace gql {
     }
   };
 
-  using OrderQueue = std::priority_queue<Order, std::vector<Order>, std::greater<Order>>;
+  using OrderQueue = std::priority_queue<Order<node_t>, std::vector<Order<node_t>>, std::greater<Order<node_t>>>;
   void stand(virtual_graph_t& vg, OrderQueue&, node_t id);
 }
 
-template<typename Heuristuc, typename Compare = std::greater<gql::Order>>
+template<typename _Graph, typename Heuristic,
+  typename Compare = std::greater<gql::Order<typename _Graph::node_t>>>
 class GAStarWalk {
+  using node_t = typename _Graph::node_t;
 public:
-  GAStarWalk(Heuristuc& h)
+  GAStarWalk(Heuristic& h)
     :_heuristic(h)
   {}
 
-  void stand(virtual_graph_t& vg, node_t id = (node_t)0) {
+  void stand(_Graph& vg, node_t id = node_t()) {
     gql::stand(vg, _queue, id);
   }
 
-  int walk(virtual_graph_t& vg, std::function<void(node_t, const node_info&)>) {
+  int walk(_Graph& vg, std::function<void(node_t, const node_info&)>) {
     if (vg.size() == 0) return WalkResult::WR_Preload;
     do
     {
@@ -62,7 +64,7 @@ public:
           auto d = _heuristic({ last_id, curInfo }, { id, collections });
           auto h = _heuristic.h(id);
           auto g = history + d;
-          gql::Order order{ id_path, g, g + h };
+          gql::Order<node_t> order{ id_path, g, g + h };
           order._ids.push_back(id);
           _queue.push(order);
         }
@@ -78,15 +80,13 @@ public:
 private:
   void beforeLoad() {}
 
-
-
 private:
-  Heuristuc& _heuristic;
+  Heuristic& _heuristic;
   /**
    * @brief order with >, the minest value will in the front.
    * 
    */
-  std::priority_queue<gql::Order, std::vector<gql::Order>, Compare> _queue;
+  std::priority_queue<gql::Order<node_t>, std::vector<gql::Order<node_t>>, Compare> _queue;
   /**
    * @brief record some node heuristic value. So if it's value is calculated, it will save in cache.
    */
@@ -94,17 +94,18 @@ private:
   std::set<node_t> _visited;
 };
 
-template<typename Heuristic>
+template<typename Graph, typename Heuristic>
 class IAStarWalkSelector {
+  using node_t = typename Graph::node_t;
 public:
-  IAStarWalkSelector(Heuristic& h) : _walker(h), _pos((node_t)0){}
-  void stand(virtual_graph_t& vg) { _walker.stand(vg, _pos); }
+  IAStarWalkSelector(Heuristic& h) : _walker(h), _pos(node_t()){}
+  void stand(Graph& vg) { _walker.stand(vg, _pos); }
 
-  int walk(virtual_graph_t& vg, std::function<void(node_t, const node_info&)> f) {
+  int walk(Graph& vg, std::function<void(node_t, const node_info&)> f) {
     return _walker.walk(vg, f);
   }
 protected:
-  GAStarWalk< Heuristic > _walker;
+  GAStarWalk<Graph, Heuristic > _walker;
   node_t _pos;
 };
 

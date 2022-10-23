@@ -79,12 +79,13 @@ private:
   ScanPlans evaluate(const ScanPlans& props);
 
   struct PatternVisitor {
-    GraphPattern& _pattern;
+    QueryCondition& _where;
     EntityNode* _node;
     // and/or index
     long _index = 0;
+    QueryType _qt =QueryType::SimpleScan;
 
-    PatternVisitor(GraphPattern& pattern, EntityNode* node) :_pattern(pattern), _node(node) {}
+    PatternVisitor(QueryCondition& where, EntityNode* node) :_where(where), _node(node) {}
 
     VisitFlow apply(GASTNode* stmt, std::list<NodeType>& path);
     VisitFlow apply(GUpsetStmt* stmt, std::list<NodeType>& path) {
@@ -104,9 +105,7 @@ private:
     VisitFlow apply(GRemoveStmt* stmt, std::list<NodeType>& path) { return VisitFlow::Return; }
     VisitFlow apply(GLiteral* stmt, std::list<NodeType>& path);
     VisitFlow apply(GArrayExpression* stmt, std::list<NodeType>& path);
-    VisitFlow apply(GEdgeDeclaration* stmt, std::list<NodeType>& path) {
-      return VisitFlow::Children;
-    }
+    VisitFlow apply(GEdgeDeclaration* stmt, std::list<NodeType>& path);
   };
 
   /**
@@ -156,8 +155,15 @@ private:
    */
   std::thread _worker;
 
-  GraphPattern _pattern;
-  ScanPlans _queries;
+  /**
+   * QueryCondition contain graph pattern, node predictates
+   */
+  QueryCondition _where;
+  /**
+   * @brief estimate info of query table
+   */
+  ScanPlans _queries[(long)LogicalPredicate::Max];
+
   std::string _graph;
   std::vector<IObserver*> _observers;
   /**
@@ -172,7 +178,11 @@ private:
    */
     GStorageEngine::cursor _cursor;
     ScanPlans::iterator _itr;
+    LogicalPredicate _op;
   };
   ScanStackRecord _scanRecord;
+  /**
+   * save temp id that search from index
+   */
   std::list< gkey_t > _resultSet;
 };

@@ -1,5 +1,6 @@
 %{
 #include <stdio.h>
+#include <float.h>
 // #define YY_USER_ACTION                                             \
 //     yylloc->first_line = yylloc->last_line;                          \
 //     yylloc->first_column = yylloc->last_column;                      \
@@ -101,6 +102,12 @@ create              {stm._errIndx += yyleng; return KW_CREATE;};
 "limit"             { stm._errIndx += yyleng; return limit;};
 "profile"           { stm._errIndx += yyleng; return profile;};
 "dump"              { stm._errIndx += yyleng; return dump; };
+"inf"               {
+                        stm._errIndx += yyleng;
+                        std::string s(yytext, yyleng);
+                        yylval->__f = DBL_MAX;
+                        return VAR_DECIMAL;
+                    }
 (\bf)unction        { stm._errIndx += yyleng;};
 (\bi)f              { stm._errIndx += yyleng;};
 "else"              { stm._errIndx += yyleng;};

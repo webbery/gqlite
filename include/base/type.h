@@ -31,6 +31,7 @@ enum NodeType {
   VariableDeclarator,
   VertexDeclaration,
   EdgeDeclaration,
+  WalkDeclaration,
   Identifier,
   Literal,
   BlockStatement,

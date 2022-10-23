@@ -41,6 +41,7 @@ enum class KeyType : uint8_t {
   Uninitialize,
   Integer = _gqlite_id_type::integer,
   Byte = _gqlite_id_type::bytes,
+  Edge,
 };
 
 enum class IndexType : uint8_t {
@@ -99,6 +100,11 @@ public:
      * @param type  map key type.
      */
     void addMap(const std::string& mapname, KeyType type);
+
+    /**
+     * @brief check map's key type is init or not. If not, set it with `type`.
+     */
+    void tryInitKeyType(const std::string& prop, KeyType type);
 
     /**
      * Add new index to graph schema
@@ -183,10 +189,6 @@ private:
     bool isMapExist(const std::string& prop);
 
     /**
-     * @brief check map's key type is init or not. If not, set it with `type`.
-     */
-    void tryInitKeyType(const std::string& prop, KeyType type);
-    /**
      * @brief check every attribute is init or not. If not, set index and its attribute's name.
      */
     void tryInitAttributeType(nlohmann::json& attributes, const std::string& attr, const nlohmann::json& value);
@@ -198,7 +200,7 @@ private:
      */
     mdbx::map_handle openSchema();
 
-    void initMap(StoreOption );
+    void initMap(StoreOption);
 
     void initDict(int compressLvl);
     void releaseDict();

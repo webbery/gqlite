@@ -7,7 +7,7 @@ namespace gql {
     if (id != (node_t)0) {
       //itr = 
     }
-    Order order = { {itr->first}, 0, std::numeric_limits<double>::max() / 2 };
+    Order<virtual_graph_t::node_t> order = { {itr->first}, 0, std::numeric_limits<double>::max() / 2 };
     _queue.push(order);
   }
 

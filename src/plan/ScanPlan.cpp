@@ -6,7 +6,9 @@
 #include "StorageEngine.h"
 #include <filesystem>
 #include <float.h>
+#include <fmt/core.h>
 #include "json.hpp"
+#include "gutil.h"
 #include "Type/Datetime.h"
 
 GScanPlan::GScanPlan(std::map<std::string, GVirtualNetwork*>& networks, GStorageEngine* store, GQueryStmt* stmt)
@@ -35,7 +37,7 @@ GScanPlan::GScanPlan(std::map<std::string, GVirtualNetwork*>& networks, GStorage
   auto jsn = store->getSchema();
   _graph = jsn[SCHEMA_GRAPH_NAME];
 
-  _queries.push_back({ FLT_MAX, group });
+  _queries[0].push_back({ FLT_MAX, group });
   parseConditions(condition);
 }
 
@@ -46,10 +48,12 @@ GScanPlan::~GScanPlan()
     delete observer;
   }
   _observers.clear();
-  for (EntityNode* node : _pattern._nodes) {
-    delete node;
+  for (int index = 0; index < (long)LogicalPredicate::Max; ++index) {
+    for (EntityNode* node : _where._patterns[index]._nodes) {
+      delete node;
+    }
+    _where._patterns[index]._nodes.clear();
   }
-  _pattern._nodes.clear();
 }
 
 void GScanPlan::addObserver(IObserver* observer)
@@ -68,20 +72,23 @@ int GScanPlan::prepare()
   case GScanPlan::QueryType::SimpleScan:
   {
     // check if index exist
-    ScanPlans plans;
-    if (_pattern._nodes.size()) {
-      auto begin = _pattern._nodes[0]->_attrs.begin();
-      auto end = _pattern._nodes[0]->_attrs.end();
-      for (auto ptr = begin; ptr != end; ++ptr) {
-        plans.push_back({ 0, *ptr });
+    for (int index = 0; index < (long)LogicalPredicate::Max; ++index) {
+      ScanPlans plans;
+      auto& pattern = _where._patterns[index];
+      if (pattern._nodes.size()) {
+        auto begin = pattern._nodes[0]->_attrs.begin();
+        auto end = pattern._nodes[0]->_attrs.end();
+        for (auto ptr = begin; ptr != end; ++ptr) {
+          plans.push_back({ 0, *ptr });
+        }
       }
-    }
-    plans.insert(plans.end(), _queries.begin(), _queries.end());
-    _queries = evaluate(plans);
-    if (_queries.size()) {
-      std::sort(_queries.begin(), _queries.end(), [](const PlanInfo& left, const PlanInfo& right) {
-        return left.cost < right.cost;
-        });
+      plans.insert(plans.end(), _queries[index].begin(), _queries[index].end());
+      _queries[index] = evaluate(plans);
+      if (_queries[index].size()) {
+        std::sort(_queries[index].begin(), _queries[index].end(), [](const PlanInfo& left, const PlanInfo& right) {
+          return left.cost < right.cost;
+          });
+      }
     }
   }
   break;
@@ -112,7 +119,8 @@ int GScanPlan::interrupt()
 void GScanPlan::start()
 {
   _state = ScanState::Scanning;
-  _scanRecord._itr = _queries.end();
+  _scanRecord._op = LogicalPredicate::And;
+  _scanRecord._itr = _queries[0].end();
 }
 
 void GScanPlan::pause()
@@ -132,102 +140,131 @@ void GScanPlan::stop()
 
 int GScanPlan::scan(const std::function<ExecuteStatus(KeyType, const std::string& key, const std::string& value)>& cb)
 {
-  if (_queries.size() == 0) return ECode_Success;
+  if (_queries[0].size() == 0 && _queries[1].size() == 0) return ECode_Success;
   int ret = scan();
   if (ret == ECode_Query_Pause || ret == ECode_Query_Stop) return ECode_Success;
   if (ret != ECode_Success) return ECode_Fail;
-  ScanPlans::iterator itr = _queries.begin();
-  GStorageEngine::cursor cursor = _store->getMapCursor(itr->_group);
-  auto data = cursor.to_first(false);
-  if (_scanRecord._itr != _queries.end()) {
-    itr = _scanRecord._itr;
-    cursor = std::move(_scanRecord._cursor);
-  }
-  while (itr != _queries.end())
-  {
-    std::string group = itr->_group;
-    KeyType type = _store->getKeyType(group);
-    while (data)
-    {
-      std::string str((char*)data.value.byte_ptr(), data.value.size());
-      //printf("scan: %s\n", str.c_str());
-      switch (_queryType)
-      {
-      case GScanPlan::QueryType::SimpleScan:
-      {
-        gkey_t vKey = getKey(type, data.key);
-        nlohmann::json jsn = nlohmann::json::parse(str);
-        bool result = predict(vKey, jsn);
-        if (result) {
-          std::string k((char*)data.key.byte_ptr(), data.key.size());
-          for (IObserver* observer: _observers) {
-            observer->update(type, k, jsn);
-          }
-          beautify(jsn);
-          if (cb) cb(type, k, jsn.dump());
-        }
-      }
-        break;
-      case GScanPlan::QueryType::NNSearch:
-        break;
-      case GScanPlan::QueryType::Match:
-        break;
-      case GScanPlan::QueryType::Inference:
-        break;
-      default:
-        break;
-      }
-      data = cursor.to_next(false);
-      if (pauseExit(cursor, itr) || stopExit())
-        return ECode_Success;
+  for (int index = 0; index < (long)LogicalPredicate::Max; ++index) {
+    if (_scanRecord._op != (LogicalPredicate)index) continue;
+    ScanPlans::iterator itr = _queries[index].begin();
+    GStorageEngine::cursor cursor = _store->getMapCursor(itr->_group);
+    auto data = cursor.to_first(false);
+    if (_scanRecord._itr != _queries[index].end()) {
+      itr = _scanRecord._itr;
+      cursor = std::move(_scanRecord._cursor);
     }
-    ++itr;
-    if (itr == _queries.end()) break;
-    cursor = _store->getMapCursor(itr->_group);
-    data = cursor.to_first(false);
+    while (itr != _queries[index].end())
+    {
+      std::string group = itr->_group;
+      KeyType type = _store->getKeyType(group);
+      while (data)
+      {
+        std::string str((char*)data.value.byte_ptr(), data.value.size());
+        //printf("scan: %s\n", str.c_str());
+        switch (_queryType)
+        {
+        case GScanPlan::QueryType::SimpleScan:
+        {
+          gkey_t vKey = getKey(type, data.key);
+          nlohmann::json jsn = nlohmann::json::parse(str);
+          bool result = predict(vKey, jsn);
+          if (result) {
+            std::string k((char*)data.key.byte_ptr(), data.key.size());
+            for (IObserver* observer : _observers) {
+              observer->update(type, k, jsn);
+            }
+            beautify(jsn);
+            if (cb) cb(type, k, jsn.dump());
+          }
+        }
+        break;
+        case GScanPlan::QueryType::NNSearch:
+          break;
+        case GScanPlan::QueryType::Match:
+          break;
+        case GScanPlan::QueryType::Inference:
+          break;
+        default:
+          break;
+        }
+        data = cursor.to_next(false);
+        if (pauseExit(cursor, itr) || stopExit())
+          return ECode_Success;
+      }
+      ++itr;
+      if (itr == _queries[index].end()) break;
+      cursor = _store->getMapCursor(itr->_group);
+      data = cursor.to_first(false);
+    }
   }
+  
   return ECode_Success;
 }
 
 int GScanPlan::scan()
 {
-  if (_queries.size()==1) return ECode_Success;
-  auto itr = _queries.begin();
-  GStorageEngine::cursor cursor = _store->getIndexCursor(itr->_group);
-  if (_scanRecord._itr != _queries.end()) {
-    itr = _scanRecord._itr;
-    cursor = std::move(_scanRecord._cursor);
-  }
-  for (; itr != _queries.end(); ) {
-    if (itr->cost != 0) {
-      // get predictor
-      int idx = 0;
-      for (auto ptr = _pattern._nodes[0]->_attrs.begin(), end = _pattern._nodes[0]->_attrs.end(); ptr != end; ++ptr, ++idx) {
-        if (*ptr == itr->_group) break;
-      }
-      auto& predictAnd = _pattern._node_predicates[(long)LogicalPredicate::And][idx];
-      std::list<std::string> keys;
-      switch (_store->getIndexType(itr->_group)) {
-      case IndexType::Number:
-        _store->read(itr->_group, 0, 100, keys);
-        break;
-      case IndexType::Word:
-      {
-        
-      }
-        break;
-      case IndexType::Vector:
-        break;
-      default:
-        break;
-      }
-      if (pauseExit(cursor, itr)) return ECode_Query_Pause;
-      if (stopExit()) return ECode_Query_Stop;
+  if (_queries[0].size() == 0 && _queries[1].size() == 0) return ECode_Success;
+  for (int index = 0; index < (long)LogicalPredicate::Max; ++index) {
+    if (_scanRecord._op != (LogicalPredicate)index || _queries[index].size() == 1) {
+      continue;
     }
-    itr = _queries.erase(itr);
-    _scanRecord._itr = _queries.end();
-    // last query is group
-    if (_queries.size() == 1) break;
+    auto itr = _queries[index].begin();
+    GStorageEngine::cursor cursor = _store->getIndexCursor(itr->_group);
+    if (_scanRecord._itr != _queries[index].end()) {
+      itr = _scanRecord._itr;
+      cursor = std::move(_scanRecord._cursor);
+    }
+    for (; itr != _queries[index].end(); ) {
+      if (itr->cost != 0) {
+        // get predictor
+        int idx = 0;
+        auto& andPattern = _where._patterns[index];
+        if (andPattern._node_predicates.size()) {
+          auto& andAttr = andPattern._nodes[0]->_attrs;
+          for (auto ptr = andAttr.begin(), end = andAttr.end(); ptr != end; ++ptr, ++idx) {
+            if (*ptr == itr->_group) break;
+          }
+          auto& predictsAnd = andPattern._node_predicates;
+          for (auto itr = predictsAnd.begin(), end = predictsAnd.end(); itr != end; ++itr) {
+
+          }
+          std::list<std::string> keys;
+          switch (_store->getIndexType(itr->_group)) {
+          case IndexType::Number:
+          {
+            double from = 0;
+            double to = 100;
+            std::string sf((char*)&from, sizeof(double));
+            std::string st((char*)&to, sizeof(double));
+            auto data = cursor.to_first(false);
+            while (data) {
+              double value = *(double*)data.key.byte_ptr();
+              if (value >= from && value < to) {
+
+              }
+              data = cursor.to_next(false);
+            }
+          }
+          break;
+          case IndexType::Word:
+          {
+
+          }
+          break;
+          case IndexType::Vector:
+            break;
+          default:
+            break;
+          }
+        }
+        if (pauseExit(cursor, itr)) return ECode_Query_Pause;
+        if (stopExit()) return ECode_Query_Stop;
+      }
+      itr = _queries[index].erase(itr);
+      _scanRecord._itr = _queries[index].end();
+      // last query is group
+      if (_queries[index].size() == 1) break;
+    }
   }
   return ECode_Success;
 }
@@ -242,11 +279,11 @@ void GScanPlan::parseGroup(GASTNode* query)
       case NodeType::MemberExpression:
       {
         GMemberExpression* expr = (GMemberExpression*)(*itr)->_value;
-        _queries.push_back({ 0, expr->GetObjectName() });
+        _queries[0].push_back({ 0, expr->GetObjectName() });
       }
         break;
       case NodeType::Literal:
-        _queries.push_back({ 0, GetString(*itr) });
+        _queries[0].push_back({ 0, GetString(*itr) });
         break;
       default:
         break;
@@ -254,7 +291,7 @@ void GScanPlan::parseGroup(GASTNode* query)
     }
   }
   else if (query->_nodetype == NodeType::Literal) {
-    _queries.push_back({ 0, GetString(query) });
+    _queries[0].push_back({ 0, GetString(query) });
   }
 }
 
@@ -262,11 +299,11 @@ void GScanPlan::parseConditions(GASTNode* conditions)
 {
   if (conditions == nullptr) return;
   EntityNode* node = new EntityNode;
-  PatternVisitor visitor(_pattern, node);
+  PatternVisitor visitor(_where, node);
   std::list<NodeType> lNodes;
   accept(conditions, visitor, lNodes);
-  _pattern._nodes.push_back(node);
-  if (_pattern._edges.size() != 0) _queryType = QueryType::Match;
+  _where._patterns[visitor._index]._nodes.push_back(node);
+  if (_where._patterns[visitor._index]._edges.size() != 0) _queryType = QueryType::Match;
 }
 
 bool GScanPlan::pauseExit(GStorageEngine::cursor& cursor, ScanPlans::iterator itr)
@@ -290,13 +327,28 @@ bool GScanPlan::stopExit()
 gkey_t GScanPlan::getKey(KeyType type, mdbx::slice& slice)
 {
   gkey_t vKey;
-  if (type == KeyType::Integer) {
+  switch (type) {
+  case KeyType::Byte:
+  {
+    std::string key((char*)slice.byte_ptr(), slice.size());
+    vKey = key;
+  }
+    break;
+  case KeyType::Integer:
+  {
     auto v = *(uint64_t*)slice.byte_ptr();
     vKey = (uint64_t)v;
   }
-  else {
+    break;
+  case KeyType::Edge:
+  {
     std::string key((char*)slice.byte_ptr(), slice.size());
+    //auto edge = gql::to_edge_id(key);
     vKey = key;
+  }
+    break;
+  default:
+    break;
   }
   return vKey;
 }
@@ -335,26 +387,25 @@ bool GScanPlan::predict(const std::function<bool(const attribute_t&)>& op, const
 bool GScanPlan::predict(gkey_t key, nlohmann::json& row)
 {
   std::vector<std::string>::iterator aitr;
-  if (_pattern._nodes.size()) {
-    aitr = _pattern._nodes[0]->_attrs.begin();
-  }
   bool result = true;
-  auto& andPreds = _pattern._node_predicates[(long)LogicalPredicate::And];
-  for (auto predItr = andPreds.begin(), end = andPreds.end(); predItr != end; ++predItr) {
-    result &= (*predItr).visit(
-      [&key](std::function<bool(const gkey_t&)> op) {
-        return op(key);
-      },
-      [&row, &aitr, this](std::function<bool(const attribute_t&)> op) {
-        auto value = row[*aitr];
-        bool ret = predict(op, value);
-        ++aitr;
-        return ret;
-      });
-    if (!result) break;
-  }
-  for (auto& pred : _pattern._node_predicates[(long)LogicalPredicate::Or])
-  {
+  for (int index = 0; index < (long)LogicalPredicate::Max; ++index) {
+    if (_where._patterns[index]._nodes.size()) {
+      aitr = _where._patterns[index]._nodes[0]->_attrs.begin();
+    }
+    auto& opPreds = _where._patterns[index]._node_predicates;
+    for (auto predItr = opPreds.begin(), end = opPreds.end(); predItr != end; ++predItr) {
+      result &= (*predItr).visit(
+        [&key](std::function<bool(const gkey_t&)> op) {
+          return op(key);
+        },
+        [&row, &aitr, this](std::function<bool(const attribute_t&)> op) {
+          auto value = row[*aitr];
+          bool ret = predict(op, value);
+          ++aitr;
+          return ret;
+        });
+      if (!result) break;
+    }
   }
   return result;
 }
@@ -413,7 +464,7 @@ VisitFlow GScanPlan::PatternVisitor::apply(GVertexDeclaration* stmt, std::list<N
         });
       return ret;
     });
-    _pattern._node_predicates[(long)LogicalPredicate::And].push_back(pred);
+    _where._patterns[_index]._node_predicates.push_back(pred);
   }
   return VisitFlow::Children;
 }
@@ -446,57 +497,38 @@ VisitFlow GScanPlan::PatternVisitor::apply(GProperty* stmt, std::list<NodeType>&
 {
   std::string key = stmt->key();
   static std::string last_key;
-  auto getLiteral = [](GASTNode* node) {
-    attribute_t v;
-    if (node->_nodetype != NodeType::Literal) return v;
-    GLiteral* literal = (GLiteral*)node->_value;
-    switch (literal->kind()) {
-    case AttributeKind::String:
-      v = literal->raw();
-      break;
-    case AttributeKind::Datetime:
-      v = (double)atoll(literal->raw().c_str());
-      break;
-    case AttributeKind::Integer:
-    case AttributeKind::Number:
-      v = (double)atof(literal->raw().c_str());
-      break;
-    default:
-      break;
-    }
-    return v;
-  };
+  
   if (key == "lt") {
     _node->_attrs.push_back(last_key);
-    attribute_t attr = getLiteral(stmt->value());
+    attribute_t attr = GetLiteral(stmt->value());
     predicate_t pred = static_cast<std::function<bool(const attribute_t&)>>([attr](const attribute_t& input)->bool {
       return input < attr;
       });
-    _pattern._node_predicates[_index].push_back(pred);
+    _where._patterns[_index]._node_predicates.push_back(pred);
   }
   else if (key == "gt") {
     _node->_attrs.push_back(last_key);
-    attribute_t attr = getLiteral(stmt->value());
+    attribute_t attr = GetLiteral(stmt->value());
     predicate_t pred = static_cast<std::function<bool(const attribute_t&)>>([attr](const attribute_t& input)->bool {
       return input > attr;
       });
-    _pattern._node_predicates[_index].push_back(pred);
+    _where._patterns[_index]._node_predicates.push_back(pred);
   }
   else if (key == "lte") {
     _node->_attrs.push_back(last_key);
-    attribute_t attr = getLiteral(stmt->value());
+    attribute_t attr = GetLiteral(stmt->value());
     predicate_t pred = static_cast<std::function<bool(const attribute_t&)>>([attr](const attribute_t& input)->bool {
       return input <= attr;
       });
-    _pattern._node_predicates[_index].push_back(pred);
+    _where._patterns[_index]._node_predicates.push_back(pred);
   }
   else if (key == "gte") {
     _node->_attrs.push_back(last_key);
-    attribute_t attr = getLiteral(stmt->value());
+    attribute_t attr = GetLiteral(stmt->value());
     predicate_t pred = static_cast<std::function<bool(const attribute_t&)>>([attr](const attribute_t& input)->bool {
       return input >= attr;
       });
-    _pattern._node_predicates[(long)LogicalPredicate::And].push_back(pred);
+    _where._patterns[_index]._node_predicates.push_back(pred);
   }
   else if (key == "id") {
     std::string key = GetString(stmt->value());
@@ -509,7 +541,7 @@ VisitFlow GScanPlan::PatternVisitor::apply(GProperty* stmt, std::list<NodeType>&
         });
       return ret;
       });
-    _pattern._node_predicates[_index].push_back(pred);
+    _where._patterns[_index]._node_predicates.push_back(pred);
   }
   else if (key == "and") {
     _index = (long)LogicalPredicate::And;
@@ -519,16 +551,31 @@ VisitFlow GScanPlan::PatternVisitor::apply(GProperty* stmt, std::list<NodeType>&
   }
   else { // group's name
     last_key = key;
-    attribute_t attr = getLiteral(stmt->value());
+    attribute_t attr = GetLiteral(stmt->value());
     if (!attr.empty()) {
       _node->_attrs.push_back(last_key);
       predicate_t pred = static_cast<std::function<bool(const attribute_t&)>>([attr](const attribute_t& input)->bool {
         return input == attr;
         });
-      _pattern._node_predicates[(long)LogicalPredicate::And].push_back(pred);
+      _where._patterns[_index]._node_predicates.push_back(pred);
     }
   }
   return VisitFlow::Children;
+}
+
+VisitFlow GScanPlan::PatternVisitor::apply(GEdgeDeclaration* stmt, std::list<NodeType>& path)
+{
+  _qt = QueryType::Match;
+  //std::string direction = GetString(stmt->link());
+  //attribute_t attr = GetLiteral(stmt->to());
+  //if (direction == "--") {
+  //}
+  //else if (direction == "->"){}
+  //else if (direction == "<-") {}
+  //else {
+  //  fmt::print("Error: {} is an unknow edge type\n", direction);
+  //}
+  return VisitFlow::SkipCurrent;
 }
 
 VisitFlow GScanPlan::VertexJsonVisitor::apply(GProperty* stmt, std::list<NodeType>& path)

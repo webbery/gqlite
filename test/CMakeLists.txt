@@ -95,6 +95,11 @@ set(INFOMATION_SOURCE ./infomation.cpp
 	${SYMBOLS_SOURCE}
 )
 
+set(MATCH_SOURCE	./match.cpp
+  ../src/walk/AStarWalk.cpp
+	${SYMBOLS_SOURCE}
+)
+
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -finstrument-functions")
 add_executable(grammar ${TEST_GRAMMAR_SOURCE})
 add_compile_definitions(BINARY_DIR="${zstd_BINARY_DIR}/lib")
@@ -107,6 +112,7 @@ add_executable(vnet ${VNET_SOURCE})
 add_executable(movielens ${MOVIELENS_SOURCE})
 add_executable(decision ${DECISION_SOURCE})
 add_executable(infomation ${INFOMATION_SOURCE})
+add_executable(match ${MATCH_SOURCE})
 
 set(storage_LINK_OPTIONS fmt::fmt-header-only mdbx-static)
 set(vnet_LINK_OPTIONS fmt::fmt-header-only)
@@ -114,7 +120,7 @@ set(grammar_LINK_OPTIONS gqlite fmt::fmt-header-only)
 set(movielens_LINK_OPTIONS gqlite)
 set(regress_LINK_OPTIONS gqlite fmt::fmt-header-only)
 IF (UNIX AND NOT APPLE AND NOT (CMAKE_SYSTEM_NAME MATCHES "Android"))
-set(TARGETS_OF_LEAK_TO_CHECK storage vnet movielens decision)
+set(TARGETS_OF_LEAK_TO_CHECK storage vnet movielens decision infomation decision match query)
 
 foreach(LEAK_TARGET ${TARGETS_OF_LEAK_TO_CHECK})
 	target_compile_options(${LEAK_TARGET} PRIVATE -fsanitize=leak -fno-omit-frame-pointer)
@@ -141,10 +147,10 @@ target_link_libraries(movielens PUBLIC ${CMAKE_DL_LIBS} m )
 target_link_libraries(grammar PUBLIC ${CMAKE_DL_LIBS} m )
 target_link_libraries(regress PUBLIC ${CMAKE_DL_LIBS} m )
 endif(GQLITE_BUILD_TEST)
-ELSE()
+ELSE() # UNIX
 target_link_libraries(storage PUBLIC ${storage_LINK_OPTIONS})
 target_link_libraries(query PUBLIC ${storage_LINK_OPTIONS})
-ENDIF()
+ENDIF() # UNIX
 # target_link_libraries(algorithm fmt::fmt-header-only)
 target_link_libraries(movielens PUBLIC ${movielens_LINK_OPTIONS} )
 IF (WIN32)
@@ -154,6 +160,7 @@ if (CMAKE_SYSTEM_NAME MATCHES "Android")
 target_link_libraries(vnet ${vnet_LINK_OPTIONS} log)
 target_link_libraries(decision log)
 target_link_libraries(infomation log)
+target_link_libraries(match log)
 # target_link_libraries(storage log)
 # target_link_libraries(grammar log)
 # target_link_libraries(ptree log)
@@ -181,6 +188,7 @@ add_test(NAME ptree COMMAND ptree)
 add_test(NAME vnet COMMAND vnet)
 add_test(NAME decision COMMAND decision)
 add_test(NAME infomation COMMAND infomation)
+add_test(NAME match COMMAND match)
 add_test(NAME regress_vertex COMMAND regress --inputdir=./vertex --outputdir=./vertex
 	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 add_test(NAME regress_edge COMMAND regress --inputdir=./edge --outputdir=./edge

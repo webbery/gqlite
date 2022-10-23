@@ -12,7 +12,7 @@
 #include "base/lang/LiteralString.h"
 #include "base/lang/LiteralDatetime.h"
 #include "base/lang/VertexDeclaration.h"
-#include "base/lang/EdgeDeclaration.h"
+#include "base/lang/WalkDeclaration.h"
 #include "base/lang/DropStmt.h"
 #include "base/lang/RemoveStmt.h"
 #include "base/lang/ObjectStmt.h"

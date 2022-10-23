@@ -25,6 +25,7 @@ public:
   iterator begin() { return _elements.begin(); }
   iterator end() { return _elements.end(); }
 
+  GASTNode* operator[](int idx) { return _elements[idx]; }
 private:
   bool isBasicElement(GASTNode*);
 

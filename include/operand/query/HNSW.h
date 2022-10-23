@@ -30,11 +30,11 @@ namespace gql {
       _target = target;
     }
   };
-  class GHNSWAStarSelector : public IAStarWalkSelector< GHNSWHeuristic > {
+  class GHNSWAStarSelector : public IAStarWalkSelector<virtual_graph_t, GHNSWHeuristic > {
   public:
     GHNSWAStarSelector(GHNSWHeuristic& h) : IAStarWalkSelector(h) {}
 
-    void start(node_t id) { _pos = id; }
+    void start(virtual_graph_t::node_t id) { _pos = id; }
   };
 }
 class GHNSW {

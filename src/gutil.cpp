@@ -1,5 +1,6 @@
 #include "gutil.h"
 #include <string.h>
+#include <regex>
 
 namespace gql {
 
@@ -9,6 +10,22 @@ namespace gql {
     while (token) {
       result.push_back(token);
       token = strtok(NULL, delim);
+    }
+    return result;
+  }
+
+  std::vector<std::string> split(const std::string& str, char delim)
+  {
+    std::vector<std::string> result;
+    auto first = str.begin();
+    for (auto itr = str.begin(); itr != str.end(); ++itr) {
+      if (*itr == delim) {
+        result.push_back({ first, itr });
+        first = itr;
+      }
+    }
+    if (first != str.end()) {
+      result.push_back({ first, str.end() });
     }
     return result;
   }
@@ -75,7 +92,13 @@ namespace gql {
       }
       previous = cur;
     }
-    return replace_all(result, "\\u0000", "");
+
+    result = replace_all(result, "\\u0000", "");
+    // convert datetime, array
+    std::regex patternDatetime("\\{'_obj_t':4,'value':(\\d+)\\}");
+    result = std::regex_replace(result, patternDatetime, "0d$1");
+    std::regex patternArray("\\{'_obj_t':5,'value':(\\[[\\w\\W]+\\])\\}");
+    return std::regex_replace(result, patternArray, "$1");
   }
 
   edge_id make_edge_id(bool direction, const Variant<std::string, uint64_t>& from, const Variant<std::string, uint64_t>& to)

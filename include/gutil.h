@@ -25,6 +25,7 @@
 namespace gql {
   std::string replace_all(const std::string& input, const std::string& origin, const std::string& newer);
   std::vector<std::string> split(const char* str, const char* delim);
+  std::vector<std::string> split(const std::string& str, char delim);
 
   /**
    * @brief try generate an identify number by input string.

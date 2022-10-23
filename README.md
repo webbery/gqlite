@@ -14,24 +14,20 @@ This is the expriments for testing abilities of graph database in ending device.
 
 <!-- vscode-markdown-toc -->
 * 1. [Designed](#Designed)
-	* 1.1. [Operator](#Operator)
-		* 1.1.1. [Graph Matching <img src="https://render.githubusercontent.com/render/math?math=P">](#GraphMatchingimgsrchttps:render.githubusercontent.comrendermathmathP)
-		* 1.1.2. [Walking <img src="https://render.githubusercontent.com/render/math?math=W">](#Walkingimgsrchttps:render.githubusercontent.comrendermathmathW)
-* 2. [The Spec of Implements](#TheSpecofImplements)
-* 3. [Build](#Build)
-	* 3.1. [ubuntu](#ubuntu)
-	* 3.2. [macos](#macos)
-	* 3.3. [windows](#windows)
-	* 3.4. [android](#android)
-* 4. [How to use in C/C++](#Howtouse)
-* 5. [Graph Query Language](#GraphQueryLanguage)
-	* 5.1. [Create Graph](#CreateGraph)
-	* 5.2. [Data Types](#DataTypes)
-	* 5.3. [Add Vertex & Edge](#AddVertexEdge)
-	* 5.4. [Remove Vertex & Edge](#RemoveVertexEdge)
-	* 5.5. [Query](#Query)
-		* 5.5.1. [intrinct function](#intrinctfunction)
-		* 5.5.2. [condition](#condition)
+* 2. [Build](#Build)
+	* 2.1. [ubuntu](#ubuntu)
+	* 2.2. [macos](#macos)
+	* 2.3. [windows](#windows)
+	* 2.4. [android](#android)
+* 3. [How to use in C/C++](#HowtouseinCC)
+* 4. [Graph Query Language](#GraphQueryLanguage)
+	* 4.1. [Create Graph](#CreateGraph)
+	* 4.2. [Data Types](#DataTypes)
+	* 4.3. [Add Vertex & Edge](#AddVertexEdge)
+	* 4.4. [Remove Vertex & Edge](#RemoveVertexEdge)
+	* 4.5. [Query](#Query)
+		* 4.5.1. [intrinct function](#intrinctfunction)
+		* 4.5.2. [condition](#condition)
 
 <!-- vscode-markdown-toc-config
 	numbering=true
@@ -40,41 +36,21 @@ This is the expriments for testing abilities of graph database in ending device.
 <!-- /vscode-markdown-toc -->
 ##  1. <a name='Designed'></a>Designed
 In order to get more inflexibility, we try to implement graph database on this paper: GRAD: On Graph Database Modeling. But not strict.  
-##  2. <a name='TheSpecofImplements'></a>The Spec of Implements
-| Feature | Description | Implements | Version |
-| :--------:  | :--------: | :--------: | :--------: |
-| create graph | | &check; | 0.0.1 |
-| upset vertex | | &check; | 0.0.1 |
-| query vertex | | &check; | 0.0.1 |
-| binary support | support binary data | &check; | 0.0.1 |
-| drop graph | | &check; | 0.0.1 |
-| delete vertex | | &check; | 0.0.1 |
-| upset edge | | &check; | 0.1.0 |
-| query edge | | -| 0.1.0 |
-| delete edge | | &check; | 0.1.0 |
-| walk of BFS | | &check; | 0.1.0 |
-| walk of DFS | | - | 0.1.0 |
-| js support | implement a subset/extend of javasript for complex query. |  | 0.2.0 |
-| walk of A* | A* algrithm for graph search | &check; | 0.2.0 |
-| HNSW | vector search algorithm | &check; | 0.2.0 |
-| GiST index | boosting for more type search |  | 0.3.0 |
-| extension support | interface for GiST |  | 0.3.0 |
-| graph match |  | - | 0.4.0 |
-| HMM | bayes network support |  | 0.4.0 |
-| CRF | bayes network support |  | 0.4.0 |
+Here is GQlite's framework:  
+![framework](doc/framework.png)
 
-##  3. <a name='Build'></a>Build
+##  2. <a name='Build'></a>Build
 Use command with `git clone --recursive https://github.com/webbery/gqlite.git` to clone this repository.
-###  3.1. <a name='ubuntu'></a>ubuntu  
+###  2.1. <a name='ubuntu'></a>ubuntu  
 Install latest version of bison.  
-###  3.2. <a name='macos'></a>macos  
+###  2.2. <a name='macos'></a>macos  
 Install latest version of bison.  
-###  3.3. <a name='windows'></a>windows  
+###  2.3. <a name='windows'></a>windows  
 An version of flex&bison is placed in dir `tool`. So it's not need to install dependency.  
-###  3.4. <a name='android'></a>android  
+###  2.4. <a name='android'></a>android  
 C++: 17  
-Cross-compile on Ubuntu/MacOS. Becasue cross-compile libzstd encounter some problem on Windows.  
-##  4. <a name='Howtouse'></a>How to use in C/C++  
+Please use cross-compile tools on Ubuntu/MacOS. Some mistakes of libzstd occur on Windows.  
+##  3. <a name='HowtouseinCC'></a>How to use in C/C++  
 An simple example shows how to use in your program is here:  
 ```
 #include "gqlite.h"
@@ -133,8 +109,8 @@ int main() {
   gqlite_close(pHandle);
 }
 ```
-##  5. <a name='GraphQueryLanguage'></a>Graph Query Language
-###  5.1. <a name='CreateGraph'></a>Create Graph
+##  4. <a name='GraphQueryLanguage'></a>Graph Query Language
+###  4.1. <a name='CreateGraph'></a>Create Graph
 Create a graph is simply use `create` keyword. The keyword of `group`, means that all entity node which group belongs to. If we want to search vertex by some property, `index` keyword will regist it.
 ```javascript
 {
@@ -160,7 +136,7 @@ Here we create an index called `tag`. The `tag` will create revert index from `t
 }
 ```
 So after upset a new tag, the revert index will be added.
-###  5.2. <a name='DataTypes'></a>Data Types
+###  4.2. <a name='DataTypes'></a>Data Types
 Normaly, basic data type as follows:  
     **string**: 'string'  
     **number**: 10 means integer, 10.0 means real number.   
@@ -169,7 +145,7 @@ Normaly, basic data type as follows:
     **datetime**: start with `0d`, then will try to convert following string to datetime, such as `0d'1642262159'`  
     **vector**: a special type of array, which items are same type.  
     **hash**: a special type of string, start with `0h` like `0h'hash'`  
-###  5.3. <a name='AddVertexEdge'></a>Add Vertex & Edge
+###  4.3. <a name='AddVertexEdge'></a>Add Vertex & Edge
 add or update vertex:
 ```javascript
 {
@@ -213,13 +189,13 @@ or simply use bidirection:
     ]
 }
 ```
-###  5.4. <a name='RemoveVertexEdge'></a>Remove Vertex & Edge
+###  4.4. <a name='RemoveVertexEdge'></a>Remove Vertex & Edge
 ```javascript
 {remove: 'graph', vertex: [21, 88]}
 ```
-###  5.5. <a name='Query'></a>Query
+###  4.5. <a name='Query'></a>Query
 There are three kinds of query. First is `vertex` which is used to find vertexes instance.  Another one is `edge` which is used to find edges instance. The last one is `path` which is used to find a batch of path from some points to other points.
-####  5.5.1. <a name='intrinctfunction'></a>intrinct function
+####  4.5.1. <a name='intrinctfunction'></a>intrinct function
 ##### count()
 ```javascript
 {// this is used to count the number of vertex
@@ -227,7 +203,7 @@ There are three kinds of query. First is `vertex` which is used to find vertexes
     group: 'movie'
 }
 ```
-####  5.5.2. <a name='condition'></a>condition
+####  4.5.2. <a name='condition'></a>condition
 query all movie that has tag:
 ```javascript
 {
@@ -284,11 +260,6 @@ In order to get a search way, you can use `path` to archive it.
 which `dijk` means dijk search.
 ###  4.6. <a name='Inference'></a>Inference
 Here we define a kind of inference operator, and apply it to a graph.  
-First Order Logic:
-```javascript
-{
-}
-```
 HMM:
 ```javascript
 {

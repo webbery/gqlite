@@ -30,15 +30,21 @@ void FreeNode(GASTNode* node) {
     delete ptr;
   }
     break;
-  case NodeType::EdgeDeclaration:
+  case NodeType::WalkDeclaration:
   {
-    GTypeTraits<NodeType::EdgeDeclaration>::type* ptr = reinterpret_cast<GTypeTraits<NodeType::EdgeDeclaration>::type*>(node->_value);
+    GTypeTraits<NodeType::WalkDeclaration>::type* ptr = reinterpret_cast<GTypeTraits<NodeType::WalkDeclaration>::type*>(node->_value);
     delete ptr;
   }
     break;
   case NodeType::VertexDeclaration:
   {
     GTypeTraits<NodeType::VertexDeclaration>::type* ptr = reinterpret_cast<GTypeTraits<NodeType::VertexDeclaration>::type*>(node->_value);
+    delete ptr;
+  }
+    break;
+  case NodeType::EdgeDeclaration:
+  {
+    GTypeTraits<NodeType::EdgeDeclaration>::type* ptr = reinterpret_cast<GTypeTraits<NodeType::EdgeDeclaration>::type*>(node->_value);
     delete ptr;
   }
     break;
@@ -165,6 +171,7 @@ std::string NodeType2String(NodeType nt) {
     RETURN_CASE_NODE_TYPE(QueryStatement);
     RETURN_CASE_NODE_TYPE(VertexDeclaration);
     RETURN_CASE_NODE_TYPE(EdgeDeclaration);
+    RETURN_CASE_NODE_TYPE(WalkDeclaration);
     RETURN_CASE_NODE_TYPE(DropStatement);
     RETURN_CASE_NODE_TYPE(RemoveStatement);
   default: return "Unknow Node Type: " + std::to_string((int)nt);
@@ -191,6 +198,28 @@ std::string GetString(GASTNode* node) {
   GLiteral* str = (GLiteral*)node->_value;
   return str->raw();
 }
+
+attribute_t GetLiteral(GASTNode* node)
+{
+  attribute_t v;
+  if (node->_nodetype != NodeType::Literal) return v;
+  GLiteral* literal = (GLiteral*)node->_value;
+  switch (literal->kind()) {
+  case AttributeKind::String:
+    v = literal->raw();
+    break;
+  case AttributeKind::Datetime:
+    v = (double)atoll(literal->raw().c_str());
+    break;
+  case AttributeKind::Integer:
+  case AttributeKind::Number:
+    v = (double)atof(literal->raw().c_str());
+    break;
+  default:
+    break;
+  }
+  return v;
+};
 
 VisitFlow GViewVisitor::apply(GASTNode* stmt, std::list<NodeType>& path) {
   size_t level = path.size();
@@ -263,11 +292,11 @@ VisitFlow GViewVisitor::apply(GEdgeDeclaration* stmt, std::list<NodeType>& path)
   printLine("|- type: {}\n", NodeType2String(EdgeDeclaration), level);
   path.push_back(NodeType::InvalidNode);
   printLine("|- link:{}\n", "", level+1);
-  accept(stmt->link(), *this, path);
-  printLine("|- from:{}\n", "", level+1);
-  accept(stmt->from(), *this, path);
-  printLine("|- to:{}\n", "", level+1);
-  accept(stmt->to(), *this, path);
+  //accept(stmt->link(), *this, path);
+  //printLine("|- from:{}\n", "", level+1);
+  //accept(stmt->from(), *this, path);
+  //printLine("|- to:{}\n", "", level+1);
+  //accept(stmt->to(), *this, path);
   path.pop_back();
   return VisitFlow::Children;
 }
@@ -276,65 +305,5 @@ VisitFlow GViewVisitor::apply(GDropStmt* stmt, std::list<NodeType>& path)
 {
   size_t level = path.size();
   printLine("|- type: {}\n", NodeType2String(DropStatement), level);
-  return VisitFlow::Children;
-}
-
-VisitFlow GCleanVisitor::apply(GASTNode* stmt, std::list<NodeType>& path)
-{
-  delete stmt;
-  return VisitFlow::Children;
-}
-
-VisitFlow GCleanVisitor::apply(GUpsetStmt* stmt, std::list<NodeType>& path)
-{
-  delete stmt;
-  return VisitFlow::Children;
-}
-
-VisitFlow GCleanVisitor::apply(GQueryStmt* stmt, std::list<NodeType>& path)
-{
-  delete stmt;
-  return VisitFlow::Children;
-}
-
-VisitFlow GCleanVisitor::apply(GGQLExpression* stmt, std::list<NodeType>& path)
-{
-  delete stmt;
-  return VisitFlow::Children;
-}
-
-VisitFlow GCleanVisitor::apply(GProperty* stmt, std::list<NodeType>& path)
-{
-  delete stmt;
-  return VisitFlow::Children;
-}
-
-VisitFlow GCleanVisitor::apply(GVertexDeclaration* stmt, std::list<NodeType>& path)
-{
-  delete stmt;
-  return VisitFlow::Children;
-}
-
-VisitFlow GCleanVisitor::apply(GCreateStmt* stmt, std::list<NodeType>& path)
-{
-  delete stmt;
-  return VisitFlow::Children;
-}
-
-VisitFlow GCleanVisitor::apply(GLiteral* stmt, std::list<NodeType>& path)
-{
-  delete stmt;
-  return VisitFlow::Children;
-}
-
-VisitFlow GCleanVisitor::apply(GArrayExpression* stmt, std::list<NodeType>& path)
-{
-  delete stmt;
-  return VisitFlow::Children;
-}
-
-VisitFlow GCleanVisitor::apply(GEdgeDeclaration* stmt, std::list<NodeType>& path)
-{
-  delete stmt;
   return VisitFlow::Children;
 }

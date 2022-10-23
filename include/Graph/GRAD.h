@@ -51,6 +51,13 @@ struct GraphPattern {
   std::vector<EntityNode*> _nodes;
   std::vector<EntityEdge*> _edges;
 
-  std::vector< predicate_t > _node_predicates[(long)LogicalPredicate::Max];
-  
+  /**
+   * Predicates index is response to _nodes's attributes index.
+   * So they have same size.
+   */
+  std::vector<predicate_t> _node_predicates;
+};
+
+struct QueryCondition {
+  GraphPattern _patterns[(long)LogicalPredicate::Max];
 };

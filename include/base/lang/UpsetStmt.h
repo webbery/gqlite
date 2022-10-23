@@ -4,7 +4,8 @@
 struct GASTNode;
 class GUpsetStmt {
 public:
-  GUpsetStmt(const std::string& graphName, GASTNode* ast);
+  GUpsetStmt(const std::string& vertexGroup, GASTNode* ast);
+  GUpsetStmt(GASTNode* edgeGroup, GASTNode* ast);
   ~GUpsetStmt();
 
   std::string name() const { return _name; }

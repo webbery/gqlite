@@ -9,7 +9,8 @@
 
 GUpsetPlan::GUpsetPlan(std::map<std::string, GVirtualNetwork*>& vn, GStorageEngine* store, GUpsetStmt* ast)
 :GPlan(vn, store)
-,_class(ast->name()) {
+,_class(ast->name())
+{
   UpsetVisitor visitor(*this);
   std::list<NodeType> ln;
   accept(ast->node(), visitor, ln);
@@ -82,6 +83,7 @@ bool GUpsetPlan::upsetVertex()
 
 bool GUpsetPlan::upsetEdge()
 {
+  _store->tryInitKeyType(_class, KeyType::Edge);
   for (auto itr = _edges.begin(), end = _edges.end(); itr != end; ++itr) {
     std::string sid = gql::to_string(itr->first);
     _store->write(_class, sid, itr->second.data(), itr->second.size());
@@ -108,16 +110,79 @@ GVirtualNetwork* GUpsetPlan::generateNetwork(const std::string& branch)
   return _networks[branch];
 }
 
+bool GUpsetPlan::upsetIndex(const std::string& index, const std::string& value, const std::string& id)
+{
+  std::string data;
+  _store->read(index, value, data);
+  std::vector<std::string> v = gql::split(data, '\0');
+  addUniqueDataAndSort(v, id);
+  data.clear();
+  for (auto& datum : v) {
+    data += datum + '\0';
+  }
+  data.pop_back();
+  _store->write(index, value, data.data(), data.size() * sizeof(char));
+  _store->updateIndexType(index, IndexType::Word);
+  return true;
+}
+
+bool GUpsetPlan::upsetIndex(const std::string& index, double value, uint64_t id)
+{
+  std::string bin((char*)&value, sizeof(double));
+  std::string data;
+  _store->read(index, bin, data);
+  std::vector<uint64_t> v((uint64_t*)data.data(), (uint64_t*)data.data() + data.size() / sizeof(uint64_t));
+  addUniqueDataAndSort(v, id);
+  _store->write(index, bin, v.data(), v.size());
+  _store->updateIndexType(index, IndexType::Number);
+  return true;
+}
+
+bool GUpsetPlan::upsetIndex(const std::string& index, const std::string& value, uint64_t id)
+{
+  std::string data;
+  _store->read(index, value, data);
+  std::vector<uint64_t> v((uint64_t*)data.data(), (uint64_t*)data.data() + data.size() / sizeof(uint64_t));
+  addUniqueDataAndSort(v, id);
+  _store->write(index, value, v.data(), v.size());
+  _store->updateIndexType(index, IndexType::Word);
+  return true;
+}
+
+bool GUpsetPlan::upsetIndex(const std::string& index, double value, const std::string& id)
+{
+  std::string bin((char*)&value, sizeof(double));
+  std::string data;
+  _store->read(index, bin, data);
+  std::vector<std::string> v = gql::split(data, '\0');
+  addUniqueDataAndSort(v, id);
+  data.clear();
+  for (auto& datum : v) {
+    data += datum + '\0';
+  }
+  data.pop_back();
+  _store->write(index, bin, data.data(), data.size() * sizeof(char));
+  _store->updateIndexType(index, IndexType::Number);
+  return true;
+}
+
 VisitFlow GUpsetPlan::UpsetVisitor::apply(GEdgeDeclaration* stmt, std::list<NodeType>& path)
 {
   _plan._vertex = false;
   gkey_t from = getLiteral(stmt->from());
   gkey_t to = getLiteral(stmt->to());
   JSONVisitor jv(_plan);
-  accept(stmt->link(), jv, path);
+  accept(stmt->value(), jv, path);
   jv.add();
   std::string edge = jv._jsonify.dump();
-  if (edge == "->" || edge == "<-") {}
+  if (stmt->direction() == "->") {
+    gql::edge_id eid = gql::make_edge_id(true, from, to);
+    _plan._edges[eid] = edge;
+  }
+  else if (stmt->direction() == "<-") {
+    gql::edge_id eid = gql::make_edge_id(true, to, from);
+    _plan._edges[eid] = edge;
+  }
   else {
     gql::edge_id eid = gql::make_edge_id(false, from, to);
     _plan._edges[eid] = edge;

@@ -57,9 +57,6 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -lrt -march=native -mfma -mavx")
 endif()
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-	# set(CODE_COVERAGE_VERBOSE TRUE)
-	# "--rc lcov_branch_coverage=0"
-	# "--no-branch-coverage"
 	include(CodeCoverage.cmake)
 	APPEND_COVERAGE_COMPILER_FLAGS()
 	setup_target_for_coverage_gcovr_xml(

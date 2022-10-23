@@ -18,12 +18,13 @@ private:
   double _order;
 };
 
-class GBFSSelector : public IAStarWalkSelector<GBFSHeuristic> {
+template<typename Graph>
+class GBFSSelector : public IAStarWalkSelector<Graph, GBFSHeuristic> {
 public:
-  GBFSSelector(GBFSHeuristic& h) : IAStarWalkSelector(h) {
+  GBFSSelector(GBFSHeuristic& h) : IAStarWalkSelector<Graph, GBFSHeuristic>(h) {
   }
 
-  void start(node_t from) {
-    _pos = from;
+  void start(typename Graph::node_t from) {
+    IAStarWalkSelector<Graph, GBFSHeuristic >::_pos = from;
   }
 };
