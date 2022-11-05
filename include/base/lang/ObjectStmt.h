@@ -1,7 +1,11 @@
 #pragma once
 
+class GASTNode;
 class GObjectStmt {
 public:
   GObjectStmt();
-  ~GObjectStmt();
+  virtual ~GObjectStmt();
+
+private:
+  
 };

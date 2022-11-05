@@ -1,7 +1,8 @@
-#include "Type/Vector.h"
+#include "base/math/Distance.h"
+#include <cassert>
 
 namespace gql {
-
+    
 #if defined(__x86_64__) || defined(_M_X64) || defined(__i386__)
   double avx_distance2(const std::vector<double>& v1, const std::vector<double>& v2)
   {
@@ -176,5 +177,4 @@ namespace gql {
     uint8_t result = 0;
     return result;
   }
-
 }

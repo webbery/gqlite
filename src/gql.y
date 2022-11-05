@@ -78,10 +78,10 @@ struct GASTNode* INIT_NUMBER_AST(T& v) {
 %token RANGE_BEGIN RANGE_END COLON QUOTE COMMA LEFT_SQUARE RIGHT_SQUARE STAR CR PARAM_BEGIN PARAM_END SEMICOLON
 %token KW_AST KW_ID KW_GRAPH KW_COMMIT
 %token KW_CREATE KW_DROP KW_IN KW_REMOVE KW_UPSET left_arrow right_arrow KW_BIDIRECT_RELATION KW_REST KW_DELETE
-%token OP_QUERY KW_INDEX OP_WHERE
+%token OP_QUERY KW_INDEX OP_WHERE OP_GEOMETRY
 %token group dump
 %token CMD_SHOW 
-%token OP_GREAT_THAN OP_LESS_THAN OP_GREAT_THAN_EQUAL OP_LESS_THAN_EQUAL equal AND OR
+%token OP_GREAT_THAN OP_LESS_THAN OP_GREAT_THAN_EQUAL OP_LESS_THAN_EQUAL equal AND OR OP_NEAR
 %token FN_COUNT
 %token dot
 %token limit profile
@@ -89,10 +89,10 @@ struct GASTNode* INIT_NUMBER_AST(T& v) {
 %type <var_name> a_edge
 %type <node> a_graph_expr
 %type <node> condition_json normal_json
-%type <node> condition_value normal_value number right_value comparable_item simple_value
+%type <node> condition_value normal_value number right_value simple_value geometry_condition range_comparable datetime_comparable
 %type <node> condition_values normal_values simple_values
 %type <node> normal_object condition_object
-%type <node> condition_array normal_array a_vector vector_list
+%type <node> condition_array normal_array a_vector number_list
 %type <node> normal_properties condition_properties
 %type <node> where_expr a_walk vertex_start_walk edge_start_walk a_simple_graph
 %type <node> function_call function_params
@@ -530,14 +530,19 @@ link: LEFT_SQUARE LITERAL_STRING COMMA connection COMMA LITERAL_STRING RIGHT_SQU
               };
 connection: RANGE_BEGIN a_link_condition RANGE_END { $$ = $2;}
         | a_edge  { $$ = INIT_STRING_AST($1); };
-/* a_vector: LEFT_SQUARE vector_list RIGHT_SQUARE {};
-vector_list: number
+a_vector: LEFT_SQUARE number_list RIGHT_SQUARE { $$ = $2; };
+number_list: number
               {
                 GArrayExpression* elemts = new GArrayExpression();
-                props->addElement($1);
-                $$ = NewAst(NodeType::ArrayExpression, props, nullptr, 0);
+                elemts->addElement($1);
+                $$ = NewAst(NodeType::ArrayExpression, elemts, nullptr, 0);
               }
-        | vector_list COMMA number {}; */
+        | number_list COMMA number
+              {
+                GArrayExpression* elemts = (GArrayExpression*)$1->_value;
+                elemts->addElement($3);
+                $$ = $1;
+              };
 normal_json: normal_value { $$ = $1; };
 condition_json: condition_value { $$ = $1; };
 normal_value: normal_object { $$ = $1; }
@@ -546,8 +551,7 @@ condition_value: condition_object { $$ = $1; }
         | condition_array { $$ = $1; };
 right_value: condition_value { $$ = $1; }
         | simple_value { $$ = $1; };
-simple_value: comparable_item { $$ = $1; }
-        | VAR_BASE64
+simple_value: VAR_BASE64
               {
                 GLiteralBinary* bin = new GLiteralBinary($1, "b64");
                 free($1);
@@ -557,6 +561,15 @@ simple_value: comparable_item { $$ = $1; }
               {
                 $$ = INIT_STRING_AST($1);
                 free($1);
+              }
+        | VAR_DATETIME
+              {
+                GLiteralDatetime* dt = new GLiteralDatetime($1);
+                $$ = NewAst(NodeType::Literal, dt, nullptr, 0);
+              }
+        | number
+              {
+                $$ = $1;
               };
 normal_object: RANGE_BEGIN normal_properties RANGE_END
             {
@@ -616,32 +629,14 @@ condition_property: VAR_NAME COLON right_value
                 free($1);
                 $$ = NewAst(NodeType::Property, prop, nullptr, 0);
               }
+        | datetime_comparable { $$ = $1;}
+        | range_comparable { $$ = $1;}
         | KW_ID COLON LITERAL_STRING
               {
                 struct GASTNode* value = INIT_STRING_AST($3);
                 free($3);
                 GProperty* prop = new GProperty("id", value);
                 $$ = NewAst(NodeType::Property, prop, nullptr, 0);
-              }
-        | OP_GREAT_THAN_EQUAL COLON comparable_item
-              {
-                GProperty* prop = new GProperty("gte", $3);
-                $$ = NewAst(NodeType::BinaryExpression, prop, nullptr, 0);
-              }
-        | OP_LESS_THAN_EQUAL COLON comparable_item
-              {
-                GProperty* prop = new GProperty("lte", $3);
-                $$ = NewAst(NodeType::BinaryExpression, prop, nullptr, 0);
-              }
-        | OP_GREAT_THAN COLON comparable_item
-              {
-                GProperty* prop = new GProperty("gt", $3);
-                $$ = NewAst(NodeType::BinaryExpression, prop, nullptr, 0);
-              }
-        | OP_LESS_THAN COLON comparable_item
-              {
-                GProperty* prop = new GProperty("lt", $3);
-                $$ = NewAst(NodeType::BinaryExpression, prop, nullptr, 0);
               }
         | AND COLON condition_array
               {
@@ -663,12 +658,72 @@ condition_property: VAR_NAME COLON right_value
                 free($3);
                 GProperty* prop = new GProperty("group", value);
                 $$ = NewAst(NodeType::Property, prop, nullptr, 0);
+              }
+        | OP_NEAR COLON RANGE_BEGIN geometry_condition RANGE_END
+              {
+                GObjectFunction* obj = (GObjectFunction*)($4->_value);
+                obj->setFunctionName("__near__", "__global__");
+                GProperty* prop = new GProperty("near", $4);
+                $$ = NewAst(NodeType::BinaryExpression, prop, nullptr, 0);
               };
-comparable_item: number { $$ = $1; }
-        | VAR_DATETIME {
-          GLiteralDatetime* dt = new GLiteralDatetime($1);
-          $$ = NewAst(NodeType::Literal, dt, nullptr, 0);
-        };
+range_comparable: OP_GREAT_THAN_EQUAL COLON number
+              {
+                GProperty* prop = new GProperty("gte", $3);
+                $$ = NewAst(NodeType::BinaryExpression, prop, nullptr, 0);
+              }
+        | OP_LESS_THAN_EQUAL COLON number
+              {
+                GProperty* prop = new GProperty("lte", $3);
+                $$ = NewAst(NodeType::BinaryExpression, prop, nullptr, 0);
+              }
+        | OP_GREAT_THAN COLON number
+              {
+                GProperty* prop = new GProperty("gt", $3);
+                $$ = NewAst(NodeType::BinaryExpression, prop, nullptr, 0);
+              }
+        | OP_LESS_THAN COLON number
+              {
+                GProperty* prop = new GProperty("lt", $3);
+                $$ = NewAst(NodeType::BinaryExpression, prop, nullptr, 0);
+              };
+datetime_comparable: OP_GREAT_THAN_EQUAL COLON VAR_DATETIME
+              {
+                GLiteralDatetime* dt = new GLiteralDatetime($3);
+                GProperty* prop = new GProperty("gte", NewAst(NodeType::Literal, dt, nullptr, 0));
+                $$ = NewAst(NodeType::BinaryExpression, prop, nullptr, 0);
+              }
+        | OP_LESS_THAN_EQUAL COLON VAR_DATETIME
+              {
+                GLiteralDatetime* dt = new GLiteralDatetime($3);
+                GProperty* prop = new GProperty("lte", NewAst(NodeType::Literal, dt, nullptr, 0));
+                $$ = NewAst(NodeType::BinaryExpression, prop, nullptr, 0);
+              }
+        | OP_GREAT_THAN COLON VAR_DATETIME
+              {
+                GLiteralDatetime* dt = new GLiteralDatetime($3);
+                GProperty* prop = new GProperty("gt", NewAst(NodeType::Literal, dt, nullptr, 0));
+                $$ = NewAst(NodeType::BinaryExpression, prop, nullptr, 0);
+              }
+        | OP_LESS_THAN COLON VAR_DATETIME
+              {
+                GLiteralDatetime* dt = new GLiteralDatetime($3);
+                GProperty* prop = new GProperty("lt", NewAst(NodeType::Literal, dt, nullptr, 0));
+                $$ = NewAst(NodeType::BinaryExpression, prop, nullptr, 0);
+              };
+geometry_condition: OP_GEOMETRY COLON a_vector COMMA range_comparable
+              {
+                GObjectFunction* obj = new GObjectFunction();
+                obj->addFunctionParam($3);
+                obj->addFunctionParam($5);
+                $$ = NewAst(NodeType::CallExpression, obj, nullptr, 0);
+              }
+        | range_comparable COMMA OP_GEOMETRY COLON a_vector
+              {
+                GObjectFunction* obj = new GObjectFunction();
+                obj->addFunctionParam($5);
+                obj->addFunctionParam($1);
+                $$ = NewAst(NodeType::CallExpression, obj, nullptr, 0);
+              };
 condition_array: LEFT_SQUARE RIGHT_SQUARE { $$ = nullptr; }
         | LEFT_SQUARE condition_values RIGHT_SQUARE
               {
@@ -680,8 +735,7 @@ condition_array: LEFT_SQUARE RIGHT_SQUARE { $$ = nullptr; }
                   "condition array is not a correct array");
                 stm._errorCode = GQL_GRAMMAR_ARRAY_FAIL;
                 $$ = nullptr;
-              }
-        ;
+              };
 normal_array:    LEFT_SQUARE RIGHT_SQUARE { $$ = nullptr; }
         | LEFT_SQUARE normal_values RIGHT_SQUARE
               {
@@ -735,8 +789,7 @@ condition_values: right_value {
                 $$ = $1;
               }
         | condition_values COMMA KW_REST {};
-a_link_condition: 
-        | a_edge COLON a_value
+a_link_condition: a_edge COLON a_value
               {
                 GEdgeDeclaration* edge = new GEdgeDeclaration($1, $3);
                 $$ = NewAst(NodeType::EdgeDeclaration, edge, nullptr, 0);
@@ -746,12 +799,10 @@ a_link_condition:
                 GEdgeDeclaration* edge = new GEdgeDeclaration($1, $3);
                 $$ = NewAst(NodeType::EdgeDeclaration, edge, nullptr, 0);
               };
-a_edge:
-        | right_arrow { memcpy(&$$, "->", 3);}
+a_edge:   right_arrow { memcpy(&$$, "->", 3);}
         | left_arrow { memcpy(&$$, "<-", 3); }
         | KW_BIDIRECT_RELATION { memcpy(&$$, "--", 3); };
-a_value:
-        | LITERAL_STRING
+a_value:  LITERAL_STRING
               {
                 $$ = INIT_STRING_AST($1);
                 free($1);

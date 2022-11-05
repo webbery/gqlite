@@ -77,16 +77,28 @@ h'' {
                         return LITERAL_STRING;
                     };
 "extension"         {stm._errIndx += yyleng;};
-"show"              {stm._errIndx += yyleng; return CMD_SHOW;};
-"graph"             {stm._errIndx += yyleng; return KW_GRAPH;};
+"show"              {
+                        stm._errIndx += yyleng;
+                        return CMD_SHOW;
+                    };
+"graph"             {
+                        stm._errIndx += yyleng;
+                        return KW_GRAPH;
+                    };
 "walk"              {stm._errIndx += yyleng; };
-"group"             {stm._errIndx += yyleng; return group;};
+"group"             {
+                        stm._errIndx += yyleng;
+                        return group;
+                    };
 "order"             {stm._errIndx += yyleng;}
 "start"             {stm._errIndx += yyleng;};
 "with"              {stm._errIndx += yyleng;};
 "id"                {stm._errIndx += yyleng; return KW_ID;};
 "use"               { stm._errIndx += yyleng; };
-create              {stm._errIndx += yyleng; return KW_CREATE;};
+create              {
+                        stm._errIndx += yyleng;
+                        return KW_CREATE;
+                    };
 "drop"              { stm._errIndx += yyleng; return KW_DROP;};
 "remove"            { stm._errIndx += yyleng; return KW_REMOVE;};
 "delete"            { stm._errIndx += yyleng; return KW_DELETE;};
@@ -120,10 +132,30 @@ create              {stm._errIndx += yyleng; return KW_CREATE;};
 "$lt"               { stm._errIndx += yyleng; return OP_LESS_THAN;};
 "$and"              { stm._errIndx += yyleng; return AND;};
 "$or"               { stm._errIndx += yyleng; return OR;};
-"<-"                { stm._errIndx += yyleng; return left_arrow;};
-"->"                { stm._errIndx += yyleng; return right_arrow;};
-"--"                { stm._errIndx += yyleng; return KW_BIDIRECT_RELATION;};
-"in"                { stm._errIndx += yyleng; return KW_IN;};
+"$near"             {
+                        stm._errIndx += yyleng;
+                        return OP_NEAR;
+                    };
+"$geometry"         {
+                        stm._errIndx += yyleng;
+                        return OP_GEOMETRY;
+                    };
+"<-"                {
+                        stm._errIndx += yyleng;
+                        return left_arrow;
+                    };
+"->"                {
+                        stm._errIndx += yyleng;
+                        return right_arrow;
+                    };
+"--"                {
+                        stm._errIndx += yyleng;
+                        return KW_BIDIRECT_RELATION;
+                    };
+"in"                {
+                        stm._errIndx += yyleng;
+                        return KW_IN;
+                    };
 "..."               { stm._errIndx += yyleng; return KW_REST;};
 "."                 { stm._errIndx += 1; return dot;};
 "+"                 {stm._errIndx += yyleng;};

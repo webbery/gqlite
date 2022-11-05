@@ -16,6 +16,7 @@
 #include "base/lang/DropStmt.h"
 #include "base/lang/RemoveStmt.h"
 #include "base/lang/ObjectStmt.h"
+#include "base/lang/ObjectFunction.h"
 #include "base/lang/GroupStmt.h"
 #include "base/lang/MemberExpression.h"
 #include "base/lang/DumpStmt.h"

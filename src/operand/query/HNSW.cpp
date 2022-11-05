@@ -5,7 +5,7 @@
 #include "gutil.h"
 #include "gqlite.h"
 #include "VirtualNetwork.h"
-#include "Type/Vector.h"
+#include "base/math/Distance.h"
 
 namespace {
   using node_detail = std::tuple<node_t, double, std::vector<double>>;

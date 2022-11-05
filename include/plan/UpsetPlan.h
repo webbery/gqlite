@@ -26,7 +26,7 @@
     item[_key] = { {"value", value.value()}, {OBJECT_TYPE_NAME, AttributeKind::Datetime} };\
   },\
   [&](gql::vector_double value) {\
-    item[_key] = { {"value", value.value()}, {OBJECT_TYPE_NAME, AttributeKind::Vector} };\
+    item[_key] = { {"value", value}, {OBJECT_TYPE_NAME, AttributeKind::Vector} };\
   }
 
 #define ATTRIBUTE_PUSH(item) \
@@ -46,7 +46,7 @@
     item.push_back({ {"value", value.value()}, {OBJECT_TYPE_NAME, AttributeKind::Datetime} });\
   },\
   [&](gql::vector_double value) {\
-    item[_key] = { {"value", value.value()}, {OBJECT_TYPE_NAME, AttributeKind::Vector} };\
+    item[_key] = { {"value", value}, {OBJECT_TYPE_NAME, AttributeKind::Vector} };\
   }
 
 struct GASTNode;
@@ -134,6 +134,9 @@ private:
     VisitFlow apply(GRemoveStmt* stmt, std::list<NodeType>& path) {
       return VisitFlow::Return;
     }
+    VisitFlow apply(GObjectFunction* stmt, std::list<NodeType>& path) {
+      return VisitFlow::Return;
+    }
 
     void add() {
       if (!_key.empty()) {
@@ -197,6 +200,9 @@ private:
       return VisitFlow::Return;
     }
     VisitFlow apply(GRemoveStmt* stmt, std::list<NodeType>& path) {
+      return VisitFlow::Return;
+    }
+    VisitFlow apply(GObjectFunction* stmt, std::list<NodeType>& path) {
       return VisitFlow::Return;
     }
     gkey_t getLiteral(GASTNode* node);

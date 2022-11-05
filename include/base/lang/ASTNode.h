@@ -35,6 +35,7 @@ GASTNode* LoadAST();
  */
 std::string GetString(GASTNode* node);
 attribute_t GetLiteral(GASTNode* node);
+std::vector<double> GetVector(GASTNode* node);
 
 class GViewVisitor {
 public:
@@ -49,6 +50,7 @@ public:
   VisitFlow apply(GArrayExpression* stmt, std::list<NodeType>& path);
   VisitFlow apply(GWalkDeclaration* stmt, std::list<NodeType>& path);
   VisitFlow apply(GDropStmt* stmt, std::list<NodeType>& path);
+  VisitFlow apply(GObjectFunction* stmt, std::list<NodeType>& path);
   VisitFlow apply(GDumpStmt* stmt, std::list<NodeType>& path) {
     return VisitFlow::SkipCurrent;
   }

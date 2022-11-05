@@ -75,15 +75,15 @@ void successful_test(gqlite* pHandle, char* ptr) {
   TEST_COMMAND("show graph 'ga';");
   TEST_GRAMMAR("{upset: 'g', vertex: [[328, {title: 'Tale\\'s from the Crypt Presents: Demon Knight (1995)', genres: 'Horror|Thriller'}]]};");
   TEST_GRAMMAR("{upset: 'g', vertex: [['328', {title: 'Tale\\'s from the Crypt Presents: Demon Knight (1995)', genres: 'Horror|Thriller'}]]};");
-  TEST_QUERY("{query: g};", 1);
-  TEST_QUERY("{query: g, in: 'ga'};", 1);
+  TEST_QUERY("{query: 'g'};", 1);
+  TEST_QUERY("{query: 'g', in: 'ga'};", 1);
   TEST_GRAMMAR("{upset: 'g', vertex: [[55, {update_time: 0d12345}]]};");
   TEST_GRAMMAR(
     "{"
       "upset: 'g',"
       "vertex: ["
         "[42, {class: 'a/c', location: [131.24194, 37.12532], keyword: ['a', 'b'], create_time: 1}],"
-        "[46, {color: '#343e58', location: [131.24194, 36.12532], keyword: ['a'], create_time: 2, update_time: 0d1664268855}],"
+        "[46, {color: [52, 62, 88], location: [131.24194, 36.12532], keyword: ['a'], create_time: 2, update_time: 0d1664268855}],"
         "[1, {text: 0b'5Zyo57q/57yW56CB6Kej56CB', location: [131.25194, 32.11532], keyword: ['a'], create_time: 145377}],"
         "[45],"
         "[4, {keyword: [], create_time: 1}]"
@@ -101,6 +101,18 @@ void successful_test(gqlite* pHandle, char* ptr) {
   TEST_QUERY("{query: 'g', in: 'ga', where: {create_time: {$lt: 5}}};", 3);
   TEST_QUERY("{query: 'g', in: 'ga', where: {$and: [{create_time: {$lt: 5}}]}};", 3);
   TEST_QUERY("{query: 'g', in: 'ga', where: {$or: [{create_time: {$lt: 5}}]}};", 3);
+  TEST_GRAMMAR(
+    "{"
+      "query: 'g', in: 'ga',"
+      "where: {"
+        "color: {"
+          "$near: {"
+            "$geometry: [126, 126, 126],"
+            "$lt: 10"
+          "}"
+        "}"
+      "}"
+    "};");
   TEST_GRAMMAR("{query: 'g', in: 'ga'};");
   TEST_GRAMMAR("{query: [g.class], in: 'ga', where: {keyword: 'b'}};");
   TEST_GRAMMAR("{query: [g.class], in: 'ga', where: {keyword: 'b'}};");

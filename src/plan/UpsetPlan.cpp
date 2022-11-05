@@ -196,7 +196,6 @@ VisitFlow GUpsetPlan::UpsetVisitor::apply(GVertexDeclaration* stmt, std::list<No
   JSONVisitor jv(_plan);
   accept(stmt->vertex(), jv, path);
   jv.add();
-  //printf("dump:%s\n", jv._jsonify.dump().c_str());
   _plan._vertexes[getLiteral(stmt->key())] = jv._jsonify;
   return VisitFlow::Children;
 }

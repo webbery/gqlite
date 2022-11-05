@@ -53,7 +53,7 @@ set(OLGRITHM_SOURCE ./algorithm.cpp
 
 set(QUERY_SOURCE ./query.cpp
 	../src/operand/query/HNSW.cpp
-	../src/Type/Vector.cpp
+	../src/base/math/Distance.cpp
 	../src/StorageEngine/StorageEngine.cpp
 	../src/VirtualNetwork.cpp
 	../src/gutil.cpp

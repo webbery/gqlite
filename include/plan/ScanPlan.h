@@ -106,6 +106,7 @@ private:
     VisitFlow apply(GLiteral* stmt, std::list<NodeType>& path);
     VisitFlow apply(GArrayExpression* stmt, std::list<NodeType>& path);
     VisitFlow apply(GEdgeDeclaration* stmt, std::list<NodeType>& path);
+    VisitFlow apply(GObjectFunction* stmt, std::list<NodeType>& path) { return VisitFlow::Return; }
   };
 
   /**
@@ -137,6 +138,7 @@ private:
     VisitFlow apply(GLiteral* stmt, std::list<NodeType>& path);
     VisitFlow apply(GArrayExpression* stmt, std::list<NodeType>& path);
     VisitFlow apply(GEdgeDeclaration* stmt, std::list<NodeType>& path) { return VisitFlow::Return; }
+    VisitFlow apply(GObjectFunction* stmt, std::list<NodeType>& path);
   };
 private:
   /**

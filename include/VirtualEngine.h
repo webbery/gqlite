@@ -112,6 +112,7 @@ private:
     VisitFlow apply(GDropStmt* stmt, std::list<NodeType>& path);
     VisitFlow apply(GDumpStmt* stmt, std::list<NodeType>& path);
     VisitFlow apply(GRemoveStmt* stmt, std::list<NodeType>& path);
+    VisitFlow apply(GObjectFunction* stmt, std::list<NodeType>& path);
     VisitFlow apply(GLiteral* stmt, std::list<NodeType>& path) {
       return VisitFlow::Children;
     }

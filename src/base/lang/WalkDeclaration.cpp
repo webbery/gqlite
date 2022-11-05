@@ -32,7 +32,7 @@ GEdgeDeclaration::GEdgeDeclaration(const char* str, GASTNode* from, GASTNode* to
 }
 
 GEdgeDeclaration::GEdgeDeclaration(GASTNode* connection, GASTNode* from, GASTNode* to)
-  : _from(from), _to(to), _edge(nullptr)
+  : _from(from), _to(to), _edge(connection)
 {
   if (connection->_nodetype == NodeType::Literal) {
     _direction = GetString(connection);
@@ -41,7 +41,6 @@ GEdgeDeclaration::GEdgeDeclaration(GASTNode* connection, GASTNode* from, GASTNod
     GEdgeDeclaration* edge = (GEdgeDeclaration*)connection->_value;
     _direction = edge->direction();
   }
-  _edge = connection;
 }
 
 GEdgeDeclaration::~GEdgeDeclaration()
@@ -56,6 +55,7 @@ GEdgeDeclaration::~GEdgeDeclaration()
 GASTNode* GEdgeDeclaration::value() const
 {
   if (!_edge) return nullptr;
+  if (_edge->_nodetype != EdgeDeclaration) return nullptr;
   GEdgeDeclaration* edge = (GEdgeDeclaration*)_edge->_value;
   return edge ? edge->from() : nullptr;
 }

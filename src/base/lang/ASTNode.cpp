@@ -221,6 +221,18 @@ attribute_t GetLiteral(GASTNode* node)
   return v;
 };
 
+std::vector<double> GetVector(GASTNode* node) {
+  std::vector<double> v;
+  if (node->_nodetype != NodeType::ArrayExpression) return v;
+  GArrayExpression* arr = (GArrayExpression*)node->_value;
+  for (auto itr = arr->begin(); itr != arr->end(); ++itr) {
+    GLiteral* literal = (GLiteral*)(*itr)->_value;
+    double d = (double)atof(literal->raw().c_str());
+    v.push_back(d);
+  }
+  return v;
+}
+
 VisitFlow GViewVisitor::apply(GASTNode* stmt, std::list<NodeType>& path) {
   size_t level = path.size();
   printLine("`- type: {}\n", NodeType2String(stmt->_nodetype), level);
@@ -305,5 +317,11 @@ VisitFlow GViewVisitor::apply(GDropStmt* stmt, std::list<NodeType>& path)
 {
   size_t level = path.size();
   printLine("|- type: {}\n", NodeType2String(DropStatement), level);
+  return VisitFlow::Children;
+}
+
+VisitFlow GViewVisitor::apply(GObjectFunction* stmt, std::list<NodeType>& path) {
+  size_t level = path.size();
+  printLine("|- type: {}\n", NodeType2String(CallExpression), level);
   return VisitFlow::Children;
 }

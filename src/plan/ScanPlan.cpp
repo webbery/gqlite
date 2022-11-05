@@ -1,6 +1,7 @@
 #include "plan/ScanPlan.h"
 #include "base/lang/ASTNode.h"
 #include "base/lang/QueryStmt.h"
+#include "base/lang/ObjectFunction.h"
 #include "base/system/Observer.h"
 #include "gqlite.h"
 #include "StorageEngine.h"
@@ -10,6 +11,7 @@
 #include "json.hpp"
 #include "gutil.h"
 #include "Type/Datetime.h"
+#include "base/math/Distance.h"
 
 GScanPlan::GScanPlan(std::map<std::string, GVirtualNetwork*>& networks, GStorageEngine* store, GQueryStmt* stmt)
 :GPlan(networks, store)
@@ -372,6 +374,13 @@ bool GScanPlan::predict(const std::function<bool(const attribute_t&)>& op, const
         ret = op((double)attr["value"]);
       }
       break;
+      case AttributeKind::Vector:
+      {
+        std::vector<double> dv = attr["value"];
+        attribute_t a = dv;
+        ret = op(a);
+      }
+      break;
       default:
         break;
       }
@@ -531,13 +540,13 @@ VisitFlow GScanPlan::PatternVisitor::apply(GProperty* stmt, std::list<NodeType>&
     _where._patterns[_index]._node_predicates.push_back(pred);
   }
   else if (key == "id") {
-    std::string key = GetString(stmt->value());
-    predicate_t pred = static_cast<std::function<bool(const gkey_t&)>>([key](const Variant<std::string, uint64_t>& input)->bool {
-      bool ret = input.visit([key](uint64_t i) -> bool {
-        return key == std::to_string(i);
+    std::string value = GetString(stmt->value());
+    predicate_t pred = static_cast<std::function<bool(const gkey_t&)>>([value](const Variant<std::string, uint64_t>& input)->bool {
+      bool ret = input.visit([value](uint64_t i) -> bool {
+        return value == std::to_string(i);
         },
-        [key](std::string s) -> bool {
-          return key == s;
+        [value](std::string s) -> bool {
+          return value == s;
         });
       return ret;
       });
@@ -549,15 +558,41 @@ VisitFlow GScanPlan::PatternVisitor::apply(GProperty* stmt, std::list<NodeType>&
   else if (key == "or") {
     _index = (long)LogicalPredicate::Or;
   }
+  else if (key == "near") {
+    auto ptr = stmt->value();
+    GObjectFunction* obj = (GObjectFunction*)ptr->_value;
+    std::vector<double> vec = GetVector((*obj)[0]);
+
+    GASTNode* comp = (*obj)[1];
+    GProperty* prop = (GProperty*)comp->_value;
+    std::string comparable = prop->key();
+    attribute_t attr = GetLiteral(prop->value());
+    double right = attr.Get<double>();
+
+    if (comparable == "lt") {
+      predicate_t pred = static_cast<std::function<bool(const attribute_t&)>>([right, vec](const attribute_t& input)->bool {
+        gql::vector_double left = input.Get<gql::vector_double>();
+        return gql::distance2(vec, left) < right;
+      });
+      _where._patterns[_index]._node_predicates.push_back(pred);
+    }
+    
+    _node->_attrs.push_back(last_key);
+  }
   else { // group's name
     last_key = key;
-    attribute_t attr = GetLiteral(stmt->value());
-    if (!attr.empty()) {
-      _node->_attrs.push_back(last_key);
-      predicate_t pred = static_cast<std::function<bool(const attribute_t&)>>([attr](const attribute_t& input)->bool {
-        return input == attr;
-        });
-      _where._patterns[_index]._node_predicates.push_back(pred);
+    GASTNode* value = stmt->value();
+    if (value->_nodetype == NodeType::Literal) {
+      attribute_t attr = GetLiteral(value);
+      if (!attr.empty()) {
+        _node->_attrs.push_back(last_key);
+        predicate_t pred = static_cast<std::function<bool(const attribute_t&)>>([attr](const attribute_t& input)->bool {
+          return input == attr;
+          });
+        _where._patterns[_index]._node_predicates.push_back(pred);
+      }
+    } else {
+      return accept(value, *this, path);
     }
   }
   return VisitFlow::Children;
@@ -594,6 +629,10 @@ VisitFlow GScanPlan::VertexJsonVisitor::apply(GLiteral* stmt, std::list<NodeType
 }
 
 VisitFlow GScanPlan::VertexJsonVisitor::apply(GArrayExpression* stmt, std::list<NodeType>& path)
+{
+  return VisitFlow::Children;
+}
+VisitFlow GScanPlan::VertexJsonVisitor::apply(GObjectFunction* stmt, std::list<NodeType>& path)
 {
   return VisitFlow::Children;
 }

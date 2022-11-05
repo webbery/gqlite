@@ -1,8 +1,36 @@
 #include "gutil.h"
 #include <string.h>
 #include <regex>
+#include <chrono>
+#include <thread>
 
 namespace gql {
+
+  namespace {
+    /**
+     * upgrade of snowflake.
+     * without negative bit.
+     * 40-timestamp 16-input number, 8-serial number
+    */
+    uint64_t snowflake2(uint16_t inputID) {
+      static constexpr long sequenceBit = 8;
+      static constexpr long inputBit = 16;
+      static constexpr long timestampShift = sequenceBit + inputBit;
+      static constexpr long TWEPOCH = 1420041600000;
+      thread_local long sequence = 0;
+      thread_local long sequenceMask = -1L ^ (-1L << sequenceBit);
+      thread_local auto lastTimeStamp = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+      auto curTimeStamp = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+      if (curTimeStamp == lastTimeStamp) {
+        sequence = (sequenceMask + 1) & sequenceMask;
+      } else {
+        lastTimeStamp = curTimeStamp;
+      }
+      return ((curTimeStamp - TWEPOCH) << timestampShift)
+        | (inputID << sequenceBit)
+        | sequence;
+    }
+  }
 
   std::vector<std::string> split(const char* str, const char* delim) {
     std::vector<std::string> result;
@@ -41,21 +69,15 @@ namespace gql {
         str += '0';
       }
     }
-    uint64_t id = 0;
+    uint16_t id = 0;
     int times = str.size() / length;
     for (int i = 0; i < times; ++i) {
       int start = length * i;
       id += (
-        uint64_t(str[start + 7]) << 56 |
-        uint64_t(str[start + 6]) << 48 |
-        uint64_t(str[start + 5]) << 40 |
-        uint64_t(str[start + 4]) << 32 |
-        uint64_t(str[start + 3]) << 24 |
-        uint64_t(str[start + 2]) << 16 |
         uint64_t(str[start + 1]) << 8 |
         uint64_t(str[start]));
     }
-    return id;
+    return snowflake2(id);
   }
 
   std::string normalize(const std::string& gql)

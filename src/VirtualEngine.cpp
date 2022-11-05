@@ -173,3 +173,7 @@ VisitFlow GVirtualEngine::PlanVisitor::apply(GRemoveStmt* stmt, std::list<NodeTy
   add(plan);
   return VisitFlow::Return;
 }
+
+VisitFlow GVirtualEngine::PlanVisitor::apply(GObjectFunction* stmt, std::list<NodeType>& path) {
+  return VisitFlow::Children;
+}
