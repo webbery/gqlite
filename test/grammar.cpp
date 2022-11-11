@@ -39,7 +39,7 @@ size_t current_count = 0;
   if (ptr) gqlite_free(ptr);\
 }
 
-int gqlite_exec_assert_callback(gqlite_result* params)
+int gqlite_exec_assert_callback(gqlite_result* params, void*)
 {
   if (params) {
     current_count += params->count;
