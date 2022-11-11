@@ -105,7 +105,17 @@ extern "C" {
 #endif
 
   SYMBOL_EXPORT int gqlite_open(gqlite** ppDb, const char* filename = nullptr);
-  SYMBOL_EXPORT int gqlite_exec(gqlite* pDb, const char* gql, int (*gqlite_callback)(gqlite_result*), void*, char** err);
+
+  /**
+   * @brief get current opened db version
+   * @param major
+   * @param minor
+   * @param patch
+   * @return db version.
+   *         0 means no database is opened.
+  */
+  SYMBOL_EXPORT int gqlite_version(gqlite* ppDb, int* major, int* minor, int* patch);
+  SYMBOL_EXPORT int gqlite_exec(gqlite* pDb, const char* gql, int (*gqlite_callback)(gqlite_result*, void*), void*, char** err);
   SYMBOL_EXPORT int gqlite_create(gqlite* pDb, const char* gql, gqlite_statement** statement);
   SYMBOL_EXPORT int gqlite_execute(gqlite* pDb, gqlite_statement* statement);
   SYMBOL_EXPORT int gqlite_next(gqlite* pDb, gqlite_statement* statement, gqlite_result** result);

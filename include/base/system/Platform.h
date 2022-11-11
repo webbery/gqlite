@@ -21,6 +21,4 @@ void _cpuid(int info[4], int InfoType);
 
 void isSSESupport(bool& sse2, bool& avx, bool& avx2);
 
-bool isFileExist(const char* file);
-
 bool enableStackTrace(bool enable);

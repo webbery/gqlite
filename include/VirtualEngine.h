@@ -11,7 +11,7 @@
 
 struct _gqlite_result;
 
-typedef int (*gqlite_callback)(_gqlite_result*);
+typedef int (*gqlite_callback)(_gqlite_result*, void*);
 
 enum GQL_Command_Type {
   GQL_Creation,
@@ -58,6 +58,8 @@ public:
 
   gqlite_callback _result_callback;
   std::string _gql;
+  void* _handle;
+
   size_t _errIndx;
   // result code of sql executing result
   int _errorCode;
@@ -80,7 +82,9 @@ private:
     std::map<std::string, GVirtualNetwork*>& _vn;
     GStorageEngine* _store;
     gqlite_callback _cb;
-    PlanVisitor(std::map<std::string, GVirtualNetwork*>& vn, GStorageEngine* store, gqlite_callback cb = nullptr):_vn(vn), _store(store){
+    void* _handle;
+    PlanVisitor(std::map<std::string, GVirtualNetwork*>& vn, GStorageEngine* store, gqlite_callback cb = nullptr, void* handle = nullptr)
+      :_vn(vn), _store(store), _handle(handle){
       _plans = new PlanList;
       _plans->_next = _plans;
       _plans->_parent = _plans;

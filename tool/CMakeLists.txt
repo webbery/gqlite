@@ -21,8 +21,10 @@ add_custom_target(
 
 set(COMMANDLINE_SOURCE ./gqlcmd.cpp ./wcwidth.cpp ./ConvertUTF.cpp ./linenoise.cpp ${CMAKE_SOURCE_DIR}/src/base/Debug.cpp)
 set(EXPORT_SOURCE ./gqlexport.cpp)
+set(L2GQL_SOURCE ./l2lite.cpp ./converter/ngql.cpp)
 
 add_executable(gql ${COMMANDLINE_SOURCE})
 add_executable(gqldump ${EXPORT_SOURCE})
+add_executable(l2lite ${L2GQL_SOURCE})
 target_link_libraries(gql PUBLIC gqlite fmt-header-only)
 target_link_libraries(gqldump PUBLIC gqlite fmt-header-only)

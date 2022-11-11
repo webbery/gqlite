@@ -78,8 +78,11 @@ set(VNET_SOURCE ./vnet.cpp
 	../src/StorageEngine/Loader.cpp
 	../src/VirtualNetwork.cpp
 	${SYMBOLS_SOURCE}
-	)
+)
 
+set(ALGRITHM_SOURCE ./algorithm.cpp
+	../src/operand/algorithms/Hungarian.cpp
+)
 set(MOVIELENS_SOURCE ./movielens.cpp
 	${SYMBOLS_SOURCE}
 )
@@ -105,7 +108,7 @@ add_executable(grammar ${TEST_GRAMMAR_SOURCE})
 add_compile_definitions(BINARY_DIR="${zstd_BINARY_DIR}/lib")
 add_executable(storage ${STORAGE_SOURCE})
 add_executable(regress ${REGRESS_SOURCE})
-# add_executable(algorithm ${OLGRITHM_SOURCE})
+add_executable(algorithm ${ALGRITHM_SOURCE})
 add_executable(query ${QUERY_SOURCE})
 add_executable(ptree ${PTREE_SOURCE})
 add_executable(vnet ${VNET_SOURCE})
@@ -181,7 +184,7 @@ ENDIF ()
 # )
 # add_dependencies(storage before_test)
 add_test(NAME storage COMMAND storage)
-# add_test(NAME algorithm COMMAND algorithm)
+add_test(NAME algorithm COMMAND algorithm)
 add_test(NAME query COMMAND query)
 add_test(NAME grammar COMMAND grammar)
 add_test(NAME ptree COMMAND ptree)

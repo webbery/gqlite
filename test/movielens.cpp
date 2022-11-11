@@ -26,6 +26,10 @@ void readCSV(const std::string& name, std::function<void(char*)> cb, bool skip_h
 TEST_CASE("init movies") {
   gqlite* pHandle = 0;
   gqlite_open(&pHandle);
+
+  int major, minor, patch;
+  assert(gqlite_version(pHandle, &major, &minor, &patch) == 0);
+
   char* ptr = nullptr;
   gqlite_exec(pHandle,
     "{drop: 'movielens_db'};",
@@ -40,6 +44,7 @@ TEST_CASE("init movies") {
       "]"
     "};",
     gqlite_exec_callback, nullptr, &ptr);
+  assert(gqlite_version(pHandle, &major, &minor, &patch) > 0);
   gqlite_free(ptr);
   readCSV("movies.csv", [&pHandle, &ptr](char* buffer) {
     char* movie_id = strtok(buffer, ",");

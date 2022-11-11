@@ -26,7 +26,8 @@
 
 #define SCHEMA_GLOBAL           "__global"
 #define GLOBAL_COMPRESS_LEVEL   "__lvl"
-#define GLOBAL_COMPRESS_DICT     "__dict"
+#define GLOBAL_COMPRESS_DICT    "__dict"
+#define GLOBAL_GQL_VERSION      "__version"
 
 #define GQL_VERSION             "0.0.1"
 

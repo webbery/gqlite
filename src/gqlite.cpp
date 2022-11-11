@@ -5,6 +5,8 @@
 #include "Error.h"
 #include "Memory.h"
 #include "json.hpp"
+#include "StorageEngine.h"
+#include "gutil.h"
 
 #define MAX_MEMORY  5*1024*1024
 #define CHECK_NULL_PTR(p) {if (!p) return ECODE_NULL_PTR;}
@@ -64,7 +66,7 @@ SYMBOL_EXPORT int gqlite_close(gqlite* gql)
   return 0;
 }
 
-SYMBOL_EXPORT int gqlite_exec(gqlite* pDb, const char* gql, int (*gqlite_callback)(gqlite_result*), void*, char** err)
+SYMBOL_EXPORT int gqlite_exec(gqlite* pDb, const char* gql, int (*gqlite_callback)(gqlite_result*, void*), void* handle, char** err)
 {
   CHECK_NULL_PTR(pDb);
   GQLiteImpl* impl = (GQLiteImpl*)pDb;
@@ -72,10 +74,27 @@ SYMBOL_EXPORT int gqlite_exec(gqlite* pDb, const char* gql, int (*gqlite_callbac
   stm->_errIndx = 0;
   stm->_result_callback = gqlite_callback;
   stm->_gql = gql;
+  stm->_handle = handle;
   impl->exec(*stm);
   char* msg = gqlite_error(pDb, stm->_errorCode);
   *err = msg;
   return stm->_errorCode;
+}
+
+SYMBOL_EXPORT int gqlite_version(gqlite* ppDb, int* major, int* minor, int* patch) {
+  GQLiteImpl* impl = (GQLiteImpl*)ppDb;
+  if (!impl) return 0;
+  GVirtualEngine* stm = impl->engine();
+  if (!stm || !stm->_storage) return 0;
+  auto pStorage = stm->_storage;
+  if (!pStorage->isOpen()) return 0;
+  auto schema = pStorage->getSchema();
+  std::string version = schema[SCHEMA_GLOBAL][GLOBAL_GQL_VERSION];
+  auto versions = gql::split(version.c_str(), '.');
+  *major = atoi(versions[0].c_str());
+  *minor = atoi(versions[1].c_str());
+  *patch = atoi(versions[2].c_str());
+  return 1;
 }
 
 SYMBOL_EXPORT int gqlite_create(gqlite* pDb, const char* gql, gqlite_statement** statement)

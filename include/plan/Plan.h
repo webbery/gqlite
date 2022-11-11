@@ -7,7 +7,7 @@
 
 class GVirtualNetwork;
 class GStorageEngine;
-typedef int (*gqlite_callback)(_gqlite_result*);
+typedef int (*gqlite_callback)(_gqlite_result*, void*);
 
 void init_result_info(gqlite_result& result, const std::vector<std::string>& info);
 void release_result_info(gqlite_result& result);

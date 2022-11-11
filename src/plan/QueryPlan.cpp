@@ -2,9 +2,9 @@
 #include "plan/ScanPlan.h"
 #include "StorageEngine.h"
 
-GQueryPlan::GQueryPlan(std::map<std::string, GVirtualNetwork*>& networks, GStorageEngine* store, GQueryStmt* stmt, gqlite_callback cb)
+GQueryPlan::GQueryPlan(std::map<std::string, GVirtualNetwork*>& networks, GStorageEngine* store, GQueryStmt* stmt, gqlite_callback cb, void* cbHandle)
   :GPlan(networks, store)
-  , _cb(cb)
+  , _cb(cb), _handle(cbHandle)
 {
   _scan = new GScanPlan(networks, store, stmt);
 }
@@ -23,7 +23,7 @@ int GQueryPlan::prepare()
 int GQueryPlan::execute(const std::function<ExecuteStatus(KeyType, const std::string& key, const std::string& value)>& processor)
 {
   if (_cb) {
-    _scan->execute([&cb = this->_cb](KeyType type, const std::string& key, const std::string& value) {
+    _scan->execute([&cb = this->_cb, handle = _handle](KeyType type, const std::string& key, const std::string& value) {
       gqlite_result result;
       result.count = 1;
       result.type = gqlite_result_type_node;
@@ -43,7 +43,7 @@ int GQueryPlan::execute(const std::function<ExecuteStatus(KeyType, const std::st
       result.nodes->_vertex->properties = new char[len + 1];
       result.nodes->_next = nullptr;
       memcpy(result.nodes->_vertex->properties, value.data(), sizeof(char) * len + 1);
-      cb(&result);
+      cb(&result, handle);
       delete[] result.nodes->_vertex->properties;
       delete result.nodes->_vertex;
       delete result.nodes;

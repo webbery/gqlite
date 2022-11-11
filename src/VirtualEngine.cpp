@@ -72,7 +72,7 @@ void GVirtualEngine::cleanPlans(PlanList* plans) {
 
 GVirtualEngine::PlanList* GVirtualEngine::makePlans(GASTNode* ast) {
   if (ast == nullptr) return nullptr;
-  PlanVisitor visitor(_networks, _storage, _result_callback);
+  PlanVisitor visitor(_networks, _storage, _result_callback, _handle);
   std::list<NodeType> ln;
   accept(ast, visitor, ln);
   return visitor._plans;
@@ -113,7 +113,7 @@ int GVirtualEngine::execCommand(GASTNode* ast)
     auto jsn = _storage->getSchema();
     _gqlite_result result;
     init_result_info(result, { jsn.dump() });
-    _result_callback(&result);
+    _result_callback(&result, _handle);
     release_result_info(result);
   }
     break;
@@ -155,7 +155,7 @@ VisitFlow GVirtualEngine::PlanVisitor::apply(GDropStmt* stmt, std::list<NodeType
 
 VisitFlow GVirtualEngine::PlanVisitor::apply(GQueryStmt* stmt, std::list<NodeType>& path)
 {
-  GPlan* plan = new GQueryPlan(_vn, _store, stmt, _cb);
+  GPlan* plan = new GQueryPlan(_vn, _store, stmt, _cb, this->_handle);
   add(plan);
   return VisitFlow::Return;
 }

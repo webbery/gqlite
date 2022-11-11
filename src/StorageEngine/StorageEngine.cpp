@@ -168,6 +168,10 @@ void GStorageEngine::initDict(int compressLvl)
     free(buffer);
   }
   _cctx = ZSTD_createCCtx();
+
+  if (_schema[SCHEMA_GLOBAL][GLOBAL_GQL_VERSION].empty()) {
+    _schema[SCHEMA_GLOBAL][GLOBAL_GQL_VERSION] = GQL_VERSION;
+  }
 }
 
 void GStorageEngine::releaseDict()

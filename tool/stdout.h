@@ -12,7 +12,7 @@ inline std::string replace_all(const std::string& input) {
   return data;
 }
 
-inline int gqlite_exec_callback(gqlite_result* params)
+inline int gqlite_exec_callback(gqlite_result* params, void*)
 {
   if (params) {
     switch (params->type)
@@ -55,7 +55,7 @@ inline int gqlite_exec_callback(gqlite_result* params)
   return 0;
 }
 
-inline int gqlite_cmd_callback(gqlite_result* params)
+inline int gqlite_cmd_callback(gqlite_result* params, void*)
 {
   if (params && params->count) {
     for (size_t idx = 0; idx < params->count; ++idx) {

@@ -6,9 +6,7 @@
 #include <catch.hpp>
 #include <regex>
 #include <iostream>
-#include "operand/SimilarityOp.h"
 #include "operand/algorithms/Hungarian.h"
-#include "Graph/BipartiteGraph.h"
 #include "base/system/Platform.h"
 #include "operand/analysis/DegreeCentrality.h"
     
@@ -31,65 +29,9 @@ std::string last_vertex(char* end) {
   return std::string(end + 1, offset);
 }
 
-#define MAX_READ_SIZE 512
-GSubGraph* createGraph(const std::string& dotfile) {
-  std::regex bireg(" *([a-zA-Z0-9_]+) *-- *([a-zA-Z0-9_]+) *(\\[[a-zA-Z0-9_]+ *= *([0-9]+)\\]){0,1};");
-  std::ifstream fs;
-  fs.open(dotfile.c_str());
-  GSubGraph* g = new GSubGraph();
-  char line[MAX_READ_SIZE] = { 0 };
-  while (fs.getline(line, MAX_READ_SIZE)) {
-    std::string readed(line);
-    std::cmatch cm;
-    // printf("read line: %s\n", line);
-    if (std::regex_match(readed.c_str(), cm, bireg)) {
-      std::string from = cm[1];
-      g->addVertex(from);
-      std::string to = cm[2];
-      g->addVertex(to);
-      nlohmann::json attribute;
-      std::string sWeight = cm[4];
-      // printf("from: %s, to: %s, weight: %s\n", from.c_str(), to.c_str(), sWeight.c_str());
-      if (sWeight.size()) {
-        int weight = std::stoi(sWeight);
-        attribute["weight"] = weight;
-      }
-      g->addEdge(from, to, GraphEdgeDirection::To, attribute);
-    }
-    memset(line, 0, MAX_READ_SIZE);
-  }
-  fs.close();
-  return g;
-}
-
-void releaseGraph(GSubGraph*g) {
-  delete g;
-}
-
-TEST_CASE("basic operation", "[member function]") {
-  GSubGraph* g1 = createGraph(working_directory + "simple_g.dot");
-  GSubGraph* bg = createGraph(working_directory + "bipartite.dot");
-
-  CHECK(g1->isBipartite() == false);
-  CHECK(bg->isBipartite() == true);
-  
-
-  releaseGraph(g1);
-  releaseGraph(bg);
-}
-
 TEST_CASE("hungarian algorithm") {
-  GSubGraph* wg = createGraph(working_directory + "bipartile_weight.dot");
-  GBipartiteGraph bipart = graph_cast<GBipartiteGraph>(*wg);
-  GSubGraph* wg2 = createGraph(working_directory + "bipartile_weight_2.dot");
-  GBipartiteGraph bipart2 = graph_cast<GBipartiteGraph>(*wg2);
-  auto m = bipart.toMatrix("weight");
-  //auto m2 = bipart2.toMatrix("weight");
-  // fmt::print("hungarian input matrix:\n{}\n", m2);
   double weight = 0;
   HungorianAlgorithm alg;
-  alg.solve(m, weight);
-  CHECK(weight == 140.0);
   //std::list<std::pair<size_t, size_t>> out;
   //alg.solve(m2, out);
   Eigen::MatrixXd m33(3, 3);
@@ -120,32 +62,8 @@ TEST_CASE("hungarian algorithm") {
     18, 67, 110, 12, 25, 62, 14, 61;
   alg.solve(m88, weight);
   CHECK(weight == 155.0);
-  BENCHMARK("hungarian algorithm[4x4]") {
-    alg.solve(m, weight);
-  };
+
   BENCHMARK("hungarian algorithm[8x8]") {
     alg.solve(m88, weight);
   };
-  releaseGraph(wg);
-}
-
-TEST_CASE("analysis algorithm") {
-  GSubGraph* g1 = createGraph(working_directory + "simple_g.dot");
-  GSubGraph* g2 = createGraph(working_directory + "g4.dot");
-  GDegreeCentrality leftDC, rightDC;
-  leftDC.analysis(*g1);
-  CHECK(leftDC.value() == std::vector<double>({2, 2, 2}));
-  rightDC.analysis(*g2);
-  CHECK(rightDC.value() == std::vector<double>({2, 3, 2, 1}));
-  auto m = leftDC - rightDC;
-  std::cout<<m<<std::endl;
-}
-
-TEST_CASE("distance", "[distance]") {
-  GSubGraph* g1 = createGraph(working_directory + "simple_g.dot");
-  GSubGraph* g2 = createGraph(working_directory + "g4.dot");
-  // CHECK(distance(g1, g2) == 1);
-  // BENCHMARK("Graph Edit Distance(A*): N=3") {
-  //   distance(g1, g2);
-  // };
 }
