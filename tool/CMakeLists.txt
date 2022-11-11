@@ -21,7 +21,11 @@ add_custom_target(
 
 set(COMMANDLINE_SOURCE ./gqlcmd.cpp ./wcwidth.cpp ./ConvertUTF.cpp ./linenoise.cpp ${CMAKE_SOURCE_DIR}/src/base/Debug.cpp)
 set(EXPORT_SOURCE ./gqlexport.cpp)
+IF (WIN32)
 set(L2GQL_SOURCE ./l2lite.cpp ./converter/ngql.cpp ./getopt.c)
+ELSE()
+set(L2GQL_SOURCE ./l2lite.cpp ./converter/ngql.cpp)
+ENDIF()
 
 add_executable(gql ${COMMANDLINE_SOURCE})
 add_executable(gqldump ${EXPORT_SOURCE})
