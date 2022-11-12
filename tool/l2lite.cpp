@@ -69,7 +69,10 @@ int main(int argc, char** argv) {
   char buff[BUF_SIZE] = {0};
   while (fscanf(fp_reader, "%s", buff) != EOF) {
     std::string out;
-    pConverter->Parse(buff, out);
+    if (pConverter->Parse(buff, out) == IConverter::CS && !out.empty()) {
+      memset(buff, 0, BUF_SIZE);
+      continue;
+    }
     memset(buff, 0, BUF_SIZE);
     printf("%s\n", out.c_str());
   }

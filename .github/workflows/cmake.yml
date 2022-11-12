@@ -66,6 +66,11 @@ jobs:
       # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
       run: |
         ctest -C Debug --rerun-failed --output-on-failure
+    - name: Crash Test
+      working-directory: ${{github.workspace}}/build
+      if: matrix.os == 'ubuntu-latest'
+      run: |
+        ./test/fail
     - name: Generate Coverage Report
       working-directory: ${{github.workspace}}/build
       if: matrix.os == 'ubuntu-latest'

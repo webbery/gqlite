@@ -33,6 +33,10 @@ int GRemovePlan::execute(const std::function<ExecuteStatus(KeyType, const std::s
     }
     break;
   case KeyType::Byte:
+    for (auto itr = keys.begin(), end = keys.end(); itr != end; ++itr)
+    {
+      _store->del(_group, itr->data());
+    }
     break;
   default:
     break;

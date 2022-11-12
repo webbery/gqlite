@@ -115,7 +115,9 @@ QUERY SUCCESS
 [v8, {"category":"HDR","datatime":"0d1651105732","feature_name":[0.5,0.0],"filename":"蓝天.jpg"}]
 [v9, {"category":"赛博朋克","datatime":"0d1651105732","filename":"大佐.jpg"}]
 QUERY SUCCESS
-[20]:	{dump: 'query_db'};
+[20]:	{remove: '废墟', vertex: ['3']};
+REMOVE SUCCESS
+[21]:	{dump: 'query_db'};
 {create: 'query_db', group: ['addr','废墟'], index: ['category','feature_name','loc']}
 {upset: 'addr', vertex: ['1', {'datatime':0d1651105732,'filename':'破墙1.jpg'}]}
 {upset: 'addr', vertex: ['2', {'filename':'破墙2.jpg','loc':[131.241943,37.12532]}]}
@@ -123,7 +125,6 @@ QUERY SUCCESS
 {upset: 'addr', vertex: ['4']}
 {upset: 'addr', vertex: ['5']}
 {upset: '废墟', vertex: ['1', {'datatime':0d1651105732,'filename':'破墙0.jpg'}]}
-{upset: '废墟', vertex: ['3']}
 {upset: '废墟', vertex: ['4']}
 {upset: '废墟', vertex: ['5']}
 {upset: '废墟', vertex: ['v1', {'datatime':0d1653446732,'feature_name':[0.0,0.0],'filename':'破旧小屋.jpg'}]}
@@ -136,6 +137,6 @@ QUERY SUCCESS
 {upset: '废墟', vertex: ['v8', {'category':'HDR','datatime':0d1651105732,'feature_name':[0.5,0.0],'filename':'蓝天.jpg'}]}
 {upset: '废墟', vertex: ['v9', {'category':'赛博朋克','datatime':0d1651105732,'filename':'大佐.jpg'}]}
 {dump: 'query_db'}; SUCCESS
-[21]:	{drop: 'query_db'};
+[22]:	{drop: 'query_db'};
 DROP SUCCESS
 ***** EXECUTE FINISH: "grammar.gql" *****

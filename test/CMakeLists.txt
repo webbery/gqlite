@@ -82,6 +82,7 @@ set(VNET_SOURCE ./vnet.cpp
 
 set(ALGRITHM_SOURCE ./algorithm.cpp
 	../src/operand/algorithms/Hungarian.cpp
+	${SYMBOLS_SOURCE}
 )
 set(MOVIELENS_SOURCE ./movielens.cpp
 	${SYMBOLS_SOURCE}
@@ -103,6 +104,10 @@ set(MATCH_SOURCE	./match.cpp
 	${SYMBOLS_SOURCE}
 )
 
+set(FAIL_SOURCE ./fail.cpp
+	${SYMBOLS_SOURCE}
+)
+
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -finstrument-functions")
 add_executable(grammar ${TEST_GRAMMAR_SOURCE})
 add_compile_definitions(BINARY_DIR="${zstd_BINARY_DIR}/lib")
@@ -116,12 +121,14 @@ add_executable(movielens ${MOVIELENS_SOURCE})
 add_executable(decision ${DECISION_SOURCE})
 add_executable(infomation ${INFOMATION_SOURCE})
 add_executable(match ${MATCH_SOURCE})
+add_executable(fail ${FAIL_SOURCE})
 
 set(storage_LINK_OPTIONS fmt::fmt-header-only mdbx-static)
 set(vnet_LINK_OPTIONS fmt::fmt-header-only)
 set(grammar_LINK_OPTIONS gqlite fmt::fmt-header-only)
 set(movielens_LINK_OPTIONS gqlite)
 set(regress_LINK_OPTIONS gqlite fmt::fmt-header-only)
+set(fail_LINK_OPTIONS gqlite)
 IF (UNIX AND NOT APPLE AND NOT (CMAKE_SYSTEM_NAME MATCHES "Android"))
 set(TARGETS_OF_LEAK_TO_CHECK storage vnet movielens decision infomation decision match query)
 
@@ -137,6 +144,7 @@ ENDIF ()
 # set_property(TARGET algorithm PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/test")
 target_link_libraries(grammar PUBLIC ${grammar_LINK_OPTIONS})
 target_link_libraries(regress PUBLIC ${regress_LINK_OPTIONS})
+target_link_libraries(fail PUBLIC ${fail_LINK_OPTIONS})
 add_dependencies(storage zstd)
 add_dependencies(query zstd)
 IF (UNIX)
@@ -188,6 +196,7 @@ add_test(NAME algorithm COMMAND algorithm)
 add_test(NAME query COMMAND query)
 add_test(NAME grammar COMMAND grammar)
 add_test(NAME ptree COMMAND ptree)
+# add_test(NAME fail COMMAND fail)
 add_test(NAME vnet COMMAND vnet)
 add_test(NAME decision COMMAND decision)
 add_test(NAME infomation COMMAND infomation)
@@ -206,3 +215,4 @@ add_test(NAME regress_error COMMAND regress --inputdir=./error --outputdir=./err
   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 add_test(NAME movielens COMMAND movielens)
 
+# set_tests_properties(fail PROPERTIES WILL_FAIL TRUE)

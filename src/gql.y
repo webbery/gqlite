@@ -231,7 +231,7 @@ upset_vertexes: RANGE_BEGIN KW_UPSET COLON LITERAL_STRING COMMA KW_VERTEX COLON 
                 stm._errorCode = GQL_GRAMMAR_OBJ_FAIL;
                 YYABORT;
               };
-remove_vertexes: RANGE_BEGIN KW_REMOVE COLON LITERAL_STRING COMMA KW_VERTEX COLON vertexes RANGE_END
+remove_vertexes: RANGE_BEGIN KW_REMOVE COLON LITERAL_STRING COMMA KW_VERTEX COLON vertex_list RANGE_END
               {
                 GRemoveStmt* rmStmt = new GRemoveStmt($4, $8);
                 free($4);
