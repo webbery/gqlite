@@ -11,7 +11,7 @@ set(SYMBOLS_SOURCE ../src/base/Debug.cpp)
 else()
 endif()
 
-set(TEST_GRAMMAR_SOURCE ./grammar.cpp)
+set(TEST_GRAMMAR_SOURCE ./grammar.cpp ${SYMBOLS_SOURCE})
 set(STORAGE_SOURCE
 	./storage.cpp
 	../src/StorageEngine/StorageEngine.cpp
