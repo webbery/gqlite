@@ -12,12 +12,12 @@
 #include <windows.h>
 #include <direct.h>
 #include <io.h>
-#define OS_DELIMITER "\\"
+#define OS_DELIMITER L"\\"
+#define UNIVERSAL_DELIMITER L"/"
 #endif
 #include <codecvt>
 #include <locale>
 
-#define UNIVERSAL_DELIMITER "/"
 
 namespace gql {
 
