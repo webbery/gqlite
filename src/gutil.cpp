@@ -8,6 +8,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #define OS_DELIMITER "/"
+#define UNIVERSAL_DELIMITER "/"
 #elif defined(WIN32)
 #include <windows.h>
 #include <direct.h>
