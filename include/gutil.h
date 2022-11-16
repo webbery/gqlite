@@ -57,6 +57,16 @@ namespace gql {
   bool is_same_edge_id(const edge_id& left, const edge_id& right);
   bool operator == (const edge_id& left, const edge_id& right);
   bool operator < (const edge_id& left, const edge_id& right);
+
+  std::wstring string2wstring(const std::string& str);
+
+  void create_directories(
+#if defined(__APPLE__) || defined(UNIX) || defined(__linux__)
+    const std::string& dir
+#elif defined(WIN32)
+    const std::wstring& dir
+#endif
+  );
 }
 
 template<typename T, typename Container = std::vector<T>>

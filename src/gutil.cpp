@@ -3,6 +3,21 @@
 #include <regex>
 #include <chrono>
 #include <thread>
+#if defined(__APPLE__) || defined(__gnu_linux__) || defined(__linux__) 
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#define OS_DELIMITER "/"
+#elif defined(WIN32)
+#include <windows.h>
+#include <direct.h>
+#include <io.h>
+#define OS_DELIMITER "\\"
+#endif
+#include <codecvt>
+#include <locale>
+
+#define UNIVERSAL_DELIMITER "/"
 
 namespace gql {
 
@@ -30,6 +45,38 @@ namespace gql {
         | (inputID << sequenceBit)
         | sequence;
     }
+
+    
+  void MkDir(
+#if defined(__APPLE__) || defined(__gnu_linux__) || defined(__linux__) 
+    const std::string& dir
+#else
+    const std::wstring& dir
+#endif
+  ) {
+#if defined(__APPLE__) || defined(__gnu_linux__) || defined(__linux__) 
+    mkdir(dir.c_str()
+      , 0777
+#else
+    _wmkdir(dir.c_str()
+#endif
+    );
+  }
+  bool isDirectoryExist(
+#if defined(__APPLE__) || defined(UNIX) || defined(__linux__)
+    const std::string& dir
+#elif defined(WIN32)
+    const std::wstring& dir
+#endif
+  ) {
+#if defined(__APPLE__) || defined(UNIX) || defined(__linux__)
+    if (access(dir.c_str(), 0) != -1) return true;
+#elif defined(WIN32)
+    if (_waccess(dir.c_str(), 0) == 0) return true;
+#endif
+    return false;
+  }
+  
   }
 
   std::vector<std::string> split(const char* str, const char* delim) {
@@ -199,5 +246,37 @@ namespace gql {
       pos += newer.size();
     }
     return data;
+  }
+
+  void create_directories(
+#if defined(__APPLE__) || defined(UNIX) || defined(__linux__)
+    const std::string& dir
+#elif defined(WIN32)
+    const std::wstring& dir
+#endif
+  ) {
+    if (isDirectoryExist(dir)) return;
+    size_t pos = dir.rfind(UNIVERSAL_DELIMITER);
+    if (pos == std::string::npos) {
+      pos = dir.rfind(OS_DELIMITER);
+      if (pos == std::string::npos) {
+        MkDir(dir);
+        return;
+      }
+    }
+#if defined(__APPLE__) || defined(UNIX) || defined(__linux__)
+    std::string parentDir;
+#elif defined(WIN32)
+    std::wstring parentDir;
+#endif
+    parentDir = dir.substr(0, pos);
+    create_directories(parentDir);
+    MkDir(dir);
+  }
+
+  std::wstring string2wstring(const std::string& str)
+  {
+    std::wstring_convert<std::codecvt_utf8<wchar_t>> conv;
+    return conv.from_bytes(str);
   }
 }

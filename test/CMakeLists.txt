@@ -16,12 +16,14 @@ set(STORAGE_SOURCE
 	./storage.cpp
 	../src/StorageEngine/StorageEngine.cpp
 	../src/base/Debug.cpp
+	../src/gutil.cpp
 	${SYMBOLS_SOURCE}
 	)
 set(PARSER_SOURCE
 	../src/StorageEngine/StorageEngine.cpp
 	../src/VirtualEngine.cpp
 	./parser.cpp
+	../src/gutil.cpp
 	${SYMBOLS_SOURCE}
 	)
 if(CMAKE_SYSTEM_NAME MATCHES "Windows")
@@ -77,6 +79,7 @@ set(VNET_SOURCE ./vnet.cpp
 	../src/ScanObserver.cpp
 	../src/StorageEngine/Loader.cpp
 	../src/VirtualNetwork.cpp
+	../src/gutil.cpp
 	${SYMBOLS_SOURCE}
 )
 

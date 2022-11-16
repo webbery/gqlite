@@ -89,9 +89,9 @@ void successful_test(gqlite* pHandle, char* ptr) {
         "[4, {keyword: [], create_time: 1}]"
     "]"
     "};");
+  TEST_QUERY("{query: 'g', in: 'ga'};", 7);
+  TEST_GRAMMAR("{remove: 'g', vertex: ['1']};");
   TEST_QUERY("{query: 'g', in: 'ga'};", 6);
-  TEST_GRAMMAR("{remove: 'g', vertex: [1]};");
-  TEST_QUERY("{query: 'g', in: 'ga'};", 5);
   TEST_QUERY("{query: 'g', in: 'ga', where: {update_time: {$lt: 0d1653315732}}};", 1);
   TEST_QUERY("{query: 'g', in: 'ga', where: {create_time: {$gt: 1, $lt: 5}}};", 1);
   TEST_QUERY("{query: 'g', in: 'ga', where: {create_time: {$gte: 1, $lt: 5}}};", 3);
@@ -187,7 +187,7 @@ void test_edges() {}
 
 int main() {
     gqlite* pHandle = 0;
-    gqlite_open(&pHandle);
+    gqlite_open(&pHandle, "测试");
     char* ptr = nullptr;
     successful_test(pHandle, ptr);
     wrong_grammar_test(pHandle, ptr);
