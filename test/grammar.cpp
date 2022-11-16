@@ -69,9 +69,10 @@ void successful_test(gqlite* pHandle, char* ptr) {
   /*
   * create a `ga` graph for keyword search
   */
-  TEST_GRAMMAR("{create: 'ga', group: ['g'], index: 'keyword'};");
+  TEST_GRAMMAR("{create: 'ga', group: ['g']};");
   TEST_COMMAND("show graph;");
-  TEST_GRAMMAR("{create: 'ga', group: ['g', 'e', 'tag'], index: ['keyword', 'color', 'create_time', 'location']};");
+  TEST_GRAMMAR("{create: 'ga', group: ['g', 'e', 'tag']};");
+  TEST_GRAMMAR("{create: 'ga', group: [{g: ['title', 'class', 'keyword', 'color', 'create_time', 'location'], index: ['keyword', 'color', 'create_time', 'location']}, 'e', 'tag']};");
   TEST_COMMAND("show graph 'ga';");
   TEST_GRAMMAR("{upset: 'g', vertex: [[328, {title: 'Tale\\'s from the Crypt Presents: Demon Knight (1995)', genres: 'Horror|Thriller'}]]};");
   TEST_GRAMMAR("{upset: 'g', vertex: [['328', {title: 'Tale\\'s from the Crypt Presents: Demon Knight (1995)', genres: 'Horror|Thriller'}]]};");
@@ -89,9 +90,9 @@ void successful_test(gqlite* pHandle, char* ptr) {
         "[4, {keyword: [], create_time: 1}]"
     "]"
     "};");
+  TEST_QUERY("{query: 'g', in: 'ga'};", 7);
+  TEST_GRAMMAR("{remove: 'g', vertex: ['1']};");
   TEST_QUERY("{query: 'g', in: 'ga'};", 6);
-  TEST_GRAMMAR("{remove: 'g', vertex: [1]};");
-  TEST_QUERY("{query: 'g', in: 'ga'};", 5);
   TEST_QUERY("{query: 'g', in: 'ga', where: {update_time: {$lt: 0d1653315732}}};", 1);
   TEST_QUERY("{query: 'g', in: 'ga', where: {create_time: {$gt: 1, $lt: 5}}};", 1);
   TEST_QUERY("{query: 'g', in: 'ga', where: {create_time: {$gte: 1, $lt: 5}}};", 3);
@@ -157,8 +158,8 @@ void successful_test(gqlite* pHandle, char* ptr) {
   );
   // query 1'st order neighber
   TEST_QUERY("{query: 'e', in: 'ga'};", 4);
-  TEST_QUERY("{query: 'e', in: 'ga', where: {id: 'v1', ->: *, step: 1}};", 0);
-  TEST_QUERY("{query: 'e', in: 'ga', where: {id: 'v1', --: *, step: 1}};", 1);
+  TEST_QUERY("{query: 'e', in: 'ga', where: {id: 'v1', ->: *, neighbor: 1}};", 0);
+  TEST_QUERY("{query: 'e', in: 'ga', where: {id: 'v1', --: *, neighbor: 1}};", 1);
   // TEST_GRAMMAR("{query: '*', path: ['b', 'e', ...], from: 'prefix_tree'}");
   /*
   * search item with distance
@@ -187,7 +188,7 @@ void test_edges() {}
 
 int main() {
     gqlite* pHandle = 0;
-    gqlite_open(&pHandle);
+    gqlite_open(&pHandle, "测试");
     char* ptr = nullptr;
     successful_test(pHandle, ptr);
     wrong_grammar_test(pHandle, ptr);

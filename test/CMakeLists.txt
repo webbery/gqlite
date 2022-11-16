@@ -7,21 +7,25 @@ add_definitions(-DCATCH_CONFIG_MAIN -DCATCH_CONFIG_ENABLE_BENCHMARKING)
 add_definitions(-D_WORKING_DIR_=\"${CMAKE_SOURCE_DIR}\")
 
 if (GQLITE_BUILD_TEST)
+if (UNIX)
 set(SYMBOLS_SOURCE ../src/base/Debug.cpp)
+endif(UNIX)
 else()
 endif()
 
-set(TEST_GRAMMAR_SOURCE ./grammar.cpp)
+set(TEST_GRAMMAR_SOURCE ./grammar.cpp ${SYMBOLS_SOURCE})
 set(STORAGE_SOURCE
 	./storage.cpp
 	../src/StorageEngine/StorageEngine.cpp
 	../src/base/Debug.cpp
+	../src/gutil.cpp
 	${SYMBOLS_SOURCE}
 	)
 set(PARSER_SOURCE
 	../src/StorageEngine/StorageEngine.cpp
 	../src/VirtualEngine.cpp
 	./parser.cpp
+	../src/gutil.cpp
 	${SYMBOLS_SOURCE}
 	)
 if(CMAKE_SYSTEM_NAME MATCHES "Windows")
@@ -77,6 +81,7 @@ set(VNET_SOURCE ./vnet.cpp
 	../src/ScanObserver.cpp
 	../src/StorageEngine/Loader.cpp
 	../src/VirtualNetwork.cpp
+	../src/gutil.cpp
 	${SYMBOLS_SOURCE}
 )
 
@@ -108,7 +113,12 @@ set(FAIL_SOURCE ./fail.cpp
 	${SYMBOLS_SOURCE}
 )
 
+IF (APPLE)
+ELSEIF (UNIX)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -finstrument-functions")
+ELSE ()
+ENDIF ()
+
 add_executable(grammar ${TEST_GRAMMAR_SOURCE})
 add_compile_definitions(BINARY_DIR="${zstd_BINARY_DIR}/lib")
 add_executable(storage ${STORAGE_SOURCE})
@@ -201,6 +211,8 @@ add_test(NAME vnet COMMAND vnet)
 add_test(NAME decision COMMAND decision)
 add_test(NAME infomation COMMAND infomation)
 add_test(NAME match COMMAND match)
+add_test(NAME basketball_player_prepare COMMAND regress --inputdir=./basketballplayer-2.X --outputdir=./basketballplayer-2.X
+	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 add_test(NAME regress_vertex COMMAND regress --inputdir=./vertex --outputdir=./vertex
 	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 add_test(NAME regress_edge COMMAND regress --inputdir=./edge --outputdir=./edge

@@ -113,7 +113,14 @@ create              {
 "commit"            { stm._errIndx += yyleng; return KW_COMMIT;};
 "limit"             { stm._errIndx += yyleng; return limit;};
 "profile"           { stm._errIndx += yyleng; return profile;};
-"dump"              { stm._errIndx += yyleng; return dump; };
+"dump"              {
+                        stm._errIndx += yyleng;
+                        return dump;
+                    };
+"import"            {
+                        stm._errIndx += yyleng;
+                        return import;
+                    };
 "inf"               {
                         stm._errIndx += yyleng;
                         std::string s(yytext, yyleng);
@@ -162,6 +169,7 @@ create              {
 "-"                 {stm._errIndx += yyleng;};
 "*"                 {stm._errIndx += yyleng;};
 "/"                 {stm._errIndx += yyleng;};
+"="                 {stm._errIndx += yyleng;};
 "\n"                {stm._errIndx += yyleng;};
 [0-9]+              {
                         std::string s(yytext, yyleng);

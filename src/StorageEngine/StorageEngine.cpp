@@ -92,7 +92,21 @@ int GStorageEngine::open(const char* filename, StoreOption option) {
       fullpath = option.directory + filename;
     }
   }
+  p = fullpath;
+  if (!p.parent_path().empty()) {
+    gql::create_directories(
+#if defined(__APPLE__) || defined(UNIX) || defined(__linux__)
+      p.parent_path().c_str()
+#elif defined(WIN32)
+      gql::string2wstring(fullpath.c_str())
+#endif
+      );
+  }
+#if defined(__APPLE__) || defined(__gnu_linux__) || defined(__linux__) 
   _env = env_managed(fullpath, create_param, operator_param);
+#else
+  _env = env_managed(gql::string2wstring(fullpath), create_param, operator_param);
+#endif
   int ret = startTrans();
   mdbx::map_handle handle = openSchema();
   thread_local auto id = std::this_thread::get_id();

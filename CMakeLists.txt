@@ -73,7 +73,6 @@ if (CMAKE_BUILD_TYPE STREQUAL "Debug")
 			"include/base/parallel/pam/*"
 			"include/base/parallel/parlay/*"
 	)
-	# set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -finstrument-functions")
 endif()
 # ctest_coverage(BUILD test)
 ELSE ()
@@ -123,17 +122,20 @@ include_directories(./include ./third_party/libmdbx ./third_party/eigen ./third_
 file(GLOB_RECURSE BASE_SOURCES "src/*.cpp")
 
 # set(FMT_CAN_MODULE ON CACHE BOOL "Build a module instead of a traditional library." FORCE)
-add_subdirectory(third_party/libmdbx)
 add_subdirectory(third_party/zstd/build/cmake)
+add_subdirectory(third_party/libmdbx)
 add_subdirectory(third_party/fmt)
+
 if (GQLITE_BUILD_TEST)
 if (CMAKE_SYSTEM_NAME MATCHES "Android")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -funwind-tables -ffunction-sections")
 endif(CMAKE_SYSTEM_NAME MATCHES "Android")
 enable_testing()
-add_subdirectory(test)
-endif()
 add_subdirectory(tool)
+add_subdirectory(test)
+else ()
+add_subdirectory(tool)
+endif()
 
 # message("USE COMPILER: " ${CMAKE_CXX_COMPILER_ID})
 add_definitions(-DYY_NO_UNISTD_H)

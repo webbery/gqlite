@@ -95,9 +95,13 @@ VisitFlow accept(GASTNode* node, Visitor& visitor, std::list<NodeType>& path) {
       switch(vf) {
         case VisitFlow::Children:
         {
-          GASTNode* list = ptr->indexes();
-          VisitFlow state = accept(list, visitor, path);
-          if (state != VisitFlow::Children) return state;
+          GArrayExpression* groups = (GArrayExpression*)ptr->groups()->_value;
+          for (GASTNode* group: *groups) {
+            GGroupStmt* stmt = (GGroupStmt*)group->_value;
+            GASTNode* list = stmt->indexes();
+            VisitFlow state = accept(list, visitor, path);
+            if (state != VisitFlow::Children) return state;
+          }
         }
         break;
         case VisitFlow::Return: vf = VisitFlow::Return;

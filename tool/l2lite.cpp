@@ -37,7 +37,7 @@ int main(int argc, char** argv) {
     switch (o)
     {
     case 'f':
-      if (strcmp(optarg, "ngql") == 0) {
+      if (strcmp(optarg, "ngql") == 0 || strcmp(optarg, " ngql") == 0 || strcmp(optarg, "=ngql") == 0) {
         pConverter = new NGQLConverter();
         break;
       }
@@ -60,6 +60,14 @@ int main(int argc, char** argv) {
       break;
     }
   }
+
+  source.erase(0, source.find_first_not_of(' '));
+  if (source.empty()) {
+    usage();
+    return -1;
+  }
+  output.erase(0, output.find_first_not_of(' '));
+
   FILE* fp_reader = NULL;
   FILE* fp_writer = NULL;
   fp_reader = fopen(source.c_str(), "r");
@@ -67,14 +75,17 @@ int main(int argc, char** argv) {
 
 #define BUF_SIZE  2048
   char buff[BUF_SIZE] = {0};
-  while (fscanf(fp_reader, "%s", buff) != EOF) {
+  while (fgets(buff, BUF_SIZE, fp_reader)) {
     std::string out;
+    int i = strlen(buff);
+    buff[i- 1] = 0;
     if (pConverter->Parse(buff, out) == IConverter::CS && !out.empty()) {
       memset(buff, 0, BUF_SIZE);
+      printf("%s\n", out.c_str());
+      fprintf(fp_writer, "%s\n", out.c_str());
       continue;
     }
     memset(buff, 0, BUF_SIZE);
-    printf("%s\n", out.c_str());
   }
 
   fclose(fp_writer);
