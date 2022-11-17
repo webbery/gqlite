@@ -113,9 +113,12 @@ set(FAIL_SOURCE ./fail.cpp
 	${SYMBOLS_SOURCE}
 )
 
-IF (UNIX)
+IF (APPLE)
+ELSEIF (UNIX)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -finstrument-functions")
-ENDIF (UNIX)
+ELSE ()
+ENDIF ()
+
 add_executable(grammar ${TEST_GRAMMAR_SOURCE})
 add_compile_definitions(BINARY_DIR="${zstd_BINARY_DIR}/lib")
 add_executable(storage ${STORAGE_SOURCE})
