@@ -7,7 +7,9 @@ add_definitions(-DCATCH_CONFIG_MAIN -DCATCH_CONFIG_ENABLE_BENCHMARKING)
 add_definitions(-D_WORKING_DIR_=\"${CMAKE_SOURCE_DIR}\")
 
 if (GQLITE_BUILD_TEST)
+if (UNIX)
 set(SYMBOLS_SOURCE ../src/base/Debug.cpp)
+endif(UNIX)
 else()
 endif()
 
@@ -111,7 +113,9 @@ set(FAIL_SOURCE ./fail.cpp
 	${SYMBOLS_SOURCE}
 )
 
+IF (UNIX)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -finstrument-functions")
+ENDIF (UNIX)
 add_executable(grammar ${TEST_GRAMMAR_SOURCE})
 add_compile_definitions(BINARY_DIR="${zstd_BINARY_DIR}/lib")
 add_executable(storage ${STORAGE_SOURCE})

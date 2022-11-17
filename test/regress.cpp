@@ -60,10 +60,11 @@ static void print_usage() {
   }
 }
 
-static void parse_opt(int argc, char** argv) {
+static int parse_opt(int argc, char** argv) {
   char* arg = nullptr;
   int c = 0;
   int opt_index = -1;
+  int ret = 0;
   while ((c = getopt_long(argc, argv, "h", lopts, &opt_index)) != -1) {
     switch (c)
     {
@@ -85,9 +86,11 @@ static void parse_opt(int argc, char** argv) {
       break;
     default:
       print_usage();
+      ret = 1;
       break;
     }
   }
+  return ret;
 }
 
 int bengin_capture(const char* output_filename, FILE*& fp) {
@@ -109,10 +112,10 @@ void close_capture(int pipe, FILE* fp) {
 }
 
 int main(int argc, char** argv) {
+  if (!parse_opt(argc, argv)) return -1;
 #ifdef __linux__
   init_coredump_capture();
 #endif
-  parse_opt(argc, argv);
   std::filesystem::path inputs = std::filesystem::current_path();
   if (g_inputdir != ".") inputs = g_inputdir;
   if (!inputs.is_absolute()) {

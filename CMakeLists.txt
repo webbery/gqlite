@@ -73,7 +73,6 @@ if (CMAKE_BUILD_TYPE STREQUAL "Debug")
 			"include/base/parallel/pam/*"
 			"include/base/parallel/parlay/*"
 	)
-	# set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -finstrument-functions")
 endif()
 # ctest_coverage(BUILD test)
 ELSE ()
