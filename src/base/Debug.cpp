@@ -30,12 +30,7 @@ extern "C" {
     return cnt;
   }
   
-  void __attribute__((no_instrument_function))
-#if defined(__APPLE__)
-  ___cyg_profile_func_enter(void* func, void* caller)
-#else
-  __cyg_profile_func_enter(void* func, void* caller)
-#endif
+  void __attribute__((no_instrument_function)) __cyg_profile_func_enter(void* func, void* caller)
   {
     auto* tls = get_tls();
     if (tls->index_ < MAX_TRACE_SIZE) {
@@ -43,12 +38,7 @@ extern "C" {
     }
   }
 
-  void __attribute__((no_instrument_function))
-#if defined(__APPLE__)
-  ___cyg_profile_func_exit(void* func, void* caller)
-#else
-  __cyg_profile_func_exit(void* func, void* caller)
-#endif
+  void __attribute__((no_instrument_function)) __cyg_profile_func_exit(void* func, void* caller)
   {
     thread_info_t* tls = get_tls();
     //get_tls_dlinfo(func);
