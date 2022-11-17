@@ -98,7 +98,7 @@ int GStorageEngine::open(const char* filename, StoreOption option) {
 #if defined(__APPLE__) || defined(UNIX) || defined(__linux__)
       p.parent_path().c_str()
 #elif defined(WIN32)
-      gql::string2wstring(std::string(p.parent_path().c_str()))
+      gql::string2wstring(fullpath.c_str())
 #endif
       );
   }
