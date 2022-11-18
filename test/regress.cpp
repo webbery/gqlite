@@ -64,7 +64,7 @@ static int parse_opt(int argc, char** argv) {
   char* arg = nullptr;
   int c = 0;
   int opt_index = -1;
-  int ret = 0;
+  int ret = -1;
   while ((c = getopt_long(argc, argv, "h", lopts, &opt_index)) != -1) {
     switch (c)
     {
@@ -86,7 +86,7 @@ static int parse_opt(int argc, char** argv) {
       break;
     default:
       print_usage();
-      ret = 1;
+      ret = 0;
       break;
     }
   }
