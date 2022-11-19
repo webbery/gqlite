@@ -56,7 +56,7 @@ jobs:
       run: |
         pip install gcovr
         cd ${{github.workspace}}
-        cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DGQLITE_BUILD_TEST=TRUE
+        cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DGQLITE_BUILD_TEST=TRUE -DZSTD_BUILD_PROGRAMS=FALSE -DMDBX_BUILD_TOOLS=FALSE
     - name: Build
       # Build your program with the given configuration
       run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
@@ -65,6 +65,7 @@ jobs:
       # Execute tests defined by the CMake configuration.  
       # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
       run: |
+        ./tool/l2lite -fngql -s../data/basketballplayer-2.X.ngql -o../data/basketballplayer.gql
         ctest -C Debug --rerun-failed --output-on-failure
     - name: Generate Coverage Report
       working-directory: ${{github.workspace}}/build

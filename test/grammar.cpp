@@ -157,8 +157,8 @@ void successful_test(gqlite* pHandle, char* ptr) {
   );
   // query 1'st order neighber
   TEST_QUERY("{query: 'e', in: 'ga'};", 4);
-  TEST_QUERY("{query: 'e', in: 'ga', where: {id: 'v1', ->: *, step: 1}};", 0);
-  TEST_QUERY("{query: 'e', in: 'ga', where: {id: 'v1', --: *, step: 1}};", 1);
+  TEST_QUERY("{query: 'e', in: 'ga', where: {id: 'v1', ->: *, neighbor: 1}};", 0);
+  TEST_QUERY("{query: 'e', in: 'ga', where: {id: 'v1', --: *, neighbor: 1}};", 1);
   // TEST_GRAMMAR("{query: '*', path: ['b', 'e', ...], from: 'prefix_tree'}");
   /*
   * search item with distance
