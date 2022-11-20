@@ -113,7 +113,7 @@ bool NGQLConverter::Drop(std::cmatch& match, std::string& out) {
   return true;
 }
 bool NGQLConverter::Create(std::string& out) {
-  out += "{create: " + _creation + ", group: [";
+  out += "{create: '" + _creation + "', group: [";
   for (auto g: _groups) {
     if (g._props.size()) {
       out += "{" + g._name + ": [";

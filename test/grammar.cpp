@@ -69,9 +69,10 @@ void successful_test(gqlite* pHandle, char* ptr) {
   /*
   * create a `ga` graph for keyword search
   */
-  TEST_GRAMMAR("{create: 'ga', group: ['g'], index: 'keyword'};");
+  TEST_GRAMMAR("{create: 'ga', group: ['g']};");
   TEST_COMMAND("show graph;");
-  TEST_GRAMMAR("{create: 'ga', group: ['g', 'e', 'tag'], index: ['keyword', 'color', 'create_time', 'location']};");
+  TEST_GRAMMAR("{create: 'ga', group: ['g', 'e', 'tag']};");
+  TEST_GRAMMAR("{create: 'ga', group: [{g: ['title', 'class', 'keyword', 'color', 'create_time', 'location'], index: ['keyword', 'color', 'create_time', 'location']}, 'e', 'tag']};");
   TEST_COMMAND("show graph 'ga';");
   TEST_GRAMMAR("{upset: 'g', vertex: [[328, {title: 'Tale\\'s from the Crypt Presents: Demon Knight (1995)', genres: 'Horror|Thriller'}]]};");
   TEST_GRAMMAR("{upset: 'g', vertex: [['328', {title: 'Tale\\'s from the Crypt Presents: Demon Knight (1995)', genres: 'Horror|Thriller'}]]};");

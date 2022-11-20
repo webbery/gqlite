@@ -20,9 +20,9 @@ GUtilPlan::GUtilPlan(std::map<std::string, GVirtualNetwork*>& vn, GStorageEngine
     if (groups) {
       GArrayExpression* array = (GArrayExpression*)groups->_value;
       for (auto item: *array) {
-        GGroupStmt* stmt = reinterpret_cast<GGroupStmt*>(item->_value);
-        std::string name = stmt->name();
-        GASTNode* node = stmt->properties();
+        GGroupStmt* group = reinterpret_cast<GGroupStmt*>(item->_value);
+        std::string name = group->name();
+        GASTNode* node = group->properties();
         if (node) {
           std::vector<std::string> props;
           GArrayExpression* array = reinterpret_cast<GArrayExpression*>(node->_value);
@@ -31,16 +31,17 @@ GUtilPlan::GUtilPlan(std::map<std::string, GVirtualNetwork*>& vn, GStorageEngine
           }
           _vParams2.emplace_back(props);
         }
+        GASTNode* indexes = group->indexes();
+        if (indexes) {
+          GArrayExpression* array = (GArrayExpression*)indexes->_value;
+          for (auto item : *array) {
+            _vParams3.emplace_back(name + ":" + GetString(item));
+          }
+        }
         _vParams1.emplace_back(name);
       }
     }
-    GASTNode* indexes = stmt->indexes();
-    if (indexes) {
-      GArrayExpression* array = (GArrayExpression*)indexes->_value;
-      for (auto item : *array) {
-        _vParams3.emplace_back(GetString(item));
-      }
-    }
+    
 }
 
 GUtilPlan::GUtilPlan(std::map<std::string, GVirtualNetwork*>& vn, GStorageEngine* store, GDropStmt* stmt)

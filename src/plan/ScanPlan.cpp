@@ -24,7 +24,8 @@ GScanPlan::GScanPlan(std::map<std::string, GVirtualNetwork*>& networks, GStorage
   }
   else {
     auto jsn = store->getSchema();
-    _graph = jsn[SCHEMA_GRAPH_NAME] ;
+    std::string s = jsn.dump();
+    _graph = jsn[SCHEMA_GRAPH_NAME];
   }
 
   auto* query = stmt->query();

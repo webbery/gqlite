@@ -205,12 +205,14 @@ add_test(NAME storage COMMAND storage)
 add_test(NAME algorithm COMMAND algorithm)
 add_test(NAME query COMMAND query)
 add_test(NAME grammar COMMAND grammar)
-add_test(NAME ptree COMMAND ptree)
+# add_test(NAME ptree COMMAND ptree)
 # add_test(NAME fail COMMAND fail)
 # add_test(NAME vnet COMMAND vnet)
 add_test(NAME decision COMMAND decision)
 add_test(NAME infomation COMMAND infomation)
 add_test(NAME match COMMAND match)
+add_test(NAME basketball_player_prepare COMMAND regress --inputdir=./basketballplayer-2.X --outputdir=./basketballplayer-2.X
+	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 add_test(NAME regress_vertex COMMAND regress --inputdir=./vertex --outputdir=./vertex
 	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 add_test(NAME regress_edge COMMAND regress --inputdir=./edge --outputdir=./edge

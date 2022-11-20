@@ -72,14 +72,14 @@ struct GASTNode* INIT_NUMBER_AST(T& v) {
 
 %token <var_name> VAR_HASH
 %token <__f> VAR_DECIMAL
-%token <__c> VAR_BASE64 LITERAL_STRING VAR_NAME
+%token <__c> VAR_BASE64 LITERAL_STRING VAR_NAME LITERAL_PATH
 %token <__int> VAR_INTEGER VAR_DATETIME
 %token <node> KW_VERTEX KW_PATH KW_EDGE
 %token RANGE_BEGIN RANGE_END COLON QUOTE COMMA LEFT_SQUARE RIGHT_SQUARE STAR CR PARAM_BEGIN PARAM_END SEMICOLON
 %token KW_AST KW_ID KW_GRAPH KW_COMMIT
 %token KW_CREATE KW_DROP KW_IN KW_REMOVE KW_UPSET left_arrow right_arrow KW_BIDIRECT_RELATION KW_REST KW_DELETE
 %token OP_QUERY KW_INDEX OP_WHERE OP_GEOMETRY neighbor
-%token group dump
+%token group dump import
 %token CMD_SHOW 
 %token OP_GREAT_THAN OP_LESS_THAN OP_GREAT_THAN_EQUAL OP_LESS_THAN_EQUAL equal AND OR OP_NEAR
 %token FN_COUNT
@@ -189,7 +189,13 @@ utility_cmd: CMD_SHOW KW_GRAPH
             FreeAst($2);
             stm._cmdtype = GQL_Util;
           }
-        | profile gql {};
+        | profile gql {}
+        | import LITERAL_PATH
+          {
+            free($2);
+            stm._cmdtype = GQL_Util;
+          }
+        ;
 creation: RANGE_BEGIN KW_CREATE COLON LITERAL_STRING COMMA groups RANGE_END
             {
               GCreateStmt* createStmt = new GCreateStmt($4, $6);
@@ -201,13 +207,7 @@ creation: RANGE_BEGIN KW_CREATE COLON LITERAL_STRING COMMA groups RANGE_END
               {
                 free($4);
               }
-        | RANGE_BEGIN KW_CREATE COLON LITERAL_STRING COMMA groups COMMA KW_INDEX COLON string_list RANGE_END
-              {
-                GCreateStmt* createStmt = new GCreateStmt($4, $6, $10);
-                free($4);
-                $$ = NewAst(NodeType::CreationStatement, createStmt, nullptr, 0);
-                stm._errorCode = ECode_Success;
-              };
+        ;
 dump_graph: RANGE_BEGIN dump COLON LITERAL_STRING RANGE_END
               {
                 GDumpStmt* stmt = new GDumpStmt($4);
@@ -276,8 +276,14 @@ a_group: LITERAL_STRING
                 GGroupStmt* stmt = new GGroupStmt($2, $4);
                 free($2);
                 $$ = NewAst(NodeType::GroupStatement, stmt, nullptr, 0);
-                
-              };
+              }
+        | RANGE_BEGIN VAR_NAME COLON string_list COMMA KW_INDEX COLON string_list RANGE_END
+              {
+                GGroupStmt* stmt = new GGroupStmt($2, $4, $8);
+                free($2);
+                $$ = NewAst(NodeType::GroupStatement, stmt, nullptr, 0);
+              }
+        ;
 a_simple_query: 
            RANGE_BEGIN query_kind RANGE_END
                 {
