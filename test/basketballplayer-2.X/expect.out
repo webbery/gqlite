@@ -1,0 +1,1776 @@
+***** EXECUTE: "basketballplayer-2.X.gql" *****
+[0]:	{drop: 'basketballplayer'};
+graph is not exist
+[1]:	{create: 'basketballplayer', group: [{player: ['name','age'], index: ['name']},{team: ['name']},{serve: ['start_year','end_year']},{follow: ['degree']}]};{upset: 'player', vertex: [['player100', {name: 'Tim Duncan', age: 42}]]};
+UPSET SUCCESS
+[2]:	{upset: 'player', vertex: [['player101', {name: 'Tony Parker', age: 36}]]};
+UPSET SUCCESS
+[3]:	{upset: 'player', vertex: [['player102', {name: 'LaMarcus Aldridge', age: 33}]]};
+UPSET SUCCESS
+[4]:	{upset: 'player', vertex: [['player103', {name: 'Rudy Gay', age: 32}]]};
+UPSET SUCCESS
+[5]:	{upset: 'player', vertex: [['player104', {name: 'Marco Belinelli', age: 32}]]};
+UPSET SUCCESS
+[6]:	{upset: 'player', vertex: [['player105', {name: 'Danny Green', age: 31}]]};
+UPSET SUCCESS
+[7]:	{upset: 'player', vertex: [['player106', {name: 'Kyle Anderson', age: 25}]]};
+UPSET SUCCESS
+[8]:	{upset: 'player', vertex: [['player107', {name: 'Aron Baynes', age: 32}]]};
+UPSET SUCCESS
+[9]:	{upset: 'player', vertex: [['player108', {name: 'Boris Diaw', age: 36}]]};
+UPSET SUCCESS
+[10]:	{upset: 'player', vertex: [['player109', {name: 'Tiago Splitter', age: 34}]]};
+UPSET SUCCESS
+[11]:	{upset: 'player', vertex: [['player110', {name: 'Cory Joseph', age: 27}]]};
+UPSET SUCCESS
+[12]:	{upset: 'player', vertex: [['player111', {name: 'David West', age: 38}]]};
+UPSET SUCCESS
+[13]:	{upset: 'player', vertex: [['player112', {name: 'Jonathon Simmons', age: 29}]]};
+UPSET SUCCESS
+[14]:	{upset: 'player', vertex: [['player113', {name: 'Dejounte Murray', age: 29}]]};
+UPSET SUCCESS
+[15]:	{upset: 'player', vertex: [['player114', {name: 'Tracy McGrady', age: 39}]]};
+UPSET SUCCESS
+[16]:	{upset: 'player', vertex: [['player115', {name: 'Kobe Bryant', age: 40}]]};
+UPSET SUCCESS
+[17]:	{upset: 'player', vertex: [['player116', {name: 'LeBron James', age: 34}]]};
+UPSET SUCCESS
+[18]:	{upset: 'player', vertex: [['player117', {name: 'Stephen Curry', age: 31}]]};
+UPSET SUCCESS
+[19]:	{upset: 'player', vertex: [['player118', {name: 'Russell Westbrook', age: 30}]]};
+UPSET SUCCESS
+[20]:	{upset: 'player', vertex: [['player119', {name: 'Kevin Durant', age: 30}]]};
+UPSET SUCCESS
+[21]:	{upset: 'player', vertex: [['player120', {name: 'James Harden', age: 29}]]};
+UPSET SUCCESS
+[22]:	{upset: 'player', vertex: [['player121', {name: 'Chris Paul', age: 33}]]};
+UPSET SUCCESS
+[23]:	{upset: 'player', vertex: [['player122', {name: 'DeAndre Jordan', age: 30}]]};
+UPSET SUCCESS
+[24]:	{upset: 'player', vertex: [['player123', {name: 'Ricky Rubio', age: 28}]]};
+UPSET SUCCESS
+[25]:	{upset: 'player', vertex: [['player124', {name: 'Rajon Rondo', age: 33}]]};
+UPSET SUCCESS
+[26]:	{upset: 'player', vertex: [['player125', {name: 'Manu Ginobili', age: 41}]]};
+UPSET SUCCESS
+[27]:	{upset: 'player', vertex: [['player126', {name: 'Kyrie Irving', age: 26}]]};
+UPSET SUCCESS
+[28]:	{upset: 'player', vertex: [['player127', {name: 'Vince Carter', age: 42}]]};
+UPSET SUCCESS
+[29]:	{upset: 'player', vertex: [['player128', {name: 'Carmelo Anthony', age: 34}]]};
+UPSET SUCCESS
+[30]:	{upset: 'player', vertex: [['player129', {name: 'Dwyane Wade', age: 37}]]};
+UPSET SUCCESS
+[31]:	{upset: 'player', vertex: [['player130', {name: 'Joel Embiid', age: 25}]]};
+UPSET SUCCESS
+[32]:	{upset: 'player', vertex: [['player131', {name: 'Paul George', age: 28}]]};
+UPSET SUCCESS
+[33]:	{upset: 'player', vertex: [['player132', {name: 'Giannis Antetokounmpo', age: 24}]]};
+UPSET SUCCESS
+[34]:	{upset: 'player', vertex: [['player133', {name: 'Yao Ming', age: 38}]]};
+UPSET SUCCESS
+[35]:	{upset: 'player', vertex: [['player134', {name: 'Blake Griffin', age: 30}]]};
+UPSET SUCCESS
+[36]:	{upset: 'player', vertex: [['player135', {name: 'Damian Lillard', age: 28}]]};
+UPSET SUCCESS
+[37]:	{upset: 'player', vertex: [['player136', {name: 'Steve Nash', age: 45}]]};
+UPSET SUCCESS
+[38]:	{upset: 'player', vertex: [['player137', {name: 'Dirk Nowitzki', age: 40}]]};
+UPSET SUCCESS
+[39]:	{upset: 'player', vertex: [['player138', {name: 'Paul Gasol', age: 38}]]};
+UPSET SUCCESS
+[40]:	{upset: 'player', vertex: [['player139', {name: 'Marc Gasol', age: 34}]]};
+UPSET SUCCESS
+[41]:	{upset: 'player', vertex: [['player140', {name: 'Grant Hill', age: 46}]]};
+UPSET SUCCESS
+[42]:	{upset: 'player', vertex: [['player141', {name: 'Ray Allen', age: 43}]]};
+UPSET SUCCESS
+[43]:	{upset: 'player', vertex: [['player142', {name: 'Klay Thompson', age: 29}]]};
+UPSET SUCCESS
+[44]:	{upset: 'player', vertex: [['player143', {name: 'Kristaps Porzingis', age: 23}]]};
+UPSET SUCCESS
+[45]:	{upset: 'player', vertex: [['player144', {name: 'Shaquille O\'Neal', age: 47}]]};
+UPSET SUCCESS
+[46]:	{upset: 'player', vertex: [['player145', {name: 'JaVale McGee', age: 31}]]};
+UPSET SUCCESS
+[47]:	{upset: 'player', vertex: [['player146', {name: 'Dwight Howard', age: 33}]]};
+UPSET SUCCESS
+[48]:	{upset: 'player', vertex: [['player147', {name: 'Amar\'e Stoudemire', age: 36}]]};
+UPSET SUCCESS
+[49]:	{upset: 'player', vertex: [['player148', {name: 'Jason Kidd', age: 45}]]};
+UPSET SUCCESS
+[50]:	{upset: 'player', vertex: [['player149', {name: 'Ben Simmons', age: 22}]]};
+UPSET SUCCESS
+[51]:	{upset: 'player', vertex: [['player150', {name: 'Luka Doncic', age: 20}]]};
+UPSET SUCCESS
+[52]:	{upset: 'team', vertex: [['team200', {name: 'Warriors'}]]};
+UPSET SUCCESS
+[53]:	{upset: 'team', vertex: [['team201', {name: 'Nuggets'}]]};
+UPSET SUCCESS
+[54]:	{upset: 'team', vertex: [['team202', {name: 'Rockets'}]]};
+UPSET SUCCESS
+[55]:	{upset: 'team', vertex: [['team203', {name: 'Trail Blazers'}]]};
+UPSET SUCCESS
+[56]:	{upset: 'team', vertex: [['team204', {name: 'Spurs'}]]};
+UPSET SUCCESS
+[57]:	{upset: 'team', vertex: [['team205', {name: 'Thunders'}]]};
+UPSET SUCCESS
+[58]:	{upset: 'team', vertex: [['team206', {name: 'Jazz'}]]};
+UPSET SUCCESS
+[59]:	{upset: 'team', vertex: [['team207', {name: 'Clippers'}]]};
+UPSET SUCCESS
+[60]:	{upset: 'team', vertex: [['team208', {name: 'Kings'}]]};
+UPSET SUCCESS
+[61]:	{upset: 'team', vertex: [['team209', {name: 'Timberwolves'}]]};
+UPSET SUCCESS
+[62]:	{upset: 'team', vertex: [['team210', {name: 'Lakers'}]]};
+UPSET SUCCESS
+[63]:	{upset: 'team', vertex: [['team211', {name: 'Pelicans'}]]};
+UPSET SUCCESS
+[64]:	{upset: 'team', vertex: [['team212', {name: 'Grizzlies'}]]};
+UPSET SUCCESS
+[65]:	{upset: 'team', vertex: [['team213', {name: 'Mavericks'}]]};
+UPSET SUCCESS
+[66]:	{upset: 'team', vertex: [['team214', {name: 'Suns'}]]};
+UPSET SUCCESS
+[67]:	{upset: 'team', vertex: [['team215', {name: 'Hornets'}]]};
+UPSET SUCCESS
+[68]:	{upset: 'team', vertex: [['team216', {name: 'Cavaliers'}]]};
+UPSET SUCCESS
+[69]:	{upset: 'team', vertex: [['team217', {name: 'Celtics'}]]};
+UPSET SUCCESS
+[70]:	{upset: 'team', vertex: [['team218', {name: 'Raptors'}]]};
+UPSET SUCCESS
+[71]:	{upset: 'team', vertex: [['team219', {name: '76ers'}]]};
+UPSET SUCCESS
+[72]:	{upset: 'team', vertex: [['team220', {name: 'Pacers'}]]};
+UPSET SUCCESS
+[73]:	{upset: 'team', vertex: [['team221', {name: 'Bulls'}]]};
+UPSET SUCCESS
+[74]:	{upset: 'team', vertex: [['team222', {name: 'Hawks'}]]};
+UPSET SUCCESS
+[75]:	{upset: 'team', vertex: [['team223', {name: 'Knicks'}]]};
+UPSET SUCCESS
+[76]:	{upset: 'team', vertex: [['team224', {name: 'Pistons'}]]};
+UPSET SUCCESS
+[77]:	{upset: 'team', vertex: [['team225', {name: 'Bucks'}]]};
+UPSET SUCCESS
+[78]:	{upset: 'team', vertex: [['team226', {name: 'Magic'}]]};
+UPSET SUCCESS
+[79]:	{upset: 'team', vertex: [['team227', {name: 'Nets'}]]};
+UPSET SUCCESS
+[80]:	{upset: 'team', vertex: [['team228', {name: 'Wizards'}]]};
+UPSET SUCCESS
+[81]:	{upset: 'team', vertex: [['team229', {name: 'Heat'}]]};
+UPSET SUCCESS
+[82]:	{upset: 'follow', edge: [['player100', ->: {degree: 95 }, 'player101']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'follow', edge: [['player100', ->: {degree: 95 }, 'player101']]};
+	                                         ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[83]:	{upset: 'follow', edge: [['player100', ->: {degree: 95 }, 'player125']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'follow', edge: [['player100', ->: {degree: 95 }, 'player125']]};
+	                                         ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[84]:	{upset: 'follow', edge: [['player101', ->: {degree: 95 }, 'player100']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'follow', edge: [['player101', ->: {degree: 95 }, 'player100']]};
+	                                         ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[85]:	{upset: 'follow', edge: [['player101', ->: {degree: 95 }, 'player125']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'follow', edge: [['player101', ->: {degree: 95 }, 'player125']]};
+	                                         ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[86]:	{upset: 'follow', edge: [['player101', ->: {degree: 90 }, 'player102']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'follow', edge: [['player101', ->: {degree: 90 }, 'player102']]};
+	                                         ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[87]:	{upset: 'follow', edge: [['player125', ->: {degree: 90 }, 'player100']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'follow', edge: [['player125', ->: {degree: 90 }, 'player100']]};
+	                                         ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[88]:	{upset: 'follow', edge: [['player102', ->: {degree: 75 }, 'player101']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'follow', edge: [['player102', ->: {degree: 75 }, 'player101']]};
+	                                         ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[89]:	{upset: 'follow', edge: [['player102', ->: {degree: 75 }, 'player100']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'follow', edge: [['player102', ->: {degree: 75 }, 'player100']]};
+	                                         ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[90]:	{upset: 'follow', edge: [['player103', ->: {degree: 70 }, 'player102']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'follow', edge: [['player103', ->: {degree: 70 }, 'player102']]};
+	                                         ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[91]:	{upset: 'follow', edge: [['player104', ->: {degree: 50 }, 'player101']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'follow', edge: [['player104', ->: {degree: 50 }, 'player101']]};
+	                                         ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[92]:	{upset: 'follow', edge: [['player104', ->: {degree: 55 }, 'player100']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'follow', edge: [['player104', ->: {degree: 55 }, 'player100']]};
+	                                         ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[93]:	{upset: 'follow', edge: [['player104', ->: {degree: 60 }, 'player105']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'follow', edge: [['player104', ->: {degree: 60 }, 'player105']]};
+	                                         ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[94]:	{upset: 'follow', edge: [['player105', ->: {degree: 83 }, 'player104']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'follow', edge: [['player105', ->: {degree: 83 }, 'player104']]};
+	                                         ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[95]:	{upset: 'follow', edge: [['player105', ->: {degree: 70 }, 'player100']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'follow', edge: [['player105', ->: {degree: 70 }, 'player100']]};
+	                                         ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[96]:	{upset: 'follow', edge: [['player105', ->: {degree: 80 }, 'player116']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'follow', edge: [['player105', ->: {degree: 80 }, 'player116']]};
+	                                         ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[97]:	{upset: 'follow', edge: [['player107', ->: {degree: 80 }, 'player100']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'follow', edge: [['player107', ->: {degree: 80 }, 'player100']]};
+	                                         ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[98]:	{upset: 'follow', edge: [['player108', ->: {degree: 80 }, 'player101']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'follow', edge: [['player108', ->: {degree: 80 }, 'player101']]};
+	                                         ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[99]:	{upset: 'follow', edge: [['player108', ->: {degree: 80 }, 'player100']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'follow', edge: [['player108', ->: {degree: 80 }, 'player100']]};
+	                                         ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[100]:	{upset: 'follow', edge: [['player109', ->: {degree: 80 }, 'player100']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'follow', edge: [['player109', ->: {degree: 80 }, 'player100']]};
+	                                         ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[101]:	{upset: 'follow', edge: [['player109', ->: {degree: 90 }, 'player125']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'follow', edge: [['player109', ->: {degree: 90 }, 'player125']]};
+	                                         ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[102]:	{upset: 'follow', edge: [['player113', ->: {degree: 99 }, 'player100']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'follow', edge: [['player113', ->: {degree: 99 }, 'player100']]};
+	                                         ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[103]:	{upset: 'follow', edge: [['player113', ->: {degree: 99 }, 'player101']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'follow', edge: [['player113', ->: {degree: 99 }, 'player101']]};
+	                                         ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[104]:	{upset: 'follow', edge: [['player113', ->: {degree: 99 }, 'player125']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'follow', edge: [['player113', ->: {degree: 99 }, 'player125']]};
+	                                         ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[105]:	{upset: 'follow', edge: [['player113', ->: {degree: 99 }, 'player104']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'follow', edge: [['player113', ->: {degree: 99 }, 'player104']]};
+	                                         ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[106]:	{upset: 'follow', edge: [['player113', ->: {degree: 99 }, 'player105']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'follow', edge: [['player113', ->: {degree: 99 }, 'player105']]};
+	                                         ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[107]:	{upset: 'follow', edge: [['player113', ->: {degree: 99 }, 'player116']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'follow', edge: [['player113', ->: {degree: 99 }, 'player116']]};
+	                                         ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[108]:	{upset: 'follow', edge: [['player113', ->: {degree: 99 }, 'player118']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'follow', edge: [['player113', ->: {degree: 99 }, 'player118']]};
+	                                         ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[109]:	{upset: 'follow', edge: [['player113', ->: {degree: 99 }, 'player121']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'follow', edge: [['player113', ->: {degree: 99 }, 'player121']]};
+	                                         ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[110]:	{upset: 'follow', edge: [['player113', ->: {degree: 99 }, 'player106']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'follow', edge: [['player113', ->: {degree: 99 }, 'player106']]};
+	                                         ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[111]:	{upset: 'follow', edge: [['player113', ->: {degree: 99 }, 'player119']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'follow', edge: [['player113', ->: {degree: 99 }, 'player119']]};
+	                                         ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[112]:	{upset: 'follow', edge: [['player113', ->: {degree: 99 }, 'player120']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'follow', edge: [['player113', ->: {degree: 99 }, 'player120']]};
+	                                         ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[113]:	{upset: 'follow', edge: [['player114', ->: {degree: 90 }, 'player115']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'follow', edge: [['player114', ->: {degree: 90 }, 'player115']]};
+	                                         ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[114]:	{upset: 'follow', edge: [['player114', ->: {degree: 90 }, 'player140']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'follow', edge: [['player114', ->: {degree: 90 }, 'player140']]};
+	                                         ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[115]:	{upset: 'follow', edge: [['player114', ->: {degree: 90 }, 'player103']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'follow', edge: [['player114', ->: {degree: 90 }, 'player103']]};
+	                                         ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[116]:	{upset: 'follow', edge: [['player116', ->: {degree: 100 }, 'player141']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'follow', edge: [['player116', ->: {degree: 100 }, 'player141']]};
+	                                         ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[117]:	{upset: 'follow', edge: [['player118', ->: {degree: 90 }, 'player131']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'follow', edge: [['player118', ->: {degree: 90 }, 'player131']]};
+	                                         ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[118]:	{upset: 'follow', edge: [['player118', ->: {degree: 90 }, 'player120']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'follow', edge: [['player118', ->: {degree: 90 }, 'player120']]};
+	                                         ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[119]:	{upset: 'follow', edge: [['player120', ->: {degree: 80 }, 'player118']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'follow', edge: [['player120', ->: {degree: 80 }, 'player118']]};
+	                                         ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[120]:	{upset: 'follow', edge: [['player121', ->: {degree: 90 }, 'player116']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'follow', edge: [['player121', ->: {degree: 90 }, 'player116']]};
+	                                         ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[121]:	{upset: 'follow', edge: [['player121', ->: {degree: 90 }, 'player128']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'follow', edge: [['player121', ->: {degree: 90 }, 'player128']]};
+	                                         ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[122]:	{upset: 'follow', edge: [['player121', ->: {degree: 90 }, 'player129']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'follow', edge: [['player121', ->: {degree: 90 }, 'player129']]};
+	                                         ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[123]:	{upset: 'follow', edge: [['player126', ->: {degree: 13 }, 'player116']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'follow', edge: [['player126', ->: {degree: 13 }, 'player116']]};
+	                                         ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[124]:	{upset: 'follow', edge: [['player127', ->: {degree: 90 }, 'player114']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'follow', edge: [['player127', ->: {degree: 90 }, 'player114']]};
+	                                         ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[125]:	{upset: 'follow', edge: [['player127', ->: {degree: 70 }, 'player148']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'follow', edge: [['player127', ->: {degree: 70 }, 'player148']]};
+	                                         ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[126]:	{upset: 'follow', edge: [['player128', ->: {degree: 90 }, 'player116']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'follow', edge: [['player128', ->: {degree: 90 }, 'player116']]};
+	                                         ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[127]:	{upset: 'follow', edge: [['player128', ->: {degree: 90 }, 'player121']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'follow', edge: [['player128', ->: {degree: 90 }, 'player121']]};
+	                                         ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[128]:	{upset: 'follow', edge: [['player128', ->: {degree: 90 }, 'player129']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'follow', edge: [['player128', ->: {degree: 90 }, 'player129']]};
+	                                         ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[129]:	{upset: 'follow', edge: [['player129', ->: {degree: 90 }, 'player116']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'follow', edge: [['player129', ->: {degree: 90 }, 'player116']]};
+	                                         ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[130]:	{upset: 'follow', edge: [['player129', ->: {degree: 90 }, 'player121']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'follow', edge: [['player129', ->: {degree: 90 }, 'player121']]};
+	                                         ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[131]:	{upset: 'follow', edge: [['player129', ->: {degree: 90 }, 'player128']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'follow', edge: [['player129', ->: {degree: 90 }, 'player128']]};
+	                                         ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[132]:	{upset: 'follow', edge: [['player130', ->: {degree: 80 }, 'player149']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'follow', edge: [['player130', ->: {degree: 80 }, 'player149']]};
+	                                         ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[133]:	{upset: 'follow', edge: [['player131', ->: {degree: 95 }, 'player118']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'follow', edge: [['player131', ->: {degree: 95 }, 'player118']]};
+	                                         ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[134]:	{upset: 'follow', edge: [['player133', ->: {degree: 90 }, 'player114']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'follow', edge: [['player133', ->: {degree: 90 }, 'player114']]};
+	                                         ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[135]:	{upset: 'follow', edge: [['player133', ->: {degree: 90 }, 'player144']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'follow', edge: [['player133', ->: {degree: 90 }, 'player144']]};
+	                                         ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[136]:	{upset: 'follow', edge: [['player135', ->: {degree: 80 }, 'player102']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'follow', edge: [['player135', ->: {degree: 80 }, 'player102']]};
+	                                         ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[137]:	{upset: 'follow', edge: [['player136', ->: {degree: 90 }, 'player147']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'follow', edge: [['player136', ->: {degree: 90 }, 'player147']]};
+	                                         ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[138]:	{upset: 'follow', edge: [['player136', ->: {degree: 88 }, 'player137']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'follow', edge: [['player136', ->: {degree: 88 }, 'player137']]};
+	                                         ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[139]:	{upset: 'follow', edge: [['player136', ->: {degree: 90 }, 'player117']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'follow', edge: [['player136', ->: {degree: 90 }, 'player117']]};
+	                                         ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[140]:	{upset: 'follow', edge: [['player136', ->: {degree: 85 }, 'player148']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'follow', edge: [['player136', ->: {degree: 85 }, 'player148']]};
+	                                         ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[141]:	{upset: 'follow', edge: [['player137', ->: {degree: 80 }, 'player136']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'follow', edge: [['player137', ->: {degree: 80 }, 'player136']]};
+	                                         ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[142]:	{upset: 'follow', edge: [['player137', ->: {degree: 80 }, 'player148']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'follow', edge: [['player137', ->: {degree: 80 }, 'player148']]};
+	                                         ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[143]:	{upset: 'follow', edge: [['player137', ->: {degree: 10 }, 'player129']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'follow', edge: [['player137', ->: {degree: 10 }, 'player129']]};
+	                                         ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[144]:	{upset: 'follow', edge: [['player138', ->: {degree: 90 }, 'player115']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'follow', edge: [['player138', ->: {degree: 90 }, 'player115']]};
+	                                         ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[145]:	{upset: 'follow', edge: [['player138', ->: {degree: 99 }, 'player139']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'follow', edge: [['player138', ->: {degree: 99 }, 'player139']]};
+	                                         ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[146]:	{upset: 'follow', edge: [['player139', ->: {degree: 99 }, 'player138']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'follow', edge: [['player139', ->: {degree: 99 }, 'player138']]};
+	                                         ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[147]:	{upset: 'follow', edge: [['player140', ->: {degree: 90 }, 'player114']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'follow', edge: [['player140', ->: {degree: 90 }, 'player114']]};
+	                                         ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[148]:	{upset: 'follow', edge: [['player141', ->: {degree: 9 }, 'player124']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'follow', edge: [['player141', ->: {degree: 9 }, 'player124']]};
+	                                         ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[149]:	{upset: 'follow', edge: [['player142', ->: {degree: 90 }, 'player117']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'follow', edge: [['player142', ->: {degree: 90 }, 'player117']]};
+	                                         ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[150]:	{upset: 'follow', edge: [['player143', ->: {degree: 90 }, 'player150']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'follow', edge: [['player143', ->: {degree: 90 }, 'player150']]};
+	                                         ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[151]:	{upset: 'follow', edge: [['player144', ->: {degree: 100 }, 'player145']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'follow', edge: [['player144', ->: {degree: 100 }, 'player145']]};
+	                                         ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[152]:	{upset: 'follow', edge: [['player144', ->: {degree: 80 }, 'player100']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'follow', edge: [['player144', ->: {degree: 80 }, 'player100']]};
+	                                         ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[153]:	{upset: 'follow', edge: [['player147', ->: {degree: 90 }, 'player136']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'follow', edge: [['player147', ->: {degree: 90 }, 'player136']]};
+	                                         ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[154]:	{upset: 'follow', edge: [['player148', ->: {degree: 80 }, 'player127']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'follow', edge: [['player148', ->: {degree: 80 }, 'player127']]};
+	                                         ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[155]:	{upset: 'follow', edge: [['player148', ->: {degree: 90 }, 'player136']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'follow', edge: [['player148', ->: {degree: 90 }, 'player136']]};
+	                                         ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[156]:	{upset: 'follow', edge: [['player148', ->: {degree: 85 }, 'player137']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'follow', edge: [['player148', ->: {degree: 85 }, 'player137']]};
+	                                         ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[157]:	{upset: 'follow', edge: [['player149', ->: {degree: 80 }, 'player130']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'follow', edge: [['player149', ->: {degree: 80 }, 'player130']]};
+	                                         ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[158]:	{upset: 'follow', edge: [['player150', ->: {degree: 90 }, 'player137']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'follow', edge: [['player150', ->: {degree: 90 }, 'player137']]};
+	                                         ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[159]:	{upset: 'follow', edge: [['player150', ->: {degree: 90 }, 'player143']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'follow', edge: [['player150', ->: {degree: 90 }, 'player143']]};
+	                                         ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[160]:	{upset: 'follow', edge: [['player150', ->: {degree: 80 }, 'player120']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'follow', edge: [['player150', ->: {degree: 80 }, 'player120']]};
+	                                         ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[161]:	{upset: 'serve', edge: [['player100', ->: {start_year: 1997, end_year: 2016 }, 'team204']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player100', ->: {start_year: 1997, end_year: 2016 }, 'team204']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[162]:	{upset: 'serve', edge: [['player101', ->: {start_year: 1999, end_year: 2018 }, 'team204']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player101', ->: {start_year: 1999, end_year: 2018 }, 'team204']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[163]:	{upset: 'serve', edge: [['player101', ->: {start_year: 2018, end_year: 2019 }, 'team215']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player101', ->: {start_year: 2018, end_year: 2019 }, 'team215']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[164]:	{upset: 'serve', edge: [['player102', ->: {start_year: 2006, end_year: 2015 }, 'team203']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player102', ->: {start_year: 2006, end_year: 2015 }, 'team203']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[165]:	{upset: 'serve', edge: [['player102', ->: {start_year: 2015, end_year: 2019 }, 'team204']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player102', ->: {start_year: 2015, end_year: 2019 }, 'team204']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[166]:	{upset: 'serve', edge: [['player103', ->: {start_year: 2006, end_year: 2013 }, 'team212']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player103', ->: {start_year: 2006, end_year: 2013 }, 'team212']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[167]:	{upset: 'serve', edge: [['player103', ->: {start_year: 2013, end_year: 2013 }, 'team218']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player103', ->: {start_year: 2013, end_year: 2013 }, 'team218']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[168]:	{upset: 'serve', edge: [['player103', ->: {start_year: 2013, end_year: 2017 }, 'team208']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player103', ->: {start_year: 2013, end_year: 2017 }, 'team208']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[169]:	{upset: 'serve', edge: [['player103', ->: {start_year: 2017, end_year: 2019 }, 'team204']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player103', ->: {start_year: 2017, end_year: 2019 }, 'team204']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[170]:	{upset: 'serve', edge: [['player104', ->: {start_year: 2007, end_year: 2009 }, 'team200']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player104', ->: {start_year: 2007, end_year: 2009 }, 'team200']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[171]:	{upset: 'serve', edge: [['player104', ->: {start_year: 2009, end_year: 2010 }, 'team218']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player104', ->: {start_year: 2009, end_year: 2010 }, 'team218']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[172]:	{upset: 'serve', edge: [['player104', ->: {start_year: 2010, end_year: 2012 }, 'team215']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player104', ->: {start_year: 2010, end_year: 2012 }, 'team215']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[173]:	{upset: 'serve', edge: [['player104', ->: {start_year: 2012, end_year: 2013 }, 'team221']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player104', ->: {start_year: 2012, end_year: 2013 }, 'team221']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[174]:	{upset: 'serve', edge: [['player104', ->: {start_year: 2013, end_year: 2015 }, 'team204']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player104', ->: {start_year: 2013, end_year: 2015 }, 'team204']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[175]:	{upset: 'serve', edge: [['player104', ->: {start_year: 2015, end_year: 2016 }, 'team208']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player104', ->: {start_year: 2015, end_year: 2016 }, 'team208']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[176]:	{upset: 'serve', edge: [['player104', ->: {start_year: 2016, end_year: 2017 }, 'team215']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player104', ->: {start_year: 2016, end_year: 2017 }, 'team215']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[177]:	{upset: 'serve', edge: [['player104', ->: {start_year: 2017, end_year: 2018 }, 'team222']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player104', ->: {start_year: 2017, end_year: 2018 }, 'team222']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[178]:	{upset: 'serve', edge: [['player104', ->: {start_year: 2018, end_year: 2018 }, 'team219']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player104', ->: {start_year: 2018, end_year: 2018 }, 'team219']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[179]:	{upset: 'serve', edge: [['player104', ->: {start_year: 2018, end_year: 2019 }, 'team204']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player104', ->: {start_year: 2018, end_year: 2019 }, 'team204']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[180]:	{upset: 'serve', edge: [['player105', ->: {start_year: 2009, end_year: 2010 }, 'team216']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player105', ->: {start_year: 2009, end_year: 2010 }, 'team216']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[181]:	{upset: 'serve', edge: [['player105', ->: {start_year: 2010, end_year: 2018 }, 'team204']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player105', ->: {start_year: 2010, end_year: 2018 }, 'team204']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[182]:	{upset: 'serve', edge: [['player105', ->: {start_year: 2018, end_year: 2019 }, 'team218']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player105', ->: {start_year: 2018, end_year: 2019 }, 'team218']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[183]:	{upset: 'serve', edge: [['player106', ->: {start_year: 2014, end_year: 2018 }, 'team204']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player106', ->: {start_year: 2014, end_year: 2018 }, 'team204']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[184]:	{upset: 'serve', edge: [['player106', ->: {start_year: 2018, end_year: 2019 }, 'team212']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player106', ->: {start_year: 2018, end_year: 2019 }, 'team212']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[185]:	{upset: 'serve', edge: [['player107', ->: {start_year: 2013, end_year: 2015 }, 'team204']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player107', ->: {start_year: 2013, end_year: 2015 }, 'team204']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[186]:	{upset: 'serve', edge: [['player107', ->: {start_year: 2015, end_year: 2017 }, 'team224']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player107', ->: {start_year: 2015, end_year: 2017 }, 'team224']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[187]:	{upset: 'serve', edge: [['player107', ->: {start_year: 2017, end_year: 2019 }, 'team217']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player107', ->: {start_year: 2017, end_year: 2019 }, 'team217']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[188]:	{upset: 'serve', edge: [['player108', ->: {start_year: 2003, end_year: 2005 }, 'team222']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player108', ->: {start_year: 2003, end_year: 2005 }, 'team222']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[189]:	{upset: 'serve', edge: [['player108', ->: {start_year: 2005, end_year: 2008 }, 'team214']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player108', ->: {start_year: 2005, end_year: 2008 }, 'team214']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[190]:	{upset: 'serve', edge: [['player108', ->: {start_year: 2008, end_year: 2012 }, 'team215']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player108', ->: {start_year: 2008, end_year: 2012 }, 'team215']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[191]:	{upset: 'serve', edge: [['player108', ->: {start_year: 2012, end_year: 2016 }, 'team204']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player108', ->: {start_year: 2012, end_year: 2016 }, 'team204']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[192]:	{upset: 'serve', edge: [['player108', ->: {start_year: 2016, end_year: 2017 }, 'team206']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player108', ->: {start_year: 2016, end_year: 2017 }, 'team206']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[193]:	{upset: 'serve', edge: [['player109', ->: {start_year: 2010, end_year: 2015 }, 'team204']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player109', ->: {start_year: 2010, end_year: 2015 }, 'team204']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[194]:	{upset: 'serve', edge: [['player109', ->: {start_year: 2015, end_year: 2017 }, 'team222']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player109', ->: {start_year: 2015, end_year: 2017 }, 'team222']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[195]:	{upset: 'serve', edge: [['player109', ->: {start_year: 2017, end_year: 2017 }, 'team219']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player109', ->: {start_year: 2017, end_year: 2017 }, 'team219']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[196]:	{upset: 'serve', edge: [['player110', ->: {start_year: 2011, end_year: 2015 }, 'team204']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player110', ->: {start_year: 2011, end_year: 2015 }, 'team204']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[197]:	{upset: 'serve', edge: [['player110', ->: {start_year: 2015, end_year: 2017 }, 'team218']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player110', ->: {start_year: 2015, end_year: 2017 }, 'team218']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[198]:	{upset: 'serve', edge: [['player110', ->: {start_year: 2017, end_year: 2019 }, 'team220']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player110', ->: {start_year: 2017, end_year: 2019 }, 'team220']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[199]:	{upset: 'serve', edge: [['player111', ->: {start_year: 2003, end_year: 2011 }, 'team215']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player111', ->: {start_year: 2003, end_year: 2011 }, 'team215']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[200]:	{upset: 'serve', edge: [['player111', ->: {start_year: 2011, end_year: 2015 }, 'team220']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player111', ->: {start_year: 2011, end_year: 2015 }, 'team220']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[201]:	{upset: 'serve', edge: [['player111', ->: {start_year: 2015, end_year: 2016 }, 'team204']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player111', ->: {start_year: 2015, end_year: 2016 }, 'team204']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[202]:	{upset: 'serve', edge: [['player111', ->: {start_year: 2016, end_year: 2018 }, 'team200']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player111', ->: {start_year: 2016, end_year: 2018 }, 'team200']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[203]:	{upset: 'serve', edge: [['player112', ->: {start_year: 2015, end_year: 2017 }, 'team204']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player112', ->: {start_year: 2015, end_year: 2017 }, 'team204']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[204]:	{upset: 'serve', edge: [['player112', ->: {start_year: 2017, end_year: 2019 }, 'team226']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player112', ->: {start_year: 2017, end_year: 2019 }, 'team226']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[205]:	{upset: 'serve', edge: [['player112', ->: {start_year: 2019, end_year: 2019 }, 'team219']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player112', ->: {start_year: 2019, end_year: 2019 }, 'team219']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[206]:	{upset: 'serve', edge: [['player113', ->: {start_year: 2016, end_year: 2019 }, 'team204']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player113', ->: {start_year: 2016, end_year: 2019 }, 'team204']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[207]:	{upset: 'serve', edge: [['player114', ->: {start_year: 1997, end_year: 2000 }, 'team218']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player114', ->: {start_year: 1997, end_year: 2000 }, 'team218']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[208]:	{upset: 'serve', edge: [['player114', ->: {start_year: 2000, end_year: 2004 }, 'team226']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player114', ->: {start_year: 2000, end_year: 2004 }, 'team226']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[209]:	{upset: 'serve', edge: [['player114', ->: {start_year: 2004, end_year: 2010 }, 'team202']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player114', ->: {start_year: 2004, end_year: 2010 }, 'team202']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[210]:	{upset: 'serve', edge: [['player114', ->: {start_year: 2013, end_year: 2013 }, 'team204']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player114', ->: {start_year: 2013, end_year: 2013 }, 'team204']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[211]:	{upset: 'serve', edge: [['player115', ->: {start_year: 1996, end_year: 2016 }, 'team210']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player115', ->: {start_year: 1996, end_year: 2016 }, 'team210']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[212]:	{upset: 'serve', edge: [['player116', ->: {start_year: 2003, end_year: 2010 }, 'team216']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player116', ->: {start_year: 2003, end_year: 2010 }, 'team216']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[213]:	{upset: 'serve', edge: [['player116', ->: {start_year: 2010, end_year: 2014 }, 'team229']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player116', ->: {start_year: 2010, end_year: 2014 }, 'team229']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[214]:	{upset: 'serve', edge: [['player116', ->: {start_year: 2014, end_year: 2018 }, 'team216']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player116', ->: {start_year: 2014, end_year: 2018 }, 'team216']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[215]:	{upset: 'serve', edge: [['player116', ->: {start_year: 2018, end_year: 2019 }, 'team210']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player116', ->: {start_year: 2018, end_year: 2019 }, 'team210']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[216]:	{upset: 'serve', edge: [['player118', ->: {start_year: 2008, end_year: 2019 }, 'team205']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player118', ->: {start_year: 2008, end_year: 2019 }, 'team205']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[217]:	{upset: 'serve', edge: [['player119', ->: {start_year: 2007, end_year: 2016 }, 'team205']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player119', ->: {start_year: 2007, end_year: 2016 }, 'team205']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[218]:	{upset: 'serve', edge: [['player119', ->: {start_year: 2016, end_year: 2019 }, 'team200']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player119', ->: {start_year: 2016, end_year: 2019 }, 'team200']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[219]:	{upset: 'serve', edge: [['player120', ->: {start_year: 2009, end_year: 2012 }, 'team205']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player120', ->: {start_year: 2009, end_year: 2012 }, 'team205']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[220]:	{upset: 'serve', edge: [['player120', ->: {start_year: 2012, end_year: 2019 }, 'team202']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player120', ->: {start_year: 2012, end_year: 2019 }, 'team202']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[221]:	{upset: 'serve', edge: [['player121', ->: {start_year: 2005, end_year: 2011 }, 'team215']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player121', ->: {start_year: 2005, end_year: 2011 }, 'team215']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[222]:	{upset: 'serve', edge: [['player121', ->: {start_year: 2011, end_year: 2017 }, 'team207']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player121', ->: {start_year: 2011, end_year: 2017 }, 'team207']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[223]:	{upset: 'serve', edge: [['player121', ->: {start_year: 2017, end_year: 2021 }, 'team202']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player121', ->: {start_year: 2017, end_year: 2021 }, 'team202']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[224]:	{upset: 'serve', edge: [['player122', ->: {start_year: 2008, end_year: 2018 }, 'team207']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player122', ->: {start_year: 2008, end_year: 2018 }, 'team207']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[225]:	{upset: 'serve', edge: [['player122', ->: {start_year: 2018, end_year: 2019 }, 'team213']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player122', ->: {start_year: 2018, end_year: 2019 }, 'team213']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[226]:	{upset: 'serve', edge: [['player122', ->: {start_year: 2019, end_year: 2019 }, 'team223']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player122', ->: {start_year: 2019, end_year: 2019 }, 'team223']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[227]:	{upset: 'serve', edge: [['player123', ->: {start_year: 2011, end_year: 2017 }, 'team209']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player123', ->: {start_year: 2011, end_year: 2017 }, 'team209']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[228]:	{upset: 'serve', edge: [['player123', ->: {start_year: 2017, end_year: 2019 }, 'team206']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player123', ->: {start_year: 2017, end_year: 2019 }, 'team206']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[229]:	{upset: 'serve', edge: [['player124', ->: {start_year: 2006, end_year: 2014 }, 'team217']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player124', ->: {start_year: 2006, end_year: 2014 }, 'team217']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[230]:	{upset: 'serve', edge: [['player124', ->: {start_year: 2014, end_year: 2015 }, 'team213']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player124', ->: {start_year: 2014, end_year: 2015 }, 'team213']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[231]:	{upset: 'serve', edge: [['player124', ->: {start_year: 2015, end_year: 2016 }, 'team208']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player124', ->: {start_year: 2015, end_year: 2016 }, 'team208']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[232]:	{upset: 'serve', edge: [['player124', ->: {start_year: 2016, end_year: 2017 }, 'team221']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player124', ->: {start_year: 2016, end_year: 2017 }, 'team221']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[233]:	{upset: 'serve', edge: [['player124', ->: {start_year: 2017, end_year: 2018 }, 'team211']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player124', ->: {start_year: 2017, end_year: 2018 }, 'team211']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[234]:	{upset: 'serve', edge: [['player124', ->: {start_year: 2018, end_year: 2019 }, 'team210']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player124', ->: {start_year: 2018, end_year: 2019 }, 'team210']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[235]:	{upset: 'serve', edge: [['player125', ->: {start_year: 2002, end_year: 2018 }, 'team204']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player125', ->: {start_year: 2002, end_year: 2018 }, 'team204']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[236]:	{upset: 'serve', edge: [['player126', ->: {start_year: 2011, end_year: 2017 }, 'team216']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player126', ->: {start_year: 2011, end_year: 2017 }, 'team216']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[237]:	{upset: 'serve', edge: [['player126', ->: {start_year: 2017, end_year: 2019 }, 'team217']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player126', ->: {start_year: 2017, end_year: 2019 }, 'team217']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[238]:	{upset: 'serve', edge: [['player127', ->: {start_year: 1998, end_year: 2004 }, 'team218']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player127', ->: {start_year: 1998, end_year: 2004 }, 'team218']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[239]:	{upset: 'serve', edge: [['player127', ->: {start_year: 2004, end_year: 2009 }, 'team227']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player127', ->: {start_year: 2004, end_year: 2009 }, 'team227']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[240]:	{upset: 'serve', edge: [['player127', ->: {start_year: 2009, end_year: 2010 }, 'team226']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player127', ->: {start_year: 2009, end_year: 2010 }, 'team226']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[241]:	{upset: 'serve', edge: [['player127', ->: {start_year: 2010, end_year: 2011 }, 'team214']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player127', ->: {start_year: 2010, end_year: 2011 }, 'team214']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[242]:	{upset: 'serve', edge: [['player127', ->: {start_year: 2011, end_year: 2014 }, 'team213']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player127', ->: {start_year: 2011, end_year: 2014 }, 'team213']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[243]:	{upset: 'serve', edge: [['player127', ->: {start_year: 2014, end_year: 2017 }, 'team212']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player127', ->: {start_year: 2014, end_year: 2017 }, 'team212']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[244]:	{upset: 'serve', edge: [['player127', ->: {start_year: 2017, end_year: 2018 }, 'team208']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player127', ->: {start_year: 2017, end_year: 2018 }, 'team208']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[245]:	{upset: 'serve', edge: [['player127', ->: {start_year: 2018, end_year: 2019 }, 'team222']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player127', ->: {start_year: 2018, end_year: 2019 }, 'team222']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[246]:	{upset: 'serve', edge: [['player128', ->: {start_year: 2003, end_year: 2011 }, 'team201']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player128', ->: {start_year: 2003, end_year: 2011 }, 'team201']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[247]:	{upset: 'serve', edge: [['player128', ->: {start_year: 2011, end_year: 2017 }, 'team223']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player128', ->: {start_year: 2011, end_year: 2017 }, 'team223']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[248]:	{upset: 'serve', edge: [['player128', ->: {start_year: 2017, end_year: 2018 }, 'team205']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player128', ->: {start_year: 2017, end_year: 2018 }, 'team205']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[249]:	{upset: 'serve', edge: [['player128', ->: {start_year: 2018, end_year: 2019 }, 'team202']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player128', ->: {start_year: 2018, end_year: 2019 }, 'team202']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[250]:	{upset: 'serve', edge: [['player129', ->: {start_year: 2003, end_year: 2016 }, 'team229']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player129', ->: {start_year: 2003, end_year: 2016 }, 'team229']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[251]:	{upset: 'serve', edge: [['player129', ->: {start_year: 2016, end_year: 2017 }, 'team221']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player129', ->: {start_year: 2016, end_year: 2017 }, 'team221']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[252]:	{upset: 'serve', edge: [['player129', ->: {start_year: 2017, end_year: 2018 }, 'team216']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player129', ->: {start_year: 2017, end_year: 2018 }, 'team216']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[253]:	{upset: 'serve', edge: [['player129', ->: {start_year: 2018, end_year: 2019 }, 'team229']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player129', ->: {start_year: 2018, end_year: 2019 }, 'team229']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[254]:	{upset: 'serve', edge: [['player130', ->: {start_year: 2014, end_year: 2019 }, 'team219']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player130', ->: {start_year: 2014, end_year: 2019 }, 'team219']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[255]:	{upset: 'serve', edge: [['player131', ->: {start_year: 2010, end_year: 2017 }, 'team220']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player131', ->: {start_year: 2010, end_year: 2017 }, 'team220']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[256]:	{upset: 'serve', edge: [['player131', ->: {start_year: 2017, end_year: 2019 }, 'team205']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player131', ->: {start_year: 2017, end_year: 2019 }, 'team205']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[257]:	{upset: 'serve', edge: [['player132', ->: {start_year: 2013, end_year: 2019 }, 'team225']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player132', ->: {start_year: 2013, end_year: 2019 }, 'team225']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[258]:	{upset: 'serve', edge: [['player133', ->: {start_year: 2002, end_year: 2011 }, 'team202']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player133', ->: {start_year: 2002, end_year: 2011 }, 'team202']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[259]:	{upset: 'serve', edge: [['player134', ->: {start_year: 2009, end_year: 2018 }, 'team207']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player134', ->: {start_year: 2009, end_year: 2018 }, 'team207']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[260]:	{upset: 'serve', edge: [['player134', ->: {start_year: 2018, end_year: 2019 }, 'team224']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player134', ->: {start_year: 2018, end_year: 2019 }, 'team224']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[261]:	{upset: 'serve', edge: [['player135', ->: {start_year: 2012, end_year: 2019 }, 'team203']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player135', ->: {start_year: 2012, end_year: 2019 }, 'team203']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[262]:	{upset: 'serve', edge: [['player136', ->: {start_year: 1996, end_year: 1998 }, 'team214']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player136', ->: {start_year: 1996, end_year: 1998 }, 'team214']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[263]:	{upset: 'serve', edge: [['player136', ->: {start_year: 1998, end_year: 2004 }, 'team213']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player136', ->: {start_year: 1998, end_year: 2004 }, 'team213']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[264]:	{upset: 'serve', edge: [['player136', ->: {start_year: 2004, end_year: 2012 }, 'team214']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player136', ->: {start_year: 2004, end_year: 2012 }, 'team214']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[265]:	{upset: 'serve', edge: [['player136', ->: {start_year: 2012, end_year: 2015 }, 'team210']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player136', ->: {start_year: 2012, end_year: 2015 }, 'team210']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[266]:	{upset: 'serve', edge: [['player137', ->: {start_year: 1998, end_year: 2019 }, 'team213']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player137', ->: {start_year: 1998, end_year: 2019 }, 'team213']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[267]:	{upset: 'serve', edge: [['player138', ->: {start_year: 2001, end_year: 2008 }, 'team212']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player138', ->: {start_year: 2001, end_year: 2008 }, 'team212']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[268]:	{upset: 'serve', edge: [['player138', ->: {start_year: 2008, end_year: 2014 }, 'team210']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player138', ->: {start_year: 2008, end_year: 2014 }, 'team210']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[269]:	{upset: 'serve', edge: [['player138', ->: {start_year: 2014, end_year: 2016 }, 'team221']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player138', ->: {start_year: 2014, end_year: 2016 }, 'team221']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[270]:	{upset: 'serve', edge: [['player138', ->: {start_year: 2016, end_year: 2019 }, 'team204']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player138', ->: {start_year: 2016, end_year: 2019 }, 'team204']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[271]:	{upset: 'serve', edge: [['player138', ->: {start_year: 2019, end_year: 2020 }, 'team225']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player138', ->: {start_year: 2019, end_year: 2020 }, 'team225']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[272]:	{upset: 'serve', edge: [['player139', ->: {start_year: 2008, end_year: 2019 }, 'team212']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player139', ->: {start_year: 2008, end_year: 2019 }, 'team212']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[273]:	{upset: 'serve', edge: [['player139', ->: {start_year: 2019, end_year: 2019 }, 'team218']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player139', ->: {start_year: 2019, end_year: 2019 }, 'team218']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[274]:	{upset: 'serve', edge: [['player140', ->: {start_year: 1994, end_year: 2000 }, 'team224']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player140', ->: {start_year: 1994, end_year: 2000 }, 'team224']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[275]:	{upset: 'serve', edge: [['player140', ->: {start_year: 2000, end_year: 2007 }, 'team226']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player140', ->: {start_year: 2000, end_year: 2007 }, 'team226']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[276]:	{upset: 'serve', edge: [['player140', ->: {start_year: 2007, end_year: 2012 }, 'team214']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player140', ->: {start_year: 2007, end_year: 2012 }, 'team214']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[277]:	{upset: 'serve', edge: [['player140', ->: {start_year: 2012, end_year: 2013 }, 'team207']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player140', ->: {start_year: 2012, end_year: 2013 }, 'team207']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[278]:	{upset: 'serve', edge: [['player141', ->: {start_year: 1996, end_year: 2003 }, 'team225']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player141', ->: {start_year: 1996, end_year: 2003 }, 'team225']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[279]:	{upset: 'serve', edge: [['player141', ->: {start_year: 2003, end_year: 2007 }, 'team205']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player141', ->: {start_year: 2003, end_year: 2007 }, 'team205']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[280]:	{upset: 'serve', edge: [['player141', ->: {start_year: 2007, end_year: 2012 }, 'team217']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player141', ->: {start_year: 2007, end_year: 2012 }, 'team217']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[281]:	{upset: 'serve', edge: [['player141', ->: {start_year: 2012, end_year: 2014 }, 'team229']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player141', ->: {start_year: 2012, end_year: 2014 }, 'team229']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[282]:	{upset: 'serve', edge: [['player142', ->: {start_year: 2011, end_year: 2019 }, 'team200']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player142', ->: {start_year: 2011, end_year: 2019 }, 'team200']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[283]:	{upset: 'serve', edge: [['player143', ->: {start_year: 2015, end_year: 2019 }, 'team223']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player143', ->: {start_year: 2015, end_year: 2019 }, 'team223']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[284]:	{upset: 'serve', edge: [['player143', ->: {start_year: 2019, end_year: 2020 }, 'team213']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player143', ->: {start_year: 2019, end_year: 2020 }, 'team213']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[285]:	{upset: 'serve', edge: [['player144', ->: {start_year: 1992, end_year: 1996 }, 'team226']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player144', ->: {start_year: 1992, end_year: 1996 }, 'team226']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[286]:	{upset: 'serve', edge: [['player144', ->: {start_year: 1996, end_year: 2004 }, 'team210']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player144', ->: {start_year: 1996, end_year: 2004 }, 'team210']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[287]:	{upset: 'serve', edge: [['player144', ->: {start_year: 2004, end_year: 2008 }, 'team229']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player144', ->: {start_year: 2004, end_year: 2008 }, 'team229']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[288]:	{upset: 'serve', edge: [['player144', ->: {start_year: 2008, end_year: 2009 }, 'team214']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player144', ->: {start_year: 2008, end_year: 2009 }, 'team214']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[289]:	{upset: 'serve', edge: [['player144', ->: {start_year: 2009, end_year: 2010 }, 'team216']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player144', ->: {start_year: 2009, end_year: 2010 }, 'team216']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[290]:	{upset: 'serve', edge: [['player144', ->: {start_year: 2010, end_year: 2011 }, 'team217']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player144', ->: {start_year: 2010, end_year: 2011 }, 'team217']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[291]:	{upset: 'serve', edge: [['player145', ->: {start_year: 2008, end_year: 2012 }, 'team228']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player145', ->: {start_year: 2008, end_year: 2012 }, 'team228']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[292]:	{upset: 'serve', edge: [['player145', ->: {start_year: 2012, end_year: 2015 }, 'team201']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player145', ->: {start_year: 2012, end_year: 2015 }, 'team201']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[293]:	{upset: 'serve', edge: [['player145', ->: {start_year: 2015, end_year: 2016 }, 'team213']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player145', ->: {start_year: 2015, end_year: 2016 }, 'team213']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[294]:	{upset: 'serve', edge: [['player145', ->: {start_year: 2016, end_year: 2018 }, 'team200']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player145', ->: {start_year: 2016, end_year: 2018 }, 'team200']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[295]:	{upset: 'serve', edge: [['player145', ->: {start_year: 2018, end_year: 2019 }, 'team210']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player145', ->: {start_year: 2018, end_year: 2019 }, 'team210']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[296]:	{upset: 'serve', edge: [['player146', ->: {start_year: 2004, end_year: 2012 }, 'team226']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player146', ->: {start_year: 2004, end_year: 2012 }, 'team226']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[297]:	{upset: 'serve', edge: [['player146', ->: {start_year: 2012, end_year: 2013 }, 'team210']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player146', ->: {start_year: 2012, end_year: 2013 }, 'team210']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[298]:	{upset: 'serve', edge: [['player146', ->: {start_year: 2013, end_year: 2016 }, 'team202']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player146', ->: {start_year: 2013, end_year: 2016 }, 'team202']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[299]:	{upset: 'serve', edge: [['player146', ->: {start_year: 2016, end_year: 2017 }, 'team222']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player146', ->: {start_year: 2016, end_year: 2017 }, 'team222']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[300]:	{upset: 'serve', edge: [['player146', ->: {start_year: 2017, end_year: 2018 }, 'team215']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player146', ->: {start_year: 2017, end_year: 2018 }, 'team215']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[301]:	{upset: 'serve', edge: [['player146', ->: {start_year: 2018, end_year: 2019 }, 'team228']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player146', ->: {start_year: 2018, end_year: 2019 }, 'team228']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[302]:	{upset: 'serve', edge: [['player147', ->: {start_year: 2002, end_year: 2010 }, 'team214']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player147', ->: {start_year: 2002, end_year: 2010 }, 'team214']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[303]:	{upset: 'serve', edge: [['player147', ->: {start_year: 2010, end_year: 2015 }, 'team223']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player147', ->: {start_year: 2010, end_year: 2015 }, 'team223']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[304]:	{upset: 'serve', edge: [['player147', ->: {start_year: 2015, end_year: 2016 }, 'team229']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player147', ->: {start_year: 2015, end_year: 2016 }, 'team229']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[305]:	{upset: 'serve', edge: [['player148', ->: {start_year: 1994, end_year: 1996 }, 'team213']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player148', ->: {start_year: 1994, end_year: 1996 }, 'team213']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[306]:	{upset: 'serve', edge: [['player148', ->: {start_year: 1996, end_year: 2001 }, 'team214']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player148', ->: {start_year: 1996, end_year: 2001 }, 'team214']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[307]:	{upset: 'serve', edge: [['player148', ->: {start_year: 2001, end_year: 2008 }, 'team227']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player148', ->: {start_year: 2001, end_year: 2008 }, 'team227']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[308]:	{upset: 'serve', edge: [['player148', ->: {start_year: 2008, end_year: 2012 }, 'team213']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player148', ->: {start_year: 2008, end_year: 2012 }, 'team213']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[309]:	{upset: 'serve', edge: [['player148', ->: {start_year: 2012, end_year: 2013 }, 'team223']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player148', ->: {start_year: 2012, end_year: 2013 }, 'team223']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[310]:	{upset: 'serve', edge: [['player149', ->: {start_year: 2016, end_year: 2019 }, 'team219']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player149', ->: {start_year: 2016, end_year: 2019 }, 'team219']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+[311]:	{upset: 'serve', edge: [['player150', ->: {start_year: 2018, end_year: 2019 }, 'team213']]};
+[22;31mError:	syntax error, unexpected COLON, expecting COMMA:[22;0m
+	{upset: 'serve', edge: [['player150', ->: {start_year: 2018, end_year: 2019 }, 'team213']]};
+	                                        ~
+[22;31mERROR:	should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}
+:[22;0m
+unknow error
+***** EXECUTE FINISH: "basketballplayer-2.X.gql" *****
