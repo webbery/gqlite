@@ -65,7 +65,6 @@ jobs:
       # Execute tests defined by the CMake configuration.  
       # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
       run: |
-        ./tool/l2lite -fngql -s../data/basketballplayer-2.X.ngql -o../data/basketballplayer.gql
         ctest -C Debug --rerun-failed --output-on-failure
     - name: Generate Coverage Report
       working-directory: ${{github.workspace}}/build
