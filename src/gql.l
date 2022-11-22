@@ -109,7 +109,6 @@ create              {
 "query"             { stm._errIndx += yyleng; return OP_QUERY;};
 "where"             { stm._errIndx += yyleng; return OP_WHERE;};
 "index"             { stm._errIndx += yyleng; return KW_INDEX;};
-"path"              { stm._errIndx += yyleng; return KW_PATH;};
 "commit"            { stm._errIndx += yyleng; return KW_COMMIT;};
 "limit"             { stm._errIndx += yyleng; return limit;};
 "profile"           { stm._errIndx += yyleng; return profile;};

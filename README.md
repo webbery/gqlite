@@ -194,7 +194,7 @@ or simply use bidirection:
 {remove: 'graph', vertex: [21, 88]}
 ```
 ###  4.5. <a name='Query'></a>Query
-There are three kinds of query. First is `vertex` which is used to find vertexes instance.  Another one is `edge` which is used to find edges instance. The last one is `path` which is used to find a batch of path from some points to other points.
+
 ####  4.5.1. <a name='intrinctfunction'></a>intrinct function
 ##### count()
 ```javascript
@@ -223,7 +223,7 @@ query all movie that has tag:
     in: 'graph'
 }
 ``` -->
-query a reverted-index:
+Or:
 ```javascript
 {
     query: movie,
@@ -253,11 +253,10 @@ query a list of neighbors, where `1` mean 1'st neighbors:
 ```javascript
 {query: user, from: 'v1', where: {--: 1}}
 ```
-In order to get a search way, you can use `path` to archive it.
+In order to get a search way
 ```javascript
-{query: path, from: 'v1', to: 'v2', where: {--: 'dijk'}}
+
 ```
-which `dijk` means dijk search.
 ###  4.6. <a name='Inference'></a>Inference
 Here we define a kind of inference operator, and apply it to a graph.  
 HMM:

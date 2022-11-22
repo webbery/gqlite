@@ -70,7 +70,7 @@ TEST_CASE("init movies") {
     char* ctag = strtok(nullptr, ",");
     std::string tag = replace_all(ctag);
     char upset[512] = { 0 };
-    sprintf(upset, "{upset: 'tag', edge: [[%d, {--: {tag: '%s'} }, %d]]};", uid, tag.c_str(), mid);
+    sprintf(upset, "{upset: 'tag', edge: [[%d, --: {tag: '%s'}, %d]]};", uid, tag.c_str(), mid);
     gqlite_exec(pHandle, upset, gqlite_exec_callback, nullptr, &ptr);
     gqlite_free(ptr);
     line_num++;

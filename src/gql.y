@@ -74,7 +74,7 @@ struct GASTNode* INIT_NUMBER_AST(T& v) {
 %token <__f> VAR_DECIMAL
 %token <__c> VAR_BASE64 LITERAL_STRING VAR_NAME LITERAL_PATH
 %token <__int> VAR_INTEGER VAR_DATETIME
-%token <node> KW_VERTEX KW_PATH KW_EDGE
+%token <node> KW_VERTEX KW_EDGE
 %token RANGE_BEGIN RANGE_END COLON QUOTE COMMA LEFT_SQUARE RIGHT_SQUARE STAR CR PARAM_BEGIN PARAM_END SEMICOLON
 %token KW_AST KW_ID KW_GRAPH KW_COMMIT
 %token KW_CREATE KW_DROP KW_IN KW_REMOVE KW_UPSET left_arrow right_arrow KW_BIDIRECT_RELATION KW_REST KW_DELETE
@@ -534,7 +534,7 @@ link: LEFT_SQUARE LITERAL_STRING COMMA connection COMMA LITERAL_STRING RIGHT_SQU
                 GEdgeDeclaration* edge = new GEdgeDeclaration("--", value);
                 $$ = NewAst(NodeType::EdgeDeclaration, edge, nullptr, 0);
               };
-connection: RANGE_BEGIN a_link_condition RANGE_END { $$ = $2;}
+connection: a_link_condition { $$ = $1;}
         | a_edge  { $$ = INIT_STRING_AST($1); };
 a_vector: LEFT_SQUARE number_list RIGHT_SQUARE { $$ = $2; };
 number_list: number
