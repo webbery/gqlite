@@ -1,626 +1,624 @@
 ***** EXECUTE: "basketballplayer-2.X.gql" *****
-[0]:	{drop: 'basketballplayer'};
-DROP SUCCESS
-[1]:	{create: 'basketballplayer', group: [{player: ['name','age'], index: ['name']},{team: ['name']},{serve: ['start_year','end_year']},{follow: ['degree']}]};{upset: 'player', vertex: [['player100', {name: 'Tim Duncan', age: 42}]]};
+[0]:	{create: 'basketballplayer', group: [{player: ['name','age'], index: ['name']},{team: ['name']},{serve: ['start_year','end_year']},{follow: ['degree']}]};{upset: 'player', vertex: [['player100', {name: 'Tim Duncan', age: 42}]]};
 UPSET SUCCESS
-[2]:	{upset: 'player', vertex: [['player101', {name: 'Tony Parker', age: 36}]]};
+[1]:	{upset: 'player', vertex: [['player101', {name: 'Tony Parker', age: 36}]]};
 UPSET SUCCESS
-[3]:	{upset: 'player', vertex: [['player102', {name: 'LaMarcus Aldridge', age: 33}]]};
+[2]:	{upset: 'player', vertex: [['player102', {name: 'LaMarcus Aldridge', age: 33}]]};
 UPSET SUCCESS
-[4]:	{upset: 'player', vertex: [['player103', {name: 'Rudy Gay', age: 32}]]};
+[3]:	{upset: 'player', vertex: [['player103', {name: 'Rudy Gay', age: 32}]]};
 UPSET SUCCESS
-[5]:	{upset: 'player', vertex: [['player104', {name: 'Marco Belinelli', age: 32}]]};
+[4]:	{upset: 'player', vertex: [['player104', {name: 'Marco Belinelli', age: 32}]]};
 UPSET SUCCESS
-[6]:	{upset: 'player', vertex: [['player105', {name: 'Danny Green', age: 31}]]};
+[5]:	{upset: 'player', vertex: [['player105', {name: 'Danny Green', age: 31}]]};
 UPSET SUCCESS
-[7]:	{upset: 'player', vertex: [['player106', {name: 'Kyle Anderson', age: 25}]]};
+[6]:	{upset: 'player', vertex: [['player106', {name: 'Kyle Anderson', age: 25}]]};
 UPSET SUCCESS
-[8]:	{upset: 'player', vertex: [['player107', {name: 'Aron Baynes', age: 32}]]};
+[7]:	{upset: 'player', vertex: [['player107', {name: 'Aron Baynes', age: 32}]]};
 UPSET SUCCESS
-[9]:	{upset: 'player', vertex: [['player108', {name: 'Boris Diaw', age: 36}]]};
+[8]:	{upset: 'player', vertex: [['player108', {name: 'Boris Diaw', age: 36}]]};
 UPSET SUCCESS
-[10]:	{upset: 'player', vertex: [['player109', {name: 'Tiago Splitter', age: 34}]]};
+[9]:	{upset: 'player', vertex: [['player109', {name: 'Tiago Splitter', age: 34}]]};
 UPSET SUCCESS
-[11]:	{upset: 'player', vertex: [['player110', {name: 'Cory Joseph', age: 27}]]};
+[10]:	{upset: 'player', vertex: [['player110', {name: 'Cory Joseph', age: 27}]]};
 UPSET SUCCESS
-[12]:	{upset: 'player', vertex: [['player111', {name: 'David West', age: 38}]]};
+[11]:	{upset: 'player', vertex: [['player111', {name: 'David West', age: 38}]]};
 UPSET SUCCESS
-[13]:	{upset: 'player', vertex: [['player112', {name: 'Jonathon Simmons', age: 29}]]};
+[12]:	{upset: 'player', vertex: [['player112', {name: 'Jonathon Simmons', age: 29}]]};
 UPSET SUCCESS
-[14]:	{upset: 'player', vertex: [['player113', {name: 'Dejounte Murray', age: 29}]]};
+[13]:	{upset: 'player', vertex: [['player113', {name: 'Dejounte Murray', age: 29}]]};
 UPSET SUCCESS
-[15]:	{upset: 'player', vertex: [['player114', {name: 'Tracy McGrady', age: 39}]]};
+[14]:	{upset: 'player', vertex: [['player114', {name: 'Tracy McGrady', age: 39}]]};
 UPSET SUCCESS
-[16]:	{upset: 'player', vertex: [['player115', {name: 'Kobe Bryant', age: 40}]]};
+[15]:	{upset: 'player', vertex: [['player115', {name: 'Kobe Bryant', age: 40}]]};
 UPSET SUCCESS
-[17]:	{upset: 'player', vertex: [['player116', {name: 'LeBron James', age: 34}]]};
+[16]:	{upset: 'player', vertex: [['player116', {name: 'LeBron James', age: 34}]]};
 UPSET SUCCESS
-[18]:	{upset: 'player', vertex: [['player117', {name: 'Stephen Curry', age: 31}]]};
+[17]:	{upset: 'player', vertex: [['player117', {name: 'Stephen Curry', age: 31}]]};
 UPSET SUCCESS
-[19]:	{upset: 'player', vertex: [['player118', {name: 'Russell Westbrook', age: 30}]]};
+[18]:	{upset: 'player', vertex: [['player118', {name: 'Russell Westbrook', age: 30}]]};
 UPSET SUCCESS
-[20]:	{upset: 'player', vertex: [['player119', {name: 'Kevin Durant', age: 30}]]};
+[19]:	{upset: 'player', vertex: [['player119', {name: 'Kevin Durant', age: 30}]]};
 UPSET SUCCESS
-[21]:	{upset: 'player', vertex: [['player120', {name: 'James Harden', age: 29}]]};
+[20]:	{upset: 'player', vertex: [['player120', {name: 'James Harden', age: 29}]]};
 UPSET SUCCESS
-[22]:	{upset: 'player', vertex: [['player121', {name: 'Chris Paul', age: 33}]]};
+[21]:	{upset: 'player', vertex: [['player121', {name: 'Chris Paul', age: 33}]]};
 UPSET SUCCESS
-[23]:	{upset: 'player', vertex: [['player122', {name: 'DeAndre Jordan', age: 30}]]};
+[22]:	{upset: 'player', vertex: [['player122', {name: 'DeAndre Jordan', age: 30}]]};
 UPSET SUCCESS
-[24]:	{upset: 'player', vertex: [['player123', {name: 'Ricky Rubio', age: 28}]]};
+[23]:	{upset: 'player', vertex: [['player123', {name: 'Ricky Rubio', age: 28}]]};
 UPSET SUCCESS
-[25]:	{upset: 'player', vertex: [['player124', {name: 'Rajon Rondo', age: 33}]]};
+[24]:	{upset: 'player', vertex: [['player124', {name: 'Rajon Rondo', age: 33}]]};
 UPSET SUCCESS
-[26]:	{upset: 'player', vertex: [['player125', {name: 'Manu Ginobili', age: 41}]]};
+[25]:	{upset: 'player', vertex: [['player125', {name: 'Manu Ginobili', age: 41}]]};
 UPSET SUCCESS
-[27]:	{upset: 'player', vertex: [['player126', {name: 'Kyrie Irving', age: 26}]]};
+[26]:	{upset: 'player', vertex: [['player126', {name: 'Kyrie Irving', age: 26}]]};
 UPSET SUCCESS
-[28]:	{upset: 'player', vertex: [['player127', {name: 'Vince Carter', age: 42}]]};
+[27]:	{upset: 'player', vertex: [['player127', {name: 'Vince Carter', age: 42}]]};
 UPSET SUCCESS
-[29]:	{upset: 'player', vertex: [['player128', {name: 'Carmelo Anthony', age: 34}]]};
+[28]:	{upset: 'player', vertex: [['player128', {name: 'Carmelo Anthony', age: 34}]]};
 UPSET SUCCESS
-[30]:	{upset: 'player', vertex: [['player129', {name: 'Dwyane Wade', age: 37}]]};
+[29]:	{upset: 'player', vertex: [['player129', {name: 'Dwyane Wade', age: 37}]]};
 UPSET SUCCESS
-[31]:	{upset: 'player', vertex: [['player130', {name: 'Joel Embiid', age: 25}]]};
+[30]:	{upset: 'player', vertex: [['player130', {name: 'Joel Embiid', age: 25}]]};
 UPSET SUCCESS
-[32]:	{upset: 'player', vertex: [['player131', {name: 'Paul George', age: 28}]]};
+[31]:	{upset: 'player', vertex: [['player131', {name: 'Paul George', age: 28}]]};
 UPSET SUCCESS
-[33]:	{upset: 'player', vertex: [['player132', {name: 'Giannis Antetokounmpo', age: 24}]]};
+[32]:	{upset: 'player', vertex: [['player132', {name: 'Giannis Antetokounmpo', age: 24}]]};
 UPSET SUCCESS
-[34]:	{upset: 'player', vertex: [['player133', {name: 'Yao Ming', age: 38}]]};
+[33]:	{upset: 'player', vertex: [['player133', {name: 'Yao Ming', age: 38}]]};
 UPSET SUCCESS
-[35]:	{upset: 'player', vertex: [['player134', {name: 'Blake Griffin', age: 30}]]};
+[34]:	{upset: 'player', vertex: [['player134', {name: 'Blake Griffin', age: 30}]]};
 UPSET SUCCESS
-[36]:	{upset: 'player', vertex: [['player135', {name: 'Damian Lillard', age: 28}]]};
+[35]:	{upset: 'player', vertex: [['player135', {name: 'Damian Lillard', age: 28}]]};
 UPSET SUCCESS
-[37]:	{upset: 'player', vertex: [['player136', {name: 'Steve Nash', age: 45}]]};
+[36]:	{upset: 'player', vertex: [['player136', {name: 'Steve Nash', age: 45}]]};
 UPSET SUCCESS
-[38]:	{upset: 'player', vertex: [['player137', {name: 'Dirk Nowitzki', age: 40}]]};
+[37]:	{upset: 'player', vertex: [['player137', {name: 'Dirk Nowitzki', age: 40}]]};
 UPSET SUCCESS
-[39]:	{upset: 'player', vertex: [['player138', {name: 'Paul Gasol', age: 38}]]};
+[38]:	{upset: 'player', vertex: [['player138', {name: 'Paul Gasol', age: 38}]]};
 UPSET SUCCESS
-[40]:	{upset: 'player', vertex: [['player139', {name: 'Marc Gasol', age: 34}]]};
+[39]:	{upset: 'player', vertex: [['player139', {name: 'Marc Gasol', age: 34}]]};
 UPSET SUCCESS
-[41]:	{upset: 'player', vertex: [['player140', {name: 'Grant Hill', age: 46}]]};
+[40]:	{upset: 'player', vertex: [['player140', {name: 'Grant Hill', age: 46}]]};
 UPSET SUCCESS
-[42]:	{upset: 'player', vertex: [['player141', {name: 'Ray Allen', age: 43}]]};
+[41]:	{upset: 'player', vertex: [['player141', {name: 'Ray Allen', age: 43}]]};
 UPSET SUCCESS
-[43]:	{upset: 'player', vertex: [['player142', {name: 'Klay Thompson', age: 29}]]};
+[42]:	{upset: 'player', vertex: [['player142', {name: 'Klay Thompson', age: 29}]]};
 UPSET SUCCESS
-[44]:	{upset: 'player', vertex: [['player143', {name: 'Kristaps Porzingis', age: 23}]]};
+[43]:	{upset: 'player', vertex: [['player143', {name: 'Kristaps Porzingis', age: 23}]]};
 UPSET SUCCESS
-[45]:	{upset: 'player', vertex: [['player144', {name: 'Shaquille O\'Neal', age: 47}]]};
+[44]:	{upset: 'player', vertex: [['player144', {name: 'Shaquille O\'Neal', age: 47}]]};
 UPSET SUCCESS
-[46]:	{upset: 'player', vertex: [['player145', {name: 'JaVale McGee', age: 31}]]};
+[45]:	{upset: 'player', vertex: [['player145', {name: 'JaVale McGee', age: 31}]]};
 UPSET SUCCESS
-[47]:	{upset: 'player', vertex: [['player146', {name: 'Dwight Howard', age: 33}]]};
+[46]:	{upset: 'player', vertex: [['player146', {name: 'Dwight Howard', age: 33}]]};
 UPSET SUCCESS
-[48]:	{upset: 'player', vertex: [['player147', {name: 'Amar\'e Stoudemire', age: 36}]]};
+[47]:	{upset: 'player', vertex: [['player147', {name: 'Amar\'e Stoudemire', age: 36}]]};
 UPSET SUCCESS
-[49]:	{upset: 'player', vertex: [['player148', {name: 'Jason Kidd', age: 45}]]};
+[48]:	{upset: 'player', vertex: [['player148', {name: 'Jason Kidd', age: 45}]]};
 UPSET SUCCESS
-[50]:	{upset: 'player', vertex: [['player149', {name: 'Ben Simmons', age: 22}]]};
+[49]:	{upset: 'player', vertex: [['player149', {name: 'Ben Simmons', age: 22}]]};
 UPSET SUCCESS
-[51]:	{upset: 'player', vertex: [['player150', {name: 'Luka Doncic', age: 20}]]};
+[50]:	{upset: 'player', vertex: [['player150', {name: 'Luka Doncic', age: 20}]]};
 UPSET SUCCESS
-[52]:	{upset: 'team', vertex: [['team200', {name: 'Warriors'}]]};
+[51]:	{upset: 'team', vertex: [['team200', {name: 'Warriors'}]]};
 UPSET SUCCESS
-[53]:	{upset: 'team', vertex: [['team201', {name: 'Nuggets'}]]};
+[52]:	{upset: 'team', vertex: [['team201', {name: 'Nuggets'}]]};
 UPSET SUCCESS
-[54]:	{upset: 'team', vertex: [['team202', {name: 'Rockets'}]]};
+[53]:	{upset: 'team', vertex: [['team202', {name: 'Rockets'}]]};
 UPSET SUCCESS
-[55]:	{upset: 'team', vertex: [['team203', {name: 'Trail Blazers'}]]};
+[54]:	{upset: 'team', vertex: [['team203', {name: 'Trail Blazers'}]]};
 UPSET SUCCESS
-[56]:	{upset: 'team', vertex: [['team204', {name: 'Spurs'}]]};
+[55]:	{upset: 'team', vertex: [['team204', {name: 'Spurs'}]]};
 UPSET SUCCESS
-[57]:	{upset: 'team', vertex: [['team205', {name: 'Thunders'}]]};
+[56]:	{upset: 'team', vertex: [['team205', {name: 'Thunders'}]]};
 UPSET SUCCESS
-[58]:	{upset: 'team', vertex: [['team206', {name: 'Jazz'}]]};
+[57]:	{upset: 'team', vertex: [['team206', {name: 'Jazz'}]]};
 UPSET SUCCESS
-[59]:	{upset: 'team', vertex: [['team207', {name: 'Clippers'}]]};
+[58]:	{upset: 'team', vertex: [['team207', {name: 'Clippers'}]]};
 UPSET SUCCESS
-[60]:	{upset: 'team', vertex: [['team208', {name: 'Kings'}]]};
+[59]:	{upset: 'team', vertex: [['team208', {name: 'Kings'}]]};
 UPSET SUCCESS
-[61]:	{upset: 'team', vertex: [['team209', {name: 'Timberwolves'}]]};
+[60]:	{upset: 'team', vertex: [['team209', {name: 'Timberwolves'}]]};
 UPSET SUCCESS
-[62]:	{upset: 'team', vertex: [['team210', {name: 'Lakers'}]]};
+[61]:	{upset: 'team', vertex: [['team210', {name: 'Lakers'}]]};
 UPSET SUCCESS
-[63]:	{upset: 'team', vertex: [['team211', {name: 'Pelicans'}]]};
+[62]:	{upset: 'team', vertex: [['team211', {name: 'Pelicans'}]]};
 UPSET SUCCESS
-[64]:	{upset: 'team', vertex: [['team212', {name: 'Grizzlies'}]]};
+[63]:	{upset: 'team', vertex: [['team212', {name: 'Grizzlies'}]]};
 UPSET SUCCESS
-[65]:	{upset: 'team', vertex: [['team213', {name: 'Mavericks'}]]};
+[64]:	{upset: 'team', vertex: [['team213', {name: 'Mavericks'}]]};
 UPSET SUCCESS
-[66]:	{upset: 'team', vertex: [['team214', {name: 'Suns'}]]};
+[65]:	{upset: 'team', vertex: [['team214', {name: 'Suns'}]]};
 UPSET SUCCESS
-[67]:	{upset: 'team', vertex: [['team215', {name: 'Hornets'}]]};
+[66]:	{upset: 'team', vertex: [['team215', {name: 'Hornets'}]]};
 UPSET SUCCESS
-[68]:	{upset: 'team', vertex: [['team216', {name: 'Cavaliers'}]]};
+[67]:	{upset: 'team', vertex: [['team216', {name: 'Cavaliers'}]]};
 UPSET SUCCESS
-[69]:	{upset: 'team', vertex: [['team217', {name: 'Celtics'}]]};
+[68]:	{upset: 'team', vertex: [['team217', {name: 'Celtics'}]]};
 UPSET SUCCESS
-[70]:	{upset: 'team', vertex: [['team218', {name: 'Raptors'}]]};
+[69]:	{upset: 'team', vertex: [['team218', {name: 'Raptors'}]]};
 UPSET SUCCESS
-[71]:	{upset: 'team', vertex: [['team219', {name: '76ers'}]]};
+[70]:	{upset: 'team', vertex: [['team219', {name: '76ers'}]]};
 UPSET SUCCESS
-[72]:	{upset: 'team', vertex: [['team220', {name: 'Pacers'}]]};
+[71]:	{upset: 'team', vertex: [['team220', {name: 'Pacers'}]]};
 UPSET SUCCESS
-[73]:	{upset: 'team', vertex: [['team221', {name: 'Bulls'}]]};
+[72]:	{upset: 'team', vertex: [['team221', {name: 'Bulls'}]]};
 UPSET SUCCESS
-[74]:	{upset: 'team', vertex: [['team222', {name: 'Hawks'}]]};
+[73]:	{upset: 'team', vertex: [['team222', {name: 'Hawks'}]]};
 UPSET SUCCESS
-[75]:	{upset: 'team', vertex: [['team223', {name: 'Knicks'}]]};
+[74]:	{upset: 'team', vertex: [['team223', {name: 'Knicks'}]]};
 UPSET SUCCESS
-[76]:	{upset: 'team', vertex: [['team224', {name: 'Pistons'}]]};
+[75]:	{upset: 'team', vertex: [['team224', {name: 'Pistons'}]]};
 UPSET SUCCESS
-[77]:	{upset: 'team', vertex: [['team225', {name: 'Bucks'}]]};
+[76]:	{upset: 'team', vertex: [['team225', {name: 'Bucks'}]]};
 UPSET SUCCESS
-[78]:	{upset: 'team', vertex: [['team226', {name: 'Magic'}]]};
+[77]:	{upset: 'team', vertex: [['team226', {name: 'Magic'}]]};
 UPSET SUCCESS
-[79]:	{upset: 'team', vertex: [['team227', {name: 'Nets'}]]};
+[78]:	{upset: 'team', vertex: [['team227', {name: 'Nets'}]]};
 UPSET SUCCESS
-[80]:	{upset: 'team', vertex: [['team228', {name: 'Wizards'}]]};
+[79]:	{upset: 'team', vertex: [['team228', {name: 'Wizards'}]]};
 UPSET SUCCESS
-[81]:	{upset: 'team', vertex: [['team229', {name: 'Heat'}]]};
+[80]:	{upset: 'team', vertex: [['team229', {name: 'Heat'}]]};
 UPSET SUCCESS
-[82]:	{upset: 'follow', edge: [['player100', ->: {degree: 95 }, 'player101']]};
+[81]:	{upset: 'follow', edge: [['player100', ->: {degree: 95 }, 'player101']]};
 UPSET SUCCESS
-[83]:	{upset: 'follow', edge: [['player100', ->: {degree: 95 }, 'player125']]};
+[82]:	{upset: 'follow', edge: [['player100', ->: {degree: 95 }, 'player125']]};
 UPSET SUCCESS
-[84]:	{upset: 'follow', edge: [['player101', ->: {degree: 95 }, 'player100']]};
+[83]:	{upset: 'follow', edge: [['player101', ->: {degree: 95 }, 'player100']]};
 UPSET SUCCESS
-[85]:	{upset: 'follow', edge: [['player101', ->: {degree: 95 }, 'player125']]};
+[84]:	{upset: 'follow', edge: [['player101', ->: {degree: 95 }, 'player125']]};
 UPSET SUCCESS
-[86]:	{upset: 'follow', edge: [['player101', ->: {degree: 90 }, 'player102']]};
+[85]:	{upset: 'follow', edge: [['player101', ->: {degree: 90 }, 'player102']]};
 UPSET SUCCESS
-[87]:	{upset: 'follow', edge: [['player125', ->: {degree: 90 }, 'player100']]};
+[86]:	{upset: 'follow', edge: [['player125', ->: {degree: 90 }, 'player100']]};
 UPSET SUCCESS
-[88]:	{upset: 'follow', edge: [['player102', ->: {degree: 75 }, 'player101']]};
+[87]:	{upset: 'follow', edge: [['player102', ->: {degree: 75 }, 'player101']]};
 UPSET SUCCESS
-[89]:	{upset: 'follow', edge: [['player102', ->: {degree: 75 }, 'player100']]};
+[88]:	{upset: 'follow', edge: [['player102', ->: {degree: 75 }, 'player100']]};
 UPSET SUCCESS
-[90]:	{upset: 'follow', edge: [['player103', ->: {degree: 70 }, 'player102']]};
+[89]:	{upset: 'follow', edge: [['player103', ->: {degree: 70 }, 'player102']]};
 UPSET SUCCESS
-[91]:	{upset: 'follow', edge: [['player104', ->: {degree: 50 }, 'player101']]};
+[90]:	{upset: 'follow', edge: [['player104', ->: {degree: 50 }, 'player101']]};
 UPSET SUCCESS
-[92]:	{upset: 'follow', edge: [['player104', ->: {degree: 55 }, 'player100']]};
+[91]:	{upset: 'follow', edge: [['player104', ->: {degree: 55 }, 'player100']]};
 UPSET SUCCESS
-[93]:	{upset: 'follow', edge: [['player104', ->: {degree: 60 }, 'player105']]};
+[92]:	{upset: 'follow', edge: [['player104', ->: {degree: 60 }, 'player105']]};
 UPSET SUCCESS
-[94]:	{upset: 'follow', edge: [['player105', ->: {degree: 83 }, 'player104']]};
+[93]:	{upset: 'follow', edge: [['player105', ->: {degree: 83 }, 'player104']]};
 UPSET SUCCESS
-[95]:	{upset: 'follow', edge: [['player105', ->: {degree: 70 }, 'player100']]};
+[94]:	{upset: 'follow', edge: [['player105', ->: {degree: 70 }, 'player100']]};
 UPSET SUCCESS
-[96]:	{upset: 'follow', edge: [['player105', ->: {degree: 80 }, 'player116']]};
+[95]:	{upset: 'follow', edge: [['player105', ->: {degree: 80 }, 'player116']]};
 UPSET SUCCESS
-[97]:	{upset: 'follow', edge: [['player107', ->: {degree: 80 }, 'player100']]};
+[96]:	{upset: 'follow', edge: [['player107', ->: {degree: 80 }, 'player100']]};
 UPSET SUCCESS
-[98]:	{upset: 'follow', edge: [['player108', ->: {degree: 80 }, 'player101']]};
+[97]:	{upset: 'follow', edge: [['player108', ->: {degree: 80 }, 'player101']]};
 UPSET SUCCESS
-[99]:	{upset: 'follow', edge: [['player108', ->: {degree: 80 }, 'player100']]};
+[98]:	{upset: 'follow', edge: [['player108', ->: {degree: 80 }, 'player100']]};
 UPSET SUCCESS
-[100]:	{upset: 'follow', edge: [['player109', ->: {degree: 80 }, 'player100']]};
+[99]:	{upset: 'follow', edge: [['player109', ->: {degree: 80 }, 'player100']]};
 UPSET SUCCESS
-[101]:	{upset: 'follow', edge: [['player109', ->: {degree: 90 }, 'player125']]};
+[100]:	{upset: 'follow', edge: [['player109', ->: {degree: 90 }, 'player125']]};
 UPSET SUCCESS
-[102]:	{upset: 'follow', edge: [['player113', ->: {degree: 99 }, 'player100']]};
+[101]:	{upset: 'follow', edge: [['player113', ->: {degree: 99 }, 'player100']]};
 UPSET SUCCESS
-[103]:	{upset: 'follow', edge: [['player113', ->: {degree: 99 }, 'player101']]};
+[102]:	{upset: 'follow', edge: [['player113', ->: {degree: 99 }, 'player101']]};
 UPSET SUCCESS
-[104]:	{upset: 'follow', edge: [['player113', ->: {degree: 99 }, 'player125']]};
+[103]:	{upset: 'follow', edge: [['player113', ->: {degree: 99 }, 'player125']]};
 UPSET SUCCESS
-[105]:	{upset: 'follow', edge: [['player113', ->: {degree: 99 }, 'player104']]};
+[104]:	{upset: 'follow', edge: [['player113', ->: {degree: 99 }, 'player104']]};
 UPSET SUCCESS
-[106]:	{upset: 'follow', edge: [['player113', ->: {degree: 99 }, 'player105']]};
+[105]:	{upset: 'follow', edge: [['player113', ->: {degree: 99 }, 'player105']]};
 UPSET SUCCESS
-[107]:	{upset: 'follow', edge: [['player113', ->: {degree: 99 }, 'player116']]};
+[106]:	{upset: 'follow', edge: [['player113', ->: {degree: 99 }, 'player116']]};
 UPSET SUCCESS
-[108]:	{upset: 'follow', edge: [['player113', ->: {degree: 99 }, 'player118']]};
+[107]:	{upset: 'follow', edge: [['player113', ->: {degree: 99 }, 'player118']]};
 UPSET SUCCESS
-[109]:	{upset: 'follow', edge: [['player113', ->: {degree: 99 }, 'player121']]};
+[108]:	{upset: 'follow', edge: [['player113', ->: {degree: 99 }, 'player121']]};
 UPSET SUCCESS
-[110]:	{upset: 'follow', edge: [['player113', ->: {degree: 99 }, 'player106']]};
+[109]:	{upset: 'follow', edge: [['player113', ->: {degree: 99 }, 'player106']]};
 UPSET SUCCESS
-[111]:	{upset: 'follow', edge: [['player113', ->: {degree: 99 }, 'player119']]};
+[110]:	{upset: 'follow', edge: [['player113', ->: {degree: 99 }, 'player119']]};
 UPSET SUCCESS
-[112]:	{upset: 'follow', edge: [['player113', ->: {degree: 99 }, 'player120']]};
+[111]:	{upset: 'follow', edge: [['player113', ->: {degree: 99 }, 'player120']]};
 UPSET SUCCESS
-[113]:	{upset: 'follow', edge: [['player114', ->: {degree: 90 }, 'player115']]};
+[112]:	{upset: 'follow', edge: [['player114', ->: {degree: 90 }, 'player115']]};
 UPSET SUCCESS
-[114]:	{upset: 'follow', edge: [['player114', ->: {degree: 90 }, 'player140']]};
+[113]:	{upset: 'follow', edge: [['player114', ->: {degree: 90 }, 'player140']]};
 UPSET SUCCESS
-[115]:	{upset: 'follow', edge: [['player114', ->: {degree: 90 }, 'player103']]};
+[114]:	{upset: 'follow', edge: [['player114', ->: {degree: 90 }, 'player103']]};
 UPSET SUCCESS
-[116]:	{upset: 'follow', edge: [['player116', ->: {degree: 100 }, 'player141']]};
+[115]:	{upset: 'follow', edge: [['player116', ->: {degree: 100 }, 'player141']]};
 UPSET SUCCESS
-[117]:	{upset: 'follow', edge: [['player118', ->: {degree: 90 }, 'player131']]};
+[116]:	{upset: 'follow', edge: [['player118', ->: {degree: 90 }, 'player131']]};
 UPSET SUCCESS
-[118]:	{upset: 'follow', edge: [['player118', ->: {degree: 90 }, 'player120']]};
+[117]:	{upset: 'follow', edge: [['player118', ->: {degree: 90 }, 'player120']]};
 UPSET SUCCESS
-[119]:	{upset: 'follow', edge: [['player120', ->: {degree: 80 }, 'player118']]};
+[118]:	{upset: 'follow', edge: [['player120', ->: {degree: 80 }, 'player118']]};
 UPSET SUCCESS
-[120]:	{upset: 'follow', edge: [['player121', ->: {degree: 90 }, 'player116']]};
+[119]:	{upset: 'follow', edge: [['player121', ->: {degree: 90 }, 'player116']]};
 UPSET SUCCESS
-[121]:	{upset: 'follow', edge: [['player121', ->: {degree: 90 }, 'player128']]};
+[120]:	{upset: 'follow', edge: [['player121', ->: {degree: 90 }, 'player128']]};
 UPSET SUCCESS
-[122]:	{upset: 'follow', edge: [['player121', ->: {degree: 90 }, 'player129']]};
+[121]:	{upset: 'follow', edge: [['player121', ->: {degree: 90 }, 'player129']]};
 UPSET SUCCESS
-[123]:	{upset: 'follow', edge: [['player126', ->: {degree: 13 }, 'player116']]};
+[122]:	{upset: 'follow', edge: [['player126', ->: {degree: 13 }, 'player116']]};
 UPSET SUCCESS
-[124]:	{upset: 'follow', edge: [['player127', ->: {degree: 90 }, 'player114']]};
+[123]:	{upset: 'follow', edge: [['player127', ->: {degree: 90 }, 'player114']]};
 UPSET SUCCESS
-[125]:	{upset: 'follow', edge: [['player127', ->: {degree: 70 }, 'player148']]};
+[124]:	{upset: 'follow', edge: [['player127', ->: {degree: 70 }, 'player148']]};
 UPSET SUCCESS
-[126]:	{upset: 'follow', edge: [['player128', ->: {degree: 90 }, 'player116']]};
+[125]:	{upset: 'follow', edge: [['player128', ->: {degree: 90 }, 'player116']]};
 UPSET SUCCESS
-[127]:	{upset: 'follow', edge: [['player128', ->: {degree: 90 }, 'player121']]};
+[126]:	{upset: 'follow', edge: [['player128', ->: {degree: 90 }, 'player121']]};
 UPSET SUCCESS
-[128]:	{upset: 'follow', edge: [['player128', ->: {degree: 90 }, 'player129']]};
+[127]:	{upset: 'follow', edge: [['player128', ->: {degree: 90 }, 'player129']]};
 UPSET SUCCESS
-[129]:	{upset: 'follow', edge: [['player129', ->: {degree: 90 }, 'player116']]};
+[128]:	{upset: 'follow', edge: [['player129', ->: {degree: 90 }, 'player116']]};
 UPSET SUCCESS
-[130]:	{upset: 'follow', edge: [['player129', ->: {degree: 90 }, 'player121']]};
+[129]:	{upset: 'follow', edge: [['player129', ->: {degree: 90 }, 'player121']]};
 UPSET SUCCESS
-[131]:	{upset: 'follow', edge: [['player129', ->: {degree: 90 }, 'player128']]};
+[130]:	{upset: 'follow', edge: [['player129', ->: {degree: 90 }, 'player128']]};
 UPSET SUCCESS
-[132]:	{upset: 'follow', edge: [['player130', ->: {degree: 80 }, 'player149']]};
+[131]:	{upset: 'follow', edge: [['player130', ->: {degree: 80 }, 'player149']]};
 UPSET SUCCESS
-[133]:	{upset: 'follow', edge: [['player131', ->: {degree: 95 }, 'player118']]};
+[132]:	{upset: 'follow', edge: [['player131', ->: {degree: 95 }, 'player118']]};
 UPSET SUCCESS
-[134]:	{upset: 'follow', edge: [['player133', ->: {degree: 90 }, 'player114']]};
+[133]:	{upset: 'follow', edge: [['player133', ->: {degree: 90 }, 'player114']]};
 UPSET SUCCESS
-[135]:	{upset: 'follow', edge: [['player133', ->: {degree: 90 }, 'player144']]};
+[134]:	{upset: 'follow', edge: [['player133', ->: {degree: 90 }, 'player144']]};
 UPSET SUCCESS
-[136]:	{upset: 'follow', edge: [['player135', ->: {degree: 80 }, 'player102']]};
+[135]:	{upset: 'follow', edge: [['player135', ->: {degree: 80 }, 'player102']]};
 UPSET SUCCESS
-[137]:	{upset: 'follow', edge: [['player136', ->: {degree: 90 }, 'player147']]};
+[136]:	{upset: 'follow', edge: [['player136', ->: {degree: 90 }, 'player147']]};
 UPSET SUCCESS
-[138]:	{upset: 'follow', edge: [['player136', ->: {degree: 88 }, 'player137']]};
+[137]:	{upset: 'follow', edge: [['player136', ->: {degree: 88 }, 'player137']]};
 UPSET SUCCESS
-[139]:	{upset: 'follow', edge: [['player136', ->: {degree: 90 }, 'player117']]};
+[138]:	{upset: 'follow', edge: [['player136', ->: {degree: 90 }, 'player117']]};
 UPSET SUCCESS
-[140]:	{upset: 'follow', edge: [['player136', ->: {degree: 85 }, 'player148']]};
+[139]:	{upset: 'follow', edge: [['player136', ->: {degree: 85 }, 'player148']]};
 UPSET SUCCESS
-[141]:	{upset: 'follow', edge: [['player137', ->: {degree: 80 }, 'player136']]};
+[140]:	{upset: 'follow', edge: [['player137', ->: {degree: 80 }, 'player136']]};
 UPSET SUCCESS
-[142]:	{upset: 'follow', edge: [['player137', ->: {degree: 80 }, 'player148']]};
+[141]:	{upset: 'follow', edge: [['player137', ->: {degree: 80 }, 'player148']]};
 UPSET SUCCESS
-[143]:	{upset: 'follow', edge: [['player137', ->: {degree: 10 }, 'player129']]};
+[142]:	{upset: 'follow', edge: [['player137', ->: {degree: 10 }, 'player129']]};
 UPSET SUCCESS
-[144]:	{upset: 'follow', edge: [['player138', ->: {degree: 90 }, 'player115']]};
+[143]:	{upset: 'follow', edge: [['player138', ->: {degree: 90 }, 'player115']]};
 UPSET SUCCESS
-[145]:	{upset: 'follow', edge: [['player138', ->: {degree: 99 }, 'player139']]};
+[144]:	{upset: 'follow', edge: [['player138', ->: {degree: 99 }, 'player139']]};
 UPSET SUCCESS
-[146]:	{upset: 'follow', edge: [['player139', ->: {degree: 99 }, 'player138']]};
+[145]:	{upset: 'follow', edge: [['player139', ->: {degree: 99 }, 'player138']]};
 UPSET SUCCESS
-[147]:	{upset: 'follow', edge: [['player140', ->: {degree: 90 }, 'player114']]};
+[146]:	{upset: 'follow', edge: [['player140', ->: {degree: 90 }, 'player114']]};
 UPSET SUCCESS
-[148]:	{upset: 'follow', edge: [['player141', ->: {degree: 9 }, 'player124']]};
+[147]:	{upset: 'follow', edge: [['player141', ->: {degree: 9 }, 'player124']]};
 UPSET SUCCESS
-[149]:	{upset: 'follow', edge: [['player142', ->: {degree: 90 }, 'player117']]};
+[148]:	{upset: 'follow', edge: [['player142', ->: {degree: 90 }, 'player117']]};
 UPSET SUCCESS
-[150]:	{upset: 'follow', edge: [['player143', ->: {degree: 90 }, 'player150']]};
+[149]:	{upset: 'follow', edge: [['player143', ->: {degree: 90 }, 'player150']]};
 UPSET SUCCESS
-[151]:	{upset: 'follow', edge: [['player144', ->: {degree: 100 }, 'player145']]};
+[150]:	{upset: 'follow', edge: [['player144', ->: {degree: 100 }, 'player145']]};
 UPSET SUCCESS
-[152]:	{upset: 'follow', edge: [['player144', ->: {degree: 80 }, 'player100']]};
+[151]:	{upset: 'follow', edge: [['player144', ->: {degree: 80 }, 'player100']]};
 UPSET SUCCESS
-[153]:	{upset: 'follow', edge: [['player147', ->: {degree: 90 }, 'player136']]};
+[152]:	{upset: 'follow', edge: [['player147', ->: {degree: 90 }, 'player136']]};
 UPSET SUCCESS
-[154]:	{upset: 'follow', edge: [['player148', ->: {degree: 80 }, 'player127']]};
+[153]:	{upset: 'follow', edge: [['player148', ->: {degree: 80 }, 'player127']]};
 UPSET SUCCESS
-[155]:	{upset: 'follow', edge: [['player148', ->: {degree: 90 }, 'player136']]};
+[154]:	{upset: 'follow', edge: [['player148', ->: {degree: 90 }, 'player136']]};
 UPSET SUCCESS
-[156]:	{upset: 'follow', edge: [['player148', ->: {degree: 85 }, 'player137']]};
+[155]:	{upset: 'follow', edge: [['player148', ->: {degree: 85 }, 'player137']]};
 UPSET SUCCESS
-[157]:	{upset: 'follow', edge: [['player149', ->: {degree: 80 }, 'player130']]};
+[156]:	{upset: 'follow', edge: [['player149', ->: {degree: 80 }, 'player130']]};
 UPSET SUCCESS
-[158]:	{upset: 'follow', edge: [['player150', ->: {degree: 90 }, 'player137']]};
+[157]:	{upset: 'follow', edge: [['player150', ->: {degree: 90 }, 'player137']]};
 UPSET SUCCESS
-[159]:	{upset: 'follow', edge: [['player150', ->: {degree: 90 }, 'player143']]};
+[158]:	{upset: 'follow', edge: [['player150', ->: {degree: 90 }, 'player143']]};
 UPSET SUCCESS
-[160]:	{upset: 'follow', edge: [['player150', ->: {degree: 80 }, 'player120']]};
+[159]:	{upset: 'follow', edge: [['player150', ->: {degree: 80 }, 'player120']]};
 UPSET SUCCESS
-[161]:	{upset: 'serve', edge: [['player100', ->: {start_year: 1997, end_year: 2016 }, 'team204']]};
+[160]:	{upset: 'serve', edge: [['player100', ->: {start_year: 1997, end_year: 2016 }, 'team204']]};
 UPSET SUCCESS
-[162]:	{upset: 'serve', edge: [['player101', ->: {start_year: 1999, end_year: 2018 }, 'team204']]};
+[161]:	{upset: 'serve', edge: [['player101', ->: {start_year: 1999, end_year: 2018 }, 'team204']]};
 UPSET SUCCESS
-[163]:	{upset: 'serve', edge: [['player101', ->: {start_year: 2018, end_year: 2019 }, 'team215']]};
+[162]:	{upset: 'serve', edge: [['player101', ->: {start_year: 2018, end_year: 2019 }, 'team215']]};
 UPSET SUCCESS
-[164]:	{upset: 'serve', edge: [['player102', ->: {start_year: 2006, end_year: 2015 }, 'team203']]};
+[163]:	{upset: 'serve', edge: [['player102', ->: {start_year: 2006, end_year: 2015 }, 'team203']]};
 UPSET SUCCESS
-[165]:	{upset: 'serve', edge: [['player102', ->: {start_year: 2015, end_year: 2019 }, 'team204']]};
+[164]:	{upset: 'serve', edge: [['player102', ->: {start_year: 2015, end_year: 2019 }, 'team204']]};
 UPSET SUCCESS
-[166]:	{upset: 'serve', edge: [['player103', ->: {start_year: 2006, end_year: 2013 }, 'team212']]};
+[165]:	{upset: 'serve', edge: [['player103', ->: {start_year: 2006, end_year: 2013 }, 'team212']]};
 UPSET SUCCESS
-[167]:	{upset: 'serve', edge: [['player103', ->: {start_year: 2013, end_year: 2013 }, 'team218']]};
+[166]:	{upset: 'serve', edge: [['player103', ->: {start_year: 2013, end_year: 2013 }, 'team218']]};
 UPSET SUCCESS
-[168]:	{upset: 'serve', edge: [['player103', ->: {start_year: 2013, end_year: 2017 }, 'team208']]};
+[167]:	{upset: 'serve', edge: [['player103', ->: {start_year: 2013, end_year: 2017 }, 'team208']]};
 UPSET SUCCESS
-[169]:	{upset: 'serve', edge: [['player103', ->: {start_year: 2017, end_year: 2019 }, 'team204']]};
+[168]:	{upset: 'serve', edge: [['player103', ->: {start_year: 2017, end_year: 2019 }, 'team204']]};
 UPSET SUCCESS
-[170]:	{upset: 'serve', edge: [['player104', ->: {start_year: 2007, end_year: 2009 }, 'team200']]};
+[169]:	{upset: 'serve', edge: [['player104', ->: {start_year: 2007, end_year: 2009 }, 'team200']]};
 UPSET SUCCESS
-[171]:	{upset: 'serve', edge: [['player104', ->: {start_year: 2009, end_year: 2010 }, 'team218']]};
+[170]:	{upset: 'serve', edge: [['player104', ->: {start_year: 2009, end_year: 2010 }, 'team218']]};
 UPSET SUCCESS
-[172]:	{upset: 'serve', edge: [['player104', ->: {start_year: 2010, end_year: 2012 }, 'team215']]};
+[171]:	{upset: 'serve', edge: [['player104', ->: {start_year: 2010, end_year: 2012 }, 'team215']]};
 UPSET SUCCESS
-[173]:	{upset: 'serve', edge: [['player104', ->: {start_year: 2012, end_year: 2013 }, 'team221']]};
+[172]:	{upset: 'serve', edge: [['player104', ->: {start_year: 2012, end_year: 2013 }, 'team221']]};
 UPSET SUCCESS
-[174]:	{upset: 'serve', edge: [['player104', ->: {start_year: 2013, end_year: 2015 }, 'team204']]};
+[173]:	{upset: 'serve', edge: [['player104', ->: {start_year: 2013, end_year: 2015 }, 'team204']]};
 UPSET SUCCESS
-[175]:	{upset: 'serve', edge: [['player104', ->: {start_year: 2015, end_year: 2016 }, 'team208']]};
+[174]:	{upset: 'serve', edge: [['player104', ->: {start_year: 2015, end_year: 2016 }, 'team208']]};
 UPSET SUCCESS
-[176]:	{upset: 'serve', edge: [['player104', ->: {start_year: 2016, end_year: 2017 }, 'team215']]};
+[175]:	{upset: 'serve', edge: [['player104', ->: {start_year: 2016, end_year: 2017 }, 'team215']]};
 UPSET SUCCESS
-[177]:	{upset: 'serve', edge: [['player104', ->: {start_year: 2017, end_year: 2018 }, 'team222']]};
+[176]:	{upset: 'serve', edge: [['player104', ->: {start_year: 2017, end_year: 2018 }, 'team222']]};
 UPSET SUCCESS
-[178]:	{upset: 'serve', edge: [['player104', ->: {start_year: 2018, end_year: 2018 }, 'team219']]};
+[177]:	{upset: 'serve', edge: [['player104', ->: {start_year: 2018, end_year: 2018 }, 'team219']]};
 UPSET SUCCESS
-[179]:	{upset: 'serve', edge: [['player104', ->: {start_year: 2018, end_year: 2019 }, 'team204']]};
+[178]:	{upset: 'serve', edge: [['player104', ->: {start_year: 2018, end_year: 2019 }, 'team204']]};
 UPSET SUCCESS
-[180]:	{upset: 'serve', edge: [['player105', ->: {start_year: 2009, end_year: 2010 }, 'team216']]};
+[179]:	{upset: 'serve', edge: [['player105', ->: {start_year: 2009, end_year: 2010 }, 'team216']]};
 UPSET SUCCESS
-[181]:	{upset: 'serve', edge: [['player105', ->: {start_year: 2010, end_year: 2018 }, 'team204']]};
+[180]:	{upset: 'serve', edge: [['player105', ->: {start_year: 2010, end_year: 2018 }, 'team204']]};
 UPSET SUCCESS
-[182]:	{upset: 'serve', edge: [['player105', ->: {start_year: 2018, end_year: 2019 }, 'team218']]};
+[181]:	{upset: 'serve', edge: [['player105', ->: {start_year: 2018, end_year: 2019 }, 'team218']]};
 UPSET SUCCESS
-[183]:	{upset: 'serve', edge: [['player106', ->: {start_year: 2014, end_year: 2018 }, 'team204']]};
+[182]:	{upset: 'serve', edge: [['player106', ->: {start_year: 2014, end_year: 2018 }, 'team204']]};
 UPSET SUCCESS
-[184]:	{upset: 'serve', edge: [['player106', ->: {start_year: 2018, end_year: 2019 }, 'team212']]};
+[183]:	{upset: 'serve', edge: [['player106', ->: {start_year: 2018, end_year: 2019 }, 'team212']]};
 UPSET SUCCESS
-[185]:	{upset: 'serve', edge: [['player107', ->: {start_year: 2013, end_year: 2015 }, 'team204']]};
+[184]:	{upset: 'serve', edge: [['player107', ->: {start_year: 2013, end_year: 2015 }, 'team204']]};
 UPSET SUCCESS
-[186]:	{upset: 'serve', edge: [['player107', ->: {start_year: 2015, end_year: 2017 }, 'team224']]};
+[185]:	{upset: 'serve', edge: [['player107', ->: {start_year: 2015, end_year: 2017 }, 'team224']]};
 UPSET SUCCESS
-[187]:	{upset: 'serve', edge: [['player107', ->: {start_year: 2017, end_year: 2019 }, 'team217']]};
+[186]:	{upset: 'serve', edge: [['player107', ->: {start_year: 2017, end_year: 2019 }, 'team217']]};
 UPSET SUCCESS
-[188]:	{upset: 'serve', edge: [['player108', ->: {start_year: 2003, end_year: 2005 }, 'team222']]};
+[187]:	{upset: 'serve', edge: [['player108', ->: {start_year: 2003, end_year: 2005 }, 'team222']]};
 UPSET SUCCESS
-[189]:	{upset: 'serve', edge: [['player108', ->: {start_year: 2005, end_year: 2008 }, 'team214']]};
+[188]:	{upset: 'serve', edge: [['player108', ->: {start_year: 2005, end_year: 2008 }, 'team214']]};
 UPSET SUCCESS
-[190]:	{upset: 'serve', edge: [['player108', ->: {start_year: 2008, end_year: 2012 }, 'team215']]};
+[189]:	{upset: 'serve', edge: [['player108', ->: {start_year: 2008, end_year: 2012 }, 'team215']]};
 UPSET SUCCESS
-[191]:	{upset: 'serve', edge: [['player108', ->: {start_year: 2012, end_year: 2016 }, 'team204']]};
+[190]:	{upset: 'serve', edge: [['player108', ->: {start_year: 2012, end_year: 2016 }, 'team204']]};
 UPSET SUCCESS
-[192]:	{upset: 'serve', edge: [['player108', ->: {start_year: 2016, end_year: 2017 }, 'team206']]};
+[191]:	{upset: 'serve', edge: [['player108', ->: {start_year: 2016, end_year: 2017 }, 'team206']]};
 UPSET SUCCESS
-[193]:	{upset: 'serve', edge: [['player109', ->: {start_year: 2010, end_year: 2015 }, 'team204']]};
+[192]:	{upset: 'serve', edge: [['player109', ->: {start_year: 2010, end_year: 2015 }, 'team204']]};
 UPSET SUCCESS
-[194]:	{upset: 'serve', edge: [['player109', ->: {start_year: 2015, end_year: 2017 }, 'team222']]};
+[193]:	{upset: 'serve', edge: [['player109', ->: {start_year: 2015, end_year: 2017 }, 'team222']]};
 UPSET SUCCESS
-[195]:	{upset: 'serve', edge: [['player109', ->: {start_year: 2017, end_year: 2017 }, 'team219']]};
+[194]:	{upset: 'serve', edge: [['player109', ->: {start_year: 2017, end_year: 2017 }, 'team219']]};
 UPSET SUCCESS
-[196]:	{upset: 'serve', edge: [['player110', ->: {start_year: 2011, end_year: 2015 }, 'team204']]};
+[195]:	{upset: 'serve', edge: [['player110', ->: {start_year: 2011, end_year: 2015 }, 'team204']]};
 UPSET SUCCESS
-[197]:	{upset: 'serve', edge: [['player110', ->: {start_year: 2015, end_year: 2017 }, 'team218']]};
+[196]:	{upset: 'serve', edge: [['player110', ->: {start_year: 2015, end_year: 2017 }, 'team218']]};
 UPSET SUCCESS
-[198]:	{upset: 'serve', edge: [['player110', ->: {start_year: 2017, end_year: 2019 }, 'team220']]};
+[197]:	{upset: 'serve', edge: [['player110', ->: {start_year: 2017, end_year: 2019 }, 'team220']]};
 UPSET SUCCESS
-[199]:	{upset: 'serve', edge: [['player111', ->: {start_year: 2003, end_year: 2011 }, 'team215']]};
+[198]:	{upset: 'serve', edge: [['player111', ->: {start_year: 2003, end_year: 2011 }, 'team215']]};
 UPSET SUCCESS
-[200]:	{upset: 'serve', edge: [['player111', ->: {start_year: 2011, end_year: 2015 }, 'team220']]};
+[199]:	{upset: 'serve', edge: [['player111', ->: {start_year: 2011, end_year: 2015 }, 'team220']]};
 UPSET SUCCESS
-[201]:	{upset: 'serve', edge: [['player111', ->: {start_year: 2015, end_year: 2016 }, 'team204']]};
+[200]:	{upset: 'serve', edge: [['player111', ->: {start_year: 2015, end_year: 2016 }, 'team204']]};
 UPSET SUCCESS
-[202]:	{upset: 'serve', edge: [['player111', ->: {start_year: 2016, end_year: 2018 }, 'team200']]};
+[201]:	{upset: 'serve', edge: [['player111', ->: {start_year: 2016, end_year: 2018 }, 'team200']]};
 UPSET SUCCESS
-[203]:	{upset: 'serve', edge: [['player112', ->: {start_year: 2015, end_year: 2017 }, 'team204']]};
+[202]:	{upset: 'serve', edge: [['player112', ->: {start_year: 2015, end_year: 2017 }, 'team204']]};
 UPSET SUCCESS
-[204]:	{upset: 'serve', edge: [['player112', ->: {start_year: 2017, end_year: 2019 }, 'team226']]};
+[203]:	{upset: 'serve', edge: [['player112', ->: {start_year: 2017, end_year: 2019 }, 'team226']]};
 UPSET SUCCESS
-[205]:	{upset: 'serve', edge: [['player112', ->: {start_year: 2019, end_year: 2019 }, 'team219']]};
+[204]:	{upset: 'serve', edge: [['player112', ->: {start_year: 2019, end_year: 2019 }, 'team219']]};
 UPSET SUCCESS
-[206]:	{upset: 'serve', edge: [['player113', ->: {start_year: 2016, end_year: 2019 }, 'team204']]};
+[205]:	{upset: 'serve', edge: [['player113', ->: {start_year: 2016, end_year: 2019 }, 'team204']]};
 UPSET SUCCESS
-[207]:	{upset: 'serve', edge: [['player114', ->: {start_year: 1997, end_year: 2000 }, 'team218']]};
+[206]:	{upset: 'serve', edge: [['player114', ->: {start_year: 1997, end_year: 2000 }, 'team218']]};
 UPSET SUCCESS
-[208]:	{upset: 'serve', edge: [['player114', ->: {start_year: 2000, end_year: 2004 }, 'team226']]};
+[207]:	{upset: 'serve', edge: [['player114', ->: {start_year: 2000, end_year: 2004 }, 'team226']]};
 UPSET SUCCESS
-[209]:	{upset: 'serve', edge: [['player114', ->: {start_year: 2004, end_year: 2010 }, 'team202']]};
+[208]:	{upset: 'serve', edge: [['player114', ->: {start_year: 2004, end_year: 2010 }, 'team202']]};
 UPSET SUCCESS
-[210]:	{upset: 'serve', edge: [['player114', ->: {start_year: 2013, end_year: 2013 }, 'team204']]};
+[209]:	{upset: 'serve', edge: [['player114', ->: {start_year: 2013, end_year: 2013 }, 'team204']]};
 UPSET SUCCESS
-[211]:	{upset: 'serve', edge: [['player115', ->: {start_year: 1996, end_year: 2016 }, 'team210']]};
+[210]:	{upset: 'serve', edge: [['player115', ->: {start_year: 1996, end_year: 2016 }, 'team210']]};
 UPSET SUCCESS
-[212]:	{upset: 'serve', edge: [['player116', ->: {start_year: 2003, end_year: 2010 }, 'team216']]};
+[211]:	{upset: 'serve', edge: [['player116', ->: {start_year: 2003, end_year: 2010 }, 'team216']]};
 UPSET SUCCESS
-[213]:	{upset: 'serve', edge: [['player116', ->: {start_year: 2010, end_year: 2014 }, 'team229']]};
+[212]:	{upset: 'serve', edge: [['player116', ->: {start_year: 2010, end_year: 2014 }, 'team229']]};
 UPSET SUCCESS
-[214]:	{upset: 'serve', edge: [['player116', ->: {start_year: 2014, end_year: 2018 }, 'team216']]};
+[213]:	{upset: 'serve', edge: [['player116', ->: {start_year: 2014, end_year: 2018 }, 'team216']]};
 UPSET SUCCESS
-[215]:	{upset: 'serve', edge: [['player116', ->: {start_year: 2018, end_year: 2019 }, 'team210']]};
+[214]:	{upset: 'serve', edge: [['player116', ->: {start_year: 2018, end_year: 2019 }, 'team210']]};
 UPSET SUCCESS
-[216]:	{upset: 'serve', edge: [['player118', ->: {start_year: 2008, end_year: 2019 }, 'team205']]};
+[215]:	{upset: 'serve', edge: [['player118', ->: {start_year: 2008, end_year: 2019 }, 'team205']]};
 UPSET SUCCESS
-[217]:	{upset: 'serve', edge: [['player119', ->: {start_year: 2007, end_year: 2016 }, 'team205']]};
+[216]:	{upset: 'serve', edge: [['player119', ->: {start_year: 2007, end_year: 2016 }, 'team205']]};
 UPSET SUCCESS
-[218]:	{upset: 'serve', edge: [['player119', ->: {start_year: 2016, end_year: 2019 }, 'team200']]};
+[217]:	{upset: 'serve', edge: [['player119', ->: {start_year: 2016, end_year: 2019 }, 'team200']]};
 UPSET SUCCESS
-[219]:	{upset: 'serve', edge: [['player120', ->: {start_year: 2009, end_year: 2012 }, 'team205']]};
+[218]:	{upset: 'serve', edge: [['player120', ->: {start_year: 2009, end_year: 2012 }, 'team205']]};
 UPSET SUCCESS
-[220]:	{upset: 'serve', edge: [['player120', ->: {start_year: 2012, end_year: 2019 }, 'team202']]};
+[219]:	{upset: 'serve', edge: [['player120', ->: {start_year: 2012, end_year: 2019 }, 'team202']]};
 UPSET SUCCESS
-[221]:	{upset: 'serve', edge: [['player121', ->: {start_year: 2005, end_year: 2011 }, 'team215']]};
+[220]:	{upset: 'serve', edge: [['player121', ->: {start_year: 2005, end_year: 2011 }, 'team215']]};
 UPSET SUCCESS
-[222]:	{upset: 'serve', edge: [['player121', ->: {start_year: 2011, end_year: 2017 }, 'team207']]};
+[221]:	{upset: 'serve', edge: [['player121', ->: {start_year: 2011, end_year: 2017 }, 'team207']]};
 UPSET SUCCESS
-[223]:	{upset: 'serve', edge: [['player121', ->: {start_year: 2017, end_year: 2021 }, 'team202']]};
+[222]:	{upset: 'serve', edge: [['player121', ->: {start_year: 2017, end_year: 2021 }, 'team202']]};
 UPSET SUCCESS
-[224]:	{upset: 'serve', edge: [['player122', ->: {start_year: 2008, end_year: 2018 }, 'team207']]};
+[223]:	{upset: 'serve', edge: [['player122', ->: {start_year: 2008, end_year: 2018 }, 'team207']]};
 UPSET SUCCESS
-[225]:	{upset: 'serve', edge: [['player122', ->: {start_year: 2018, end_year: 2019 }, 'team213']]};
+[224]:	{upset: 'serve', edge: [['player122', ->: {start_year: 2018, end_year: 2019 }, 'team213']]};
 UPSET SUCCESS
-[226]:	{upset: 'serve', edge: [['player122', ->: {start_year: 2019, end_year: 2019 }, 'team223']]};
+[225]:	{upset: 'serve', edge: [['player122', ->: {start_year: 2019, end_year: 2019 }, 'team223']]};
 UPSET SUCCESS
-[227]:	{upset: 'serve', edge: [['player123', ->: {start_year: 2011, end_year: 2017 }, 'team209']]};
+[226]:	{upset: 'serve', edge: [['player123', ->: {start_year: 2011, end_year: 2017 }, 'team209']]};
 UPSET SUCCESS
-[228]:	{upset: 'serve', edge: [['player123', ->: {start_year: 2017, end_year: 2019 }, 'team206']]};
+[227]:	{upset: 'serve', edge: [['player123', ->: {start_year: 2017, end_year: 2019 }, 'team206']]};
 UPSET SUCCESS
-[229]:	{upset: 'serve', edge: [['player124', ->: {start_year: 2006, end_year: 2014 }, 'team217']]};
+[228]:	{upset: 'serve', edge: [['player124', ->: {start_year: 2006, end_year: 2014 }, 'team217']]};
 UPSET SUCCESS
-[230]:	{upset: 'serve', edge: [['player124', ->: {start_year: 2014, end_year: 2015 }, 'team213']]};
+[229]:	{upset: 'serve', edge: [['player124', ->: {start_year: 2014, end_year: 2015 }, 'team213']]};
 UPSET SUCCESS
-[231]:	{upset: 'serve', edge: [['player124', ->: {start_year: 2015, end_year: 2016 }, 'team208']]};
+[230]:	{upset: 'serve', edge: [['player124', ->: {start_year: 2015, end_year: 2016 }, 'team208']]};
 UPSET SUCCESS
-[232]:	{upset: 'serve', edge: [['player124', ->: {start_year: 2016, end_year: 2017 }, 'team221']]};
+[231]:	{upset: 'serve', edge: [['player124', ->: {start_year: 2016, end_year: 2017 }, 'team221']]};
 UPSET SUCCESS
-[233]:	{upset: 'serve', edge: [['player124', ->: {start_year: 2017, end_year: 2018 }, 'team211']]};
+[232]:	{upset: 'serve', edge: [['player124', ->: {start_year: 2017, end_year: 2018 }, 'team211']]};
 UPSET SUCCESS
-[234]:	{upset: 'serve', edge: [['player124', ->: {start_year: 2018, end_year: 2019 }, 'team210']]};
+[233]:	{upset: 'serve', edge: [['player124', ->: {start_year: 2018, end_year: 2019 }, 'team210']]};
 UPSET SUCCESS
-[235]:	{upset: 'serve', edge: [['player125', ->: {start_year: 2002, end_year: 2018 }, 'team204']]};
+[234]:	{upset: 'serve', edge: [['player125', ->: {start_year: 2002, end_year: 2018 }, 'team204']]};
 UPSET SUCCESS
-[236]:	{upset: 'serve', edge: [['player126', ->: {start_year: 2011, end_year: 2017 }, 'team216']]};
+[235]:	{upset: 'serve', edge: [['player126', ->: {start_year: 2011, end_year: 2017 }, 'team216']]};
 UPSET SUCCESS
-[237]:	{upset: 'serve', edge: [['player126', ->: {start_year: 2017, end_year: 2019 }, 'team217']]};
+[236]:	{upset: 'serve', edge: [['player126', ->: {start_year: 2017, end_year: 2019 }, 'team217']]};
 UPSET SUCCESS
-[238]:	{upset: 'serve', edge: [['player127', ->: {start_year: 1998, end_year: 2004 }, 'team218']]};
+[237]:	{upset: 'serve', edge: [['player127', ->: {start_year: 1998, end_year: 2004 }, 'team218']]};
 UPSET SUCCESS
-[239]:	{upset: 'serve', edge: [['player127', ->: {start_year: 2004, end_year: 2009 }, 'team227']]};
+[238]:	{upset: 'serve', edge: [['player127', ->: {start_year: 2004, end_year: 2009 }, 'team227']]};
 UPSET SUCCESS
-[240]:	{upset: 'serve', edge: [['player127', ->: {start_year: 2009, end_year: 2010 }, 'team226']]};
+[239]:	{upset: 'serve', edge: [['player127', ->: {start_year: 2009, end_year: 2010 }, 'team226']]};
 UPSET SUCCESS
-[241]:	{upset: 'serve', edge: [['player127', ->: {start_year: 2010, end_year: 2011 }, 'team214']]};
+[240]:	{upset: 'serve', edge: [['player127', ->: {start_year: 2010, end_year: 2011 }, 'team214']]};
 UPSET SUCCESS
-[242]:	{upset: 'serve', edge: [['player127', ->: {start_year: 2011, end_year: 2014 }, 'team213']]};
+[241]:	{upset: 'serve', edge: [['player127', ->: {start_year: 2011, end_year: 2014 }, 'team213']]};
 UPSET SUCCESS
-[243]:	{upset: 'serve', edge: [['player127', ->: {start_year: 2014, end_year: 2017 }, 'team212']]};
+[242]:	{upset: 'serve', edge: [['player127', ->: {start_year: 2014, end_year: 2017 }, 'team212']]};
 UPSET SUCCESS
-[244]:	{upset: 'serve', edge: [['player127', ->: {start_year: 2017, end_year: 2018 }, 'team208']]};
+[243]:	{upset: 'serve', edge: [['player127', ->: {start_year: 2017, end_year: 2018 }, 'team208']]};
 UPSET SUCCESS
-[245]:	{upset: 'serve', edge: [['player127', ->: {start_year: 2018, end_year: 2019 }, 'team222']]};
+[244]:	{upset: 'serve', edge: [['player127', ->: {start_year: 2018, end_year: 2019 }, 'team222']]};
 UPSET SUCCESS
-[246]:	{upset: 'serve', edge: [['player128', ->: {start_year: 2003, end_year: 2011 }, 'team201']]};
+[245]:	{upset: 'serve', edge: [['player128', ->: {start_year: 2003, end_year: 2011 }, 'team201']]};
 UPSET SUCCESS
-[247]:	{upset: 'serve', edge: [['player128', ->: {start_year: 2011, end_year: 2017 }, 'team223']]};
+[246]:	{upset: 'serve', edge: [['player128', ->: {start_year: 2011, end_year: 2017 }, 'team223']]};
 UPSET SUCCESS
-[248]:	{upset: 'serve', edge: [['player128', ->: {start_year: 2017, end_year: 2018 }, 'team205']]};
+[247]:	{upset: 'serve', edge: [['player128', ->: {start_year: 2017, end_year: 2018 }, 'team205']]};
 UPSET SUCCESS
-[249]:	{upset: 'serve', edge: [['player128', ->: {start_year: 2018, end_year: 2019 }, 'team202']]};
+[248]:	{upset: 'serve', edge: [['player128', ->: {start_year: 2018, end_year: 2019 }, 'team202']]};
 UPSET SUCCESS
-[250]:	{upset: 'serve', edge: [['player129', ->: {start_year: 2003, end_year: 2016 }, 'team229']]};
+[249]:	{upset: 'serve', edge: [['player129', ->: {start_year: 2003, end_year: 2016 }, 'team229']]};
 UPSET SUCCESS
-[251]:	{upset: 'serve', edge: [['player129', ->: {start_year: 2016, end_year: 2017 }, 'team221']]};
+[250]:	{upset: 'serve', edge: [['player129', ->: {start_year: 2016, end_year: 2017 }, 'team221']]};
 UPSET SUCCESS
-[252]:	{upset: 'serve', edge: [['player129', ->: {start_year: 2017, end_year: 2018 }, 'team216']]};
+[251]:	{upset: 'serve', edge: [['player129', ->: {start_year: 2017, end_year: 2018 }, 'team216']]};
 UPSET SUCCESS
-[253]:	{upset: 'serve', edge: [['player129', ->: {start_year: 2018, end_year: 2019 }, 'team229']]};
+[252]:	{upset: 'serve', edge: [['player129', ->: {start_year: 2018, end_year: 2019 }, 'team229']]};
 UPSET SUCCESS
-[254]:	{upset: 'serve', edge: [['player130', ->: {start_year: 2014, end_year: 2019 }, 'team219']]};
+[253]:	{upset: 'serve', edge: [['player130', ->: {start_year: 2014, end_year: 2019 }, 'team219']]};
 UPSET SUCCESS
-[255]:	{upset: 'serve', edge: [['player131', ->: {start_year: 2010, end_year: 2017 }, 'team220']]};
+[254]:	{upset: 'serve', edge: [['player131', ->: {start_year: 2010, end_year: 2017 }, 'team220']]};
 UPSET SUCCESS
-[256]:	{upset: 'serve', edge: [['player131', ->: {start_year: 2017, end_year: 2019 }, 'team205']]};
+[255]:	{upset: 'serve', edge: [['player131', ->: {start_year: 2017, end_year: 2019 }, 'team205']]};
 UPSET SUCCESS
-[257]:	{upset: 'serve', edge: [['player132', ->: {start_year: 2013, end_year: 2019 }, 'team225']]};
+[256]:	{upset: 'serve', edge: [['player132', ->: {start_year: 2013, end_year: 2019 }, 'team225']]};
 UPSET SUCCESS
-[258]:	{upset: 'serve', edge: [['player133', ->: {start_year: 2002, end_year: 2011 }, 'team202']]};
+[257]:	{upset: 'serve', edge: [['player133', ->: {start_year: 2002, end_year: 2011 }, 'team202']]};
 UPSET SUCCESS
-[259]:	{upset: 'serve', edge: [['player134', ->: {start_year: 2009, end_year: 2018 }, 'team207']]};
+[258]:	{upset: 'serve', edge: [['player134', ->: {start_year: 2009, end_year: 2018 }, 'team207']]};
 UPSET SUCCESS
-[260]:	{upset: 'serve', edge: [['player134', ->: {start_year: 2018, end_year: 2019 }, 'team224']]};
+[259]:	{upset: 'serve', edge: [['player134', ->: {start_year: 2018, end_year: 2019 }, 'team224']]};
 UPSET SUCCESS
-[261]:	{upset: 'serve', edge: [['player135', ->: {start_year: 2012, end_year: 2019 }, 'team203']]};
+[260]:	{upset: 'serve', edge: [['player135', ->: {start_year: 2012, end_year: 2019 }, 'team203']]};
 UPSET SUCCESS
-[262]:	{upset: 'serve', edge: [['player136', ->: {start_year: 1996, end_year: 1998 }, 'team214']]};
+[261]:	{upset: 'serve', edge: [['player136', ->: {start_year: 1996, end_year: 1998 }, 'team214']]};
 UPSET SUCCESS
-[263]:	{upset: 'serve', edge: [['player136', ->: {start_year: 1998, end_year: 2004 }, 'team213']]};
+[262]:	{upset: 'serve', edge: [['player136', ->: {start_year: 1998, end_year: 2004 }, 'team213']]};
 UPSET SUCCESS
-[264]:	{upset: 'serve', edge: [['player136', ->: {start_year: 2004, end_year: 2012 }, 'team214']]};
+[263]:	{upset: 'serve', edge: [['player136', ->: {start_year: 2004, end_year: 2012 }, 'team214']]};
 UPSET SUCCESS
-[265]:	{upset: 'serve', edge: [['player136', ->: {start_year: 2012, end_year: 2015 }, 'team210']]};
+[264]:	{upset: 'serve', edge: [['player136', ->: {start_year: 2012, end_year: 2015 }, 'team210']]};
 UPSET SUCCESS
-[266]:	{upset: 'serve', edge: [['player137', ->: {start_year: 1998, end_year: 2019 }, 'team213']]};
+[265]:	{upset: 'serve', edge: [['player137', ->: {start_year: 1998, end_year: 2019 }, 'team213']]};
 UPSET SUCCESS
-[267]:	{upset: 'serve', edge: [['player138', ->: {start_year: 2001, end_year: 2008 }, 'team212']]};
+[266]:	{upset: 'serve', edge: [['player138', ->: {start_year: 2001, end_year: 2008 }, 'team212']]};
 UPSET SUCCESS
-[268]:	{upset: 'serve', edge: [['player138', ->: {start_year: 2008, end_year: 2014 }, 'team210']]};
+[267]:	{upset: 'serve', edge: [['player138', ->: {start_year: 2008, end_year: 2014 }, 'team210']]};
 UPSET SUCCESS
-[269]:	{upset: 'serve', edge: [['player138', ->: {start_year: 2014, end_year: 2016 }, 'team221']]};
+[268]:	{upset: 'serve', edge: [['player138', ->: {start_year: 2014, end_year: 2016 }, 'team221']]};
 UPSET SUCCESS
-[270]:	{upset: 'serve', edge: [['player138', ->: {start_year: 2016, end_year: 2019 }, 'team204']]};
+[269]:	{upset: 'serve', edge: [['player138', ->: {start_year: 2016, end_year: 2019 }, 'team204']]};
 UPSET SUCCESS
-[271]:	{upset: 'serve', edge: [['player138', ->: {start_year: 2019, end_year: 2020 }, 'team225']]};
+[270]:	{upset: 'serve', edge: [['player138', ->: {start_year: 2019, end_year: 2020 }, 'team225']]};
 UPSET SUCCESS
-[272]:	{upset: 'serve', edge: [['player139', ->: {start_year: 2008, end_year: 2019 }, 'team212']]};
+[271]:	{upset: 'serve', edge: [['player139', ->: {start_year: 2008, end_year: 2019 }, 'team212']]};
 UPSET SUCCESS
-[273]:	{upset: 'serve', edge: [['player139', ->: {start_year: 2019, end_year: 2019 }, 'team218']]};
+[272]:	{upset: 'serve', edge: [['player139', ->: {start_year: 2019, end_year: 2019 }, 'team218']]};
 UPSET SUCCESS
-[274]:	{upset: 'serve', edge: [['player140', ->: {start_year: 1994, end_year: 2000 }, 'team224']]};
+[273]:	{upset: 'serve', edge: [['player140', ->: {start_year: 1994, end_year: 2000 }, 'team224']]};
 UPSET SUCCESS
-[275]:	{upset: 'serve', edge: [['player140', ->: {start_year: 2000, end_year: 2007 }, 'team226']]};
+[274]:	{upset: 'serve', edge: [['player140', ->: {start_year: 2000, end_year: 2007 }, 'team226']]};
 UPSET SUCCESS
-[276]:	{upset: 'serve', edge: [['player140', ->: {start_year: 2007, end_year: 2012 }, 'team214']]};
+[275]:	{upset: 'serve', edge: [['player140', ->: {start_year: 2007, end_year: 2012 }, 'team214']]};
 UPSET SUCCESS
-[277]:	{upset: 'serve', edge: [['player140', ->: {start_year: 2012, end_year: 2013 }, 'team207']]};
+[276]:	{upset: 'serve', edge: [['player140', ->: {start_year: 2012, end_year: 2013 }, 'team207']]};
 UPSET SUCCESS
-[278]:	{upset: 'serve', edge: [['player141', ->: {start_year: 1996, end_year: 2003 }, 'team225']]};
+[277]:	{upset: 'serve', edge: [['player141', ->: {start_year: 1996, end_year: 2003 }, 'team225']]};
 UPSET SUCCESS
-[279]:	{upset: 'serve', edge: [['player141', ->: {start_year: 2003, end_year: 2007 }, 'team205']]};
+[278]:	{upset: 'serve', edge: [['player141', ->: {start_year: 2003, end_year: 2007 }, 'team205']]};
 UPSET SUCCESS
-[280]:	{upset: 'serve', edge: [['player141', ->: {start_year: 2007, end_year: 2012 }, 'team217']]};
+[279]:	{upset: 'serve', edge: [['player141', ->: {start_year: 2007, end_year: 2012 }, 'team217']]};
 UPSET SUCCESS
-[281]:	{upset: 'serve', edge: [['player141', ->: {start_year: 2012, end_year: 2014 }, 'team229']]};
+[280]:	{upset: 'serve', edge: [['player141', ->: {start_year: 2012, end_year: 2014 }, 'team229']]};
 UPSET SUCCESS
-[282]:	{upset: 'serve', edge: [['player142', ->: {start_year: 2011, end_year: 2019 }, 'team200']]};
+[281]:	{upset: 'serve', edge: [['player142', ->: {start_year: 2011, end_year: 2019 }, 'team200']]};
 UPSET SUCCESS
-[283]:	{upset: 'serve', edge: [['player143', ->: {start_year: 2015, end_year: 2019 }, 'team223']]};
+[282]:	{upset: 'serve', edge: [['player143', ->: {start_year: 2015, end_year: 2019 }, 'team223']]};
 UPSET SUCCESS
-[284]:	{upset: 'serve', edge: [['player143', ->: {start_year: 2019, end_year: 2020 }, 'team213']]};
+[283]:	{upset: 'serve', edge: [['player143', ->: {start_year: 2019, end_year: 2020 }, 'team213']]};
 UPSET SUCCESS
-[285]:	{upset: 'serve', edge: [['player144', ->: {start_year: 1992, end_year: 1996 }, 'team226']]};
+[284]:	{upset: 'serve', edge: [['player144', ->: {start_year: 1992, end_year: 1996 }, 'team226']]};
 UPSET SUCCESS
-[286]:	{upset: 'serve', edge: [['player144', ->: {start_year: 1996, end_year: 2004 }, 'team210']]};
+[285]:	{upset: 'serve', edge: [['player144', ->: {start_year: 1996, end_year: 2004 }, 'team210']]};
 UPSET SUCCESS
-[287]:	{upset: 'serve', edge: [['player144', ->: {start_year: 2004, end_year: 2008 }, 'team229']]};
+[286]:	{upset: 'serve', edge: [['player144', ->: {start_year: 2004, end_year: 2008 }, 'team229']]};
 UPSET SUCCESS
-[288]:	{upset: 'serve', edge: [['player144', ->: {start_year: 2008, end_year: 2009 }, 'team214']]};
+[287]:	{upset: 'serve', edge: [['player144', ->: {start_year: 2008, end_year: 2009 }, 'team214']]};
 UPSET SUCCESS
-[289]:	{upset: 'serve', edge: [['player144', ->: {start_year: 2009, end_year: 2010 }, 'team216']]};
+[288]:	{upset: 'serve', edge: [['player144', ->: {start_year: 2009, end_year: 2010 }, 'team216']]};
 UPSET SUCCESS
-[290]:	{upset: 'serve', edge: [['player144', ->: {start_year: 2010, end_year: 2011 }, 'team217']]};
+[289]:	{upset: 'serve', edge: [['player144', ->: {start_year: 2010, end_year: 2011 }, 'team217']]};
 UPSET SUCCESS
-[291]:	{upset: 'serve', edge: [['player145', ->: {start_year: 2008, end_year: 2012 }, 'team228']]};
+[290]:	{upset: 'serve', edge: [['player145', ->: {start_year: 2008, end_year: 2012 }, 'team228']]};
 UPSET SUCCESS
-[292]:	{upset: 'serve', edge: [['player145', ->: {start_year: 2012, end_year: 2015 }, 'team201']]};
+[291]:	{upset: 'serve', edge: [['player145', ->: {start_year: 2012, end_year: 2015 }, 'team201']]};
 UPSET SUCCESS
-[293]:	{upset: 'serve', edge: [['player145', ->: {start_year: 2015, end_year: 2016 }, 'team213']]};
+[292]:	{upset: 'serve', edge: [['player145', ->: {start_year: 2015, end_year: 2016 }, 'team213']]};
 UPSET SUCCESS
-[294]:	{upset: 'serve', edge: [['player145', ->: {start_year: 2016, end_year: 2018 }, 'team200']]};
+[293]:	{upset: 'serve', edge: [['player145', ->: {start_year: 2016, end_year: 2018 }, 'team200']]};
 UPSET SUCCESS
-[295]:	{upset: 'serve', edge: [['player145', ->: {start_year: 2018, end_year: 2019 }, 'team210']]};
+[294]:	{upset: 'serve', edge: [['player145', ->: {start_year: 2018, end_year: 2019 }, 'team210']]};
 UPSET SUCCESS
-[296]:	{upset: 'serve', edge: [['player146', ->: {start_year: 2004, end_year: 2012 }, 'team226']]};
+[295]:	{upset: 'serve', edge: [['player146', ->: {start_year: 2004, end_year: 2012 }, 'team226']]};
 UPSET SUCCESS
-[297]:	{upset: 'serve', edge: [['player146', ->: {start_year: 2012, end_year: 2013 }, 'team210']]};
+[296]:	{upset: 'serve', edge: [['player146', ->: {start_year: 2012, end_year: 2013 }, 'team210']]};
 UPSET SUCCESS
-[298]:	{upset: 'serve', edge: [['player146', ->: {start_year: 2013, end_year: 2016 }, 'team202']]};
+[297]:	{upset: 'serve', edge: [['player146', ->: {start_year: 2013, end_year: 2016 }, 'team202']]};
 UPSET SUCCESS
-[299]:	{upset: 'serve', edge: [['player146', ->: {start_year: 2016, end_year: 2017 }, 'team222']]};
+[298]:	{upset: 'serve', edge: [['player146', ->: {start_year: 2016, end_year: 2017 }, 'team222']]};
 UPSET SUCCESS
-[300]:	{upset: 'serve', edge: [['player146', ->: {start_year: 2017, end_year: 2018 }, 'team215']]};
+[299]:	{upset: 'serve', edge: [['player146', ->: {start_year: 2017, end_year: 2018 }, 'team215']]};
 UPSET SUCCESS
-[301]:	{upset: 'serve', edge: [['player146', ->: {start_year: 2018, end_year: 2019 }, 'team228']]};
+[300]:	{upset: 'serve', edge: [['player146', ->: {start_year: 2018, end_year: 2019 }, 'team228']]};
 UPSET SUCCESS
-[302]:	{upset: 'serve', edge: [['player147', ->: {start_year: 2002, end_year: 2010 }, 'team214']]};
+[301]:	{upset: 'serve', edge: [['player147', ->: {start_year: 2002, end_year: 2010 }, 'team214']]};
 UPSET SUCCESS
-[303]:	{upset: 'serve', edge: [['player147', ->: {start_year: 2010, end_year: 2015 }, 'team223']]};
+[302]:	{upset: 'serve', edge: [['player147', ->: {start_year: 2010, end_year: 2015 }, 'team223']]};
 UPSET SUCCESS
-[304]:	{upset: 'serve', edge: [['player147', ->: {start_year: 2015, end_year: 2016 }, 'team229']]};
+[303]:	{upset: 'serve', edge: [['player147', ->: {start_year: 2015, end_year: 2016 }, 'team229']]};
 UPSET SUCCESS
-[305]:	{upset: 'serve', edge: [['player148', ->: {start_year: 1994, end_year: 1996 }, 'team213']]};
+[304]:	{upset: 'serve', edge: [['player148', ->: {start_year: 1994, end_year: 1996 }, 'team213']]};
 UPSET SUCCESS
-[306]:	{upset: 'serve', edge: [['player148', ->: {start_year: 1996, end_year: 2001 }, 'team214']]};
+[305]:	{upset: 'serve', edge: [['player148', ->: {start_year: 1996, end_year: 2001 }, 'team214']]};
 UPSET SUCCESS
-[307]:	{upset: 'serve', edge: [['player148', ->: {start_year: 2001, end_year: 2008 }, 'team227']]};
+[306]:	{upset: 'serve', edge: [['player148', ->: {start_year: 2001, end_year: 2008 }, 'team227']]};
 UPSET SUCCESS
-[308]:	{upset: 'serve', edge: [['player148', ->: {start_year: 2008, end_year: 2012 }, 'team213']]};
+[307]:	{upset: 'serve', edge: [['player148', ->: {start_year: 2008, end_year: 2012 }, 'team213']]};
 UPSET SUCCESS
-[309]:	{upset: 'serve', edge: [['player148', ->: {start_year: 2012, end_year: 2013 }, 'team223']]};
+[308]:	{upset: 'serve', edge: [['player148', ->: {start_year: 2012, end_year: 2013 }, 'team223']]};
 UPSET SUCCESS
-[310]:	{upset: 'serve', edge: [['player149', ->: {start_year: 2016, end_year: 2019 }, 'team219']]};
+[309]:	{upset: 'serve', edge: [['player149', ->: {start_year: 2016, end_year: 2019 }, 'team219']]};
 UPSET SUCCESS
-[311]:	{upset: 'serve', edge: [['player150', ->: {start_year: 2018, end_year: 2019 }, 'team213']]};
+[310]:	{upset: 'serve', edge: [['player150', ->: {start_year: 2018, end_year: 2019 }, 'team213']]};
 UPSET SUCCESS
 ***** EXECUTE FINISH: "basketballplayer-2.X.gql" *****

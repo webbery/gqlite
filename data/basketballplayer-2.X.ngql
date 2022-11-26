@@ -1,4 +1,4 @@
-drop space basketballplayer;
+// drop space basketballplayer;
 create space basketballplayer(partition_num=10,replica_factor=1,vid_type=fixed_string(32));
 :sleep 20
 use basketballplayer;
