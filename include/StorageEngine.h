@@ -22,6 +22,7 @@
 #define SCHEMA_CLASS_VALUE      "val_type"
 #define SCHEMA_CLASS_NAME       "name"
 #define SCHEMA_INDEX            "indx"
+#define SCHEMA_EDGE             "edge"
 #define MAP_BASIC               "__basic"
 
 #define SCHEMA_GLOBAL           "__global"
@@ -150,9 +151,11 @@ public:
      *   {
      *     name: graph_name(filename)
      *     version: 0.0.1(example),
-     *     class(which values are map name): [Movie, Actor, ...],
+     *     edge(for quick access): [A, B, ...],
+     *     class(which values are map name): [Movie, Actor, A, B...],
      *     Movie(class detail): [{Score: value type}, {Title: string}, {WebID:...}, ...],
      *     Actor(class detail): [{nodes: current count}, {edges: current count}, ],
+     *     A(class detail): [{from: name}, {to: name}, {props: type}, ...],
      *   }
      */
     nlohmann::json& getSchema() { return _schema; }

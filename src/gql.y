@@ -129,7 +129,7 @@ struct GASTNode* INIT_NUMBER_AST(double v, AttributeKind kind) {
 %type <node> a_graph_properties graph_property graph_properties
 %type <node> a_link_condition
 %type <node> a_value
-%type <node> a_group group_list groups
+%type <node> a_group group_list groups vertex_group edge_group
 %type <node> drop_graph
 %type <node> remove_vertexes
 %type <node> vertex_list vertexes string_list strings property_list links link
@@ -286,22 +286,48 @@ group_list: a_group
                 array->addElement($3);
                 $$ = $1;
               };
-a_group: LITERAL_STRING
+a_group: vertex_group
               {
-                GGroupStmt* stmt = new GGroupStmt($1);
+                $$ = $1;
+              }
+        | edge_group
+              {
+                
+              }
+        ;
+vertex_group: LITERAL_STRING
+              {
+                GGroupStmt* stmt = new GVertexGroupStmt($1);
                 free($1);
                 $$ = NewAst(NodeType::GroupStatement, stmt, nullptr, 0);
               }
         | RANGE_BEGIN VAR_NAME COLON string_list RANGE_END
               {
-                GGroupStmt* stmt = new GGroupStmt($2, $4);
+                GGroupStmt* stmt = new GVertexGroupStmt($2, $4);
                 free($2);
                 $$ = NewAst(NodeType::GroupStatement, stmt, nullptr, 0);
               }
         | RANGE_BEGIN VAR_NAME COLON string_list COMMA KW_INDEX COLON string_list RANGE_END
               {
-                GGroupStmt* stmt = new GGroupStmt($2, $4, $8);
+                GGroupStmt* stmt = new GVertexGroupStmt($2, $4, $8);
                 free($2);
+                $$ = NewAst(NodeType::GroupStatement, stmt, nullptr, 0);
+              }
+        ;
+edge_group: LEFT_SQUARE LITERAL_STRING COMMA RANGE_BEGIN VAR_NAME COLON string_list RANGE_END COMMA LITERAL_STRING RIGHT_SQUARE
+              {
+                GGroupStmt* stmt = new GEdgeGroupStmt($5, $7, $2, $10);
+                free($2);
+                free($5);
+                free($10);
+                $$ = NewAst(NodeType::GroupStatement, stmt, nullptr, 0);
+              }
+        | LEFT_SQUARE LITERAL_STRING COMMA LITERAL_STRING COMMA LITERAL_STRING RIGHT_SQUARE
+              {
+                GGroupStmt* stmt = new GEdgeGroupStmt($4, nullptr, $2, $6);
+                free($2);
+                free($4);
+                free($6);
                 $$ = NewAst(NodeType::GroupStatement, stmt, nullptr, 0);
               }
         ;

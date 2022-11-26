@@ -91,6 +91,7 @@ IConverter::Result NGQLConverter::Parse(const std::string& line, std::string& ou
     Create(out);
     _creation.clear();
     _groups.clear();
+    return IConverter::Result::CS;
   }
 
   std::regex regUpsetVertex(R"(insert vertex (\w+)\(([\w\W]+)\) values \"(\w+)\":\(([\w\W]+)\);)");

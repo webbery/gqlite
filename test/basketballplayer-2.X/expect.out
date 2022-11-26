@@ -1,6 +1,6 @@
 ***** EXECUTE: "basketballplayer-2.X.gql" *****
-[0]:	{create: 'basketballplayer', group: [{player: ['name','age'], index: ['name']},{team: ['name']},{serve: ['start_year','end_year']},{follow: ['degree']}]};{upset: 'player', vertex: [['player100', {name: 'Tim Duncan', age: 42}]]};
-UPSET SUCCESS
+[0]:	{create: 'basketballplayer', group: [{player: ['name','age'], index: ['name']},{team: ['name']},{serve: ['start_year','end_year']},{follow: ['degree']}]};
+CREATE SUCCESS
 [1]:	{upset: 'player', vertex: [['player101', {name: 'Tony Parker', age: 36}]]};
 UPSET SUCCESS
 [2]:	{upset: 'player', vertex: [['player102', {name: 'LaMarcus Aldridge', age: 33}]]};

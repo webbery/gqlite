@@ -38,6 +38,12 @@ GUtilPlan::GUtilPlan(std::map<std::string, GVirtualNetwork*>& vn, GStorageEngine
             _vParams3.emplace_back(name + ":" + GetString(item));
           }
         }
+        if (group->type() == GGroupStmt::Edge) {
+          // edge group
+          GEdgeGroupStmt* edgeGroup = static_cast<GEdgeGroupStmt*>(group);
+          auto& schema = _store->getSchema();
+          schema[SCHEMA_EDGE][edgeGroup->name()] = make_pair(edgeGroup->from(), edgeGroup->to());
+        }
         _vParams1.emplace_back(name);
       }
     }

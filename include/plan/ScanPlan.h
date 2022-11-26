@@ -167,6 +167,8 @@ private:
   ScanPlans _queries[(long)LogicalPredicate::Max];
 
   std::string _graph;
+  std::string _group;
+  
   std::vector<IObserver*> _observers;
   /**
    * scan status.

@@ -212,7 +212,9 @@ int GScanPlan::scan()
       continue;
     }
     auto itr = _queries[index].begin();
-    GStorageEngine::cursor cursor = _store->getIndexCursor(itr->_group);
+
+    std::string groupIndex = _group + ":" + itr->_group;
+    GStorageEngine::cursor cursor = _store->getIndexCursor(groupIndex);
     if (_scanRecord._itr != _queries[index].end()) {
       itr = _scanRecord._itr;
       cursor = std::move(_scanRecord._cursor);
@@ -225,14 +227,14 @@ int GScanPlan::scan()
         if (andPattern._node_predicates.size()) {
           auto& andAttr = andPattern._nodes[0]->_attrs;
           for (auto ptr = andAttr.begin(), end = andAttr.end(); ptr != end; ++ptr, ++idx) {
-            if (*ptr == itr->_group) break;
+            if (*ptr == groupIndex) break;
           }
           auto& predictsAnd = andPattern._node_predicates;
           for (auto itr = predictsAnd.begin(), end = predictsAnd.end(); itr != end; ++itr) {
 
           }
           std::list<std::string> keys;
-          switch (_store->getIndexType(itr->_group)) {
+          switch (_store->getIndexType(groupIndex)) {
           case IndexType::Number:
           {
             double from = 0;
@@ -282,7 +284,8 @@ void GScanPlan::parseGroup(GASTNode* query)
       case NodeType::MemberExpression:
       {
         GMemberExpression* expr = (GMemberExpression*)(*itr)->_value;
-        _queries[0].push_back({ 0, expr->GetObjectName() });
+        _group = expr->GetObjectName();
+        _queries[0].push_back({ 0, _group });
       }
         break;
       case NodeType::Literal:
@@ -294,7 +297,8 @@ void GScanPlan::parseGroup(GASTNode* query)
     }
   }
   else if (query->_nodetype == NodeType::Literal) {
-    _queries[0].push_back({ 0, GetString(query) });
+    _group = GetString(query);
+    _queries[0].push_back({ 0, _group });
   }
 }
 
