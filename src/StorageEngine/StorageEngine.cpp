@@ -86,22 +86,22 @@ int GStorageEngine::open(const char* filename, StoreOption option) {
 #define DEFAULT_MAX_PROPS  64
   operator_param.max_maps = DEFAULT_MAX_PROPS;
   std::filesystem::path p(filename);
-  std::string fullpath = p.filename().u8string();
   if (p.is_relative()) {
     if (!option.directory.empty()) {
-      fullpath = option.directory + filename;
+      p = std::filesystem::path(option.directory) / filename;
     }
   }
-  p = fullpath;
-  if (!p.parent_path().empty()) {
+  std::string fullpath = p.string();
+  if (p.has_parent_path() && !std::filesystem::exists(p.parent_path())) {
     gql::create_directories(
 #if defined(__APPLE__) || defined(UNIX) || defined(__linux__)
       p.parent_path().c_str()
 #elif defined(WIN32)
       gql::string2wstring(fullpath.c_str())
 #endif
-      );
+    );
   }
+
 #if defined(__APPLE__) || defined(__gnu_linux__) || defined(__linux__) 
   _env = env_managed(fullpath, create_param, operator_param);
 #else

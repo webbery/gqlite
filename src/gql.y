@@ -49,9 +49,29 @@ struct GASTNode* INIT_STRING_AST(const char* key) {
 }
 
 template<typename T>
-struct GASTNode* INIT_NUMBER_AST(T& v) {
+struct GASTNode* INIT_NUMBER_AST(T v) {
   GLiteral* number = new GLiteralNumber(v);
   return NewAst(NodeType::Literal, number, nullptr, 0);
+}
+
+struct GASTNode* INIT_NUMBER_AST(double v, AttributeKind kind) {
+  switch (kind) {
+  case AttributeKind::Integer:
+    if (v <= std::numeric_limits<int>::max()) {
+      return INIT_NUMBER_AST((int)v);
+    }
+    else if (v <= std::numeric_limits<long>::max()) {
+      return INIT_NUMBER_AST((long)v);
+    }
+    else if (v > 0 && v <= std::numeric_limits<uint64_t>::max()){
+      return INIT_NUMBER_AST((uint64_t)v);
+    }
+    else { // use double
+      return INIT_NUMBER_AST(v);
+    }
+  default:
+    return INIT_NUMBER_AST(v);
+  }
 }
 } // %code
 
@@ -59,7 +79,7 @@ struct GASTNode* INIT_NUMBER_AST(T& v) {
 %parse-param {GVirtualEngine& stm}
 %union {
   struct GASTNode* node;
-  float __f;
+  double __f;
   char var_name[32];
   char* __c;
   size_t __offset;
@@ -73,7 +93,8 @@ struct GASTNode* INIT_NUMBER_AST(T& v) {
 %token <var_name> VAR_HASH
 %token <__f> VAR_DECIMAL
 %token <__c> VAR_BASE64 LITERAL_STRING VAR_NAME LITERAL_PATH
-%token <__int> VAR_INTEGER VAR_DATETIME
+%token <__f> VAR_INTEGER
+%token <__datetime> VAR_DATETIME
 %token <node> KW_VERTEX KW_EDGE
 %token RANGE_BEGIN RANGE_END COLON QUOTE COMMA LEFT_SQUARE RIGHT_SQUARE STAR CR PARAM_BEGIN PARAM_END SEMICOLON
 %token KW_AST KW_ID KW_GRAPH KW_COMMIT
@@ -397,8 +418,8 @@ strings:  LITERAL_STRING
                 free($3);
                 $$ = $1;
               };
-number: VAR_DECIMAL { $$ = INIT_NUMBER_AST($1); }
-        | VAR_INTEGER { $$ = INIT_NUMBER_AST($1); };
+number: VAR_DECIMAL { $$ = INIT_NUMBER_AST($1, AttributeKind::Number); }
+        | VAR_INTEGER { $$ = INIT_NUMBER_AST($1, AttributeKind::Integer); };
 a_graph_properties:
           graph_property { $$ = $1; }
         | LEFT_SQUARE graph_properties RIGHT_SQUARE { $$ = $2; }
@@ -476,12 +497,12 @@ vertex: LEFT_SQUARE LITERAL_STRING COMMA normal_json RIGHT_SQUARE
               }
         | LEFT_SQUARE VAR_INTEGER RIGHT_SQUARE
               {
-                GVertexDeclaration* decl = new GVertexDeclaration(INIT_NUMBER_AST($2), nullptr);
+                GVertexDeclaration* decl = new GVertexDeclaration(INIT_NUMBER_AST($2, AttributeKind::Integer), nullptr);
                 $$ = NewAst(NodeType::VertexDeclaration, decl, nullptr, 0);
               }
         | LEFT_SQUARE VAR_INTEGER COMMA normal_json RIGHT_SQUARE
               {
-                GVertexDeclaration* decl = new GVertexDeclaration(INIT_NUMBER_AST($2), $4);
+                GVertexDeclaration* decl = new GVertexDeclaration(INIT_NUMBER_AST($2, AttributeKind::Integer), $4);
                 $$ = NewAst(NodeType::VertexDeclaration, decl, nullptr, 0);
               }
         | LITERAL_STRING
@@ -492,7 +513,7 @@ vertex: LEFT_SQUARE LITERAL_STRING COMMA normal_json RIGHT_SQUARE
               }
         | VAR_INTEGER
               {
-                GVertexDeclaration* decl = new GVertexDeclaration(INIT_NUMBER_AST($1), nullptr);
+                GVertexDeclaration* decl = new GVertexDeclaration(INIT_NUMBER_AST($1, AttributeKind::Integer), nullptr);
                 $$ = NewAst(NodeType::VertexDeclaration, decl, nullptr, 0);
               };
 links: link
@@ -525,12 +546,12 @@ link: LEFT_SQUARE LITERAL_STRING COMMA connection COMMA LITERAL_STRING RIGHT_SQU
               }
         | LEFT_SQUARE VAR_INTEGER COMMA connection COMMA VAR_INTEGER RIGHT_SQUARE
               {
-                GEdgeDeclaration* edge = new GEdgeDeclaration($4, INIT_NUMBER_AST($2), INIT_NUMBER_AST($6));
+                GEdgeDeclaration* edge = new GEdgeDeclaration($4, INIT_NUMBER_AST($2, AttributeKind::Integer), INIT_NUMBER_AST($6, AttributeKind::Integer));
                 $$ = NewAst(NodeType::EdgeDeclaration, edge, nullptr, 0);
               }
         | LEFT_SQUARE VAR_INTEGER RIGHT_SQUARE
               {
-                struct GASTNode* value = INIT_NUMBER_AST($2);
+                struct GASTNode* value = INIT_NUMBER_AST($2, AttributeKind::Integer);
                 GEdgeDeclaration* edge = new GEdgeDeclaration("--", value);
                 $$ = NewAst(NodeType::EdgeDeclaration, edge, nullptr, 0);
               };
@@ -813,8 +834,8 @@ a_value:  LITERAL_STRING
                 $$ = INIT_STRING_AST($1);
                 free($1);
               }
-        | VAR_DECIMAL { $$ = INIT_NUMBER_AST($1); }
-        | VAR_INTEGER { $$ = INIT_NUMBER_AST($1); };
+        | VAR_DECIMAL { $$ = INIT_NUMBER_AST($1, AttributeKind::Number); }
+        | VAR_INTEGER { $$ = INIT_NUMBER_AST($1, AttributeKind::Integer); };
 function_call:
         | VAR_NAME function_params
               {

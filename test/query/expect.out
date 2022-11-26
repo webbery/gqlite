@@ -120,7 +120,7 @@ REMOVE SUCCESS
 [21]:	{dump: 'query_db'};
 {create: 'query_db', group: ['addr','ruins'], index: ['ruins:category','ruins:feature_name','ruins:loc']}
 {upset: 'addr', vertex: ['1', {'datatime':0d1651105732,'filename':'破墙1.jpg'}]}
-{upset: 'addr', vertex: ['2', {'filename':'破墙2.jpg','loc':[131.241943,37.12532]}]}
+{upset: 'addr', vertex: ['2', {'filename':'破墙2.jpg','loc':[131.24194,37.12532]}]}
 {upset: 'addr', vertex: ['3']}
 {upset: 'addr', vertex: ['4']}
 {upset: 'addr', vertex: ['5']}

@@ -172,13 +172,13 @@ create              {
 "\n"                {stm._errIndx += yyleng;};
 [0-9]+              {
                         std::string s(yytext, yyleng);
-                        yylval->__int = std::stoi(s);
+                        yylval->__f = std::stod(s);
                         stm._errIndx += yyleng;
                         return VAR_INTEGER;
                     };
 {DECIMAL}           {
                         std::string s(yytext, yyleng);
-                        yylval->__f = std::stof(s);
+                        yylval->__f = std::stod(s);
                         stm._errIndx += yyleng;
                         return VAR_DECIMAL;
                     };
