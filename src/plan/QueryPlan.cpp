@@ -16,8 +16,7 @@ GQueryPlan::~GQueryPlan()
 
 int GQueryPlan::prepare()
 {
-  _scan->prepare();
-  return 0;
+  return _scan->prepare();
 }
 
 int GQueryPlan::execute(const std::function<ExecuteStatus(KeyType, const std::string& key, const std::string& value)>& processor)

@@ -186,12 +186,12 @@ public:
     IndexType updateIndexType(const std::string& name, IndexType type);
     IndexType getIndexType(const std::string& name);
 
-private:
     /**
      * @brief check map(prop) is exist or not.
      */
     bool isMapExist(const std::string& prop);
 
+private:
     /**
      * @brief check every attribute is init or not. If not, set index and its attribute's name.
      */

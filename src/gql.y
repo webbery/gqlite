@@ -113,26 +113,23 @@ struct GASTNode* INIT_NUMBER_AST(double v, AttributeKind kind) {
 %type <node> condition_value normal_value number right_value simple_value geometry_condition range_comparable datetime_comparable
 %type <node> condition_values normal_values simple_values
 %type <node> normal_object condition_object
-%type <node> condition_array normal_array a_vector number_list
+%type <node> condition_array normal_array
 %type <node> normal_properties condition_properties
 %type <node> where_expr a_walk vertex_start_walk edge_start_walk a_simple_graph
 %type <node> function_call function_params
 %type <node> normal_property condition_property
-%type <node> vertex 
 %type <node> gql
 %type <node> creation dump_graph
-%type <node> upset_vertexes
-%type <node> upset_edges edge_pattern connection
-%type <node> a_simple_query
-%type <node> query_kind_expr a_match match_expr
+%type <node> upset_vertexes vertex_list vertexes vertex
+%type <node> a_simple_query query_kind_expr a_match match_expr
 %type <node> query_kind
 %type <node> a_graph_properties graph_property graph_properties
-%type <node> a_link_condition
 %type <node> a_value
 %type <node> a_group group_list groups vertex_group edge_group
-%type <node> drop_graph
-%type <node> remove_vertexes
-%type <node> vertex_list vertexes string_list strings property_list links link
+%type <node> drop_graph remove_vertexes remove_edges
+%type <node> upset_edges edge_pattern connection a_link_condition
+%type <node> links link condition_links condition_link_item condition_link
+%type <node> key string_list strings intergers property_list a_vector number_list
 
 %%
 line_list: line_list line SEMICOLON {}
@@ -170,6 +167,7 @@ gql: creation
             stm._cmdtype = GQL_Upset;
           }
         | remove_vertexes { $$ = $1; stm._cmdtype = GQL_Remove; }
+        | remove_edges { $$ = $1; stm._cmdtype = GQL_Remove; }
         | drop_graph
           {
             GGQLExpression* expr = new GGQLExpression();
@@ -254,11 +252,23 @@ upset_vertexes: RANGE_BEGIN KW_UPSET COLON LITERAL_STRING COMMA KW_VERTEX COLON 
               };
 remove_vertexes: RANGE_BEGIN KW_REMOVE COLON LITERAL_STRING COMMA KW_VERTEX COLON vertex_list RANGE_END
               {
-                GRemoveStmt* rmStmt = new GRemoveStmt($4, $8);
+                GRemoveStmt* rmStmt = new GVertexRemoveStmt($4, $8);
                 free($4);
                 $$ = NewAst(NodeType::RemoveStatement, rmStmt, nullptr, 0);
               };
-upset_edges: RANGE_BEGIN KW_UPSET COLON LITERAL_STRING COMMA KW_EDGE COLON LEFT_SQUARE links RIGHT_SQUARE RANGE_END
+remove_edges: RANGE_BEGIN KW_REMOVE COLON LITERAL_STRING COMMA KW_EDGE COLON condition_links RANGE_END
+              {
+                GRemoveStmt* rmStmt = new GEdgeRemoveStmt($4, $8);
+                free($4);
+                $$ = NewAst(NodeType::RemoveStatement, rmStmt, nullptr, 0);
+              };
+upset_edges: RANGE_BEGIN KW_UPSET COLON LITERAL_STRING COMMA KW_EDGE COLON link RANGE_END
+              {
+                GUpsetStmt* upsetStmt = new GUpsetStmt($4, $8);
+                free($4);
+                $$ = NewAst(NodeType::UpsetStatement, upsetStmt, nullptr, 0);
+              }
+        | RANGE_BEGIN KW_UPSET COLON LITERAL_STRING COMMA KW_EDGE COLON LEFT_SQUARE links RIGHT_SQUARE RANGE_END
               {
                 GUpsetStmt* upsetStmt = new GUpsetStmt($4, $9);
                 free($4);
@@ -444,6 +454,18 @@ strings:  LITERAL_STRING
                 free($3);
                 $$ = $1;
               };
+intergers: VAR_INTEGER
+              {
+                GArrayExpression* array = new GArrayExpression();
+                array->addElement(INIT_NUMBER_AST($1, AttributeKind::Integer));
+                $$ = NewAst(NodeType::ArrayExpression, array, nullptr, 0);
+              }
+        | intergers COMMA VAR_INTEGER
+              {
+                GArrayExpression* array = (GArrayExpression*)$1->_value;
+                array->addElement(INIT_NUMBER_AST($3, AttributeKind::Integer));
+                $$ = $1;
+              };
 number: VAR_DECIMAL { $$ = INIT_NUMBER_AST($1, AttributeKind::Number); }
         | VAR_INTEGER { $$ = INIT_NUMBER_AST($1, AttributeKind::Integer); };
 a_graph_properties:
@@ -542,6 +564,32 @@ vertex: LEFT_SQUARE LITERAL_STRING COMMA normal_json RIGHT_SQUARE
                 GVertexDeclaration* decl = new GVertexDeclaration(INIT_NUMBER_AST($1, AttributeKind::Integer), nullptr);
                 $$ = NewAst(NodeType::VertexDeclaration, decl, nullptr, 0);
               };
+condition_links: condition_link
+              {
+                GArrayExpression* edges = new GArrayExpression();
+                edges->addElement($1);
+                $$ = NewAst(NodeType::ArrayExpression, edges, nullptr, 0);
+              }
+        | condition_links COMMA condition_link
+              {
+                GArrayExpression* edges = (GArrayExpression*)$1->_value;
+                edges->addElement($3);
+                $$ = $1;
+              }
+        ;
+condition_link: LEFT_SQUARE condition_link_item COMMA connection COMMA condition_link_item RIGHT_SQUARE
+              {
+                GEdgeDeclaration* edge = new GEdgeDeclaration($4, $2, $6);
+                $$ = NewAst(NodeType::EdgeDeclaration, edge, nullptr, 0);
+              };
+condition_link_item: VAR_INTEGER {$$ = INIT_NUMBER_AST($1, AttributeKind::Integer);}
+        | LITERAL_STRING
+              {
+                $$ = INIT_STRING_AST($1);
+                free($1);
+              }
+        | STAR { $$ = INIT_STRING_AST("*"); }
+        ;
 links: link
               {
                 GArrayExpression* edges = new GArrayExpression();
@@ -554,33 +602,23 @@ links: link
                 edges->addElement($3);
                 $$ = $1;
               };
-link: LEFT_SQUARE LITERAL_STRING COMMA connection COMMA LITERAL_STRING RIGHT_SQUARE
+link: LEFT_SQUARE key COMMA connection COMMA key RIGHT_SQUARE
               {
-                struct GASTNode* from_value = INIT_STRING_AST($2);
-                free($2);
-                struct GASTNode* to_value = INIT_STRING_AST($6);
-                free($6);
-                GEdgeDeclaration* edge = new GEdgeDeclaration($4, from_value, to_value);
+                GEdgeDeclaration* edge = new GEdgeDeclaration($4, $2, $6);
                 $$ = NewAst(NodeType::EdgeDeclaration, edge, nullptr, 0);
               }
-        | LEFT_SQUARE LITERAL_STRING RIGHT_SQUARE
+        | LEFT_SQUARE key RIGHT_SQUARE
               {
-                struct GASTNode* value = INIT_STRING_AST($2);
-                free($2);
-                GEdgeDeclaration* edge = new GEdgeDeclaration("--", value);
+                GEdgeDeclaration* edge = new GEdgeDeclaration("--", $2);
                 $$ = NewAst(NodeType::EdgeDeclaration, edge, nullptr, 0);
               }
-        | LEFT_SQUARE VAR_INTEGER COMMA connection COMMA VAR_INTEGER RIGHT_SQUARE
+        ;
+multi_link: LEFT_SQUARE key COMMA a_edge COMMA LEFT_SQUARE strings RIGHT_SQUARE RIGHT_SQUARE
               {
-                GEdgeDeclaration* edge = new GEdgeDeclaration($4, INIT_NUMBER_AST($2, AttributeKind::Integer), INIT_NUMBER_AST($6, AttributeKind::Integer));
-                $$ = NewAst(NodeType::EdgeDeclaration, edge, nullptr, 0);
+                // GEdgeDeclaration* edge = new GEdgeDeclaration($4, $2, $6);
               }
-        | LEFT_SQUARE VAR_INTEGER RIGHT_SQUARE
-              {
-                struct GASTNode* value = INIT_NUMBER_AST($2, AttributeKind::Integer);
-                GEdgeDeclaration* edge = new GEdgeDeclaration("--", value);
-                $$ = NewAst(NodeType::EdgeDeclaration, edge, nullptr, 0);
-              };
+        | LEFT_SQUARE key COMMA a_edge COMMA LEFT_SQUARE intergers RIGHT_SQUARE RIGHT_SQUARE
+              {};
 connection: a_link_condition { $$ = $1;}
         | a_edge  { $$ = INIT_STRING_AST($1); };
 a_vector: LEFT_SQUARE number_list RIGHT_SQUARE { $$ = $2; };
@@ -879,4 +917,6 @@ function_params:
         | PARAM_BEGIN STAR PARAM_END { $$ = INIT_STRING_AST("*"); }
         | PARAM_BEGIN string_list PARAM_END { $$ = $2; }
         ;
+key: VAR_INTEGER { $$ = INIT_NUMBER_AST($1, AttributeKind::Integer); }
+        | LITERAL_STRING { $$ = INIT_STRING_AST($1); free($1);};
 %%

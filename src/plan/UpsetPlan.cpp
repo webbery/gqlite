@@ -205,10 +205,12 @@ gkey_t GUpsetPlan::UpsetVisitor::getLiteral(GASTNode* node)
   GLiteral* literal = (GLiteral*)(node->_value);
   gkey_t k;
   switch (literal->kind()) {
+  case AttributeKind::Integer:
   case AttributeKind::Number:
     k = (uint64_t)atoll(literal->raw().c_str());
     break;
   case AttributeKind::Datetime:
+  case AttributeKind::Vector:
     break;
   default:
     k = literal->raw();

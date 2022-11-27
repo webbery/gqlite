@@ -70,6 +70,7 @@ int GScanPlan::prepare()
   if (!std::filesystem::exists(_graph)) {
     return ECode_Graph_Not_Exist;
   }
+  if (!_store->isMapExist(_group)) return ECode_Group_Not_Exist;
   switch (_queryType)
   {
   case GScanPlan::QueryType::SimpleScan:

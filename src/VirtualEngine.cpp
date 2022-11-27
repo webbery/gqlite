@@ -83,7 +83,7 @@ int GVirtualEngine::executePlans(PlanList* plans) {
   PlanList* cur = plans->_next;
   while (cur != plans)
   {
-    cur->_plan->prepare();
+    ret = cur->_plan->prepare();
     if (ret != ECode_Success) return ret;
     ret = cur->_plan->execute([&](KeyType, const std::string& key, const std::string& value) -> ExecuteStatus {
       return ExecuteStatus::Continue; });

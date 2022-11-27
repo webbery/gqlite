@@ -1,0 +1,38 @@
+***** EXECUTE: "grammar.gql" *****
+[0]:	{create: 'file_resource', group: [{file_meta:['color','size','path','filename','type','datetime','addtime','width','height'], index:['color','size','type','datetime','addtime']}, {tag: 'name'}, {directory: 'path'}, {keyword: 'name'}, ['tag', 'relation_tag', 'file_meta'], ['directory', 'relation_dir', 'file_meta'], ['keyword', 'relation_kw', 'file_meta']]};
+CREATE SUCCESS
+[1]:	{upset: 'file_meta', vertex: [[2734686464, {datetime:0d1600577894000,filename:'f2d470a08a1011eab5a4993e17631b31.jpg~tplv-banciyuan-w650.jpg',hash:'unknow',height:650,path:'C:\Users\webberg\Pictures\f2d470a08a1011eab5a4993e17631b31.jpg~tplv-banciyuan-w650.jpg',size:207879,type:'unknow',width:650}]]};
+UPSET SUCCESS
+[2]:	{upset: 'file_meta', vertex: [[2234686464, {datetime:0d1600577894000,filename:'06cc22608a1111eab5a4993e17631b31.jpg~tplv-banciyuan-w650.jpg',hash:'unknow',height:650,path:'C:\Users\webberg\Pictures\06cc22608a1111eab5a4993e17631b31.jpg~tplv-banciyuan-w650.jpg',size:207879,type:'unknow',width:650}]]};
+UPSET SUCCESS
+[3]:	{upset: 'relation_dir', edge: [2734686464, --, 'type1']};
+UPSET SUCCESS
+[4]:	{upset: 'relation_dir', edge: [2734686464, --, 'type2']};
+UPSET SUCCESS
+[5]:	{upset: 'tag', vertex: ['test']};
+UPSET SUCCESS
+[6]:	{upset: 'keyword', vertex: ['keyword1']};
+UPSET SUCCESS
+[7]:	{upset: 'relation_tag', edge: [2734686720, --, 'test']};
+UPSET SUCCESS
+[8]:	{upset: 'relation_tag', edge: [2734686464, --, 'test']};
+UPSET SUCCESS
+[9]:	{upset: 'relation_tag', edge: [2734686976, --, 'test']};
+UPSET SUCCESS
+[10]:	{upset: 'relation_tag', edge: [2734687232, --, 'test']};
+UPSET SUCCESS
+[11]:	{upset: 'relation_kw', edge: [2734687232, --, 'keyword1']};
+UPSET SUCCESS
+[12]:	{remove: 'relation_dir', edge: [2734686464, --, *]};
+REMOVE SUCCESS
+[13]:	{remove: 'relation_tag', edge: [2734686464, --, *]};
+REMOVE SUCCESS
+[14]:	{remove: 'relation_tag', edge: [2734686720, --, *]};
+REMOVE SUCCESS
+[15]:	{remove: 'relation_tag', edge: [2734686976, --, *]};
+REMOVE SUCCESS
+[16]:	{remove: 'file_meta', vertex: [2734686464]};
+REMOVE SUCCESS
+[17]:	{remove: 'relation_kw', edge: [2734686976, --, *]};
+REMOVE SUCCESS
+***** EXECUTE FINISH: "grammar.gql" *****

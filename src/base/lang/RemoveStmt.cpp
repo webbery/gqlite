@@ -9,3 +9,15 @@ GRemoveStmt::~GRemoveStmt()
 {
   FreeAst(_array);
 }
+
+GVertexRemoveStmt::GVertexRemoveStmt(const std::string& name, GASTNode* array)
+: GRemoveStmt(name, array)
+{
+  _type = Vertex;
+}
+
+GEdgeRemoveStmt::GEdgeRemoveStmt(const std::string& name, GASTNode* array)
+: GRemoveStmt(name, array)
+{
+  _type = Edge;
+}

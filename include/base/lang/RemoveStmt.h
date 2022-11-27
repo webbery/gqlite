@@ -4,12 +4,28 @@
 struct GASTNode;
 class GRemoveStmt {
 public:
+  enum RemoveType{
+    Vertex,
+    Edge
+  };
   GRemoveStmt(const std::string& name, GASTNode* array);
-  ~GRemoveStmt();
+  virtual ~GRemoveStmt();
 
   std::string name() const { return _name; }
   GASTNode* node() const { return _array; }
-private:
+  RemoveType type() const { return _type; }
+protected:
+  RemoveType _type;
   std::string _name;
   GASTNode* _array;
+};
+
+class GVertexRemoveStmt : public GRemoveStmt {
+public:
+  GVertexRemoveStmt(const std::string& name, GASTNode* array);
+};
+
+class GEdgeRemoveStmt : public GRemoveStmt {
+public:
+  GEdgeRemoveStmt(const std::string& name, GASTNode* array);
 };

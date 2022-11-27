@@ -26,7 +26,10 @@ DECIMAL [0-9]+.[0-9]+
 "{"                 { stm._errIndx += 1; return RANGE_BEGIN;};
 "}"                 { stm._errIndx += 1; return RANGE_END;};
 "\""                { stm._errIndx += 1; };
-"'*'"               { stm._errIndx += 3;return STAR; };
+"*"                 {
+                        stm._errIndx += 3;
+                        return STAR;
+                    };
 [ ]*                { stm._errIndx += yyleng; };
 "\["                { stm._errIndx += 1; return LEFT_SQUARE; };
 "\]"                { stm._errIndx += 1; return RIGHT_SQUARE; };
