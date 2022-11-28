@@ -224,8 +224,9 @@ private:
   template<typename T>
   bool upsetIndex(const nlohmann::json& item, const T& id) {
     for (auto& index : _indexes) {
-      if (item.count(index) == 0) continue;
-      auto& value = item[index];
+      std::string k = index.substr(_class.size() + 1, index.size() - _class.size() - 1);
+      if (item.count(k) == 0) continue;
+      auto& value = item[k];
       if (value.is_object() && value.count(OBJECT_TYPE_NAME)) {
         switch ((AttributeKind)value[OBJECT_TYPE_NAME])
         {
@@ -233,8 +234,7 @@ private:
         {
           if (!_hnsws.count(index)) {
             // group name + index name can fix identity name
-            std::string k = _class + ":" + index;
-            GVirtualNetwork* net = generateNetwork(k);
+            GVirtualNetwork* net = generateNetwork(index);
             _hnsws[index] = new GHNSW(net, _store, index.c_str(), (index + ":v").c_str());
           }
           addVectorIndex(index, id, value["value"]);

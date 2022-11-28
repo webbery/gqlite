@@ -1,6 +1,7 @@
 {create: 'file_resource', group: [{file_meta:['color','size','path','filename','type','datetime','addtime','width','height'], index:['color','size','type','datetime','addtime']}, {tag: 'name'}, {directory: 'path'}, {keyword: 'name'}, ['tag', 'relation_tag', 'file_meta'], ['directory', 'relation_dir', 'file_meta'], ['keyword', 'relation_kw', 'file_meta']]};
 {upset: 'file_meta', vertex: [[2734686464, {datetime:0d1600577894000,filename:'f2d470a08a1011eab5a4993e17631b31.jpg~tplv-banciyuan-w650.jpg',hash:'unknow',height:650,path:'C:\Users\webberg\Pictures\f2d470a08a1011eab5a4993e17631b31.jpg~tplv-banciyuan-w650.jpg',size:207879,type:'unknow',width:650}]]};
 {upset: 'file_meta', vertex: [[2234686464, {datetime:0d1600577894000,filename:'06cc22608a1111eab5a4993e17631b31.jpg~tplv-banciyuan-w650.jpg',hash:'unknow',height:650,path:'C:\Users\webberg\Pictures\06cc22608a1111eab5a4993e17631b31.jpg~tplv-banciyuan-w650.jpg',size:207879,type:'unknow',width:650}]]};
+{upset: 'directory', vertex: ['type1']};
 {upset: 'relation_dir', edge: [2734686464, --, 'type1']};
 {upset: 'relation_dir', edge: [2734686464, --, 'type2']};
 {upset: 'tag', vertex: ['test']};
@@ -16,3 +17,5 @@
 {remove: 'relation_tag', edge: [2734686976, --, *]};
 {remove: 'file_meta', vertex: [2734686464]};
 {remove: 'relation_kw', edge: [2734686976, --, *]};
+{dump: 'file_resource'};
+{drop: 'file_resource'};

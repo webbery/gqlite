@@ -536,6 +536,7 @@ GStorageEngine::cursor GStorageEngine::getIndexCursor(const std::string& mapname
   case IndexType::Word:
     handle = getOrCreateHandle(mapname, mdbx::key_mode::usual);
     break;
+  case IndexType::Vector:
   default:
     printf("other type: %s\n", mapname.c_str());
     handle = getOrCreateHandle(mapname, mdbx::key_mode::ordinal);
@@ -543,6 +544,13 @@ GStorageEngine::cursor GStorageEngine::getIndexCursor(const std::string& mapname
   }
   thread_local auto id = std::this_thread::get_id();
   return _txns[id].open_cursor(handle);
+}
+
+
+std::vector<std::string> GStorageEngine::getRelations(const std::string& group)
+{
+  std::vector<std::string> relations;
+  return relations;
 }
 
 int GStorageEngine::startTrans(ReadWriteOption opt) {

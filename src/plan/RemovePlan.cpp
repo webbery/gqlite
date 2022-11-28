@@ -3,6 +3,7 @@
 #include "base/lang/RemoveStmt.h"
 #include "plan/ScanPlan.h"
 #include "StorageEngine.h"
+#include "gutil.h"
 
 GRemovePlan::GRemovePlan(std::map<std::string, GVirtualNetwork*>& networks, GStorageEngine* store, GRemoveStmt* stmt)
   :GPlan(networks, store)
@@ -24,6 +25,10 @@ int GRemovePlan::execute(const std::function<ExecuteStatus(KeyType, const std::s
     return ExecuteStatus::Continue;
     });
   KeyType type = _store->getKeyType(_group);
+  if (type == KeyType::Integer || type == KeyType::Byte) {
+    // try find their relation data and then remove
+    std::vector<std::string>&& relations = _store->getRelations(_group);
+  }
   switch (type) {
   case KeyType::Integer:
     for (auto itr = keys.begin(), end = keys.end(); itr != end; ++itr)
@@ -38,8 +43,15 @@ int GRemovePlan::execute(const std::function<ExecuteStatus(KeyType, const std::s
       _store->del(_group, itr->data());
     }
     break;
-  default:
+  case KeyType::Edge:
+    for (auto itr = keys.begin(), end = keys.end(); itr != end; ++itr)
+    {
+      gql::edge_id eid = gql::to_edge_id(*itr);
+      _store->del(_group, *itr);
+    }
     break;
+  default:
+    return ECode_Remove_Unknow_Type;
   }
   return 0;
 }

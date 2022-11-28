@@ -75,6 +75,7 @@ SYMBOL_EXPORT int gqlite_exec(gqlite* pDb, const char* gql, int (*gqlite_callbac
   stm->_result_callback = gqlite_callback;
   stm->_gql = gql;
   stm->_handle = handle;
+  stm->_errorCode = 0;
   impl->exec(*stm);
   char* msg = gqlite_error(pDb, stm->_errorCode);
   *err = msg;
