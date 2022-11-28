@@ -12,12 +12,12 @@
 ast {query: 'ruins', in: 'vertex_db', where: {category: '废墟'}};
 {query: 'ruins'};
 {query: 'ruins', in: 'vertex_db', where: {category: '废墟'}};
-{query: 'ruins', in: 'vertex_db', where: {category: '赛博朋克'}};
+{query: 'ruins', in: 'query_db', where: {category: '赛博朋克'}};
 ast {query: 'ruins', in: 'vertex_db', where: {datatime: {$lt: 1653315732}}};
-{query: 'ruins', in: 'vertex_db', where: {datatime: {$lt: 0d1653315732}}};
-{query: 'ruins', in: 'vertex_db', where: {datatime: {$gt: 0d1653315732}}};
-{query: 'ruins', in: 'vertex_db', where: {datatime: {$gte: 0d1653315732}}};
-{query: 'ruins', in: 'vertex_db', where: {datatime: {$lte: 0d1653446731}}};
+{query: 'ruins', in: 'query_db', where: {datatime: {$lt: 0d1653315732}}};
+{query: 'ruins', in: 'query_db', where: {datatime: {$gt: 0d1653315732}}};
+{query: 'ruins', in: 'query_db', where: {datatime: {$gte: 0d1653315732}}};
+{query: 'ruins', in: 'query_db', where: {datatime: {$lte: 0d1653446731}}};
 {remove: 'ruins', vertex: ['3']};
 {dump: 'query_db'};
 {drop: 'query_db'};
