@@ -34,6 +34,7 @@
 #define ECode_TRANSTION_Not_Exist   500
 #define ECode_Query_Stop            600
 #define ECode_Query_Pause           601
+#define ECode_Remove_Unknow_Type    700
 
 typedef void* gqlite;
 

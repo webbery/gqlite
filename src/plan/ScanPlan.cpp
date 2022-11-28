@@ -83,7 +83,7 @@ int GScanPlan::prepare()
         auto begin = pattern._nodes[0]->_attrs.begin();
         auto end = pattern._nodes[0]->_attrs.end();
         for (auto ptr = begin; ptr != end; ++ptr) {
-          plans.push_back({ 0, *ptr });
+          plans.push_back({ 0, _group + ":" + *ptr});
         }
       }
       plans.insert(plans.end(), _queries[index].begin(), _queries[index].end());
@@ -214,7 +214,7 @@ int GScanPlan::scan()
     }
     auto itr = _queries[index].begin();
 
-    std::string groupIndex = _group + ":" + itr->_group;
+    std::string groupIndex = itr->_group;
     GStorageEngine::cursor cursor = _store->getIndexCursor(groupIndex);
     if (_scanRecord._itr != _queries[index].end()) {
       itr = _scanRecord._itr;

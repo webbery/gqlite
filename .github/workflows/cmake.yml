@@ -2,7 +2,7 @@ name: CMake
 
 on:
   push:
-    branches: [ master, ci, ci-* ]
+    branches: [ master, ci, ci-*, develop ]
 
 env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
@@ -56,7 +56,7 @@ jobs:
       run: |
         pip install gcovr
         cd ${{github.workspace}}
-        cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DGQLITE_BUILD_TEST=TRUE -DMDBX_BUILD_TOOLS=FALSE -DZSTD_LEGACY_SUPPORT=OFF
+        cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DGQLITE_BUILD_TEST=TRUE -DMDBX_BUILD_TOOLS=FALSE -DMDBX_INSTALL_MANPAGES=FALSE -DZSTD_LEGACY_SUPPORT=OFF
     - name: Build
       # Build your program with the given configuration
       run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}

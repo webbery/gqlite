@@ -120,24 +120,24 @@ QUERY SUCCESS
 [20]:	{remove: 'ruins', vertex: ['3']};
 REMOVE SUCCESS
 [21]:	{dump: 'query_db'};
-{create: 'query_db', group: ['addr','ruins'], index: ['ruins:category','ruins:feature_name','ruins:loc']}
-{upset: 'addr', vertex: [1, {'datatime':0d1651105732,'filename':'破墙1.jpg'}]}
-{upset: 'addr', vertex: [2, {'filename':'破墙2.jpg','loc':[131.24194,37.12532]}]}
-{upset: 'addr', vertex: [3]}
-{upset: 'addr', vertex: [4]}
-{upset: 'addr', vertex: [5]}
-{upset: 'ruins', vertex: ['1', {'datatime':0d5,'filename':'破墙0.jpg'}]}
-{upset: 'ruins', vertex: ['4']}
-{upset: 'ruins', vertex: ['5']}
-{upset: 'ruins', vertex: ['v1', {'datatime':0d1653446732,'feature_name':[0.0,0.0],'filename':'破旧小屋.jpg'}]}
-{upset: 'ruins', vertex: ['v2', {'category':'HDR','datatime':0d1653446732,'filename':'夕阳.jpg'}]}
-{upset: 'ruins', vertex: ['v3', {'category':'赛博朋克','datatime':0d1653446732,'filename':'阿丽塔.jpg'}]}
-{upset: 'ruins', vertex: ['v4', {'datatime':0d1653315732,'feature_name':[0.0,0.5],'filename':'垃圾堆.jpg'}]}
-{upset: 'ruins', vertex: ['v5', {'category':'HDR','datatime':0d1653315732,'filename':'海岸线.jpg'}]}
-{upset: 'ruins', vertex: ['v6', {'category':'赛博朋克','datatime':0d1653315732,'filename':'机械姬.jpg'}]}
-{upset: 'ruins', vertex: ['v7', {'datatime':0d1651105732,'feature_name':[0.0,1.5],'filename':'破墙.jpg'}]}
-{upset: 'ruins', vertex: ['v8', {'category':'HDR','datatime':0d1651105732,'feature_name':[0.5,0.0],'filename':'蓝天.jpg'}]}
-{upset: 'ruins', vertex: ['v9', {'category':'赛博朋克','datatime':0d1651105732,'filename':'大佐.jpg'}]}
+{create: 'query_db', group: [{addr: []},{ruins: [], index: ['category','feature_name','loc']}]};
+{upset: 'addr', vertex: [1, {'datatime':0d1651105732,'filename':'破墙1.jpg'}]};
+{upset: 'addr', vertex: [2, {'filename':'破墙2.jpg','loc':[131.24194,37.12532]}]};
+{upset: 'addr', vertex: [3]};
+{upset: 'addr', vertex: [4]};
+{upset: 'addr', vertex: [5]};
+{upset: 'ruins', vertex: ['1', {'datatime':0d5,'filename':'破墙0.jpg'}]};
+{upset: 'ruins', vertex: ['4']};
+{upset: 'ruins', vertex: ['5']};
+{upset: 'ruins', vertex: ['v1', {'datatime':0d1653446732,'feature_name':[0.0,0.0],'filename':'破旧小屋.jpg'}]};
+{upset: 'ruins', vertex: ['v2', {'category':'HDR','datatime':0d1653446732,'filename':'夕阳.jpg'}]};
+{upset: 'ruins', vertex: ['v3', {'category':'赛博朋克','datatime':0d1653446732,'filename':'阿丽塔.jpg'}]};
+{upset: 'ruins', vertex: ['v4', {'datatime':0d1653315732,'feature_name':[0.0,0.5],'filename':'垃圾堆.jpg'}]};
+{upset: 'ruins', vertex: ['v5', {'category':'HDR','datatime':0d1653315732,'filename':'海岸线.jpg'}]};
+{upset: 'ruins', vertex: ['v6', {'category':'赛博朋克','datatime':0d1653315732,'filename':'机械姬.jpg'}]};
+{upset: 'ruins', vertex: ['v7', {'datatime':0d1651105732,'feature_name':[0.0,1.5],'filename':'破墙.jpg'}]};
+{upset: 'ruins', vertex: ['v8', {'category':'HDR','datatime':0d1651105732,'feature_name':[0.5,0.0],'filename':'蓝天.jpg'}]};
+{upset: 'ruins', vertex: ['v9', {'category':'赛博朋克','datatime':0d1651105732,'filename':'大佐.jpg'}]};
 {dump: 'query_db'}; SUCCESS
 [22]:	{drop: 'query_db'};
 DROP SUCCESS

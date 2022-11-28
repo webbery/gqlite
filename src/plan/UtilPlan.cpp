@@ -121,27 +121,43 @@ int GUtilPlan::execute(const std::function<ExecuteStatus(KeyType, const std::str
     std::string graph = std::get<std::string>(_var);
     auto& schema = _store->getSchema();
     auto& groups = schema[SCHEMA_CLASS];
+    auto& edges = schema[SCHEMA_EDGE];
+    auto indexes = _store->getIndexes();
+    //fmt::printf("%s\n", schema.dump());
     // create graph
     std::string groupsName;
     for (auto itr = groups.begin(); itr != groups.end(); ++itr) {
       std::string name = itr.key();
       if (name == MAP_BASIC || name.find(":") != std::string::npos) continue;
-      groupsName += "'" +name + "'";
-      groupsName += ",";
+      if (edges.find(name) != edges.end()) {
+        auto& relation = edges[name];
+        groupsName += std::string("['") + std::string(relation[0]) + "', '" + name + "', '" + std::string(relation[1]) + "'],";
+      }
+      else {
+        // TODO: property will be consider if necessary
+        groupsName += "{" + name + ": []";
+        if (indexes.size()) {
+          std::string sIndexes;
+          std::string prefIndx(name + ":");
+          for (auto& indx : indexes) {
+            size_t pos = std::string(indx).find(prefIndx);
+            if (pos != std::string::npos) {
+              sIndexes += "'" + indx.substr(prefIndx.size(), indx.size() - prefIndx.size()) + "',";
+            }
+          }
+          if (sIndexes.size()) {
+            sIndexes.pop_back();
+            sIndexes = ", index: [" + sIndexes + "]";
+          }
+          groupsName += sIndexes;
+        }
+        groupsName += "},";
+      }
     }
     groupsName.pop_back();
-    auto indexes = _store->getIndexes();
-    if (indexes.size()) {
-      std::string sIndexes;
-      for (auto& indx : indexes) {
-        sIndexes += "'" + indx + "',";
-      }
-      sIndexes.pop_back();
-      fmt::printf("{create: '%s', group: [%s], index: [%s]}\n", graph, groupsName, sIndexes);
-    }
-    else {
-      fmt::printf("{create: '%s', group: [%s]}\n", graph, groupsName);
-    }
+
+    fmt::printf("{create: '%s', group: [%s]};\n", graph, groupsName);
+
     // upset group
     for (auto itr = groups.begin(); itr != groups.end(); ++itr) {
       std::string g = itr.key();
@@ -169,10 +185,10 @@ int GUtilPlan::execute(const std::function<ExecuteStatus(KeyType, const std::str
         std::string data((char*)result.value.byte_ptr(), result.value.size());
         std::string key((char*)result.key.byte_ptr(), result.key.size());
         if (data != "null") {
-          fmt::printf("{upset: '%s', vertex: [%s, %s]}\n", g, converter(key), gql::normalize(data));
+          fmt::printf("{upset: '%s', vertex: [%s, %s]};\n", g, converter(key), gql::normalize(data));
         }
         else {
-          fmt::printf("{upset: '%s', vertex: [%s]}\n", g, converter(key));
+          fmt::printf("{upset: '%s', vertex: [%s]};\n", g, converter(key));
         }
         result = cursor.to_next(false);
       }

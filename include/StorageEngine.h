@@ -160,6 +160,11 @@ public:
      */
     nlohmann::json& getSchema() { return _schema; }
 
+    /**
+     * Get vertex group's relations
+     */
+    std::vector<std::string> getRelations(const std::string& group);
+
     int startTrans(ReadWriteOption opt = ReadWriteOption::read_write);
 
     int finishTrans();
