@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <signal.h>
 #include <execinfo.h>
+#include <cstdlib>
 #ifdef __cplusplus
 #include <cxxabi.h>
 #include <memory>
