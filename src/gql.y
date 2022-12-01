@@ -722,11 +722,9 @@ condition_property: VAR_NAME COLON right_value
               }
         | datetime_comparable { $$ = $1;}
         | range_comparable { $$ = $1;}
-        | KW_ID COLON LITERAL_STRING
+        | KW_ID COLON key
               {
-                struct GASTNode* value = INIT_STRING_AST($3);
-                free($3);
-                GProperty* prop = new GProperty("id", value);
+                GProperty* prop = new GProperty("id", $3);
                 $$ = NewAst(NodeType::Property, prop, nullptr, 0);
               }
         | AND COLON condition_array

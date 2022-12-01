@@ -11,6 +11,8 @@
 {upset: 'relation_tag', edge: [2734686976, --, 'test']};
 {upset: 'relation_tag', edge: [2734687232, --, 'test']};
 {upset: 'relation_kw', edge: [2734687232, --, 'keyword1']};
+{query: 'file_meta', in: 'file_resource', where: {id: 2415919360}};
+{query: 'file_meta', in: 'file_resource', where: {id: 2234686464}};
 {remove: 'relation_dir', edge: [2734686464, --, *]};
 {remove: 'relation_tag', edge: [2734686464, --, *]};
 {remove: 'relation_tag', edge: [2734686720, --, *]};
