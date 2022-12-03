@@ -30,25 +30,35 @@ QUERY SUCCESS
 [14]:	{query: 'file_meta', in: 'file_resource', where: {id: 2234686464}};
 [0, {"datetime":"0d1600577894000","filename":"06cc22608a1111eab5a4993e17631b31.jpg~tplv-banciyuan-w650.jpg","hash":"unknow","height":650,"path":"C:\\Users\\webberg\\Pictures\\06cc22608a1111eab5a4993e17631b31.jpg~tplv-banciyuan-w650.jpg","size":207879,"type":"unknow","width":650}]
 QUERY SUCCESS
-[15]:	{remove: 'relation_dir', edge: [2734686464, --, *]};
+[15]:	{query: 'relation_tag', in: 'file_resource', where: [2734686464, --, 'test']};
+[2734686464, --, test]
+[2734686720, --, test]
+[2734686976, --, test]
+[2734687232, --, test]
+QUERY SUCCESS
+[16]:	{query: 'relation_dir', in: 'file_resource', where: [2734686464, --, *]};
+[2734686464, --, type1]
+[2734686464, --, type2]
+QUERY SUCCESS
+[17]:	{remove: 'relation_dir', edge: [2734686464, --, *]};
 REMOVE SUCCESS
-[16]:	{remove: 'relation_tag', edge: [2734686464, --, *]};
+[18]:	{remove: 'relation_tag', edge: [2734686464, --, *]};
 REMOVE SUCCESS
-[17]:	{remove: 'relation_tag', edge: [2734686720, --, *]};
+[19]:	{remove: 'relation_tag', edge: [2734686720, --, *]};
 REMOVE SUCCESS
-[18]:	{remove: 'relation_tag', edge: [2734686976, --, *]};
+[20]:	{remove: 'relation_tag', edge: [2734686976, --, *]};
 REMOVE SUCCESS
-[19]:	{remove: 'file_meta', vertex: [2734686464]};
+[21]:	{remove: 'file_meta', vertex: [2734686464]};
 REMOVE SUCCESS
-[20]:	{remove: 'relation_kw', edge: [2734686976, --, *]};
+[22]:	{remove: 'relation_kw', edge: [2734686976, --, *]};
 REMOVE SUCCESS
-[21]:	{dump: 'file_resource'};
+[23]:	{dump: 'file_resource'};
 {create: 'file_resource', group: [{directory: []},{file_meta: [], index: ['addtime','color','datetime','size','type']},{keyword: []},['directory', 'relation_dir', 'file_meta'],['keyword', 'relation_kw', 'file_meta'],['tag', 'relation_tag', 'file_meta'],{tag: []}]};
 {upset: 'directory', vertex: ['type1']};
 {upset: 'file_meta', vertex: [2234686464, {'datetime':0d1600577894000,'filename':'06cc22608a1111eab5a4993e17631b31.jpg~tplv-banciyuan-w650.jpg','hash':'unknow','height':650,'path':'C:\\Users\\webberg\\Pictures\\06cc22608a1111eab5a4993e17631b31.jpg~tplv-banciyuan-w650.jpg','size':207879,'type':'unknow','width':650}]};
 {upset: 'keyword', vertex: ['keyword1']};
 {upset: 'tag', vertex: ['test']};
-{dump: 'file_resource'}; SUCCESS
-[22]:	{drop: 'file_resource'};
+EXECUTE COMMAND SUCCESS
+[24]:	{drop: 'file_resource'};
 DROP SUCCESS
 ***** EXECUTE FINISH: "grammar.gql" *****

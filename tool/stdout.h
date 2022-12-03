@@ -27,7 +27,7 @@ inline int gqlite_exec_callback(gqlite_result* params, void*)
         {
           gqlite_vertex* v = node->_vertex;
           if (v->type == gqlite_id_type::integer) {
-            printf("[%d, %s]\n", v->uid, v->properties);
+            printf("[%lld, %s]\n", v->uid, v->properties);
           }
           else {
             printf("[%s, %s]\n", v->cid, v->properties);
@@ -35,6 +35,39 @@ inline int gqlite_exec_callback(gqlite_result* params, void*)
         }
           break;
         case gqlite_node_type_edge:
+        {
+          gqlite_edge* e = node->_edge;
+          gqlite_vertex* f = e->from;
+          gqlite_vertex* t = e->to;
+          std::string out;
+          if (f->type == gqlite_id_type::integer) {
+            out += std::to_string(f->uid);
+          }
+          else {
+            out += f->cid;
+          }
+
+          if (e->direction) {
+            out += ", ->";
+          }
+          else {
+            out += ", --";
+          }
+
+          if (e->properties) {
+            out += ": " + std::string(e->properties, e->len);
+          }
+
+          out += ", ";
+          if (t->type == gqlite_id_type::integer) {
+            out += std::to_string(t->uid);
+          }
+          else {
+            out += t->cid;
+          }
+
+          printf("[%s]\n", out.c_str());
+        }
           break;
         default:
           break;

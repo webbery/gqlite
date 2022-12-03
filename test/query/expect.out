@@ -41,7 +41,7 @@ AST:
             |- type: Literal
             |- raw: 废墟
             |- kind: String
-ast {query: 'ruins', in: 'vertex_db', where: {category: '废墟'}}; SUCCESS
+EXECUTE COMMAND SUCCESS
 [12]:	{query: 'ruins'};
 [1, {"datatime":"0d5","filename":"破墙0.jpg"}]
 [3, null]
@@ -88,7 +88,7 @@ AST:
                   |- type: Literal
                   |- raw: 1653315732
                   |- kind: Unknow Property Kind: 1
-ast {query: 'ruins', in: 'vertex_db', where: {datatime: {$lt: 1653315732}}}; SUCCESS
+EXECUTE COMMAND SUCCESS
 [16]:	{query: 'ruins', in: 'query_db', where: {datatime: {$lt: 0d1653315732}}};
 [1, {"datatime":"0d5","filename":"破墙0.jpg"}]
 [v7, {"datatime":"0d1651105732","feature_name":[0.0,1.5],"filename":"破墙.jpg"}]
@@ -138,7 +138,7 @@ REMOVE SUCCESS
 {upset: 'ruins', vertex: ['v7', {'datatime':0d1651105732,'feature_name':[0.0,1.5],'filename':'破墙.jpg'}]};
 {upset: 'ruins', vertex: ['v8', {'category':'HDR','datatime':0d1651105732,'feature_name':[0.5,0.0],'filename':'蓝天.jpg'}]};
 {upset: 'ruins', vertex: ['v9', {'category':'赛博朋克','datatime':0d1651105732,'filename':'大佐.jpg'}]};
-{dump: 'query_db'}; SUCCESS
+EXECUTE COMMAND SUCCESS
 [22]:	{drop: 'query_db'};
 DROP SUCCESS
 ***** EXECUTE FINISH: "grammar.gql" *****

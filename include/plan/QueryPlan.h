@@ -9,6 +9,11 @@ public:
   ~GQueryPlan();
   virtual int prepare();
   virtual int execute(const std::function<ExecuteStatus(KeyType, const std::string& key, const std::string& value)>&);
+
+private:
+  void convert_vertex(KeyType type, const std::string& key, const std::string& value, gqlite_result& result);
+  void convert_edge(const std::string& key, const std::string& value, gqlite_result& result);
+
 private:
   GScanPlan* _scan;
   gqlite_callback _cb;

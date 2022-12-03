@@ -207,6 +207,7 @@ namespace gql {
     uint8_t info[2] = { 0 };
     memcpy(info, &id, 2 * sizeof(uint8_t));
     std::string s((char*)info, 2);
+
     s.append(id._value, id._len);
     return s;
   }
@@ -216,7 +217,7 @@ namespace gql {
     edge_id eid = { 0 };
     memcpy(&eid, id.data(), 2);
     eid._value = (char*)malloc(eid._len);
-    memcpy(eid._value, id.data() + 2, id.size() - 2);
+    memcpy(eid._value, id.data() + 2, eid._len);
     return eid;
   }
 
