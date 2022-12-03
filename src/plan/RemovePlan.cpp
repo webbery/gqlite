@@ -48,6 +48,7 @@ int GRemovePlan::execute(const std::function<ExecuteStatus(KeyType, const std::s
     {
       gql::edge_id eid = gql::to_edge_id(*itr);
       _store->del(_group, *itr);
+      gql::release_edge_id(eid);
     }
     break;
   default:
