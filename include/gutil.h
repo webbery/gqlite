@@ -43,9 +43,9 @@ namespace gql {
     bool _direction : 1;
     uint8_t _from_type : 1; // 0 means integer, otherwise bytes
     uint8_t _to_type : 1;   // 0 means integer, otherwise bytes
-    uint8_t _len: 8;        // _value size, max value is 2^8 = 256
     uint8_t _from_len : 4;  // length of from, `to`'s length can be calculate from total len and `from`.
     uint8_t _reserved : 1;
+    uint8_t _len : 8;        // _value size, max value is 2^8 = 256
     char* _value;
   };
 

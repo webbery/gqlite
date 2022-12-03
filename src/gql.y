@@ -115,7 +115,7 @@ struct GASTNode* INIT_NUMBER_AST(double v, AttributeKind kind) {
 %type <node> normal_object condition_object
 %type <node> condition_array normal_array
 %type <node> normal_properties condition_properties
-%type <node> where_expr a_walk vertex_start_walk edge_start_walk a_simple_graph
+%type <node> where_expr a_walk vertex_start_walk edge_start_walk a_simple_graph condition_vertex a_walk_range
 %type <node> function_call function_params
 %type <node> normal_property condition_property
 %type <node> gql
@@ -360,23 +360,21 @@ a_simple_query:
                   $$ = NewAst(NodeType::QueryStatement, queryStmt, nullptr, 0);
                   stm._errorCode = ECode_Success;
                 };
-a_simple_graph: LEFT_SQUARE a_walk RIGHT_SQUARE
+a_simple_graph: a_walk_range
                 {
-                  $$ = $2;
-                  // GArrayExpression* array = new GArrayExpression();
-                  // array->addElement($1);
-                  // $$ = NewAst(NodeType::ArrayExpression, array, nullptr, 0);
+                  $$ = $1;
                 }
-        | a_simple_graph COMMA LEFT_SQUARE a_walk RIGHT_SQUARE
+        | a_simple_graph COMMA a_walk_range
                 {
                   // $1->addElement($4);
                   // $$ = $1;
                 };
+a_walk_range: LEFT_SQUARE a_walk RIGHT_SQUARE { $$ = $2; };
 a_walk: vertex_start_walk
                 {
                   $$ = $1;
                 }
-        | vertex_start_walk COMMA vertex
+        | vertex_start_walk COMMA condition_vertex
                 {
                   ((GWalkDeclaration*)($1->_value))->add($3, true);
                 }
@@ -384,31 +382,38 @@ a_walk: vertex_start_walk
                 {
                   $$ = $1;
                 }
-        | edge_start_walk COMMA vertex
+        | edge_start_walk COMMA condition_vertex
                 {
                   // $1->add($3, )
+                }
+        | a_walk COMMA STAR
+                {
+                  $$ = $1;
                 };
-vertex_start_walk: vertex COMMA a_link_condition
+vertex_start_walk: condition_vertex COMMA connection
                 {
                   GWalkDeclaration* walkDecl = new GWalkDeclaration();
                   walkDecl->add($1, true);
                   walkDecl->add($3, false);
                   $$ = NewAst(NodeType::WalkDeclaration, walkDecl, nullptr, 0);
                 }
-        | vertex_start_walk COMMA vertex COMMA a_link_condition
+        | vertex_start_walk COMMA condition_vertex COMMA connection
                 {
                   ((GWalkDeclaration*)($1->_value))->add($3, true);
                   ((GWalkDeclaration*)($1->_value))->add($5, false);
                   $$ = $1;
                 };
-edge_start_walk: a_link_condition COMMA vertex
+edge_start_walk: connection COMMA condition_vertex
                 {
                   GWalkDeclaration* walkDecl = new GWalkDeclaration();
                   walkDecl->add($1, true);
                   walkDecl->add($3, false);
                   $$ = NewAst(NodeType::WalkDeclaration, walkDecl, nullptr, 0);
                 }
-        | edge_start_walk COMMA a_link_condition COMMA vertex {};
+        | edge_start_walk COMMA connection COMMA condition_vertex {};
+condition_vertex: condition_object { $$ = $1; }
+        | key { $$ = $1; };
+        | STAR { $$ = INIT_STRING_AST("*"); };
 query_kind: OP_QUERY COLON query_kind_expr { $$ = $3; }
         |   OP_QUERY COLON match_expr { $$ = $3; };
 query_kind_expr: 
@@ -416,16 +421,18 @@ query_kind_expr:
         |  LITERAL_STRING { $$ = INIT_STRING_AST($1); free($1); }
         | a_graph_properties { $$ = $1; };
 match_expr: //{->: 'alias'}
-          RANGE_BEGIN a_match RANGE_END { $$ = $2; };
-a_match:  a_simple_graph { $$ = $1; };
+          RANGE_BEGIN a_simple_graph RANGE_END { $$ = $2; };
 a_graph_expr:
           KW_IN COLON LITERAL_STRING
                 {
                   $$ = INIT_STRING_AST($3);
                   free($3);
                 };
-where_expr: OP_WHERE COLON condition_json { $$ = $3; }
-      |     OP_WHERE COLON a_match {};
+where_expr: OP_WHERE COLON a_match { $$ = $3; };
+a_match:  condition_vertex { $$ = $1; }
+        | a_walk_range { $$ = $1; }
+        | LEFT_SQUARE a_simple_graph RIGHT_SQUARE { $$ = $2; }
+        ;
 string_list: LITERAL_STRING
                 {
                   GArrayExpression* array = new GArrayExpression();
@@ -553,15 +560,9 @@ vertex: LEFT_SQUARE LITERAL_STRING COMMA normal_json RIGHT_SQUARE
                 GVertexDeclaration* decl = new GVertexDeclaration(INIT_NUMBER_AST($2, AttributeKind::Integer), $4);
                 $$ = NewAst(NodeType::VertexDeclaration, decl, nullptr, 0);
               }
-        | LITERAL_STRING
+        | key
               {
-                GVertexDeclaration* decl = new GVertexDeclaration(INIT_STRING_AST($1), nullptr);
-                free($1);
-                $$ = NewAst(NodeType::VertexDeclaration, decl, nullptr, 0);
-              }
-        | VAR_INTEGER
-              {
-                GVertexDeclaration* decl = new GVertexDeclaration(INIT_NUMBER_AST($1, AttributeKind::Integer), nullptr);
+                GVertexDeclaration* decl = new GVertexDeclaration($1, nullptr);
                 $$ = NewAst(NodeType::VertexDeclaration, decl, nullptr, 0);
               };
 condition_links: condition_link
@@ -635,12 +636,10 @@ number_list: number
                 $$ = $1;
               };
 normal_json: normal_value { $$ = $1; };
-condition_json: condition_value { $$ = $1; };
 normal_value: normal_object { $$ = $1; }
         | normal_array { $$ = $1; };
-condition_value: condition_object { $$ = $1; }
-        | condition_array { $$ = $1; };
-right_value: condition_value { $$ = $1; }
+right_value: condition_object { $$ = $1; }
+        | condition_array { $$ = $1; }
         | simple_value { $$ = $1; };
 simple_value: VAR_BASE64
               {
@@ -737,10 +736,6 @@ condition_property: VAR_NAME COLON right_value
                 GProperty* prop = new GProperty("or", $3);
                 $$ = NewAst(NodeType::BinaryExpression, prop, nullptr, 0);
               }
-        | a_walk
-              {
-                $$ = $1;
-              }
         | group COLON LITERAL_STRING
               {
                 struct GASTNode* value = INIT_STRING_AST($3);
@@ -818,13 +813,7 @@ condition_array: LEFT_SQUARE RIGHT_SQUARE { $$ = nullptr; }
               {
                 $$ = $2;
               }
-        | error RIGHT_SQUARE
-              {
-                printf("\033[22;31mDetail:\t%s:\033[22;0m\n",
-                  "condition array is not a correct array");
-                stm._errorCode = GQL_GRAMMAR_ARRAY_FAIL;
-                $$ = nullptr;
-              };
+        ;
 normal_array:    LEFT_SQUARE RIGHT_SQUARE { $$ = nullptr; }
         | LEFT_SQUARE normal_values RIGHT_SQUARE
               {

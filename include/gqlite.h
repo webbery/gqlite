@@ -59,7 +59,7 @@ typedef struct _gqlite_vertex {
   // nodeid, C-style string
   union {
     char* cid;
-    uint32_t uid;
+    uint64_t uid;
   };
   gqlite_id_type type;
   // node properties
@@ -68,7 +68,9 @@ typedef struct _gqlite_vertex {
 }gqlite_vertex;
 
 typedef struct _gqlite_edge {
-  char* id;
+  gqlite_vertex* from;
+  gqlite_vertex* to;
+  bool direction;
   char* properties;
   uint32_t len;
 }gqlite_edge;

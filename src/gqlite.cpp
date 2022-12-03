@@ -27,7 +27,7 @@ namespace {
     case GQL_Drop: return "DROP";
     case GQL_Remove: return "REMOVE";
     default:
-      return gql;
+      return "EXECUTE COMMAND";
     }
   }
 
