@@ -110,5 +110,6 @@ void GQueryPlan::convert_edge(const std::string& key, const std::string& value, 
   if (result.nodes->_edge->properties) delete[] result.nodes->_edge->properties;
   delete result.nodes->_edge->to;
   delete result.nodes->_edge->from;
+  gql::release_edge_id(id);
   delete result.nodes->_edge;
 }
