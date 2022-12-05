@@ -115,6 +115,7 @@ create              {
 "commit"            { stm._errIndx += yyleng; return KW_COMMIT;};
 "limit"             { stm._errIndx += yyleng; return limit;};
 "profile"           { stm._errIndx += yyleng; return profile;};
+"property"          { stm._errIndx += yyleng; return property;};
 "dump"              {
                         stm._errIndx += yyleng;
                         return dump;

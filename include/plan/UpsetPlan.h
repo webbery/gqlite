@@ -50,6 +50,7 @@
   }
 
 struct GASTNode;
+class GScanPlan;
 class GUpsetPlan: public GPlan {
 public:
   GUpsetPlan(std::map<std::string, GVirtualNetwork*>& vn, GStorageEngine* store, GUpsetStmt* stmt);
@@ -174,9 +175,8 @@ private:
     VisitFlow apply(GGQLExpression* stmt, std::list<NodeType>& path) {
       return VisitFlow::Children;
     }
-    VisitFlow apply(GProperty* stmt, std::list<NodeType>& path) {
-      return VisitFlow::Children;
-    }
+    VisitFlow apply(GProperty* stmt, std::list<NodeType>& path);
+
     VisitFlow apply(GDumpStmt* stmt, std::list<NodeType>& path) {
       return VisitFlow::SkipCurrent;
     }
@@ -188,12 +188,13 @@ private:
       return VisitFlow::Children;
     }
     VisitFlow apply(GArrayExpression* stmt, std::list<NodeType>& path) {
+      VisitFlow vf = VisitFlow::Children;
       for (auto itr = stmt->begin(), end = stmt->end(); itr != end; ++itr) {
-        VisitFlow vf = accept(*itr, *this, path);
+        vf = accept(*itr, *this, path);
         if (vf == VisitFlow::Children || vf == VisitFlow::SkipCurrent) continue;
         return vf;
       }
-      return VisitFlow::Children;
+      return vf;
     }
     VisitFlow apply(GEdgeDeclaration* stmt, std::list<NodeType>& path);
     VisitFlow apply(GDropStmt* stmt, std::list<NodeType>& path) {
@@ -279,9 +280,13 @@ private:
   bool _vertex;       /**< true if upset target is vertex, else is edge */
   std::string _class;
   
+  nlohmann::json _props;
   std::map<gkey_t, nlohmann::json> _vertexes;
   std::map<gql::edge_id, std::string> _edges;
   std::vector<std::string> _indexes;
   // 
   std::map<std::string, GHNSW*> _hnsws;
+
+  // used by conditional update
+  GScanPlan* _scan;
 };

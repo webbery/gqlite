@@ -36,6 +36,7 @@ GScanPlan::GScanPlan(std::map<std::string, GVirtualNetwork*>& networks, GStorage
 GScanPlan::GScanPlan(std::map<std::string, GVirtualNetwork*>& networks, GStorageEngine* store, GASTNode* condition, const std::string& group)
   :GPlan(networks, store)
   , _queryType(QueryType::SimpleScan)
+  ,_group(group)
 {
   auto jsn = store->getSchema();
   _graph = jsn[SCHEMA_GRAPH_NAME];

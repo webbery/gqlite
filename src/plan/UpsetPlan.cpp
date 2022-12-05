@@ -1,6 +1,7 @@
 #include <thread>
 #include <future>
 #include "plan/UpsetPlan.h"
+#include "plan/ScanPlan.h"
 #include "StorageEngine.h"
 #include "VirtualNetwork.h"
 #include "gutil.h"
@@ -10,7 +11,12 @@
 GUpsetPlan::GUpsetPlan(std::map<std::string, GVirtualNetwork*>& vn, GStorageEngine* store, GUpsetStmt* ast)
 :GPlan(vn, store)
 ,_class(ast->name())
+,_scan(nullptr)
 {
+  GASTNode* condition = ast->conditions();
+  if (condition) {
+    _scan = new GScanPlan(vn, store, condition, _class);
+  }
   UpsetVisitor visitor(*this);
   std::list<NodeType> ln;
   accept(ast->node(), visitor, ln);
@@ -25,19 +31,46 @@ GUpsetPlan::~GUpsetPlan()
   for(auto hnsw: _hnsws) {
     delete hnsw.second;
   }
+  if (_scan) delete _scan;
 }
 
 int GUpsetPlan::prepare() {
   // check graph is create or not.
   auto schema = _store->getSchema();
   if (schema.empty()) return ECode_Fail;
+
+  if (_scan) return _scan->prepare();
   return ECode_Success;
 }
 
 int GUpsetPlan::execute(const std::function<ExecuteStatus(KeyType, const std::string& key, const std::string& value)>& processor) {
   if (_store) {
-    if (_vertex) return upsetVertex();
-    else return upsetEdge();
+    if (!_scan) {
+      if (_vertex) return upsetVertex();
+      else return upsetEdge();
+    }
+    else {
+      _scan->execute([&](KeyType type, const std::string& key, const std::string& value) {
+        nlohmann::json updateProps = nlohmann::json::parse(value);
+        if (type == KeyType::Integer) {
+          uint64_t upsetKey = *(uint64_t*)key.data();
+          for (auto& item: _props.items()) {
+            std::string k = item.key();
+            updateProps[k] = item.value();
+          }
+          if (_store->write(_class, upsetKey, updateProps) == ECode_Success) {
+            if (!_indexes.empty()) {
+              //upsetIndex(itr->second, k);
+              return ExecuteStatus::Stop;
+            }
+          }
+        }
+        else if (type == KeyType::Byte) {
+
+        }
+        return ExecuteStatus::Continue;
+        });
+    }
   }
   return 0;
 }
@@ -198,6 +231,19 @@ VisitFlow GUpsetPlan::UpsetVisitor::apply(GVertexDeclaration* stmt, std::list<No
   jv.add();
   _plan._vertexes[getLiteral(stmt->key())] = jv._jsonify;
   return VisitFlow::Children;
+}
+
+VisitFlow GUpsetPlan::UpsetVisitor::apply(GProperty* stmt, std::list<NodeType>& path)
+{
+  if (_plan._scan) {
+    JSONVisitor jv(_plan);
+    accept(stmt->value(), jv, path);
+    jv.add();
+    for (auto& item : jv._jsonify.items()) {
+      _plan._props[stmt->key()] = item.value();
+    }
+  }
+  return VisitFlow::SkipCurrent;
 }
 
 gkey_t GUpsetPlan::UpsetVisitor::getLiteral(GASTNode* node)

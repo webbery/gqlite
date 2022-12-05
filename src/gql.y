@@ -105,7 +105,7 @@ struct GASTNode* INIT_NUMBER_AST(double v, AttributeKind kind) {
 %token OP_GREAT_THAN OP_LESS_THAN OP_GREAT_THAN_EQUAL OP_LESS_THAN_EQUAL equal AND OR OP_NEAR
 %token FN_COUNT
 %token dot
-%token limit profile
+%token limit profile property
 
 %type <var_name> a_edge
 %type <node> a_graph_expr
@@ -236,9 +236,13 @@ dump_graph: RANGE_BEGIN dump COLON LITERAL_STRING RANGE_END
               };
 upset_vertexes: RANGE_BEGIN KW_UPSET COLON LITERAL_STRING COMMA KW_VERTEX COLON vertex_list RANGE_END
               {
-                // struct YYLTYPE* ltype = &@8;
-                // printf("upset_vertexes: %d, %d, %d, %d\n", ltype->first_line, ltype->first_column, ltype->last_line, ltype->last_column);
                 GUpsetStmt* upsetStmt = new GUpsetStmt($4, $8);
+                free($4);
+                $$ = NewAst(NodeType::UpsetStatement, upsetStmt, nullptr, 0);
+              }
+        | RANGE_BEGIN KW_UPSET COLON LITERAL_STRING COMMA property COLON normal_json COMMA where_expr RANGE_END
+              {
+                GUpsetStmt* upsetStmt = new GUpsetStmt($4, $8, $10);
                 free($4);
                 $$ = NewAst(NodeType::UpsetStatement, upsetStmt, nullptr, 0);
               }
