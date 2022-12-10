@@ -57,6 +57,7 @@ namespace gql {
   bool is_same_edge_id(const edge_id& left, const edge_id& right);
   bool operator == (const edge_id& left, const edge_id& right);
   bool operator < (const edge_id& left, const edge_id& right);
+  void get_from_to(const edge_id& eid, Variant<std::string, uint64_t>& from, Variant<std::string, uint64_t>& to);
 
   std::wstring string2wstring(const std::string& str);
 

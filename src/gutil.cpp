@@ -281,4 +281,20 @@ namespace gql {
     std::wstring_convert<std::codecvt_utf8<wchar_t>> conv;
     return conv.from_bytes(str);
   }
+
+  void get_from_to(const edge_id& eid, Variant<std::string, uint64_t>& from, Variant<std::string, uint64_t>& to)
+  {
+    auto get_value = [](int type, char* ptr, uint8_t len) -> Variant<std::string, uint64_t> {
+      switch (type) {
+      case 0: // integer
+        return *(uint64_t*)ptr;
+      default:
+        return std::string(ptr, len);
+      }
+    };
+    
+    from = get_value(eid._from_type, eid._value, eid._from_len);
+    to = get_value(eid._to_type, eid._value + eid._from_len, eid._len - eid._from_len);
+  }
+
 }

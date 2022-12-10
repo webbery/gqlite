@@ -67,7 +67,9 @@ private:
   bool stopExit();
 
   gkey_t getKey(KeyType type, mdbx::slice& slice);
-  bool predict(gkey_t key, nlohmann::json& row);
+  bool predict(KeyType type, gkey_t key, nlohmann::json& row);
+  bool predictEdge(gkey_t key, nlohmann::json& row);
+  bool predictVertex(gkey_t key, nlohmann::json& row);
   bool predict(const std::function<bool(const attribute_t&)>& op, const nlohmann::json& attr)const;
   // convert obj to display type
   void beautify(nlohmann::json& input);
@@ -80,12 +82,17 @@ private:
 
   struct PatternVisitor {
     QueryCondition& _where;
-    EntityNode* _node;
+    //EntityNode* _node;
     // and/or index
     long _index = 0;
     QueryType _qt =QueryType::SimpleScan;
 
-    PatternVisitor(QueryCondition& where, EntityNode* node) :_where(where), _node(node) {}
+    /**
+     * attributes that will use to compare
+     */
+    std::vector<attr_node_t> _attrs;
+
+    PatternVisitor(QueryCondition& where) :_where(where) {}
 
     VisitFlow apply(GASTNode* stmt, std::list<NodeType>& path);
     VisitFlow apply(GUpsetStmt* stmt, std::list<NodeType>& path) {
@@ -106,6 +113,7 @@ private:
     VisitFlow apply(GLiteral* stmt, std::list<NodeType>& path);
     VisitFlow apply(GArrayExpression* stmt, std::list<NodeType>& path);
     VisitFlow apply(GEdgeDeclaration* stmt, std::list<NodeType>& path);
+    VisitFlow apply(GWalkDeclaration* stmt, std::list<NodeType>& path);
     VisitFlow apply(GObjectFunction* stmt, std::list<NodeType>& path) { return VisitFlow::Return; }
   };
 
@@ -139,6 +147,7 @@ private:
     VisitFlow apply(GArrayExpression* stmt, std::list<NodeType>& path);
     VisitFlow apply(GEdgeDeclaration* stmt, std::list<NodeType>& path) { return VisitFlow::Return; }
     VisitFlow apply(GObjectFunction* stmt, std::list<NodeType>& path);
+    VisitFlow apply(GWalkDeclaration* stmt, std::list<NodeType>& path) { return VisitFlow::Children; }
   };
 private:
   /**

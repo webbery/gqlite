@@ -1,6 +1,6 @@
 #pragma once
 
-class GASTNode;
+struct GASTNode;
 class GObjectStmt {
 public:
   GObjectStmt();

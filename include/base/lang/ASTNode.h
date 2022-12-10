@@ -48,7 +48,9 @@ public:
   VisitFlow apply(GCreateStmt* stmt, std::list<NodeType>& path);
   VisitFlow apply(GLiteral* stmt, std::list<NodeType>& path);
   VisitFlow apply(GArrayExpression* stmt, std::list<NodeType>& path);
-  VisitFlow apply(GWalkDeclaration* stmt, std::list<NodeType>& path);
+  VisitFlow apply(GWalkDeclaration* stmt, std::list<NodeType>& path) {
+    return VisitFlow::Return;
+  }
   VisitFlow apply(GDropStmt* stmt, std::list<NodeType>& path);
   VisitFlow apply(GObjectFunction* stmt, std::list<NodeType>& path);
   VisitFlow apply(GDumpStmt* stmt, std::list<NodeType>& path) {
@@ -58,6 +60,6 @@ public:
     return VisitFlow::Return;
   }
   VisitFlow apply(GEdgeDeclaration* stmt, std::list<NodeType>& path);
-
+  
 private:
 };

@@ -12,6 +12,7 @@
 #include "gutil.h"
 #include "Type/Datetime.h"
 #include "base/math/Distance.h"
+#include <set>
 
 GScanPlan::GScanPlan(std::map<std::string, GVirtualNetwork*>& networks, GStorageEngine* store, GQueryStmt* stmt)
 :GPlan(networks, store)
@@ -53,10 +54,23 @@ GScanPlan::~GScanPlan()
   }
   _observers.clear();
   for (int index = 0; index < (long)LogicalPredicate::Max; ++index) {
-    for (EntityNode* node : _where._patterns[index]._nodes) {
+    auto& graphPattern = _where._patterns[index];
+    for (EntityNode* node : graphPattern._nodes) {
       delete node;
     }
-    _where._patterns[index]._nodes.clear();
+    graphPattern._nodes.clear();
+
+    std::set< EntityNode*> restNodes;
+    for (EntityEdge* edge : graphPattern._edges) {
+      if (edge->_start) restNodes.insert(edge->_start);
+      if (edge->_end) restNodes.insert(edge->_end);
+      delete edge;
+    }
+    graphPattern._edges.clear();
+
+    for (auto ptr : restNodes) {
+      delete ptr;
+    }
   }
 }
 
@@ -172,7 +186,7 @@ int GScanPlan::scan(const std::function<ExecuteStatus(KeyType, const std::string
         {
           gkey_t vKey = getKey(type, data.key);
           nlohmann::json jsn = nlohmann::json::parse(str);
-          bool result = predict(vKey, jsn);
+          bool result = predict(type, vKey, jsn);
           if (result) {
             std::string k((char*)data.key.byte_ptr(), data.key.size());
             for (IObserver* observer : _observers) {
@@ -307,12 +321,20 @@ void GScanPlan::parseGroup(GASTNode* query)
 void GScanPlan::parseConditions(GASTNode* conditions)
 {
   if (conditions == nullptr) return;
-  EntityNode* node = new EntityNode;
-  PatternVisitor visitor(_where, node);
+  PatternVisitor visitor(_where);
   std::list<NodeType> lNodes;
   accept(conditions, visitor, lNodes);
-  _where._patterns[visitor._index]._nodes.push_back(node);
-  if (_where._patterns[visitor._index]._edges.size() != 0) _queryType = QueryType::Match;
+  if (_where._patterns[visitor._index]._edges.size() > 1) {
+    _queryType = QueryType::Match;
+  }
+  else if (_where._patterns[visitor._index]._edges.size() == 1) {
+    // query one kind of edge
+  }
+  else { // query type is simple scan
+    EntityNode* node = new EntityNode;
+    node->_attrs = visitor._attrs;
+    _where._patterns[visitor._index]._nodes.push_back(node);
+  }
 }
 
 bool GScanPlan::pauseExit(GStorageEngine::cursor& cursor, ScanPlans::iterator itr)
@@ -362,6 +384,32 @@ gkey_t GScanPlan::getKey(KeyType type, mdbx::slice& slice)
   return vKey;
 }
 
+bool GScanPlan::predictVertex(gkey_t key, nlohmann::json& row)
+{
+  bool result = true;
+  std::vector<std::string>::iterator aitr;
+  for (int index = 0; index < (long)LogicalPredicate::Max; ++index) {
+    if (_where._patterns[index]._nodes.size()) {
+      aitr = _where._patterns[index]._nodes[0]->_attrs.begin();
+    }
+    auto& opPreds = _where._patterns[index]._node_predicates;
+    for (auto predItr = opPreds.begin(), end = opPreds.end(); predItr != end; ++predItr) {
+      result &= (*predItr).visit(
+        [&key](std::function<bool(const gkey_t&)> op) {
+          return op(key);
+        },
+        [&row, &aitr, this](std::function<bool(const attribute_t&)> op) {
+          auto value = row[*aitr];
+          bool ret = predict(op, value);
+          ++aitr;
+          return ret;
+        });
+      if (!result) break;
+    }
+  }
+  return result;
+}
+
 bool GScanPlan::predict(const std::function<bool(const attribute_t&)>& op, const nlohmann::json& attr) const
 {
   bool ret = false;
@@ -400,30 +448,51 @@ bool GScanPlan::predict(const std::function<bool(const attribute_t&)>& op, const
   return ret;
 }
 
-bool GScanPlan::predict(gkey_t key, nlohmann::json& row)
+bool GScanPlan::predict(KeyType type, gkey_t key, nlohmann::json& row)
 {
+  switch (type)
+  {
+  case KeyType::Edge: {
+    return predictEdge(key, row);
+  }
+  default:
+    return predictVertex(key, row);
+  }
+  
+}
+
+bool GScanPlan::predictEdge(gkey_t key, nlohmann::json& row)
+{
+  auto match_node = [](const std::string node1, const std::string& node2) -> bool {
+    // input is `*`, all nodes are correct
+    if (node1.empty() || node2.empty()) return true;
+
+    return node1 == node2;
+  };
+  auto match_node_int = [](const std::string node1, uint64_t node2) {
+    if (node1.empty()) return true;
+
+    uint64_t value = strtoull(node1.c_str(), nullptr, 10);
+    return value == node2;
+  };
+  bool ret = false;
+  gql::edge_id eid = gql::to_edge_id(key.Get<std::string>());
+  gkey_t from, to;
+  get_from_to(eid, from, to);
+  std::string val = row.dump();
   std::vector<std::string>::iterator aitr;
-  bool result = true;
   for (int index = 0; index < (long)LogicalPredicate::Max; ++index) {
-    if (_where._patterns[index]._nodes.size()) {
-      aitr = _where._patterns[index]._nodes[0]->_attrs.begin();
-    }
-    auto& opPreds = _where._patterns[index]._node_predicates;
-    for (auto predItr = opPreds.begin(), end = opPreds.end(); predItr != end; ++predItr) {
-      result &= (*predItr).visit(
-        [&key](std::function<bool(const gkey_t&)> op) {
-          return op(key);
-        },
-        [&row, &aitr, this](std::function<bool(const attribute_t&)> op) {
-          auto value = row[*aitr];
-          bool ret = predict(op, value);
-          ++aitr;
-          return ret;
-        });
-      if (!result) break;
+    auto& edges = _where._patterns[index]._edges;
+    for (auto itr = edges.begin(); itr != edges.end(); ++itr) {
+      auto& edge = *itr;
+      if (eid._direction == edge->_direction) {
+        bool from_result = eid._from_type ? match_node(edge->_start->_label, from.Get<std::string>()) : match_node_int(edge->_start->_label, from.Get<uint64_t>());
+        bool to_result = eid._to_type? match_node(edge->_end->_label, to.Get<std::string>()) : match_node_int(edge->_end->_label, to.Get<uint64_t>());
+        return from_result && to_result;
+      }
     }
   }
-  return result;
+  return ret;
 }
 
 void GScanPlan::beautify(nlohmann::json& input)
@@ -515,7 +584,7 @@ VisitFlow GScanPlan::PatternVisitor::apply(GProperty* stmt, std::list<NodeType>&
   static std::string last_key;
   
   if (key == "lt") {
-    _node->_attrs.push_back(last_key);
+    _attrs.push_back(last_key);
     attribute_t attr = GetLiteral(stmt->value());
     predicate_t pred = static_cast<std::function<bool(const attribute_t&)>>([attr](const attribute_t& input)->bool {
       return input < attr;
@@ -523,7 +592,7 @@ VisitFlow GScanPlan::PatternVisitor::apply(GProperty* stmt, std::list<NodeType>&
     _where._patterns[_index]._node_predicates.push_back(pred);
   }
   else if (key == "gt") {
-    _node->_attrs.push_back(last_key);
+    _attrs.push_back(last_key);
     attribute_t attr = GetLiteral(stmt->value());
     predicate_t pred = static_cast<std::function<bool(const attribute_t&)>>([attr](const attribute_t& input)->bool {
       return input > attr;
@@ -531,7 +600,7 @@ VisitFlow GScanPlan::PatternVisitor::apply(GProperty* stmt, std::list<NodeType>&
     _where._patterns[_index]._node_predicates.push_back(pred);
   }
   else if (key == "lte") {
-    _node->_attrs.push_back(last_key);
+    _attrs.push_back(last_key);
     attribute_t attr = GetLiteral(stmt->value());
     predicate_t pred = static_cast<std::function<bool(const attribute_t&)>>([attr](const attribute_t& input)->bool {
       return input <= attr;
@@ -539,7 +608,7 @@ VisitFlow GScanPlan::PatternVisitor::apply(GProperty* stmt, std::list<NodeType>&
     _where._patterns[_index]._node_predicates.push_back(pred);
   }
   else if (key == "gte") {
-    _node->_attrs.push_back(last_key);
+    _attrs.push_back(last_key);
     attribute_t attr = GetLiteral(stmt->value());
     predicate_t pred = static_cast<std::function<bool(const attribute_t&)>>([attr](const attribute_t& input)->bool {
       return input >= attr;
@@ -584,7 +653,7 @@ VisitFlow GScanPlan::PatternVisitor::apply(GProperty* stmt, std::list<NodeType>&
       _where._patterns[_index]._node_predicates.push_back(pred);
     }
     
-    _node->_attrs.push_back(last_key);
+    _attrs.push_back(last_key);
   }
   else { // group's name
     last_key = key;
@@ -592,7 +661,7 @@ VisitFlow GScanPlan::PatternVisitor::apply(GProperty* stmt, std::list<NodeType>&
     if (value->_nodetype == NodeType::Literal) {
       attribute_t attr = GetLiteral(value);
       if (!attr.empty()) {
-        _node->_attrs.push_back(last_key);
+        _attrs.push_back(last_key);
         predicate_t pred = static_cast<std::function<bool(const attribute_t&)>>([attr](const attribute_t& input)->bool {
           return input == attr;
           });
@@ -618,6 +687,50 @@ VisitFlow GScanPlan::PatternVisitor::apply(GEdgeDeclaration* stmt, std::list<Nod
   //  fmt::print("Error: {} is an unknow edge type\n", direction);
   //}
   return VisitFlow::SkipCurrent;
+}
+
+VisitFlow GScanPlan::PatternVisitor::apply(GWalkDeclaration* stmt, std::list<NodeType>& path)
+{
+  auto& grad = _where._patterns[_index];
+  auto order = stmt->order();
+  EntityNode* node = nullptr;
+  auto ptr = stmt->root();
+  while (ptr) {
+    std::string str = GetString(ptr->_element);
+    if (str == "--" || str == "->") {
+      EntityEdge* edge = new EntityEdge;
+      if (order == GWalkDeclaration::VertexEdge) {
+        edge->_start = node;
+        edge->_end = nullptr;
+      }
+      if (str == "--") edge->_direction = false;
+      else edge->_direction = true;
+      _where._patterns[_index]._edges.push_back(edge);
+    }
+    else if (str == "<-") {
+      EntityEdge* edge = new EntityEdge;
+      if (order == GWalkDeclaration::VertexEdge) {
+        edge->_start = nullptr;
+        edge->_end = node;
+      }
+      edge->_direction = true;
+      _where._patterns[_index]._edges.push_back(edge);
+    }
+    else {
+      node = new EntityNode;
+      if (str != "*") node->_label = str;
+      auto& edges = _where._patterns[_index]._edges;
+      if (edges.size()) {
+        auto& lastEdge = edges.back();
+        if (order == GWalkDeclaration::VertexEdge) {
+          if (lastEdge->_end) { lastEdge->_start = node; }
+          else lastEdge->_end = node;
+        }
+      }
+    }
+    ptr = ptr->_next;
+  }
+  return VisitFlow::Children;
 }
 
 VisitFlow GScanPlan::VertexJsonVisitor::apply(GProperty* stmt, std::list<NodeType>& path)

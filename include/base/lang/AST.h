@@ -199,7 +199,10 @@ VisitFlow accept(GASTNode* node, Visitor& visitor, std::list<NodeType>& path) {
     }
       break;
     case NodeType::WalkDeclaration:
-    {}
+    {
+      GTypeTraits<NodeType::WalkDeclaration>::type* ptr = reinterpret_cast<GTypeTraits<NodeType::WalkDeclaration>::type*>(node->_value);
+      vf = visitor.apply(ptr, path);
+    }
       break;
     case NodeType::DropStatement:
     {
@@ -239,32 +242,32 @@ VisitFlow accept(GASTNode* node, Visitor& visitor, std::list<NodeType>& path) {
  * If you want to implement special visitor for some kind of nodes, you can inherit this
  * class and rewrite some member function in it.
  * ***************************************************/
-struct GeneralVisitor {
-  VisitFlow apply(GASTNode* stmt, std::list<NodeType>& path) {
-    return VisitFlow::Children;
-  }
-  VisitFlow apply(GUpsetStmt* stmt, std::list<NodeType>& path) {
-    return VisitFlow::Children;
-  }
-  VisitFlow apply(GQueryStmt* stmt, std::list<NodeType>& path) {
-    return VisitFlow::Children;
-  }
-  VisitFlow apply(GGQLExpression* stmt, std::list<NodeType>& path) {
-    return VisitFlow::Children;
-  }
-  VisitFlow apply(GProperty* stmt, std::list<NodeType>& path) {
-    return VisitFlow::Children;
-  }
-  VisitFlow apply(GVertexDeclaration* stmt, std::list<NodeType>& path) {
-    return VisitFlow::Children;
-  }
-  VisitFlow apply(GCreateStmt* stmt, std::list<NodeType>& path) {
-    return VisitFlow::Children;
-  }
-  VisitFlow apply(GLiteral* stmt, std::list<NodeType>& path) {
-    return VisitFlow::Children;
-  }
-  VisitFlow apply(GArrayExpression* stmt, std::list<NodeType>& path) {
-    return VisitFlow::Children;
-  }
-};
+//struct GeneralVisitor {
+//  VisitFlow apply(GASTNode* stmt, std::list<NodeType>& path) {
+//    return VisitFlow::Children;
+//  }
+//  VisitFlow apply(GUpsetStmt* stmt, std::list<NodeType>& path) {
+//    return VisitFlow::Children;
+//  }
+//  VisitFlow apply(GQueryStmt* stmt, std::list<NodeType>& path) {
+//    return VisitFlow::Children;
+//  }
+//  VisitFlow apply(GGQLExpression* stmt, std::list<NodeType>& path) {
+//    return VisitFlow::Children;
+//  }
+//  VisitFlow apply(GProperty* stmt, std::list<NodeType>& path) {
+//    return VisitFlow::Children;
+//  }
+//  VisitFlow apply(GVertexDeclaration* stmt, std::list<NodeType>& path) {
+//    return VisitFlow::Children;
+//  }
+//  VisitFlow apply(GCreateStmt* stmt, std::list<NodeType>& path) {
+//    return VisitFlow::Children;
+//  }
+//  VisitFlow apply(GLiteral* stmt, std::list<NodeType>& path) {
+//    return VisitFlow::Children;
+//  }
+//  VisitFlow apply(GArrayExpression* stmt, std::list<NodeType>& path) {
+//    return VisitFlow::Children;
+//  }
+//};

@@ -622,3 +622,19 @@ UPSET SUCCESS
 [310]:	{upset: 'serve', edge: [['player150', ->: {start_year: 2018, end_year: 2019 }, 'team213']]};
 UPSET SUCCESS
 ***** EXECUTE FINISH: "basketballplayer-2.X.gql" *****
+***** EXECUTE: "query.gql" *****
+[0]:	{query: '*', in: 'basketballplayer', where: ['player102', ->: ..., 'team201']}
+[22;31mError:	syntax error, unexpected KW_REST:[22;0m
+	{query: '*', in: 'basketballplayer', where: ['player102', ->: ..., 'team201']}
+	                                                                ~
+[22;31mDetail:	array is not a correct array:[22;0m
+[22;31mERROR:	input object is not a correct property:[22;0m
+unknow error
+[1]:	{query: '*', in: 'basketballplayer', where: ['player102', ->: () => { console.info($$) }, 'team201']}
+[22;31mError:	syntax error, unexpected PARAM_BEGIN:[22;0m
+	{query: '*', in: 'basketballplayer', where: ['player102', ->: () => { console.info($$) }, 'team201']}
+	                                                              ~
+[22;31mDetail:	array is not a correct array:[22;0m
+[22;31mERROR:	input object is not a correct property:[22;0m
+unknow error
+***** EXECUTE FINISH: "query.gql" *****

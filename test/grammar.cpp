@@ -80,6 +80,7 @@ void successful_test(gqlite* pHandle, char* ptr) {
   TEST_QUERY("{query: 'g', in: 'ga'};", 1);
   TEST_GRAMMAR("{upset: 'g', vertex: [[55, {update_time: 0d12345}]]};");
   TEST_GRAMMAR("{upset: 'g', vertex: [[1040187648, {datetime:'0d1600577894000',filename: 'f2d470a08a1011eab5a4993e17631b31.jpg~tplv-banciyuan-w650.jpg',hash: 'unknow',height: 650,path: 'C:\\Users\\webberg\\Pictures\\f2d470a08a1011eab5a4993e17631b31.jpg~tplv-banciyuan-w650.jpg',size: 207879,type: 'unknow',width: 650}]]};");
+  TEST_GRAMMAR("{upset: 'g', property: {filename: '7777.jpg'}, where: {id: 1040187648}};");
   TEST_GRAMMAR(
     "{"
       "upset: 'g',"
@@ -163,6 +164,8 @@ void successful_test(gqlite* pHandle, char* ptr) {
   );
   // query 1'st order neighber
   TEST_QUERY("{query: 'e', in: 'ga'};", 4);
+  TEST_QUERY("{query: 'e', in: 'ga', where: ['v1', --, *]};", 1);
+  TEST_QUERY("{query: 'e', in: 'ga', where: ['v1', ->, *]};", 0);
   TEST_QUERY("{query: 'e', in: 'ga', where: {id: 'v1', ->: *, neighbor: 1}};", 0);
   TEST_QUERY("{query: 'e', in: 'ga', where: {id: 'v1', --: *, neighbor: 1}};", 1);
   // TEST_GRAMMAR("{query: '*', path: ['b', 'e', ...], from: 'prefix_tree'}");

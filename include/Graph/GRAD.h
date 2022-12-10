@@ -16,6 +16,7 @@ struct EntityEdge {
    * Super Edge when _extend is true
    */
   bool _extend;
+  bool _direction;
 };
 
 using gkey_t = Variant<std::string, uint64_t>;
@@ -42,9 +43,14 @@ enum class LogicalPredicate {
   Max
 };
 
-// describe the graph match pattern.
-// It come from query condition.
-// this GRAD is data structure, which different from gql_mal
+/**
+ * @brief Describe the graph match pattern.
+ *        It come from query condition. For example, if query some vertexes by attributes,
+ *        _nodes must have a node object, it's attributes are same as query attributes.
+ *        It means that predict attributes are assign to node's `_attr`.
+ *        If `_attr` is empty, it means that all of data should be scan.
+ *        If query is edge, _edges shouldn't empty.
+ */ 
 struct GraphPattern {
   using node_t = uint32_t;
 

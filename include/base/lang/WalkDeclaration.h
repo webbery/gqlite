@@ -19,9 +19,18 @@ public:
 
   void add(GASTNode* node, bool isVertex);
 
+  size_t size() const { return _size; }
+
+  WalkElement* root() const;
+
+  Order order() const { return _order; }
+private:
+  WalkElement* init(GASTNode* node);
+
 private:
   Order _order;
   WalkElement* _walk;
+  uint8_t _size;
 };
 
 class GEdgeDeclaration {

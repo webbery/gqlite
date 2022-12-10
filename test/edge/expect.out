@@ -34,9 +34,6 @@ QUERY SUCCESS
 QUERY SUCCESS
 [16]:	{query: 'relation_tag', in: 'file_resource', where: [2734686464, --, 'test']};
 [2734686464, --, test]
-[2734686720, --, test]
-[2734686976, --, test]
-[2734687232, --, test]
 QUERY SUCCESS
 [17]:	{query: 'relation_dir', in: 'file_resource', where: [2734686464, --, *]};
 [2734686464, --, type1]

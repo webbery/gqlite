@@ -282,10 +282,6 @@ HMM:
 show graph
 show graph 'xxx'
 ```
-###  5.2. <a name='Extension'></a>Extension
-```
-install extension geo_bound
-```
 ### Use Graph
 ```
 use graph 'xxx'

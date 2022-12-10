@@ -138,6 +138,7 @@ private:
     VisitFlow apply(GObjectFunction* stmt, std::list<NodeType>& path) {
       return VisitFlow::Return;
     }
+    VisitFlow apply(GWalkDeclaration* stmt, std::list<NodeType>& path) { return VisitFlow::Children; }
 
     void add() {
       if (!_key.empty()) {
@@ -206,6 +207,7 @@ private:
     VisitFlow apply(GObjectFunction* stmt, std::list<NodeType>& path) {
       return VisitFlow::Return;
     }
+    VisitFlow apply(GWalkDeclaration* stmt, std::list<NodeType>& path) { return VisitFlow::Children; }
     gkey_t getLiteral(GASTNode* node);
   };
 
