@@ -486,8 +486,18 @@ bool GScanPlan::predictEdge(gkey_t key, nlohmann::json& row)
     for (auto itr = edges.begin(); itr != edges.end(); ++itr) {
       auto& edge = *itr;
       if (eid._direction == edge->_direction) {
-        bool from_result = eid._from_type ? match_node(edge->_start->_label, from.Get<std::string>()) : match_node_int(edge->_start->_label, from.Get<uint64_t>());
-        bool to_result = eid._to_type? match_node(edge->_end->_label, to.Get<std::string>()) : match_node_int(edge->_end->_label, to.Get<uint64_t>());
+        auto& start = edge->_start->_label;
+        auto& end = edge->_end->_label;
+        bool from_result = eid._from_type ? match_node(start, from.Get<std::string>()) : match_node_int(start, from.Get<uint64_t>());
+        bool to_result = eid._to_type ? match_node(end, to.Get<std::string>()) : match_node_int(end, to.Get<uint64_t>());
+
+        if (eid._direction == false) {
+          // swap start and end
+          if (!from_result || !to_result) {
+            from_result = eid._from_type ? match_node(end, from.Get<std::string>()) : match_node_int(end, from.Get<uint64_t>());
+            to_result = eid._to_type ? match_node(start, to.Get<std::string>()) : match_node_int(start, to.Get<uint64_t>());
+          }
+        }
         release_edge_id(eid);
         return from_result && to_result;
       }

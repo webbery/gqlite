@@ -14,7 +14,7 @@
 {upset: 'relation_kw', edge: [2734687232, --, 'keyword1']};
 {query: 'file_meta', in: 'file_resource', where: {id: 2415919360}};
 {query: 'file_meta', in: 'file_resource', where: {id: 2234686464}};
-{query: 'relation_tag', in: 'file_resource', where: [2734686464, --, 'test']};
+{query: 'relation_tag', in: 'file_resource', where: ['test', --, 2734686464]};
 {query: 'relation_dir', in: 'file_resource', where: [2734686464, --, *]};
 {remove: 'relation_dir', edge: [2734686464, --, *]};
 {remove: 'relation_tag', edge: [2734686464, --, *]};

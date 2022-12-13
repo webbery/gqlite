@@ -32,8 +32,7 @@ QUERY SUCCESS
 [15]:	{query: 'file_meta', in: 'file_resource', where: {id: 2234686464}};
 [0, {"datetime":"0d1600577894000","filename":"newfile.jpg","hash":"unknow","height":650,"path":"C:\\Users\\webberg\\Pictures\\06cc22608a1111eab5a4993e17631b31.jpg~tplv-banciyuan-w650.jpg","size":207879,"type":"unknow","width":650}]
 QUERY SUCCESS
-[16]:	{query: 'relation_tag', in: 'file_resource', where: [2734686464, --, 'test']};
-[2734686464, --, test]
+[16]:	{query: 'relation_tag', in: 'file_resource', where: ['test', --, 2734686464]};
 QUERY SUCCESS
 [17]:	{query: 'relation_dir', in: 'file_resource', where: [2734686464, --, *]};
 [2734686464, --, type1]
