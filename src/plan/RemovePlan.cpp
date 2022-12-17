@@ -27,7 +27,7 @@ int GRemovePlan::execute(const std::function<ExecuteStatus(KeyType, const std::s
   KeyType type = _store->getKeyType(_group);
   if (type == KeyType::Integer || type == KeyType::Byte) {
     // try find their relation data and then remove
-    std::vector<std::string>&& relations = _store->getRelations(_group);
+    std::list<std::string>&& relations = _store->getRelations(_group);
   }
   switch (type) {
   case KeyType::Integer:

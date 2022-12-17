@@ -65,7 +65,7 @@ void GQueryPlan::convert_vertex(KeyType type, const std::string& key, const std:
   result.nodes->_vertex = new gqlite_vertex;
   if (type == KeyType::Integer) {
     result.nodes->_vertex->type = gqlite_id_type::integer;
-    result.nodes->_vertex->uid = atoll((char*)key.data());
+    result.nodes->_vertex->uid = *(uint64_t*)key.data();
   }
   else {
     result.nodes->_vertex->type = gqlite_id_type::bytes;

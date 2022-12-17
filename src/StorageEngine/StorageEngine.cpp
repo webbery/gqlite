@@ -11,7 +11,7 @@
 
 #define GRAPH_EXCEPTION_CATCH(expr) try{\
   expr;\
-}catch(std::exception& err) {printf("exception %s [%d]: %s\n", __FILE__, __LINE__, err.what());}
+}catch(std::exception& err) {}
 #define DB_SCHEMA   "gql_schema"
 #define SCHEMA_BASIC  "basic"
 
@@ -247,6 +247,19 @@ IndexType GStorageEngine::getIndexType(const std::string& name)
   return _schema[SCHEMA_INDEX][name];
 }
 
+std::list<std::string> GStorageEngine::getRelations(const std::string& prop) {
+  std::list<std::string> relations;
+  auto& edges = _schema[SCHEMA_EDGE];
+  for (auto& item : edges.items()) {
+    std::string from, to;
+    std::tie(from, to) = std::pair<std::string, std::string>(item.value());
+    if (from == prop || to == prop) {
+      relations.emplace_back(item.key());
+    }
+  }
+  return relations;
+}
+
 void GStorageEngine::tryInitKeyType(const std::string& prop, KeyType type)
 {
   if (_schema[SCHEMA_CLASS][prop][SCHEMA_CLASS_KEY] != KeyType::Uninitialize) return;
@@ -327,7 +340,10 @@ mdbx::map_handle GStorageEngine::getOrCreateHandle(const std::string& prop, mdbx
   thread_local auto id = std::this_thread::get_id();
   if (_mHandles[id].count(prop) == 0) {
     mdbx::map_handle propMap;
-    GRAPH_EXCEPTION_CATCH(propMap = _txns[id].create_map(prop, mode, mdbx::value_mode::single));
+    GRAPH_EXCEPTION_CATCH(propMap = _txns[id].open_map(prop, (mdbx::key_mode)MDBX_db_flags_t::MDBX_DB_ACCEDE, mdbx::value_mode::single));
+    if (!propMap) {
+      GRAPH_EXCEPTION_CATCH(propMap = _txns[id].create_map(prop, mode, mdbx::value_mode::single));
+    }
     _mHandles[id][prop] = propMap;
   }
   return _mHandles[id][prop];
@@ -544,13 +560,6 @@ GStorageEngine::cursor GStorageEngine::getIndexCursor(const std::string& mapname
   }
   thread_local auto id = std::this_thread::get_id();
   return _txns[id].open_cursor(handle);
-}
-
-
-std::vector<std::string> GStorageEngine::getRelations(const std::string& group)
-{
-  std::vector<std::string> relations;
-  return relations;
 }
 
 int GStorageEngine::startTrans(ReadWriteOption opt) {

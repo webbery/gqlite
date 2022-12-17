@@ -163,7 +163,7 @@ public:
     /**
      * Get vertex group's relations
      */
-    std::vector<std::string> getRelations(const std::string& group);
+    std::list<std::string> getRelations(const std::string& group);
 
     int startTrans(ReadWriteOption opt = ReadWriteOption::read_write);
 

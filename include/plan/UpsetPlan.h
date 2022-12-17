@@ -21,7 +21,7 @@
   },\
   [&](gql::GBinary value) {\
     item[_key] = nlohmann::json::binary(value.raw());\
-  },\
+  }, \
   [&](gql::GDatetime value) {\
     item[_key] = { {"value", value.value()}, {OBJECT_TYPE_NAME, AttributeKind::Datetime} };\
   },\

@@ -44,7 +44,7 @@ inline int gqlite_exec_callback(gqlite_result* params, void*)
             out += std::to_string(f->uid);
           }
           else {
-            out += f->cid;
+            out += std::string("'") + f->cid + "'";
           }
 
           if (e->direction) {
@@ -63,7 +63,7 @@ inline int gqlite_exec_callback(gqlite_result* params, void*)
             out += std::to_string(t->uid);
           }
           else {
-            out += t->cid;
+            out += std::string("'") + t->cid + "'";
           }
 
           printf("[%s]\n", out.c_str());

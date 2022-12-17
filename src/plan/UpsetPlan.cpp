@@ -86,14 +86,16 @@ bool GUpsetPlan::upsetVertex()
           fmt::print(fmt::fg(fmt::color::red), "ERROR: upset fail!\nInput key type is string, but require integer\n");
           return ECode_Fail;
         }
-        if (_store->write(_class, k, itr->second) == ECode_Success){
-          //printf("write: %s\n", itr->second.dump().c_str());
-          if (!_indexes.empty()) {
-            upsetIndex(itr->second, k);
-            return ECode_Success;
-          }
+        if (_store->write(_class, k, itr->second) != ECode_Success)
+          return ECode_Fail;
+        
+        if (!_indexes.empty()) {
+          upsetIndex(itr->second, k);
         }
-        return ECode_Fail;
+
+        auto relations = _store->getRelations(_class);
+        if (relations.size()) {}
+        return ECode_Success;
       },
       [&](uint64_t k) {
         if (type == KeyType::Byte) {

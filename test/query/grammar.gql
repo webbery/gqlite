@@ -8,6 +8,7 @@
 {upset: 'ruins', vertex: [[1, {filename: '破墙0.jpg', datatime: 0d1651105732}]]};
 {upset: 'addr', vertex: [[1, {filename: '破墙1.jpg', datatime: 0d1651105732}]]};
 {upset: 'addr', vertex: [[2, {filename: '破墙2.jpg', loc: [131.24194, 37.12532]}]]};
+{upset: 'ruins', vertex: [['ff', {filename: '破墙5.jpg', thumbnail: 0b'AQI='}]]};
 {upset: 'addr', vertex: [3, 4, 5]};
 ast {query: 'ruins', in: 'vertex_db', where: {category: '废墟'}};
 {query: 'ruins'};

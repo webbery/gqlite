@@ -67,7 +67,7 @@ int main(int argc, char** argv) {
     int error = gqlite_exec(pHandle, input.c_str(), gqlite_exec_callback, nullptr, &ptr);
     auto elapsed = std::chrono::high_resolution_clock::now() - start;
     if (ptr) {
-      auto microseconds = std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count() / 1000.0;
+      auto microseconds = std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count() / 1000000.0;
       printf("%s, COST %gs\n", ptr, microseconds);
       gqlite_free(ptr);
     }

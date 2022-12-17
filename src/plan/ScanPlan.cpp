@@ -523,6 +523,12 @@ void GScanPlan::beautify(nlohmann::json& input)
         break;
       }
     }
+    else if (input.count("bytes") && input.count("subtype")) {
+      // binary
+      std::vector<uint8_t> bin = input["bytes"];
+      input = std::string("0b") + gql::base64_encode(bin);
+      return;
+    }
     for (auto itr = input.begin(); itr != input.end(); ++itr)
     {
       beautify(itr.value());
