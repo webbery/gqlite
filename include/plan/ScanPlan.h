@@ -82,15 +82,17 @@ private:
 
   struct PatternVisitor {
     QueryCondition& _where;
-    //EntityNode* _node;
     // and/or index
-    long _index = 0;
+    long _index[2] = {0, 1};
+    bool _isAnd = true;
+
     QueryType _qt =QueryType::SimpleScan;
+
 
     /**
      * attributes that will use to compare
      */
-    std::vector<attr_node_t> _attrs;
+    std::vector<attr_node_t> _attrs[2];
 
     PatternVisitor(QueryCondition& where) :_where(where) {}
 
