@@ -480,7 +480,6 @@ bool GScanPlan::predictEdge(gkey_t key, nlohmann::json& row)
     uint64_t value = strtoull(node1.c_str(), nullptr, 10);
     return value == node2;
   };
-  bool ret = false;
   gql::edge_id eid = gql::to_edge_id(key.Get<std::string>());
   gkey_t from, to;
   get_from_to(eid, from, to);
@@ -508,7 +507,7 @@ bool GScanPlan::predictEdge(gkey_t key, nlohmann::json& row)
     }
   }
   release_edge_id(eid);
-  return ret;
+  return true;
 }
 
 void GScanPlan::beautify(nlohmann::json& input)
@@ -732,35 +731,41 @@ VisitFlow GScanPlan::PatternVisitor::apply(GWalkDeclaration* stmt, std::list<Nod
   EntityNode* node = nullptr;
   auto ptr = stmt->root();
   while (ptr) {
-    std::string str = GetString(ptr->_element);
-    if (str == "--" || str == "->") {
-      EntityEdge* edge = new EntityEdge;
-      if (order == GWalkDeclaration::VertexEdge) {
-        edge->_start = node;
-        edge->_end = nullptr;
-      }
-      if (str == "--") edge->_direction = false;
-      else edge->_direction = true;
-      _where._patterns[index]._edges.push_back(edge);
-    }
-    else if (str == "<-") {
-      EntityEdge* edge = new EntityEdge;
-      if (order == GWalkDeclaration::VertexEdge) {
-        edge->_start = nullptr;
-        edge->_end = node;
-      }
-      edge->_direction = true;
-      _where._patterns[index]._edges.push_back(edge);
+    auto element = ptr->_element;
+    if (element->_nodetype == EdgeDeclaration) {
+
     }
     else {
-      node = new EntityNode;
-      if (str != "*") node->_label = str;
-      auto& edges = _where._patterns[index]._edges;
-      if (edges.size()) {
-        auto& lastEdge = edges.back();
+      std::string str = GetString(ptr->_element);
+      if (str == "--" || str == "->") {
+        EntityEdge* edge = new EntityEdge;
         if (order == GWalkDeclaration::VertexEdge) {
-          if (lastEdge->_end) { lastEdge->_start = node; }
-          else lastEdge->_end = node;
+          edge->_start = node;
+          edge->_end = nullptr;
+        }
+        if (str == "--") edge->_direction = false;
+        else edge->_direction = true;
+        _where._patterns[index]._edges.push_back(edge);
+      }
+      else if (str == "<-") {
+        EntityEdge* edge = new EntityEdge;
+        if (order == GWalkDeclaration::VertexEdge) {
+          edge->_start = nullptr;
+          edge->_end = node;
+        }
+        edge->_direction = true;
+        _where._patterns[index]._edges.push_back(edge);
+      }
+      else {
+        node = new EntityNode;
+        if (str != "*") node->_label = str;
+        auto& edges = _where._patterns[index]._edges;
+        if (edges.size()) {
+          auto& lastEdge = edges.back();
+          if (order == GWalkDeclaration::VertexEdge) {
+            if (lastEdge->_end) { lastEdge->_start = node; }
+            else lastEdge->_end = node;
+          }
         }
       }
     }

@@ -166,7 +166,10 @@ create              {
                         stm._errIndx += yyleng;
                         return KW_IN;
                     };
-"..."               { stm._errIndx += yyleng; return KW_REST;};
+"..."               {
+                        stm._errIndx += yyleng;
+                        return KW_REST;
+                    };
 "."                 { stm._errIndx += 1; return dot;};
 "+"                 {stm._errIndx += yyleng;};
 "-"                 {stm._errIndx += yyleng;};

@@ -102,6 +102,8 @@ typedef struct _gqlite_result {
   uint32_t count;
   gqlite_result_type type;
   int errcode;
+  // 
+  float cost;
 }gqlite_result;
 
 #ifdef __cplusplus

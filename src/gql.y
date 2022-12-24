@@ -880,6 +880,16 @@ a_link_condition: a_edge COLON a_value
               {
                 GEdgeDeclaration* edge = new GEdgeDeclaration($1, $3);
                 $$ = NewAst(NodeType::EdgeDeclaration, edge, nullptr, 0);
+              }
+        | a_edge COLON function_call
+              {
+                GEdgeDeclaration* edge = new GEdgeDeclaration($1, $3);
+                $$ = NewAst(NodeType::EdgeDeclaration, edge, nullptr, 0);
+              }
+        | a_edge COLON KW_REST
+              {
+                GEdgeDeclaration* edge = new GEdgeDeclaration($1, INIT_STRING_AST("..."));
+                $$ = NewAst(NodeType::EdgeDeclaration, edge, nullptr, 0);
               };
 a_edge:   right_arrow { memcpy(&$$, "->", 3);}
         | left_arrow { memcpy(&$$, "<-", 3); }
@@ -891,8 +901,7 @@ a_value:  LITERAL_STRING
               }
         | VAR_DECIMAL { $$ = INIT_NUMBER_AST($1, AttributeKind::Number); }
         | VAR_INTEGER { $$ = INIT_NUMBER_AST($1, AttributeKind::Integer); };
-function_call:
-        | VAR_NAME function_params
+function_call: VAR_NAME function_params
               {
                 auto fname = INIT_STRING_AST($1);
                 free($1);
