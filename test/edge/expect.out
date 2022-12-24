@@ -54,19 +54,29 @@ QUERY SUCCESS
 [2734686464, --, 'type1']
 [2734686464, --, 'type2']
 QUERY SUCCESS
-[23]:	{remove: 'relation_dir', edge: [2734686464, --, *]};
+[23]:	{query: 'relation_dir', in: 'file_resource'};
+[2734686464, --, 'type1']
+[2734686464, --, 'type2']
+QUERY SUCCESS
+[24]:	{remove: 'relation_dir', edge: [2734686464, --, *]};
 REMOVE SUCCESS
-[24]:	{remove: 'relation_tag', edge: [2734686464, --, *]};
+[25]:	{remove: 'relation_tag', edge: [2734686464, --, *]};
 REMOVE SUCCESS
-[25]:	{remove: 'relation_tag', edge: [2734686720, --, *]};
+[26]:	{query: 'relation_tag', in: 'file_resource'};
+[2734686976, --, 'test']
+[2734687232, --, 'test']
+[2234686464, --, 'test']
+[2734687232, --, '图片']
+QUERY SUCCESS
+[27]:	{remove: 'relation_tag', edge: [2734686720, --, *]};
 REMOVE SUCCESS
-[26]:	{remove: 'relation_tag', edge: [2734686976, --, *]};
+[28]:	{remove: 'relation_tag', edge: [2734686976, --, *]};
 REMOVE SUCCESS
-[27]:	{remove: 'file_meta', vertex: [2734686464]};
+[29]:	{remove: 'file_meta', vertex: [2734686464]};
 REMOVE SUCCESS
-[28]:	{remove: 'relation_kw', edge: [2734686976, --, *]};
+[30]:	{remove: 'relation_kw', edge: [2734686976, --, *]};
 REMOVE SUCCESS
-[29]:	{dump: 'file_resource'};
+[31]:	{dump: 'file_resource'};
 {create: 'file_resource', group: [{directory: []},{file_meta: [], index: ['addtime','color','datetime','size','type']},{keyword: []},['directory', 'relation_dir', 'file_meta'],['keyword', 'relation_kw', 'file_meta'],['tag', 'relation_tag', 'file_meta'],{tag: []}]};
 {upset: 'directory', vertex: ['type1']};
 {upset: 'file_meta', vertex: [2234686464, {'datetime':'0d1600577894000','filename':'newfile.jpg','hash':'unknow','height':650,'path':'C:\\Users\\webberg\\Pictures\\06cc22608a1111eab5a4993e17631b31.jpg~tplv-banciyuan-w650.jpg','size':207879,'type':'unknow','width':650}]};
@@ -74,6 +84,6 @@ REMOVE SUCCESS
 {upset: 'tag', vertex: ['test', {'name':'test'}]};
 {upset: 'tag', vertex: ['图片', {'name':'图片'}]};
 EXECUTE COMMAND SUCCESS
-[30]:	{drop: 'file_resource'};
+[32]:	{drop: 'file_resource'};
 DROP SUCCESS
 ***** EXECUTE FINISH: "grammar.gql" *****

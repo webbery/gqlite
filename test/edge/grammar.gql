@@ -21,8 +21,10 @@
 {upset: 'tag', property: {name: 'new_tag'}, where: {id: 'test'}};
 {query: 'relation_tag', in: 'file_resource', where: ['test', --, *]};
 {query: 'relation_dir', in: 'file_resource', where: [2734686464, --, *]};
+{query: 'relation_dir', in: 'file_resource'};
 {remove: 'relation_dir', edge: [2734686464, --, *]};
 {remove: 'relation_tag', edge: [2734686464, --, *]};
+{query: 'relation_tag', in: 'file_resource'};
 {remove: 'relation_tag', edge: [2734686720, --, *]};
 {remove: 'relation_tag', edge: [2734686976, --, *]};
 {remove: 'file_meta', vertex: [2734686464]};

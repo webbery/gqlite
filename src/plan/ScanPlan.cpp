@@ -185,8 +185,7 @@ int GScanPlan::scan(const std::function<ExecuteStatus(KeyType, const std::string
         {
           gkey_t vKey = getKey(type, data.key);
           nlohmann::json jsn = nlohmann::json::parse(str);
-          bool result = predict(type, vKey, jsn);
-          if (result) {
+          if (_scanAll || (!_scanAll && predict(type, vKey, jsn))) {
             std::string k((char*)data.key.byte_ptr(), data.key.size());
             for (IObserver* observer : _observers) {
               observer->update(type, k, jsn);
@@ -319,7 +318,12 @@ void GScanPlan::parseGroup(GASTNode* query)
 
 void GScanPlan::parseConditions(GASTNode* conditions)
 {
-  if (conditions == nullptr) return;
+  if (conditions == nullptr) {
+    _scanAll = true;
+    return;
+  }
+  _scanAll = false;
+
   PatternVisitor visitor(_where);
   std::list<NodeType> lNodes;
   accept(conditions, visitor, lNodes);
@@ -507,7 +511,7 @@ bool GScanPlan::predictEdge(gkey_t key, nlohmann::json& row)
     }
   }
   release_edge_id(eid);
-  return true;
+  return false;
 }
 
 void GScanPlan::beautify(nlohmann::json& input)
@@ -711,16 +715,31 @@ VisitFlow GScanPlan::PatternVisitor::apply(GProperty* stmt, std::list<NodeType>&
 VisitFlow GScanPlan::PatternVisitor::apply(GEdgeDeclaration* stmt, std::list<NodeType>& path)
 {
   _qt = QueryType::Match;
-  //std::string direction = GetString(stmt->link());
-  //attribute_t attr = GetLiteral(stmt->to());
-  //if (direction == "--") {
-  //}
-  //else if (direction == "->"){}
-  //else if (direction == "<-") {}
-  //else {
-  //  fmt::print("Error: {} is an unknow edge type\n", direction);
-  //}
+  if (stmt->from() && stmt->to()) {
+    int index = _isAnd ? 0 : 1;
+    EntityNode* start = makeNodeCondition(index, GetString(stmt->from()));
+    EntityNode* end = makeNodeCondition(index, GetString(stmt->to()));
+    makeEdgeCondition(index, GWalkDeclaration::VertexEdge, start, end, stmt->direction() != "--");
+  }
   return VisitFlow::SkipCurrent;
+}
+
+void GScanPlan::PatternVisitor::makeEdgeCondition(int index, GWalkDeclaration::Order order, EntityNode* start, EntityNode* end, bool direction)
+{
+  EntityEdge* edge = new EntityEdge;
+  if (order == GWalkDeclaration::VertexEdge) {
+      edge->_start = start;
+      edge->_end = end;
+  }
+  edge->_direction = direction;
+  _where._patterns[index]._edges.push_back(edge);
+}
+
+EntityNode* GScanPlan::PatternVisitor::makeNodeCondition(int index, const std::string& str)
+{
+  EntityNode* node = new EntityNode;
+  if (str != "*") node->_label = str;
+  return node;
 }
 
 VisitFlow GScanPlan::PatternVisitor::apply(GWalkDeclaration* stmt, std::list<NodeType>& path)
@@ -737,28 +756,16 @@ VisitFlow GScanPlan::PatternVisitor::apply(GWalkDeclaration* stmt, std::list<Nod
     }
     else {
       std::string str = GetString(ptr->_element);
+      int dir = 0;
+
       if (str == "--" || str == "->") {
-        EntityEdge* edge = new EntityEdge;
-        if (order == GWalkDeclaration::VertexEdge) {
-          edge->_start = node;
-          edge->_end = nullptr;
-        }
-        if (str == "--") edge->_direction = false;
-        else edge->_direction = true;
-        _where._patterns[index]._edges.push_back(edge);
+        makeEdgeCondition(index, order, node, nullptr, (str == "--")? 0 : 1);
       }
       else if (str == "<-") {
-        EntityEdge* edge = new EntityEdge;
-        if (order == GWalkDeclaration::VertexEdge) {
-          edge->_start = nullptr;
-          edge->_end = node;
-        }
-        edge->_direction = true;
-        _where._patterns[index]._edges.push_back(edge);
+        makeEdgeCondition(index, order, nullptr, node, 1);
       }
       else {
-        node = new EntityNode;
-        if (str != "*") node->_label = str;
+        node = makeNodeCondition(index, str);
         auto& edges = _where._patterns[index]._edges;
         if (edges.size()) {
           auto& lastEdge = edges.back();

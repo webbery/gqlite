@@ -24,6 +24,8 @@ int GRemovePlan::execute(const std::function<ExecuteStatus(KeyType, const std::s
     keys.emplace_back(key);
     return ExecuteStatus::Continue;
     });
+  if (keys.size() == 0) return ECode_Success;
+
   KeyType type = _store->getKeyType(_group);
   if (type == KeyType::Integer || type == KeyType::Byte) {
     // try find their relation data and then remove

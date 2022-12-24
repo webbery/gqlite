@@ -117,6 +117,9 @@ private:
     VisitFlow apply(GEdgeDeclaration* stmt, std::list<NodeType>& path);
     VisitFlow apply(GWalkDeclaration* stmt, std::list<NodeType>& path);
     VisitFlow apply(GObjectFunction* stmt, std::list<NodeType>& path) { return VisitFlow::Return; }
+
+    void makeEdgeCondition(int index, GWalkDeclaration::Order order, EntityNode* start, EntityNode* end, bool direction);
+    EntityNode* makeNodeCondition(int index, const std::string& str);
   };
 
   /**
@@ -172,6 +175,8 @@ private:
    * QueryCondition contain graph pattern, node predictates
    */
   QueryCondition _where;
+  // simple tag if no condition
+  bool _scanAll;
   /**
    * @brief estimate info of query table
    */
