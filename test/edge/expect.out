@@ -72,7 +72,7 @@ QUERY SUCCESS
 REMOVE SUCCESS
 [28]:	{remove: 'relation_tag', edge: [2734686976, --, *]};
 REMOVE SUCCESS
-[29]:	{remove: 'file_meta', vertex: [2734686464]};
+[29]:	{remove: 'file_meta', vertex: {id: 2734686464}};
 REMOVE SUCCESS
 [30]:	{remove: 'relation_kw', edge: [2734686976, --, *]};
 REMOVE SUCCESS

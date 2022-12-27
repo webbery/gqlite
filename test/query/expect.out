@@ -125,7 +125,7 @@ QUERY SUCCESS
 [v8, {"category":"HDR","datatime":"0d1651105732","feature_name":[0.5,0.0],"filename":"蓝天.jpg"}]
 [v9, {"category":"赛博朋克","datatime":"0d1651105732","filename":"大佐.jpg"}]
 QUERY SUCCESS
-[22]:	{remove: 'ruins', vertex: ['3']};
+[22]:	{remove: 'ruins', vertex: {id: '3'}};
 REMOVE SUCCESS
 [23]:	{dump: 'query_db'};
 {create: 'query_db', group: [{addr: []},{ruins: [], index: ['category','feature_name','loc']}]};
