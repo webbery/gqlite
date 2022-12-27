@@ -134,6 +134,9 @@ public:
     int write(const std::string& mapname, const std::string& key, const nlohmann::json& value);
     int write(const std::string& mapname, uint64_t key, const nlohmann::json& value);
 
+    int del(const std::string& mapname, uint64_t key, bool from);
+    int del(const std::string& mapname, const std::string& key, bool from);
+
     /**
      * @brief parse a string to json which get from cursor
      */
@@ -163,7 +166,7 @@ public:
     /**
      * Get vertex group's relations
      */
-    std::list<std::string> getRelations(const std::string& group);
+    std::list<std::tuple<std::string, std::string, std::string>> getRelations(const std::string& group);
 
     int startTrans(ReadWriteOption opt = ReadWriteOption::read_write);
 

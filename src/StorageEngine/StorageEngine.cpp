@@ -247,14 +247,14 @@ IndexType GStorageEngine::getIndexType(const std::string& name)
   return _schema[SCHEMA_INDEX][name];
 }
 
-std::list<std::string> GStorageEngine::getRelations(const std::string& prop) {
-  std::list<std::string> relations;
+std::list<std::tuple<std::string, std::string, std::string>> GStorageEngine::getRelations(const std::string& prop) {
+  std::list<std::tuple<std::string, std::string, std::string>> relations;
   auto& edges = _schema[SCHEMA_EDGE];
   for (auto& item : edges.items()) {
     std::string from, to;
     std::tie(from, to) = std::pair<std::string, std::string>(item.value());
     if (from == prop || to == prop) {
-      relations.emplace_back(item.key());
+      relations.emplace_back(make_tuple(item.key(), from, to));
     }
   }
   return relations;
@@ -420,6 +420,55 @@ int GStorageEngine::write(const std::string& mapname, uint64_t key, const nlohma
   return 0;
 }
 
+int GStorageEngine::del(const std::string& mapname, uint64_t key, bool from)
+{
+  auto is_match_from = [](bool from, const gql::edge_id& edge, uint64_t key) {
+    return edge._from_len == sizeof(uint64_t) && *(uint64_t*)edge._value == key;
+  };
+  auto is_match_to = [](bool to, const gql::edge_id& edge, uint64_t key) {
+    return (edge._len - edge._from_len) == sizeof(uint64_t) && *(uint64_t*)(edge._value + edge._from_len) == key;
+  };
+
+  thread_local auto id = std::this_thread::get_id();
+  auto handle = getOrCreateHandle(mapname, mdbx::key_mode::ordinal);
+  auto cursor = _txns[id].open_cursor(handle);
+  auto data = cursor.to_first(false);
+  while (data) {
+    std::string k((char*)data.key.byte_ptr(), data.key.size());
+    auto edge = gql::to_edge_id(k);
+    if (is_match_from(from, edge, key) || is_match_to(!from, edge, key)) {
+        _txns[id].erase(handle, data.key);
+    }
+    gql::release_edge_id(edge);
+    data = cursor.to_next(false);
+  }
+  return 0;
+}
+
+int GStorageEngine::del(const std::string& mapname, const std::string& key, bool from) {
+  auto is_match_from = [](bool from, const gql::edge_id& edge, const std::string& key) {
+    return from && edge._from_len == key.size() && key == edge._value;
+  };
+  auto is_match_to = [](bool to, const gql::edge_id& edge, const std::string& key) {
+    return to && (edge._len - edge._from_len) == key.size() && key == (edge._value + edge._from_len);
+  };
+
+  thread_local auto id = std::this_thread::get_id();
+  auto handle = getOrCreateHandle(mapname, mdbx::key_mode::ordinal);
+  auto cursor = _txns[id].open_cursor(handle);
+  auto data = cursor.to_first(false);
+  while (data) {
+    std::string k((char*)data.key.byte_ptr(), data.key.size());
+    auto edge = gql::to_edge_id(k);
+    if (is_match_from(from, edge, key) || is_match_to(!from, edge, key)) {
+      _txns[id].erase(handle, data.key);
+    }
+    gql::release_edge_id(edge);
+    data = cursor.to_next(false);
+  }
+  return 0;
+}
+
 int GStorageEngine::read(const std::string& prop, const std::string& key, std::string& value) {
   assert(isMapExist(prop) || isIndexExist(prop));
   auto handle = getOrCreateHandle(prop, mdbx::key_mode::usual);
@@ -446,7 +495,6 @@ int GStorageEngine::read(const std::string& mapname, uint64_t from, uint64_t to,
 
 int GStorageEngine::parse(const std::string& data, nlohmann::json& value)
 {
-
   return ECode_Success;
 }
 
@@ -529,7 +577,6 @@ GStorageEngine::cursor GStorageEngine::getMapCursor(const std::string& prop)
   assert(isMapExist(prop));
   mdbx::map_handle handle;
   auto pp = getProp(prop);
-  std::string d = pp.dump();
   auto type = (KeyType)pp[SCHEMA_CLASS_KEY];
   if (type == KeyType::Integer) {
     handle = getOrCreateHandle(prop, mdbx::key_mode::ordinal);

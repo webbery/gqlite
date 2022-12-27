@@ -5,6 +5,22 @@
 #include "StorageEngine.h"
 #include "gutil.h"
 
+namespace {
+
+  template<typename Key>
+  void RemoveEdges(GStorageEngine* store, const std::string& group, const Key& k) {
+    bool isFrom = true;
+    auto&& relations = store->getRelations(group);
+    for (auto& relation : relations) {
+      //if (group == std::get<2>(relation)) {
+      //  isFrom = false;
+      //}
+      store->del(std::get<0>(relation), k, isFrom);
+    }
+  }
+
+}
+
 GRemovePlan::GRemovePlan(std::map<std::string, GVirtualNetwork*>& networks, GStorageEngine* store, GRemoveStmt* stmt)
   :GPlan(networks, store)
 {
@@ -17,6 +33,7 @@ GRemovePlan::~GRemovePlan()
   delete _scan;
 }
 
+
 int GRemovePlan::execute(const std::function<ExecuteStatus(KeyType, const std::string& key, const std::string& value)>& processor)
 {
   std::vector<std::string> keys;
@@ -27,22 +44,22 @@ int GRemovePlan::execute(const std::function<ExecuteStatus(KeyType, const std::s
   if (keys.size() == 0) return ECode_Success;
 
   KeyType type = _store->getKeyType(_group);
-  if (type == KeyType::Integer || type == KeyType::Byte) {
-    // try find their relation data and then remove
-    std::list<std::string>&& relations = _store->getRelations(_group);
-  }
   switch (type) {
   case KeyType::Integer:
     for (auto itr = keys.begin(), end = keys.end(); itr != end; ++itr)
     {
       uint64_t k = *(uint64_t*)(itr->data());
-      _store->del(_group, k);
+      if (_store->del(_group, k) == ECode_Success) {
+        RemoveEdges(_store, _group, k);
+      }
     }
     break;
   case KeyType::Byte:
     for (auto itr = keys.begin(), end = keys.end(); itr != end; ++itr)
     {
-      _store->del(_group, itr->data());
+      if (_store->del(_group, itr->data()) == ECode_Success) {
+        RemoveEdges(_store, _group, itr->data());
+      }
     }
     break;
   case KeyType::Edge:
