@@ -116,6 +116,7 @@ int GStorageEngine::open(const char* filename, StoreOption option) {
     _schema = nlohmann::json::from_cbor(v);
   }
   _schema[SCHEMA_GRAPH_NAME] = p.filename();
+  _curDBPath = fullpath;
   initMap(option);
   initDict(option.compress);
   return ret;
@@ -155,6 +156,10 @@ mdbx::map_handle GStorageEngine::openSchema() {
 void GStorageEngine::initMap(StoreOption option)
 {
   addMap(MAP_BASIC, KeyType::Uninitialize);
+}
+
+std::string GStorageEngine::getPath() const {
+  return _curDBPath;
 }
 
 void GStorageEngine::initDict(int compressLvl)

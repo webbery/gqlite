@@ -13,6 +13,7 @@
 
 #define UNKNOWN_ERROR           "unknow error"
 #define Graph_Not_Exist_ERROR   "graph is not exist"
+#define Group_Not_Exist_ERROR   "group is not exist"
 #define Index_Not_Exist_ERROR   "index %s is not exist"
 #define GRAMMAR_ARRAY_ERROR     "input array seems not correct"
 
@@ -133,6 +134,9 @@ SYMBOL_EXPORT char* gqlite_error(gqlite* pDb, int error)
     break;
   case ECode_GQL_Index_Not_Exist:
     //sprintf(buff, Index_Not_Exist_ERROR, jsn["index"].dump().c_str());
+    break;
+  case ECode_Group_Not_Exist:
+    msg = simple_message(Group_Not_Exist_ERROR);
     break;
   case ECode_GQL_Parse_Fail:
     break;

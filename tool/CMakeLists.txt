@@ -26,6 +26,7 @@ set(L2GQL_SOURCE ./l2lite.cpp ./converter/ngql.cpp ./getopt.c)
 ELSE()
 set(L2GQL_SOURCE ./l2lite.cpp ./converter/ngql.cpp)
 ENDIF()
+add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
 
 add_executable(gql ${COMMANDLINE_SOURCE})
 add_executable(gqldump ${EXPORT_SOURCE})

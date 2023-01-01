@@ -11,6 +11,8 @@
 #include <stdio.h>
 #include <set>
 #include <fmt/format.h>
+#include <fmt/printf.h>
+#include <fmt/color.h>
 #include "Error.h"
 #include "Type/Binary.h"
 #include "base/lang/lang.h"
@@ -35,8 +37,8 @@ void yyerror(YYLTYPE* yyllocp, yyscan_t unused, GVirtualEngine& stm, const char*
   }
   // printf("\033[22;0m%s\n%s\n",
   //   stm.gql().c_str(), err_index.c_str());
-    printf("\033[22;31mError:\t%s:\033[22;0m\n\t%s\n\t%s\n",
-      msg, stm.gql().c_str(), err_index.c_str());
+  fmt::print(fmt::fg(fmt::color::red), "Error:\t{}:\n\t{}\n\t{}\n",
+    msg, stm.gql(), err_index);
 }
 
 struct GASTNode* INIT_STRING_AST(const char* key) {
@@ -248,7 +250,7 @@ upset_vertexes: RANGE_BEGIN KW_UPSET COLON LITERAL_STRING COMMA KW_VERTEX COLON 
               }
         | error RANGE_END
               {
-                printf("\033[22;31mERROR:\t%s:\033[22;0m\n",
+                fmt::print(fmt::fg(fmt::color::red), "Error:\t{}\n",
                   "should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}\n");
                 yyerrok;
                 stm._errorCode = GQL_GRAMMAR_OBJ_FAIL;
@@ -484,8 +486,7 @@ a_graph_properties:
         | LEFT_SQUARE graph_properties RIGHT_SQUARE { $$ = $2; }
         | error RIGHT_SQUARE
           {
-            printf("\033[22;31mERROR:\t%s:\033[22;0m\n",
-              "input object is not a correct json");
+            fmt::print(fmt::fg(fmt::color::red), "Error:\tinput object is not a correct json:\n");
             yyerrok;
             stm._errorCode = GQL_GRAMMAR_OBJ_FAIL;
             YYABORT;
@@ -675,8 +676,7 @@ condition_object: RANGE_BEGIN condition_properties RANGE_END
             }
         | error RANGE_END
             {
-              printf("\033[22;31mERROR:\t%s:\033[22;0m\n",
-                "input object is not a correct property");
+              fmt::print(fmt::fg(fmt::color::red), "Error:\tinput object is not a correct property\n");
               yyerrok;
               stm._errorCode = GQL_GRAMMAR_OBJ_FAIL;
               YYABORT;

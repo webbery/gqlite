@@ -81,7 +81,8 @@ void GScanPlan::addObserver(IObserver* observer)
 int GScanPlan::prepare()
 {
   if (_graph.empty()) return ECode_Graph_Not_Exist;
-  if (!std::filesystem::exists(_graph)) {
+  std::string curDB = _store->getPath();
+  if (!std::filesystem::exists(curDB) || _graph != _store->getSchema()[SCHEMA_GRAPH_NAME]) {
     return ECode_Graph_Not_Exist;
   }
   if (!_store->isMapExist(_group)) return ECode_Group_Not_Exist;
@@ -425,6 +426,7 @@ bool GScanPlan::predict(const std::function<bool(const attribute_t&)>& op, const
   switch ((nlohmann::json::value_t)attr) {
   case nlohmann::json::value_t::number_float:
   case nlohmann::json::value_t::number_integer:
+  case nlohmann::json::value_t::number_unsigned:
     ret = op((double)attr);
     break;
   case nlohmann::json::value_t::string:

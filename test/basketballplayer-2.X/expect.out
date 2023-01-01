@@ -624,7 +624,7 @@ UPSET SUCCESS
 ***** EXECUTE FINISH: "basketballplayer-2.X.gql" *****
 ***** EXECUTE: "query.gql" *****
 [0]:	{query: '*', in: 'basketballplayer', where: ['player102', ->: ..., 'team201']};
-unknow error
+group is not exist
 [1]:	{query: '*', in: 'basketballplayer', where: ['player102', ->: min('distance'), 'team201']};
-unknow error
+group is not exist
 ***** EXECUTE FINISH: "query.gql" *****

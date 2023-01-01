@@ -1,6 +1,7 @@
 #include <iostream>
 #include <chrono>
 #ifdef WIN32
+#include <windows.h>
 #include <conio.h>
 #pragma warning(disable : 4054)
 #pragma warning(disable : 4055)
@@ -31,9 +32,23 @@
 #define MAX_HISTORY_SIZE  100
 #define HISTORY_FILENAME  ".gql_history"
 
+void trim(std::string& input) {
+  if (input.empty()) return ;
+
+  input.erase(0, input.find_first_not_of(" "));
+  input.erase(input.find_last_not_of(" ") + 1);
+}
+
 int main(int argc, char** argv) {
 #ifdef __linux__
   init_coredump_capture();
+#elif _WIN32
+  HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+  DWORD dwMode = 0;
+  GetConsoleMode(hOut, &dwMode);
+  dwMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+  SetConsoleMode(hOut, dwMode);
+  system("CHCP 65001 > nul 2>nul");
 #endif
   std::string dbfile = "";
   if (argc > 1) {
@@ -60,6 +75,7 @@ int main(int argc, char** argv) {
     if (result == nullptr) break;
     std::string input(result);
     free(result);
+    trim(input);
     if (*result == '\0' || input == "exit") break;
     linenoiseHistoryAdd(input.c_str());
     char* ptr = nullptr;

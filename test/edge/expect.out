@@ -60,7 +60,7 @@ QUERY SUCCESS
 QUERY SUCCESS
 [24]:	{remove: 'relation_dir', edge: [2734686464, --, *]};
 REMOVE SUCCESS
-[25]:	{remove: 'file_meta', vertex: [2734686464]};
+[25]:	{remove: 'file_meta', vertex: {id: 2734686464}};
 REMOVE SUCCESS
 [26]:	{query: 'relation_tag', in: 'file_resource'};
 ['test', --, 2734686976]
@@ -71,6 +71,10 @@ QUERY SUCCESS
 [27]:	{remove: 'relation_tag', edge: [2734686464, --, *]};
 REMOVE SUCCESS
 [28]:	{query: 'relation_tag', in: 'file_resource'};
+['test', --, 2734686976]
+['test', --, 2734687232]
+['test', --, 2234686464]
+['图片', --, 2734687232]
 QUERY SUCCESS
 [29]:	{remove: 'relation_tag', edge: [2734686720, --, *]};
 REMOVE SUCCESS

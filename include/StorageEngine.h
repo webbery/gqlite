@@ -199,6 +199,8 @@ public:
      */
     bool isMapExist(const std::string& prop);
 
+    std::string getPath() const;
+
 private:
     /**
      * @brief check every attribute is init or not. If not, set index and its attribute's name.
@@ -229,6 +231,9 @@ private:
      * prop contain current map information, include key type, attribute's name and its types.
      */
     nlohmann::json _schema;
+
+    std::string _curDBPath;
+
     ZSTD_CDict* _cdict;
     ZSTD_DDict* _ddict;
     ZSTD_CCtx* _cctx;

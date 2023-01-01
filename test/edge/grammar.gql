@@ -23,7 +23,7 @@
 {query: 'relation_dir', in: 'file_resource', where: [2734686464, --, *]};
 {query: 'relation_dir', in: 'file_resource'};
 {remove: 'relation_dir', edge: [2734686464, --, *]};
-{remove: 'file_meta', vertex: [2734686464]};
+{remove: 'file_meta', vertex: {id: 2734686464}};
 {query: 'relation_tag', in: 'file_resource'};
 {remove: 'relation_tag', edge: [2734686464, --, *]};
 {query: 'relation_tag', in: 'file_resource'};
