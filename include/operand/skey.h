@@ -18,6 +18,11 @@ enum class BTScanStrategy {
 #define STR_GREATE_THAN       "gt"
 #define STR_GREATE_THAN_EQUAL "gte"
 
+#define STR_MIN               "min"
+#define STR_MAX               "max"
+#define STR_SAMPLE            "sample"    // random select
+#define STR_COIN              "coin"
+
 /**
  * GED_MAX_SIZE is the max vertex count which is used to check GED algorithm enable
  */

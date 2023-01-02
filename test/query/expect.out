@@ -64,7 +64,7 @@ EXECUTE COMMAND SUCCESS
 [v8, {"category":"HDR","datatime":"0d1651105732","feature_name":[0.5,0.0],"filename":"蓝天.jpg"}]
 [v9, {"category":"赛博朋克","datatime":"0d1651105732","filename":"大佐.jpg"}]
 [yu6, {"pid":461791488}]
-[yu7, {"name":"新分类2/新子类","pid":2147483647}]
+[yu7, {"name":"新分类2/新子类","pid":2821611776}]
 QUERY SUCCESS
 [16]:	{query: 'ruins', in: 'vertex_db', where: {category: '废墟'}};
 graph is not exist
@@ -156,7 +156,7 @@ REMOVE SUCCESS
 {upset: 'ruins', vertex: ['v8', {'category':'HDR','datatime':0d1651105732,'feature_name':[0.5,0.0],'filename':'蓝天.jpg'}]};
 {upset: 'ruins', vertex: ['v9', {'category':'赛博朋克','datatime':0d1651105732,'filename':'大佐.jpg'}]};
 {upset: 'ruins', vertex: ['yu6', {'pid':461791488}]};
-{upset: 'ruins', vertex: ['yu7', {'name':'新分类2/新子类','pid':2147483647}]};
+{upset: 'ruins', vertex: ['yu7', {'name':'新分类2/新子类','pid':2821611776}]};
 EXECUTE COMMAND SUCCESS
 [27]:	{drop: 'query_db'};
 DROP SUCCESS
