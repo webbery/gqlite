@@ -20,7 +20,7 @@ struct EntityEdge {
 };
 
 using gkey_t = Variant<std::string, uint64_t>;
-using attribute_t = Variant<std::string, double, gql::GDatetime, gql::vector_double, gql::GBinary, int,
+using attribute_t = Variant<std::string, double, gql::GDatetime, gql::vector_double, gql::GBinary, int, long, uint64_t,
   gql::vector_uint8
 >;
 using predicate_t = Variant<std::function<bool(const gkey_t&)>, std::function<bool(const attribute_t&)>>;

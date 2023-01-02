@@ -50,46 +50,45 @@ UPSET SUCCESS
 ['test', --, 2734687232]
 ['test', --, 2234686464]
 QUERY SUCCESS
-[22]:	{query: 'relation_dir', in: 'file_resource', where: [2734686464, --, *]};
-['type1', --, 2734686464]
+[22]:	{remove: 'directory', vertex: {id: 'type1'}};
+REMOVE SUCCESS
+[23]:	{query: 'relation_dir', in: 'file_resource', where: [2734686464, --, *]};
 ['type2', --, 2734686464]
 QUERY SUCCESS
-[23]:	{query: 'relation_dir', in: 'file_resource'};
-['type1', --, 2734686464]
+[24]:	{query: 'relation_dir', in: 'file_resource'};
 ['type2', --, 2734686464]
 QUERY SUCCESS
-[24]:	{remove: 'relation_dir', edge: [2734686464, --, *]};
+[25]:	{remove: 'relation_dir', edge: [2734686464, --, *]};
 REMOVE SUCCESS
-[25]:	{remove: 'file_meta', vertex: {id: 2734686464}};
+[26]:	{remove: 'file_meta', vertex: {id: 2734686464}};
 REMOVE SUCCESS
-[26]:	{query: 'relation_tag', in: 'file_resource'};
+[27]:	{query: 'relation_tag', in: 'file_resource'};
 ['test', --, 2734686976]
 ['test', --, 2734687232]
 ['test', --, 2234686464]
 ['图片', --, 2734687232]
 QUERY SUCCESS
-[27]:	{remove: 'relation_tag', edge: [2734686464, --, *]};
+[28]:	{remove: 'relation_tag', edge: [2734686464, --, *]};
 REMOVE SUCCESS
-[28]:	{query: 'relation_tag', in: 'file_resource'};
+[29]:	{query: 'relation_tag', in: 'file_resource'};
 ['test', --, 2734686976]
 ['test', --, 2734687232]
 ['test', --, 2234686464]
 ['图片', --, 2734687232]
 QUERY SUCCESS
-[29]:	{remove: 'relation_tag', edge: [2734686720, --, *]};
+[30]:	{remove: 'relation_tag', edge: [2734686720, --, *]};
 REMOVE SUCCESS
-[30]:	{remove: 'relation_tag', edge: [2734686976, --, *]};
+[31]:	{remove: 'relation_tag', edge: [2734686976, --, *]};
 REMOVE SUCCESS
-[31]:	{remove: 'relation_kw', edge: [2734686976, --, *]};
+[32]:	{remove: 'relation_kw', edge: [2734686976, --, *]};
 REMOVE SUCCESS
-[32]:	{dump: 'file_resource'};
+[33]:	{dump: 'file_resource'};
 {create: 'file_resource', group: [{directory: []},{file_meta: [], index: ['addtime','color','datetime','size','type']},{keyword: []},['directory', 'relation_dir', 'file_meta'],['keyword', 'relation_kw', 'file_meta'],['tag', 'relation_tag', 'file_meta'],{tag: []}]};
-{upset: 'directory', vertex: ['type1']};
 {upset: 'file_meta', vertex: [2234686464, {'datetime':'0d1600577894000','filename':'newfile.jpg','hash':'unknow','height':650,'path':'C:\\Users\\webberg\\Pictures\\06cc22608a1111eab5a4993e17631b31.jpg~tplv-banciyuan-w650.jpg','size':207879,'type':'unknow','width':650}]};
 {upset: 'keyword', vertex: ['keyword1']};
 {upset: 'tag', vertex: ['test', {'name':'test'}]};
 {upset: 'tag', vertex: ['图片', {'name':'图片'}]};
 EXECUTE COMMAND SUCCESS
-[33]:	{drop: 'file_resource'};
+[34]:	{drop: 'file_resource'};
 DROP SUCCESS
 ***** EXECUTE FINISH: "grammar.gql" *****

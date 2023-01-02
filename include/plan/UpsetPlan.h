@@ -8,9 +8,16 @@
 #include "json.hpp"
 #include "Graph/GRAD.h"
 #include "operand/query/HNSW.h"
+#include <cstddef>
 
 #define ATTRIBUTE_SET(item) \
   [&](int value) {\
+    item[_key] = value;\
+  },\
+  [&](long value) {\
+    item[_key] = value;\
+  },\
+  [&](uint64_t value) {\
     item[_key] = value;\
   },\
   [&](double value) {\
@@ -31,6 +38,12 @@
 
 #define ATTRIBUTE_PUSH(item) \
   [&](int value) {\
+    item.push_back(value);\
+  },\
+  [&](long value) {\
+    item.push_back(value);\
+  },\
+  [&](uint64_t value) {\
     item.push_back(value);\
   },\
   [&](double value) {\
@@ -111,8 +124,21 @@ private:
         _values.emplace_back(date);
       }
         break;
-      case AttributeKind::Integer:
-        _values.push_back(atoi(stmt->raw().c_str()));
+      case AttributeKind::Integer: {
+        std::string raw = stmt->raw();
+        double real = atof(raw.c_str());
+        if (real <= std::numeric_limits<int>::max()) {
+          _values.push_back(atoi(raw.c_str()));
+        }
+        else if (real <= std::numeric_limits<long>::max()) {
+          _values.push_back(atol(raw.c_str()));
+        }
+        else if (real > 0 && real <= std::numeric_limits<uint64_t>::max()){
+          char* end;
+          uint64_t v = strtoull(raw.c_str(), &end, 10);
+          _values.push_back(v);
+        }
+      }
         break;
       case AttributeKind::Number:
         _values.push_back(atof(stmt->raw().c_str()));

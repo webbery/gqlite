@@ -5,6 +5,8 @@
 {upset: 'ruins', vertex: [['v7', {filename: '破墙.jpg', datatime: 0d1651105732, feature_name: [0, 1.5]}], ['v8', {category: 'HDR', filename: '蓝天.jpg', datatime: 0d1651105732, feature_name: [0.5, 0]}], ['v9', {category: '赛博朋克', filename: '大佐.jpg', datatime: 0d1651105732}]]};
 {upset: 'ruins', vertex: [['1', {filename: '破墙0.jpg', datatime: 0d5}]]};
 {upset: 'ruins', vertex: ['3', '4', '5']};
+{upset: 'ruins', vertex: [['yu6', {pid: 461791488}]]};
+{upset: 'ruins', vertex: [['yu7', {name:'新分类2/新子类', pid:2821611776}]]};
 {upset: 'ruins', vertex: [[1, {filename: '破墙0.jpg', datatime: 0d1651105732}]]};
 {upset: 'addr', vertex: [[1, {filename: '破墙1.jpg', datatime: 0d1651105732}]]};
 {upset: 'addr', vertex: [[2, {filename: '破墙2.jpg', loc: [131.24194, 37.12532]}]]};
@@ -13,6 +15,7 @@
 ast {query: 'ruins', in: 'vertex_db', where: {category: '废墟'}};
 {query: 'ruins'};
 {query: 'ruins', in: 'vertex_db', where: {category: '废墟'}};
+{query: 'notexist_group', in: 'query_db'};
 {query: 'ruins', in: 'query_db', where: {category: '赛博朋克'}};
 {query: 'ruins', in: 'query_db', where: {category: ['赛博朋克', '废墟']}};
 ast {query: 'ruins', in: 'vertex_db', where: {datatime: {$lt: 1653315732}}};
