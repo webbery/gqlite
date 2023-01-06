@@ -27,7 +27,7 @@ inline int gqlite_exec_callback(gqlite_result* params, void*)
         {
           gqlite_vertex* v = node->_vertex;
           if (v->type == gqlite_id_type::integer) {
-            printf("[%lld, %s]\n", v->uid, v->properties);
+            printf("[%ld, %s]\n", v->uid, v->properties);
           }
           else {
             printf("[%s, %s]\n", v->cid, v->properties);
