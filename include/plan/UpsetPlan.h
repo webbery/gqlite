@@ -270,7 +270,13 @@ private:
           _store->updateIndexType(index, IndexType::Vector);
         }
           break;
+        case AttributeKind::Datetime: {
+          uint64_t v = value["value"];
+          upsetIndex(index, v, id);
+        }
+          break;
         default:
+          printf("TODO: Not implement: %d\n", (AttributeKind)value[OBJECT_TYPE_NAME]);
           break;
         }
       }

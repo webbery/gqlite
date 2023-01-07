@@ -9,21 +9,28 @@ namespace gql {
 
   class variant_bad_cast : public std::exception {
   public:
-    variant_bad_cast(const char* msg): std::exception(
-#ifdef WIN32
-      msg
-  #endif
-  ) {}
+    variant_bad_cast(const char* msg):
+#if defined(WIN32)
+      std::exception(msg)
+#elif defined(__ANDROID__)
+      _msg(msg)
+#endif
+  {}
 
-  #ifdef __linux
+#ifdef __linux
     virtual const char*
-    what() const _GLIBCXX_TXN_SAFE_DYN _GLIBCXX_NOTHROW {
+    what() const
+#if defined(__ANDROID__)
+#elif defined(__linux__)
+      _GLIBCXX_TXN_SAFE_DYN _GLIBCXX_NOTHROW
+#endif
+    {
       return _msg.c_str();
     }
 
   private:
     std::string _msg;
-  #endif
+#endif
   };
 
   /**
@@ -230,7 +237,7 @@ public:
       return _Storage::equal(_tindex, (void*)&_data, (void*)&other._data);
     }
     static std::string msg;
-    msg = gql::format("compare different type, %s and %s\n", _tindex.name(), other._tindex.name());
+    msg = gql::format("compare different type, %s and %s", _tindex.name(), other._tindex.name());
     throw gql::variant_bad_cast(msg.c_str());
   }
 
@@ -239,7 +246,7 @@ public:
       return _Storage::less_than(_tindex, &const_cast<Variant&>(*this)._data , &const_cast<Variant&>(other)._data);
     }
     static std::string msg;
-    msg = gql::format("compare different type, %s and %s\n", _tindex.name(), other._tindex.name());
+    msg = gql::format("compare different type, %s and %s", _tindex.name(), other._tindex.name());
     throw gql::variant_bad_cast(msg.c_str());
   }
 
@@ -248,7 +255,7 @@ public:
       return _Storage::less_than_equal(_tindex, &const_cast<Variant&>(*this)._data, &const_cast<Variant&>(other)._data);
     }
     static std::string msg;
-    msg = gql::format("compare different type, %s and %s\n", _tindex.name(), other._tindex.name());
+    msg = gql::format("compare different type, %s and %s", _tindex.name(), other._tindex.name());
     throw gql::variant_bad_cast(msg.c_str());
   }
 
