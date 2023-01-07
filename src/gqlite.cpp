@@ -143,6 +143,8 @@ SYMBOL_EXPORT char* gqlite_error(gqlite* pDb, int error)
   case GQL_GRAMMAR_ARRAY_FAIL:
     msg = simple_message(GRAMMAR_ARRAY_ERROR);
     break;
+  case ECode_GQL_Type_Not_Match:
+    break;
   case ECode_Fail:
   default:
     msg = simple_message(UNKNOWN_ERROR);

@@ -27,6 +27,8 @@ namespace gql {
   std::vector<std::string> split(const char* str, const char* delim);
   std::vector<std::string> split(const std::string& str, char delim);
 
+  std::string format(const char* fmt, ...);
+
   /**
    * @brief try generate an identify number by input string.
    * Note: Because of hash collision, so don't use in product but experiment.

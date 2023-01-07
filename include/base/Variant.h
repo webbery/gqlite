@@ -5,6 +5,11 @@
 #include <tuple>
 
 namespace gql {
+  class variant_bad_cast : public std::exception {
+  public:
+    variant_bad_cast(const char* msg):exception(msg) {}
+  };
+
   /**
  * @brief Caculate max size of Args. and put it's type to type
  *
@@ -208,22 +213,27 @@ public:
     if (other._tindex == this->_tindex && other._indx == this->_indx) {
       return _Storage::equal(_tindex, (void*)&_data, (void*)&other._data);
     }
-    return false;
+    static std::string msg;
+    msg = gql::format("compare different type, %s and %s\n", _tindex.name(), other._tindex.name());
+    throw gql::variant_bad_cast(msg.c_str());
   }
 
   bool operator < (const Variant& other) const {
     if (other._tindex == this->_tindex && other._indx == this->_indx) {
       return _Storage::less_than(_tindex, &const_cast<Variant&>(*this)._data , &const_cast<Variant&>(other)._data);
     }
-    printf("ERROR: compare different type, %s and %s\n", _tindex.name(), other._tindex.name());
-    return false;
+    static std::string msg;
+    msg = gql::format("compare different type, %s and %s\n", _tindex.name(), other._tindex.name());
+    throw gql::variant_bad_cast(msg.c_str());
   }
 
   bool operator <= (const Variant& other) const {
     if (other._tindex == this->_tindex && other._indx == this->_indx) {
       return _Storage::less_than_equal(_tindex, &const_cast<Variant&>(*this)._data, &const_cast<Variant&>(other)._data);
     }
-    throw std::bad_cast();
+    static std::string msg;
+    msg = gql::format("compare different type, %s and %s\n", _tindex.name(), other._tindex.name());
+    throw gql::variant_bad_cast(msg.c_str());
   }
 
   bool operator > (const Variant& other) const {

@@ -35,14 +35,14 @@ int GQueryPlan::prepare()
   return _scan->prepare();
 }
 
-int GQueryPlan::execute(const std::function<ExecuteStatus(KeyType, const std::string& key, const std::string& value)>& processor)
+int GQueryPlan::execute(const std::function<ExecuteStatus(KeyType, const std::string& key, const std::string& value, int status)>& processor)
 {
   if (_cb) {
-    _scan->execute([this](KeyType type, const std::string& key, const std::string& value) {
+    _scan->execute([this](KeyType type, const std::string& key, const std::string& value, int status) {
       gqlite_result result;
       result.count = 1;
       result.type = gqlite_result_type_node;
-      result.errcode = ECode_Success;
+      result.errcode = status;
       result.nodes = new gqlite_node;
       result.nodes->_next = nullptr;
       if (type != KeyType::Edge) {
@@ -61,6 +61,16 @@ int GQueryPlan::execute(const std::function<ExecuteStatus(KeyType, const std::st
 
 void GQueryPlan::convert_vertex(KeyType type, const std::string& key, const std::string& value, gqlite_result& result)
 {
+  if (result.errcode != ECode_Success) {
+    gqlite_result err;
+    err.errcode = result.errcode;
+    err.type = gqlite_result_type::gqlite_result_type_info;
+    err.count = 1;
+    const char* p[1] = { value.c_str() };
+    err.infos = (char**)p;
+    _cb(&err, _handle);
+    return;
+  }
   result.nodes->_type = gqlite_node_type::gqlite_node_type_vertex;
   result.nodes->_vertex = new gqlite_vertex;
   if (type == KeyType::Integer) {

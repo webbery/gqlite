@@ -27,7 +27,8 @@
 #include <string>
 #include "gqlite.h"
 #include "linenoise.h"
-#include "stdout.h"
+#include <fmt/color.h>
+#include <fmt/printf.h>
 #include "base/Debug.h"
 #define MAX_HISTORY_SIZE  100
 #define HISTORY_FILENAME  ".gql_history"
@@ -37,6 +38,84 @@ void trim(std::string& input) {
 
   input.erase(0, input.find_first_not_of(" "));
   input.erase(input.find_last_not_of(" ") + 1);
+}
+
+
+inline int query_exec_callback(gqlite_result* params, void*)
+{
+  if (params) {
+    switch (params->type)
+    {
+    case gqlite_result_type_node:
+    {
+      gqlite_node* node = params->nodes;
+      while (node) {
+        switch (node->_type)
+        {
+        case gqlite_node_type_vertex:
+        {
+          gqlite_vertex* v = node->_vertex;
+          if (v->type == gqlite_id_type::integer) {
+            printf("[%lld, %s]\n", v->uid, v->properties);
+          }
+          else {
+            printf("[%s, %s]\n", v->cid, v->properties);
+          }
+        }
+        break;
+        case gqlite_node_type_edge:
+        {
+          gqlite_edge* e = node->_edge;
+          gqlite_vertex* f = e->from;
+          gqlite_vertex* t = e->to;
+          std::string from, edge, to;
+          if (f->type == gqlite_id_type::integer) {
+            from += std::to_string(f->uid);
+          }
+          else {
+            from += std::string("'") + f->cid + "'";
+          }
+          fmt::print(fmt::fg(fmt::color::indian_red), "{}, ", from);
+
+          if (e->direction) {
+            edge += "->";
+          }
+          else {
+            edge += "--";
+          }
+
+          if (e->properties) {
+            edge += ": " + std::string(e->properties, e->len);
+          }
+          fmt::print(fmt::fg(fmt::color::lime_green), "{}, ", edge);
+
+          if (t->type == gqlite_id_type::integer) {
+            to += std::to_string(t->uid);
+          }
+          else {
+            to += std::string("'") + t->cid + "'";
+          }
+
+          fmt::print(fmt::fg(fmt::color::indian_red), "{}\n", to);
+        }
+        break;
+        default:
+          break;
+        }
+        node = node->_next;
+      }
+    }
+    break;
+    case gqlite_result_type_cmd:
+      for (size_t idx = 0; idx < params->count; ++idx) {
+        printf("%s\n", params->infos[idx]);
+      }
+      break;
+    default:
+      break;
+    }
+}
+  return 0;
 }
 
 int main(int argc, char** argv) {
@@ -80,7 +159,7 @@ int main(int argc, char** argv) {
     linenoiseHistoryAdd(input.c_str());
     char* ptr = nullptr;
     auto start = std::chrono::high_resolution_clock::now();
-    int error = gqlite_exec(pHandle, input.c_str(), gqlite_exec_callback, nullptr, &ptr);
+    int error = gqlite_exec(pHandle, input.c_str(), query_exec_callback, nullptr, &ptr);
     auto elapsed = std::chrono::high_resolution_clock::now() - start;
     if (ptr) {
       auto microseconds = std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count() / 1000000.0;

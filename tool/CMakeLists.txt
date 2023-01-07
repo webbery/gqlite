@@ -31,7 +31,7 @@ add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
 add_executable(gql ${COMMANDLINE_SOURCE})
 add_executable(gqldump ${EXPORT_SOURCE})
 add_executable(l2lite ${L2GQL_SOURCE})
-target_link_libraries(gql PUBLIC gqlite fmt-header-only)
+target_link_libraries(gql PUBLIC gqlite)
 target_link_libraries(gqldump PUBLIC gqlite fmt-header-only)
 
 add_test(NAME example_basketballplayer_prepare COMMAND l2lite -fngql -s../data/basketballplayer-2.X.ngql -o../test/basketballplayer-2.X/basketballplayer-2.X.gql

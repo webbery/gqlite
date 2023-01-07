@@ -42,7 +42,7 @@ public:
 
   void addObserver(IObserver* observer);
   virtual int prepare();
-  virtual int execute(const std::function<ExecuteStatus(KeyType, const std::string& key, const std::string& value)>&);
+  virtual int execute(const std::function<ExecuteStatus(KeyType, const std::string& key, const std::string& value, int status)>&);
   virtual int interrupt();
 
   void start();
@@ -52,7 +52,7 @@ public:
 
   //std::vector<std::string> groups() { return _queries; }
 private:
-  int scan(const std::function<ExecuteStatus(KeyType, const std::string& key, const std::string& value)>& cb);
+  int scan(const std::function<ExecuteStatus(KeyType, const std::string& key, const std::string& value, int status)>& cb);
   // scan indexes
   int scan();
 

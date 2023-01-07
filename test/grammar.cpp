@@ -80,6 +80,7 @@ void successful_test(gqlite* pHandle, char* ptr) {
   TEST_QUERY("{query: 'g', in: 'ga'};", 1);
   TEST_GRAMMAR("{upset: 'g', vertex: [[55, {update_time: 0d12345}]]};");
   TEST_GRAMMAR("{upset: 'g', vertex: [[1040187648, {datetime:'0d1600577894000',filename: 'f2d470a08a1011eab5a4993e17631b31.jpg~tplv-banciyuan-w650.jpg',hash: 'unknow',height: 650,path: 'C:\\Users\\webberg\\Pictures\\f2d470a08a1011eab5a4993e17631b31.jpg~tplv-banciyuan-w650.jpg',size: 207879,type: 'unknow',width: 650}]]};");
+  TEST_QUERY("{query: 'g', in: 'ga', where: {datetime: {$gt:0d1600531200000}}};", 1);
   TEST_GRAMMAR("{upset: 'g', property: {filename: '7777.jpg'}, where: {id: 1040187648}};");
   TEST_GRAMMAR(
     "{"
@@ -92,7 +93,9 @@ void successful_test(gqlite* pHandle, char* ptr) {
         "[4, {keyword: [], create_time: 1}]"
     "]"
     "};");
+  TEST_GRAMMAR("{upset: 'g', vertex: [[456, {name:'新分类2/新子类', pid:2821611776}]]};");
   TEST_QUERY("{query: 'g', in: 'ga'};", 7);
+  TEST_QUERY("{query: 'g', in: 'ga', where: {pid: 461791488}};", 1);
   TEST_GRAMMAR("{remove: 'g', vertex: ['1']};");
   TEST_QUERY("{query: 'g', in: 'ga'};", 6);
   TEST_QUERY("{query: 'g', in: 'ga', where: {update_time: {$lt: 0d1653315732}}};", 1);

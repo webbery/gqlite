@@ -28,6 +28,7 @@
 #define ECode_GQL_Edge_Exist        100
 #define ECode_GQL_Edge_Type_Unknow  101
 #define ECode_GQL_Parse_Fail        200
+#define ECode_GQL_Type_Not_Match    201
 #define ECode_DISK_OPEN_FAIL        300
 #define ECode_DB_Drop_Fail          301
 #define ECode_DATUM_Not_Exist       400

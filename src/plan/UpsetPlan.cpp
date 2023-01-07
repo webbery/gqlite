@@ -43,14 +43,16 @@ int GUpsetPlan::prepare() {
   return ECode_Success;
 }
 
-int GUpsetPlan::execute(const std::function<ExecuteStatus(KeyType, const std::string& key, const std::string& value)>& processor) {
+int GUpsetPlan::execute(const std::function<ExecuteStatus(KeyType, const std::string& key, const std::string& value, int status)>& processor) {
   if (_store) {
     if (!_scan) {
       if (_vertex) return upsetVertex();
       else return upsetEdge();
     }
     else {
-      _scan->execute([&](KeyType type, const std::string& key, const std::string& value) {
+      _scan->execute([&](KeyType type, const std::string& key, const std::string& value, int status) {
+        if (status != ECode_Success) return ExecuteStatus::Stop;
+
         nlohmann::json updateProps = nlohmann::json::parse(value);
         if (type == KeyType::Integer) {
           uint64_t upsetKey = *(uint64_t*)key.data();
@@ -103,7 +105,7 @@ bool GUpsetPlan::upsetVertex()
           return ECode_Fail;
         }
         if (_store->write(_class, k, itr->second) == ECode_Success){
-          //printf("write: %s\n", itr->second.dump().c_str());
+          // printf("write: %s\n", itr->second.dump().c_str());
           if (!_indexes.empty()) {
             upsetIndex(itr->second, k);
             return ECode_Success;

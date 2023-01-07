@@ -8,11 +8,12 @@
 #include <filesystem>
 #include <float.h>
 #include <fmt/core.h>
+#include <fmt/color.h>
+#include <set>
 #include "json.hpp"
 #include "gutil.h"
 #include "Type/Datetime.h"
 #include "base/math/Distance.h"
-#include <set>
 
 GScanPlan::GScanPlan(std::map<std::string, GVirtualNetwork*>& networks, GStorageEngine* store, GQueryStmt* stmt)
 :GPlan(networks, store)
@@ -117,7 +118,7 @@ int GScanPlan::prepare()
   return ECode_Success;
 }
 
-int GScanPlan::execute(const std::function<ExecuteStatus(KeyType, const std::string& key, const std::string& value)>& processor) {
+int GScanPlan::execute(const std::function<ExecuteStatus(KeyType, const std::string& key, const std::string& value, int status)>& processor) {
   _interrupt.store(false);
   start();
 #ifdef GQLITE_MULTI_THREAD
@@ -157,7 +158,7 @@ void GScanPlan::stop()
   _state = ScanState::Stop;
 }
 
-int GScanPlan::scan(const std::function<ExecuteStatus(KeyType, const std::string& key, const std::string& value)>& cb)
+int GScanPlan::scan(const std::function<ExecuteStatus(KeyType, const std::string& key, const std::string& value, int status)>& cb)
 {
   if (_queries[0].size() == 0 && _queries[1].size() == 0) return ECode_Success;
   int ret = scan();
@@ -186,14 +187,23 @@ int GScanPlan::scan(const std::function<ExecuteStatus(KeyType, const std::string
         {
           gkey_t vKey = getKey(type, data.key);
           nlohmann::json jsn = nlohmann::json::parse(str);
-          if (_scanAll || (!_scanAll && predict(type, vKey, jsn))) {
-            std::string k((char*)data.key.byte_ptr(), data.key.size());
-            for (IObserver* observer : _observers) {
-              observer->update(type, k, jsn);
+          try {
+            if (_scanAll || (!_scanAll && predict(type, vKey, jsn))) {
+              std::string k((char*)data.key.byte_ptr(), data.key.size());
+              for (IObserver* observer : _observers) {
+                observer->update(type, k, jsn);
+              }
+              beautify(jsn);
+              if (cb) cb(type, k, jsn.dump(), ECode_Success);
             }
-            beautify(jsn);
-            if (cb) cb(type, k, jsn.dump());
           }
+          catch (gql::variant_bad_cast& e) {
+            if (cb) cb(type, "", e.what(), ECode_GQL_Type_Not_Match);
+            else {
+              fmt::print(fmt::fg(fmt::color::yellow), "{}", e.what());
+            }
+          }
+          
         }
         break;
         case GScanPlan::QueryType::NNSearch:

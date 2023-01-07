@@ -26,6 +26,7 @@ int gqlite_benchmark_callback(gqlite_result* params, void*)
     {
     }
   }
+  return 0;
 }
 
 int main(int argc, char** argv) {

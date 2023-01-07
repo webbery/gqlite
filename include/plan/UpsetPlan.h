@@ -70,7 +70,7 @@ public:
   ~GUpsetPlan();
 
   virtual int prepare();
-  virtual int execute(const std::function<ExecuteStatus(KeyType, const std::string& key, const std::string& value)>&);
+  virtual int execute(const std::function<ExecuteStatus(KeyType, const std::string& key, const std::string& value, int status)>&);
 
 private:
   /**

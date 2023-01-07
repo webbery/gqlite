@@ -106,6 +106,15 @@ namespace gql {
     return result;
   }
 
+  std::string format(const char* fmt, ...) {
+    va_list arg_ptr;
+    va_start(arg_ptr, fmt);
+    char buffer[1024] = { 0 };
+    vsprintf(buffer, fmt, arg_ptr);
+    va_end(arg_ptr);
+    return std::string(buffer);
+  }
+
   uint64_t hash64(const std::string& input)
   {
     constexpr short length = 8;
