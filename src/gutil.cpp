@@ -7,6 +7,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <stdarg.h>
 #define OS_DELIMITER "/"
 #define UNIVERSAL_DELIMITER "/"
 #elif defined(WIN32)

@@ -5,9 +5,25 @@
 #include <tuple>
 
 namespace gql {
+  std::string format(const char* fmt, ...);
+
   class variant_bad_cast : public std::exception {
   public:
-    variant_bad_cast(const char* msg):exception(msg) {}
+    variant_bad_cast(const char* msg): std::exception(
+#ifdef WIN32
+      msg
+  #endif
+  ) {}
+
+  #ifdef __linux
+    virtual const char*
+    what() const _GLIBCXX_TXN_SAFE_DYN _GLIBCXX_NOTHROW {
+      return _msg.c_str();
+    }
+
+  private:
+    std::string _msg;
+  #endif
   };
 
   /**
