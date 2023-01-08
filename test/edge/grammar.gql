@@ -15,6 +15,7 @@
 {upset: 'relation_tag', edge: ['图片', --, 2734687232]};
 {upset: 'relation_kw', edge: ['keyword1', --, 2734687232]};
 {query: 'file_meta', in: 'file_resource', where: {id: 2415919360}};
+{upset: 'file_meta', property: {datetime:0d1600577994}, where: {id: 2234686464}};
 {query: 'file_meta', in: 'file_resource', where: {id: 2234686464}};
 {query: 'relation_tag', in: 'file_resource', where: ['test', --, 2734686464]};
 {query: 'relation_tag', in: 'file_resource', where: ['图片', --, *]};

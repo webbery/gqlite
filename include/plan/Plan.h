@@ -32,7 +32,7 @@ public:
    * For example: before update execute, we should check database created or not.
    */
   virtual int prepare() { return 0; }
-  virtual int execute(const std::function<ExecuteStatus(KeyType, const std::string& key, const std::string& value, int status)>& processor) = 0;
+  virtual int execute(const std::function<ExecuteStatus(KeyType, const std::string& key, nlohmann::json& value, int status)>& processor) = 0;
   /**
    * Try to interrupt plan when it still working
    */

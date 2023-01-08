@@ -12,15 +12,16 @@ namespace gql {
     variant_bad_cast(const char* msg):
 #if defined(WIN32)
       std::exception(msg)
-#elif defined(__ANDROID__)
+#else
       _msg(msg)
 #endif
-  {}
+    {}
 
-#ifdef __linux
+#ifdef __linux__
     virtual const char*
     what() const
 #if defined(__ANDROID__)
+      _NOEXCEPT
 #elif defined(__linux__)
       _GLIBCXX_TXN_SAFE_DYN _GLIBCXX_NOTHROW
 #endif

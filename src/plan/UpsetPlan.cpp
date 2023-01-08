@@ -43,32 +43,38 @@ int GUpsetPlan::prepare() {
   return ECode_Success;
 }
 
-int GUpsetPlan::execute(const std::function<ExecuteStatus(KeyType, const std::string& key, const std::string& value, int status)>& processor) {
+int GUpsetPlan::execute(const std::function<ExecuteStatus(KeyType, const std::string& key, nlohmann::json& value, int status)>& processor) {
   if (_store) {
     if (!_scan) {
       if (_vertex) return upsetVertex();
       else return upsetEdge();
     }
     else {
-      _scan->execute([&](KeyType type, const std::string& key, const std::string& value, int status) {
+      _scan->execute([&](KeyType type, const std::string& key, nlohmann::json& value, int status) {
         if (status != ECode_Success) return ExecuteStatus::Stop;
 
-        nlohmann::json updateProps = nlohmann::json::parse(value);
+        for (auto& item : _props.items()) {
+          std::string k = item.key();
+          value[k] = item.value();
+        }
+
         if (type == KeyType::Integer) {
           uint64_t upsetKey = *(uint64_t*)key.data();
-          for (auto& item: _props.items()) {
-            std::string k = item.key();
-            updateProps[k] = item.value();
-          }
-          if (_store->write(_class, upsetKey, updateProps) == ECode_Success) {
-            if (!_indexes.empty()) {
-              //upsetIndex(itr->second, k);
-              return ExecuteStatus::Stop;
+          if (_store->write(_class, upsetKey, value) == ECode_Success) {
+            for (auto& item : _props.items()) {
+              upsetIndex(item, upsetKey);
             }
+            return ExecuteStatus::Stop;
           }
         }
         else if (type == KeyType::Byte) {
-
+          std::string upsetKey(key.data(), key.size());
+          if (_store->write(_class, upsetKey, value) == ECode_Success) {
+            for (auto& item : _props.items()) {
+              upsetIndex(item, upsetKey);
+            }
+            return ExecuteStatus::Stop;
+          }
         }
         return ExecuteStatus::Continue;
         });

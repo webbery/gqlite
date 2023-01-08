@@ -42,7 +42,7 @@ public:
 
   void addObserver(IObserver* observer);
   virtual int prepare();
-  virtual int execute(const std::function<ExecuteStatus(KeyType, const std::string& key, const std::string& value, int status)>&);
+  virtual int execute(const std::function<ExecuteStatus(KeyType, const std::string& key, nlohmann::json& value, int status)>&);
   virtual int interrupt();
 
   void start();
@@ -52,7 +52,7 @@ public:
 
   //std::vector<std::string> groups() { return _queries; }
 private:
-  int scan(const std::function<ExecuteStatus(KeyType, const std::string& key, const std::string& value, int status)>& cb);
+  int scan(const std::function<ExecuteStatus(KeyType, const std::string& key, nlohmann::json& value, int status)>& cb);
   // scan indexes
   int scan();
 
@@ -71,8 +71,7 @@ private:
   bool predictEdge(gkey_t key, nlohmann::json& row);
   bool predictVertex(gkey_t key, nlohmann::json& row);
   bool predict(const std::function<bool(const attribute_t&)>& op, const nlohmann::json& attr)const;
-  // convert obj to display type
-  void beautify(nlohmann::json& input);
+
   /**
    * @brief evaluate the order of simple scan's indexes
    * 

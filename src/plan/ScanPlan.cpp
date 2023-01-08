@@ -118,7 +118,7 @@ int GScanPlan::prepare()
   return ECode_Success;
 }
 
-int GScanPlan::execute(const std::function<ExecuteStatus(KeyType, const std::string& key, const std::string& value, int status)>& processor) {
+int GScanPlan::execute(const std::function<ExecuteStatus(KeyType, const std::string& key, nlohmann::json& value, int status)>& processor) {
   _interrupt.store(false);
   start();
 #ifdef GQLITE_MULTI_THREAD
@@ -158,7 +158,7 @@ void GScanPlan::stop()
   _state = ScanState::Stop;
 }
 
-int GScanPlan::scan(const std::function<ExecuteStatus(KeyType, const std::string& key, const std::string& value, int status)>& cb)
+int GScanPlan::scan(const std::function<ExecuteStatus(KeyType, const std::string& key, nlohmann::json& value, int status)>& cb)
 {
   if (_queries[0].size() == 0 && _queries[1].size() == 0) return ECode_Success;
   int ret = scan();
@@ -193,12 +193,11 @@ int GScanPlan::scan(const std::function<ExecuteStatus(KeyType, const std::string
               for (IObserver* observer : _observers) {
                 observer->update(type, k, jsn);
               }
-              beautify(jsn);
-              if (cb) cb(type, k, jsn.dump(), ECode_Success);
+              if (cb) cb(type, k, jsn, ECode_Success);
             }
           }
           catch (gql::variant_bad_cast& e) {
-            if (cb) cb(type, "", e.what(), ECode_GQL_Type_Not_Match);
+            if (cb) cb(type, e.what(), jsn, ECode_GQL_Type_Not_Match);
             else {
               fmt::print(fmt::fg(fmt::color::yellow), "{}", e.what());
             }
@@ -524,41 +523,6 @@ bool GScanPlan::predictEdge(gkey_t key, nlohmann::json& row)
   }
   release_edge_id(eid);
   return false;
-}
-
-void GScanPlan::beautify(nlohmann::json& input)
-{
-  if (input.empty() || input.is_null()) return;
-  if (input.is_object()) {
-    if (input.count(OBJECT_TYPE_NAME)) {
-      switch (AttributeKind(input[OBJECT_TYPE_NAME])) {
-      case AttributeKind::Datetime:
-        input = std::string("0d") + std::to_string((time_t)input["value"]);
-        return;
-      case AttributeKind::Vector:
-        input = input["value"];
-        return;
-      default:
-        break;
-      }
-    }
-    else if (input.count("bytes") && input.count("subtype")) {
-      // binary
-      std::vector<uint8_t> bin = input["bytes"];
-      input = std::string("0b") + gql::base64_encode(bin);
-      return;
-    }
-    for (auto itr = input.begin(); itr != input.end(); ++itr)
-    {
-      beautify(itr.value());
-    }
-  }
-  else if (input.is_array()) {
-    for (auto itr = input.begin(); itr != input.end(); ++itr)
-    {
-      beautify(itr.value());
-    }
-  }
 }
 
 GScanPlan::ScanPlans GScanPlan::evaluate(const ScanPlans& props)

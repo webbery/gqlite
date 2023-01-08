@@ -35,10 +35,10 @@ int GQueryPlan::prepare()
   return _scan->prepare();
 }
 
-int GQueryPlan::execute(const std::function<ExecuteStatus(KeyType, const std::string& key, const std::string& value, int status)>& processor)
+int GQueryPlan::execute(const std::function<ExecuteStatus(KeyType, const std::string& key, nlohmann::json& value, int status)>& processor)
 {
   if (_cb) {
-    _scan->execute([this](KeyType type, const std::string& key, const std::string& value, int status) {
+    _scan->execute([this](KeyType type, const std::string& key, nlohmann::json& value, int status) {
       gqlite_result result;
       result.count = 1;
       result.type = gqlite_result_type_node;
@@ -59,18 +59,57 @@ int GQueryPlan::execute(const std::function<ExecuteStatus(KeyType, const std::st
   return 0;
 }
 
-void GQueryPlan::convert_vertex(KeyType type, const std::string& key, const std::string& value, gqlite_result& result)
+void GQueryPlan::beautify(nlohmann::json& input)
+{
+  if (input.empty() || input.is_null()) return;
+  if (input.is_object()) {
+    if (input.count(OBJECT_TYPE_NAME)) {
+      switch (AttributeKind(input[OBJECT_TYPE_NAME])) {
+      case AttributeKind::Datetime:
+        input = std::string("0d") + std::to_string((time_t)input["value"]);
+        return;
+      case AttributeKind::Vector:
+        input = input["value"];
+        return;
+      default:
+        break;
+      }
+    }
+    else if (input.count("bytes") && input.count("subtype")) {
+      // binary
+      std::vector<uint8_t> bin = input["bytes"];
+      input = std::string("0b") + gql::base64_encode(bin);
+      return;
+    }
+    for (auto itr = input.begin(); itr != input.end(); ++itr)
+    {
+      beautify(itr.value());
+    }
+  }
+  else if (input.is_array()) {
+    for (auto itr = input.begin(); itr != input.end(); ++itr)
+    {
+      beautify(itr.value());
+    }
+  }
+}
+
+void GQueryPlan::convert_vertex(KeyType type, const std::string& key, nlohmann::json& jsn, gqlite_result& result)
 {
   if (result.errcode != ECode_Success) {
     gqlite_result err;
     err.errcode = result.errcode;
     err.type = gqlite_result_type::gqlite_result_type_info;
     err.count = 1;
-    const char* p[1] = { value.c_str() };
+    const char* p[1] = { key.c_str() };
     err.infos = (char**)p;
     _cb(&err, _handle);
     return;
   }
+
+  beautify(jsn);
+  std::string value = jsn.dump();
+
   result.nodes->_type = gqlite_node_type::gqlite_node_type_vertex;
   result.nodes->_vertex = new gqlite_vertex;
   if (type == KeyType::Integer) {
@@ -90,7 +129,7 @@ void GQueryPlan::convert_vertex(KeyType type, const std::string& key, const std:
   delete result.nodes->_vertex;
 }
 
-void GQueryPlan::convert_edge(const std::string& key, const std::string& value, gqlite_result& result)
+void GQueryPlan::convert_edge(const std::string& key, nlohmann::json& jsn, gqlite_result& result)
 {
   result.nodes->_type = gqlite_node_type::gqlite_node_type_edge;
   result.nodes->_edge = new gqlite_edge;
@@ -104,6 +143,7 @@ void GQueryPlan::convert_edge(const std::string& key, const std::string& value, 
   init_vertex(result.nodes->_edge->to, id._to_type, idTo);
   result.nodes->_edge->direction = id._direction;
 
+  std::string value = jsn.dump();
   size_t len = value.size();
   if (value != "null") {
     result.nodes->_edge->properties = new char[len + 1];
