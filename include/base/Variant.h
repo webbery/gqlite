@@ -28,7 +28,9 @@ namespace gql {
     {
       return _msg.c_str();
     }
+#endif
 
+#ifndef WIN32
   private:
     std::string _msg;
 #endif

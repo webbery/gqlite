@@ -133,9 +133,26 @@ QUERY SUCCESS
 [v8, {"category":"HDR","datatime":"0d1651105732","feature_name":[0.5,0.0],"filename":"蓝天.jpg"}]
 [v9, {"category":"赛博朋克","datatime":"0d1651105732","filename":"大佐.jpg"}]
 QUERY SUCCESS
-[25]:	{remove: 'ruins', vertex: {id: '3'}};
+[25]:	{query: 'ruins', in: 'query_db', where: {datatime: *}};
+[1, {"datatime":"0d5","filename":"破墙0.jpg"}]
+[v1, {"datatime":"0d1653446732","feature_name":[0.0,0.0],"filename":"破旧小屋.jpg"}]
+[v2, {"category":"HDR","datatime":"0d1653446732","filename":"夕阳.jpg"}]
+[v3, {"category":"赛博朋克","datatime":"0d1653446732","filename":"阿丽塔.jpg"}]
+[v4, {"datatime":"0d1653315732","feature_name":[0.0,0.5],"filename":"垃圾堆.jpg"}]
+[v5, {"category":"HDR","datatime":"0d1653315732","filename":"海岸线.jpg"}]
+[v6, {"category":"赛博朋克","datatime":"0d1653315732","filename":"机械姬.jpg"}]
+[v7, {"datatime":"0d1651105732","feature_name":[0.0,1.5],"filename":"破墙.jpg"}]
+[v8, {"category":"HDR","datatime":"0d1651105732","feature_name":[0.5,0.0],"filename":"蓝天.jpg"}]
+[v9, {"category":"赛博朋克","datatime":"0d1651105732","filename":"大佐.jpg"}]
+QUERY SUCCESS
+[26]:	// {query: 'ruins', in: 'query_db', where: {feature_name: {$near: {$geometry: [0.1, 0.333], $lte: 0.5}}}};
+[38;2;255;000;000mError:	syntax error, unexpected end of file:
+	// {query: 'ruins', in: 'query_db', where: {feature_name: {$near: {$geometry: [0.1, 0.333], $lte: 0.5}}}};
+	                                                                                                         ~
+[0mQUERY SUCCESS
+[27]:	{remove: 'ruins', vertex: {id: '3'}};
 REMOVE SUCCESS
-[26]:	{dump: 'query_db'};
+[28]:	{dump: 'query_db'};
 {create: 'query_db', group: [{addr: []},{ruins: [], index: ['category','feature_name','loc']}]};
 {upset: 'addr', vertex: [1, {'datatime':0d1651105732,'filename':'破墙1.jpg'}]};
 {upset: 'addr', vertex: [2, {'filename':'破墙2.jpg','loc':[131.24194,37.12532]}]};
@@ -158,6 +175,6 @@ REMOVE SUCCESS
 {upset: 'ruins', vertex: ['yu6', {'pid':461791488}]};
 {upset: 'ruins', vertex: ['yu7', {'name':'新分类2/新子类','pid':2821611776}]};
 EXECUTE COMMAND SUCCESS
-[27]:	{drop: 'query_db'};
+[29]:	{drop: 'query_db'};
 DROP SUCCESS
 ***** EXECUTE FINISH: "grammar.gql" *****

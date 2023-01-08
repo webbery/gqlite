@@ -663,6 +663,17 @@ VisitFlow GScanPlan::PatternVisitor::apply(GProperty* stmt, std::list<NodeType>&
     GASTNode* value = stmt->value();
 
     auto addEqualLiteral = [this](GASTNode* value, int index) {
+      if (value->_nodetype == NodeType::Literal) {
+        std::string cond = GetString(value);
+        if (cond == "*") {
+          _attrs[index].push_back(last_key);
+          predicate_t pred = static_cast<std::function<bool(const attribute_t&)>>([](const attribute_t& input)->bool {
+            return true;
+          });
+          _where._patterns[index]._node_predicates.push_back(pred);
+          return;
+        }
+      }
       attribute_t attr = GetLiteral(value);
       if (!attr.empty()) {
         _attrs[index].push_back(last_key);

@@ -723,6 +723,12 @@ condition_property: VAR_NAME COLON right_value
                 free($1);
                 $$ = NewAst(NodeType::Property, prop, nullptr, 0);
               }
+        | VAR_NAME COLON STAR
+              {
+                GProperty* prop = new GProperty($1, INIT_STRING_AST("*"));
+                free($1);
+                $$ = NewAst(NodeType::Property, prop, nullptr, 0);
+              }
         | datetime_comparable { $$ = $1;}
         | range_comparable { $$ = $1;}
         | KW_ID COLON key
