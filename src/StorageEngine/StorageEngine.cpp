@@ -604,9 +604,8 @@ GStorageEngine::cursor GStorageEngine::getIndexCursor(const std::string& mapname
   case IndexType::Word:
     handle = getOrCreateHandle(mapname, mdbx::key_mode::usual);
     break;
-  case IndexType::Vector:
+  case IndexType::Vector: // Support number's element only
   default:
-    printf("other type: %s\n", mapname.c_str());
     handle = getOrCreateHandle(mapname, mdbx::key_mode::ordinal);
     break;
   }
