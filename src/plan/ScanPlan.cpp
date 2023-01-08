@@ -655,6 +655,34 @@ VisitFlow GScanPlan::PatternVisitor::apply(GProperty* stmt, std::list<NodeType>&
       });
       _where._patterns[index]._node_predicates.push_back(pred);
     }
+    else if (comparable == "lte") {
+      predicate_t pred = static_cast<std::function<bool(const attribute_t&)>>([right, vec](const attribute_t& input)->bool {
+        gql::vector_double left = input.Get<gql::vector_double>();
+        return gql::distance2(vec, left) <= right;
+        });
+      _where._patterns[index]._node_predicates.push_back(pred);
+    }
+    else if (comparable == "gt") {
+      predicate_t pred = static_cast<std::function<bool(const attribute_t&)>>([right, vec](const attribute_t& input)->bool {
+        gql::vector_double left = input.Get<gql::vector_double>();
+        return gql::distance2(vec, left) > right;
+        });
+      _where._patterns[index]._node_predicates.push_back(pred);
+    }
+    else if (comparable == "gte") {
+      predicate_t pred = static_cast<std::function<bool(const attribute_t&)>>([right, vec](const attribute_t& input)->bool {
+        gql::vector_double left = input.Get<gql::vector_double>();
+        return gql::distance2(vec, left) >= right;
+        });
+      _where._patterns[index]._node_predicates.push_back(pred);
+    }
+    else {
+      fmt::print(fmt::fg(fmt::color::yellow), "not support operator {}\n", comparable);
+      predicate_t pred = static_cast<std::function<bool(const attribute_t&)>>([right, vec](const attribute_t& input)->bool {
+        return false;
+        });
+      _where._patterns[index]._node_predicates.push_back(pred);
+    }
     
     _attrs[index].push_back(last_key);
   }

@@ -24,7 +24,7 @@ ast {query: 'ruins', in: 'vertex_db', where: {datatime: {$lt: 1653315732}}};
 {query: 'ruins', in: 'query_db', where: {datatime: {$gte: 0d1653315732}}};
 {query: 'ruins', in: 'query_db', where: {datatime: {$lte: 0d1653446731}}};
 {query: 'ruins', in: 'query_db', where: {datatime: *}};
-// {query: 'ruins', in: 'query_db', where: {feature_name: {$near: {$geometry: [0.1, 0.333], $lte: 0.5}}}};
+{query: 'ruins', in: 'query_db', where: {feature_name: {$near: {$geometry: [0.1, 0.333], $lte: 0.5}}}};
 {remove: 'ruins', vertex: {id: '3'}};
 {dump: 'query_db'};
 {drop: 'query_db'};
