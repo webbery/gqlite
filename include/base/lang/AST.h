@@ -76,6 +76,10 @@ template <> struct GTypeTraits<NodeType::CallExpression> {
   typedef GObjectFunction type;
 };
 
+//template <> struct GTypeTraits<NodeType::BlockStatement> {
+//  typedef GObjectFunction type;
+//};
+
 /******************************
  * accept function will visit all nodes start from input node.
  * We define ourself's visitor to process nodes when type is matched.
@@ -222,10 +226,13 @@ VisitFlow accept(GASTNode* node, Visitor& visitor, std::list<NodeType>& path) {
       vf = visitor.apply(ptr, path);
     }
     break;
-    case NodeType::CallExpression:
-    {
+    case NodeType::CallExpression: {
       GTypeTraits<NodeType::CallExpression>::type* ptr = reinterpret_cast<GTypeTraits<NodeType::CallExpression>::type*>(node->_value);
       vf = visitor.apply(ptr, path);
+    }
+    break;
+    case NodeType::BlockStatement: {
+
     }
     break;
     default: vf = visitor.apply(node, path); break;

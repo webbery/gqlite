@@ -75,6 +75,8 @@ struct GASTNode* INIT_NUMBER_AST(double v, AttributeKind kind) {
     return INIT_NUMBER_AST(v);
   }
 }
+
+void startScript(struct yyguts_t * yyg);
 } // %code
 
 %lex-param {GVirtualEngine& stm}
@@ -98,27 +100,27 @@ struct GASTNode* INIT_NUMBER_AST(double v, AttributeKind kind) {
 %token <__f> VAR_INTEGER
 %token <__datetime> VAR_DATETIME
 %token <node> KW_VERTEX KW_EDGE
-%token RANGE_BEGIN RANGE_END COLON QUOTE COMMA LEFT_SQUARE RIGHT_SQUARE STAR CR PARAM_BEGIN PARAM_END SEMICOLON
+%token QUOTE STAR
 %token KW_AST KW_ID KW_GRAPH KW_COMMIT
 %token KW_CREATE KW_DROP KW_IN KW_REMOVE KW_UPSET left_arrow right_arrow KW_BIDIRECT_RELATION KW_REST KW_DELETE
 %token OP_QUERY KW_INDEX OP_WHERE OP_GEOMETRY neighbor
 %token group dump import
 %token CMD_SHOW 
 %token OP_GREAT_THAN OP_LESS_THAN OP_GREAT_THAN_EQUAL OP_LESS_THAN_EQUAL equal AND OR OP_NEAR
-%token FN_COUNT
-%token dot
+%token SKIP
+%token FUNCTION_ARROW RETURN IF ELSE
 %token limit profile property
 
 %type <var_name> a_edge
 %type <node> a_graph_expr
 %type <node> condition_json normal_json
-%type <node> condition_value normal_value number right_value simple_value geometry_condition range_comparable datetime_comparable
+%type <node> condition_value normal_value number right_value simple_value geometry_condition range_comparable datetime_comparable range_comparable_obj
 %type <node> condition_values normal_values simple_values
 %type <node> normal_object condition_object
 %type <node> condition_array normal_array
 %type <node> normal_properties condition_properties
 %type <node> where_expr a_walk vertex_start_walk edge_start_walk a_simple_graph condition_vertex a_walk_range
-%type <node> function_call function_params
+%type <node> function_call function_params function_obj statements statement if_state ret_state expr assign_state
 %type <node> normal_property condition_property
 %type <node> gql
 %type <node> creation dump_graph
@@ -134,10 +136,12 @@ struct GASTNode* INIT_NUMBER_AST(double v, AttributeKind kind) {
 %type <node> key string_list strings intergers property_list a_vector number_list
 
 %%
-line_list: line_list line SEMICOLON {}
-          | line SEMICOLON {}
+line_list: line_list line ';' {}
+          | line ';' {}
+          | comment {}
           /* | error SEMICOLON {} */
           ;
+comment: SKIP{};
 line: gql
           {
             stm._errorCode = stm.execAST($1);
@@ -217,38 +221,38 @@ utility_cmd: CMD_SHOW KW_GRAPH
             stm._cmdtype = GQL_Util;
           }
         ;
-creation: RANGE_BEGIN KW_CREATE COLON LITERAL_STRING COMMA groups RANGE_END
+creation: '{' KW_CREATE ':' LITERAL_STRING ',' groups '}'
             {
               GCreateStmt* createStmt = new GCreateStmt($4, $6);
               free($4);
               $$ = NewAst(NodeType::CreationStatement, createStmt, nullptr, 0);
               stm._errorCode = ECode_Success;
             }
-        | RANGE_BEGIN KW_CREATE COLON LITERAL_STRING COMMA KW_INDEX COLON function_call RANGE_END
+        | '{' KW_CREATE ':' LITERAL_STRING ',' KW_INDEX ':' function_call '}'
               {
                 free($4);
               }
         ;
-dump_graph: RANGE_BEGIN dump COLON LITERAL_STRING RANGE_END
+dump_graph: '{' dump ':' LITERAL_STRING '}'
               {
                 GDumpStmt* stmt = new GDumpStmt($4);
                 free($4);
                 $$ = NewAst(NodeType::DumpStatement, stmt, nullptr, 0);
                 stm._errorCode = ECode_Success;
               };
-upset_vertexes: RANGE_BEGIN KW_UPSET COLON LITERAL_STRING COMMA KW_VERTEX COLON vertex_list RANGE_END
+upset_vertexes: '{' KW_UPSET ':' LITERAL_STRING ',' KW_VERTEX ':' vertex_list '}'
               {
                 GUpsetStmt* upsetStmt = new GUpsetStmt($4, $8);
                 free($4);
                 $$ = NewAst(NodeType::UpsetStatement, upsetStmt, nullptr, 0);
               }
-        | RANGE_BEGIN KW_UPSET COLON LITERAL_STRING COMMA property COLON normal_json COMMA where_expr RANGE_END
+        | '{' KW_UPSET ':' LITERAL_STRING ',' property ':' normal_json ',' where_expr '}'
               {
                 GUpsetStmt* upsetStmt = new GUpsetStmt($4, $8, $10);
                 free($4);
                 $$ = NewAst(NodeType::UpsetStatement, upsetStmt, nullptr, 0);
               }
-        | error RANGE_END
+        | error '}'
               {
                 fmt::print(fmt::fg(fmt::color::red), "Error:\t{}\n",
                   "should you use upset edge? input format is {upset: [vertex, edge, vertex], edge: ...}\n");
@@ -256,37 +260,37 @@ upset_vertexes: RANGE_BEGIN KW_UPSET COLON LITERAL_STRING COMMA KW_VERTEX COLON 
                 stm._errorCode = GQL_GRAMMAR_OBJ_FAIL;
                 YYABORT;
               };
-remove_vertexes: RANGE_BEGIN KW_REMOVE COLON LITERAL_STRING COMMA KW_VERTEX COLON condition_object RANGE_END
+remove_vertexes: '{' KW_REMOVE ':' LITERAL_STRING ',' KW_VERTEX ':' condition_object '}'
               {
                 GRemoveStmt* rmStmt = new GVertexRemoveStmt($4, $8);
                 free($4);
                 $$ = NewAst(NodeType::RemoveStatement, rmStmt, nullptr, 0);
               };
-remove_edges: RANGE_BEGIN KW_REMOVE COLON LITERAL_STRING COMMA KW_EDGE COLON condition_links RANGE_END
+remove_edges: '{' KW_REMOVE ':' LITERAL_STRING ',' KW_EDGE ':' condition_links '}'
               {
                 GRemoveStmt* rmStmt = new GEdgeRemoveStmt($4, $8);
                 free($4);
                 $$ = NewAst(NodeType::RemoveStatement, rmStmt, nullptr, 0);
               };
-upset_edges: RANGE_BEGIN KW_UPSET COLON LITERAL_STRING COMMA KW_EDGE COLON link RANGE_END
+upset_edges: '{' KW_UPSET ':' LITERAL_STRING ',' KW_EDGE ':' link '}'
               {
                 GUpsetStmt* upsetStmt = new GUpsetStmt($4, $8);
                 free($4);
                 $$ = NewAst(NodeType::UpsetStatement, upsetStmt, nullptr, 0);
               }
-        | RANGE_BEGIN KW_UPSET COLON LITERAL_STRING COMMA KW_EDGE COLON LEFT_SQUARE links RIGHT_SQUARE RANGE_END
+        | '{' KW_UPSET ':' LITERAL_STRING ',' KW_EDGE ':' '[' links ']' '}'
               {
                 GUpsetStmt* upsetStmt = new GUpsetStmt($4, $9);
                 free($4);
                 $$ = NewAst(NodeType::UpsetStatement, upsetStmt, nullptr, 0);
               };
-drop_graph: RANGE_BEGIN KW_DROP COLON LITERAL_STRING RANGE_END
+drop_graph: '{' KW_DROP ':' LITERAL_STRING '}'
               {
                 GDropStmt* dropStmt = new GDropStmt($4);
                 free($4);
                 $$ = NewAst(NodeType::DropStatement, dropStmt, nullptr, 0);
               };
-groups: group COLON LEFT_SQUARE group_list RIGHT_SQUARE
+groups: group ':' '[' group_list ']'
               {
                 $$ = $4;
               };
@@ -296,7 +300,7 @@ group_list: a_group
                 array->addElement($1);
                 $$ = NewAst(NodeType::ArrayExpression, array, nullptr, 0);
               }
-        | group_list COMMA a_group
+        | group_list ',' a_group
               {
                 GArrayExpression* array = (GArrayExpression*)$1->_value;
                 array->addElement($3);
@@ -317,20 +321,20 @@ vertex_group: LITERAL_STRING
                 free($1);
                 $$ = NewAst(NodeType::GroupStatement, stmt, nullptr, 0);
               }
-        | RANGE_BEGIN VAR_NAME COLON string_list RANGE_END
+        | '{' VAR_NAME ':' string_list '}'
               {
                 GGroupStmt* stmt = new GVertexGroupStmt($2, $4);
                 free($2);
                 $$ = NewAst(NodeType::GroupStatement, stmt, nullptr, 0);
               }
-        | RANGE_BEGIN VAR_NAME COLON string_list COMMA KW_INDEX COLON string_list RANGE_END
+        | '{' VAR_NAME ':' string_list ',' KW_INDEX ':' string_list '}'
               {
                 GGroupStmt* stmt = new GVertexGroupStmt($2, $4, $8);
                 free($2);
                 $$ = NewAst(NodeType::GroupStatement, stmt, nullptr, 0);
               }
         ;
-edge_group: LEFT_SQUARE LITERAL_STRING COMMA RANGE_BEGIN VAR_NAME COLON string_list RANGE_END COMMA LITERAL_STRING RIGHT_SQUARE
+edge_group: '[' LITERAL_STRING ',' '{' VAR_NAME ':' string_list '}' ',' LITERAL_STRING ']'
               {
                 GGroupStmt* stmt = new GEdgeGroupStmt($5, $7, $2, $10);
                 free($2);
@@ -338,7 +342,7 @@ edge_group: LEFT_SQUARE LITERAL_STRING COMMA RANGE_BEGIN VAR_NAME COLON string_l
                 free($10);
                 $$ = NewAst(NodeType::GroupStatement, stmt, nullptr, 0);
               }
-        | LEFT_SQUARE LITERAL_STRING COMMA LITERAL_STRING COMMA LITERAL_STRING RIGHT_SQUARE
+        | '[' LITERAL_STRING ',' LITERAL_STRING ',' LITERAL_STRING ']'
               {
                 GGroupStmt* stmt = new GEdgeGroupStmt($4, nullptr, $2, $6);
                 free($2);
@@ -348,19 +352,19 @@ edge_group: LEFT_SQUARE LITERAL_STRING COMMA RANGE_BEGIN VAR_NAME COLON string_l
               }
         ;
 a_simple_query: 
-           RANGE_BEGIN query_kind RANGE_END
+           '{' query_kind '}'
                 {
                   GQueryStmt* queryStmt = new GQueryStmt($2, nullptr, nullptr);
                   $$ = NewAst(NodeType::QueryStatement, queryStmt, nullptr, 0);
                   stm._errorCode = ECode_Success;
                 }
-        |  RANGE_BEGIN query_kind COMMA a_graph_expr RANGE_END
+        |  '{' query_kind ',' a_graph_expr '}'
                 {
                   GQueryStmt* queryStmt = new GQueryStmt($2, $4, nullptr);
                   $$ = NewAst(NodeType::QueryStatement, queryStmt, nullptr, 0);
                   stm._errorCode = ECode_Success;
                 }
-        | RANGE_BEGIN query_kind COMMA a_graph_expr COMMA where_expr RANGE_END
+        | '{' query_kind ',' a_graph_expr ',' where_expr '}'
                 {
                   GQueryStmt* queryStmt = new GQueryStmt($2, $4, $6);
                   $$ = NewAst(NodeType::QueryStatement, queryStmt, nullptr, 0);
@@ -370,17 +374,17 @@ a_simple_graph: a_walk_range
                 {
                   $$ = $1;
                 }
-        | a_simple_graph COMMA a_walk_range
+        | a_simple_graph ',' a_walk_range
                 {
                   // $1->addElement($4);
                   // $$ = $1;
                 };
-a_walk_range: LEFT_SQUARE a_walk RIGHT_SQUARE { $$ = $2; };
+a_walk_range: '[' a_walk ']' { $$ = $2; };
 a_walk: vertex_start_walk
                 {
                   $$ = $1;
                 }
-        | vertex_start_walk COMMA condition_vertex
+        | vertex_start_walk ',' condition_vertex
                 {
                   ((GWalkDeclaration*)($1->_value))->add($3, true);
                 }
@@ -388,56 +392,56 @@ a_walk: vertex_start_walk
                 {
                   $$ = $1;
                 }
-        | edge_start_walk COMMA condition_vertex
+        | edge_start_walk ',' condition_vertex
                 {
                   // $1->add($3, )
                 }
-        | a_walk COMMA STAR
+        | a_walk ',' STAR
                 {
                   $$ = $1;
                 };
-vertex_start_walk: condition_vertex COMMA connection
+vertex_start_walk: condition_vertex ',' connection
                 {
                   GWalkDeclaration* walkDecl = new GWalkDeclaration();
                   walkDecl->add($1, true);
                   walkDecl->add($3, false);
                   $$ = NewAst(NodeType::WalkDeclaration, walkDecl, nullptr, 0);
                 }
-        | vertex_start_walk COMMA condition_vertex COMMA connection
+        | vertex_start_walk ',' condition_vertex ',' connection
                 {
                   ((GWalkDeclaration*)($1->_value))->add($3, true);
                   ((GWalkDeclaration*)($1->_value))->add($5, false);
                   $$ = $1;
                 };
-edge_start_walk: connection COMMA condition_vertex
+edge_start_walk: connection ',' condition_vertex
                 {
                   GWalkDeclaration* walkDecl = new GWalkDeclaration();
                   walkDecl->add($1, true);
                   walkDecl->add($3, false);
                   $$ = NewAst(NodeType::WalkDeclaration, walkDecl, nullptr, 0);
                 }
-        | edge_start_walk COMMA connection COMMA condition_vertex {};
+        | edge_start_walk ',' connection ',' condition_vertex {};
 condition_vertex: condition_object { $$ = $1; }
         | key { $$ = $1; };
         | STAR { $$ = INIT_STRING_AST("*"); };
-query_kind: OP_QUERY COLON query_kind_expr { $$ = $3; }
-        |   OP_QUERY COLON match_expr { $$ = $3; };
+query_kind: OP_QUERY ':' query_kind_expr { $$ = $3; }
+        |   OP_QUERY ':' match_expr { $$ = $3; };
 query_kind_expr: 
           KW_EDGE { $$ = INIT_STRING_AST("edge"); }
         |  LITERAL_STRING { $$ = INIT_STRING_AST($1); free($1); }
         | a_graph_properties { $$ = $1; };
 match_expr: //{->: 'alias'}
-          RANGE_BEGIN a_simple_graph RANGE_END { $$ = $2; };
+          '{' a_simple_graph '}' { $$ = $2; };
 a_graph_expr:
-          KW_IN COLON LITERAL_STRING
+          KW_IN ':' LITERAL_STRING
                 {
                   $$ = INIT_STRING_AST($3);
                   free($3);
                 };
-where_expr: OP_WHERE COLON a_match { $$ = $3; };
+where_expr: OP_WHERE ':' a_match { $$ = $3; };
 a_match:  condition_vertex { $$ = $1; }
         | a_walk_range { $$ = $1; }
-        | LEFT_SQUARE a_simple_graph RIGHT_SQUARE { $$ = $2; }
+        | '[' a_simple_graph ']' { $$ = $2; }
         ;
 string_list: LITERAL_STRING
                 {
@@ -446,7 +450,7 @@ string_list: LITERAL_STRING
                   free($1);
                   $$ = NewAst(NodeType::ArrayExpression, array, nullptr, 0);
                 }
-        | LEFT_SQUARE strings RIGHT_SQUARE
+        | '[' strings ']'
               {
                 $$ = $2;
               }
@@ -460,7 +464,7 @@ strings:  LITERAL_STRING
                   free($1);
                   $$ = NewAst(NodeType::ArrayExpression, array, nullptr, 0);
                 }
-        | strings COMMA LITERAL_STRING
+        | strings ',' LITERAL_STRING
               {
                 GArrayExpression* array = (GArrayExpression*)$1->_value;
                 array->addElement(INIT_STRING_AST($3));
@@ -473,7 +477,7 @@ intergers: VAR_INTEGER
                 array->addElement(INIT_NUMBER_AST($1, AttributeKind::Integer));
                 $$ = NewAst(NodeType::ArrayExpression, array, nullptr, 0);
               }
-        | intergers COMMA VAR_INTEGER
+        | intergers ',' VAR_INTEGER
               {
                 GArrayExpression* array = (GArrayExpression*)$1->_value;
                 array->addElement(INIT_NUMBER_AST($3, AttributeKind::Integer));
@@ -483,8 +487,8 @@ number: VAR_DECIMAL { $$ = INIT_NUMBER_AST($1, AttributeKind::Number); }
         | VAR_INTEGER { $$ = INIT_NUMBER_AST($1, AttributeKind::Integer); };
 a_graph_properties:
           graph_property { $$ = $1; }
-        | LEFT_SQUARE graph_properties RIGHT_SQUARE { $$ = $2; }
-        | error RIGHT_SQUARE
+        | '[' graph_properties ']' { $$ = $2; }
+        | error ']'
           {
             fmt::print(fmt::fg(fmt::color::red), "Error:\tinput object is not a correct json:\n");
             yyerrok;
@@ -499,41 +503,41 @@ graph_properties:
                 array->addElement($1);
                 $$ = NewAst(NodeType::ArrayExpression, array, nullptr, 0);
               }
-        | graph_properties COMMA graph_property
+        | graph_properties ',' graph_property
               {
                 GArrayExpression* array = (GArrayExpression*)$1->_value;
                 array->addElement($3);
                 $$ = $1;
               };
 graph_property:
-          KW_VERTEX dot VAR_NAME
+          KW_VERTEX '.' VAR_NAME
               {
                 GMemberExpression* expr = new GMemberExpression(INIT_STRING_AST("vertex"), INIT_STRING_AST($3));
                 $$ = NewAst(NodeType::MemberExpression, expr, nullptr, 0);
                 free($3);
               }
-        | KW_EDGE dot VAR_NAME
+        | KW_EDGE '.' VAR_NAME
               {
                 GMemberExpression* expr = new GMemberExpression(INIT_STRING_AST("edge"), INIT_STRING_AST($3));
                 $$ = NewAst(NodeType::MemberExpression, expr, nullptr, 0);
                 free($3);
               }
-        |  VAR_NAME dot VAR_NAME
+        |  VAR_NAME '.' VAR_NAME
               {
                 GMemberExpression* expr = new GMemberExpression(INIT_STRING_AST($1), INIT_STRING_AST($3));
                 $$ = NewAst(NodeType::MemberExpression, expr, nullptr, 0);
                 free($3);
                 free($1);
               }
-        | KW_VERTEX dot function_call {}
-        | KW_EDGE dot function_call {}
-        | VAR_NAME dot function_call
+        | KW_VERTEX '.' function_call {}
+        | KW_EDGE '.' function_call {}
+        | VAR_NAME '.' function_call
               {
                 auto scope = INIT_STRING_AST($1);
                 $$ = NewAst(NodeType::VariableDeclarator, scope, $3, 1);
                 free($1);
               };
-vertex_list: LEFT_SQUARE vertexes RIGHT_SQUARE
+vertex_list: '[' vertexes ']'
               {
                 $$ = $2;
               };
@@ -543,24 +547,24 @@ vertexes: vertex
                 vertexes->addElement($1);
                 $$ = NewAst(NodeType::ArrayExpression, vertexes, nullptr, 0);
               }
-        | vertexes COMMA vertex
+        | vertexes ',' vertex
               {
                 GArrayExpression* vertexes = (GArrayExpression*)$1->_value;
                 vertexes->addElement($3);
                 $$ = $1;
               };
-vertex: LEFT_SQUARE LITERAL_STRING COMMA normal_json RIGHT_SQUARE
+vertex: '[' LITERAL_STRING ',' normal_json ']'
               {
                 GVertexDeclaration* decl = new GVertexDeclaration(INIT_STRING_AST($2), $4);
                 free($2);
                 $$ = NewAst(NodeType::VertexDeclaration, decl, nullptr, 0);
               }
-        | LEFT_SQUARE VAR_INTEGER RIGHT_SQUARE
+        | '[' VAR_INTEGER ']'
               {
                 GVertexDeclaration* decl = new GVertexDeclaration(INIT_NUMBER_AST($2, AttributeKind::Integer), nullptr);
                 $$ = NewAst(NodeType::VertexDeclaration, decl, nullptr, 0);
               }
-        | LEFT_SQUARE VAR_INTEGER COMMA normal_json RIGHT_SQUARE
+        | '[' VAR_INTEGER ',' normal_json ']'
               {
                 GVertexDeclaration* decl = new GVertexDeclaration(INIT_NUMBER_AST($2, AttributeKind::Integer), $4);
                 $$ = NewAst(NodeType::VertexDeclaration, decl, nullptr, 0);
@@ -576,14 +580,14 @@ condition_links: condition_link
                 edges->addElement($1);
                 $$ = NewAst(NodeType::ArrayExpression, edges, nullptr, 0);
               }
-        | condition_links COMMA condition_link
+        | condition_links ',' condition_link
               {
                 GArrayExpression* edges = (GArrayExpression*)$1->_value;
                 edges->addElement($3);
                 $$ = $1;
               }
         ;
-condition_link: LEFT_SQUARE condition_link_item COMMA connection COMMA condition_link_item RIGHT_SQUARE
+condition_link: '[' condition_link_item ',' connection ',' condition_link_item ']'
               {
                 GEdgeDeclaration* edge = new GEdgeDeclaration($4, $2, $6);
                 $$ = NewAst(NodeType::EdgeDeclaration, edge, nullptr, 0);
@@ -602,39 +606,39 @@ links: link
                 edges->addElement($1);
                 $$ = NewAst(NodeType::ArrayExpression, edges, nullptr, 0);
               }
-        | links COMMA link
+        | links ',' link
               {
                 GArrayExpression* edges = (GArrayExpression*)$1->_value;
                 edges->addElement($3);
                 $$ = $1;
               };
-link: LEFT_SQUARE key COMMA connection COMMA key RIGHT_SQUARE
+link: '[' key ',' connection ',' key ']'
               {
                 GEdgeDeclaration* edge = new GEdgeDeclaration($4, $2, $6);
                 $$ = NewAst(NodeType::EdgeDeclaration, edge, nullptr, 0);
               }
-        | LEFT_SQUARE key RIGHT_SQUARE
+        | '[' key ']'
               {
                 GEdgeDeclaration* edge = new GEdgeDeclaration("--", $2);
                 $$ = NewAst(NodeType::EdgeDeclaration, edge, nullptr, 0);
               }
         ;
-multi_link: LEFT_SQUARE key COMMA a_edge COMMA LEFT_SQUARE strings RIGHT_SQUARE RIGHT_SQUARE
+multi_link: '[' key ',' a_edge ',' '[' strings ']' ']'
               {
                 // GEdgeDeclaration* edge = new GEdgeDeclaration($4, $2, $6);
               }
-        | LEFT_SQUARE key COMMA a_edge COMMA LEFT_SQUARE intergers RIGHT_SQUARE RIGHT_SQUARE
+        | '[' key ',' a_edge ',' '[' intergers ']' ']'
               {};
 connection: a_link_condition { $$ = $1;}
         | a_edge  { $$ = INIT_STRING_AST($1); };
-a_vector: LEFT_SQUARE number_list RIGHT_SQUARE { $$ = $2; };
+a_vector: '[' number_list ']' { $$ = $2; };
 number_list: number
               {
                 GArrayExpression* elemts = new GArrayExpression();
                 elemts->addElement($1);
                 $$ = NewAst(NodeType::ArrayExpression, elemts, nullptr, 0);
               }
-        | number_list COMMA number
+        | number_list ',' number
               {
                 GArrayExpression* elemts = (GArrayExpression*)$1->_value;
                 elemts->addElement($3);
@@ -666,15 +670,15 @@ simple_value: VAR_BASE64
               {
                 $$ = $1;
               };
-normal_object: RANGE_BEGIN normal_properties RANGE_END
+normal_object: '{' normal_properties '}'
             {
               $$ = NewAst(NodeType::ObjectExpression, $2, nullptr, 0);
             };
-condition_object: RANGE_BEGIN condition_properties RANGE_END
+condition_object: '{' condition_properties '}'
             {
               $$ = NewAst(NodeType::ObjectExpression, $2, nullptr, 0);
             }
-        | error RANGE_END
+        | error '}'
             {
               fmt::print(fmt::fg(fmt::color::red), "Error:\tinput object is not a correct property\n");
               yyerrok;
@@ -687,7 +691,7 @@ normal_properties: normal_property {
               props->addElement($1);
               $$ = NewAst(NodeType::ArrayExpression, props, nullptr, 0);
             }
-        | normal_properties COMMA normal_property
+        | normal_properties ',' normal_property
               {
                 GArrayExpression* props = (GArrayExpression*)$1->_value;
                 props->addElement($3);
@@ -699,31 +703,31 @@ condition_properties: condition_property
                 props->addElement($1);
                 $$ = NewAst(NodeType::ArrayExpression, props, nullptr, 0);
               }
-        | condition_properties COMMA condition_property
+        | condition_properties ',' condition_property
               {
                 GArrayExpression* props = (GArrayExpression*)$1->_value;
                 props->addElement($3);
                 $$ = $1;
               };
-normal_property: VAR_NAME COLON simple_value
+normal_property: VAR_NAME ':' simple_value
               {
                 GProperty* prop = new GProperty($1, $3);
                 free($1);
                 $$ = NewAst(NodeType::Property, prop, nullptr, 0);
               }
-        | VAR_NAME COLON normal_value
+        | VAR_NAME ':' normal_value
               {
                 GProperty* prop = new GProperty($1, $3);
                 free($1);
                 $$ = NewAst(NodeType::Property, prop, nullptr, 0);
               };
-condition_property: VAR_NAME COLON right_value
+condition_property: VAR_NAME ':' right_value
               {
                 GProperty* prop = new GProperty($1, $3);
                 free($1);
                 $$ = NewAst(NodeType::Property, prop, nullptr, 0);
               }
-        | VAR_NAME COLON STAR
+        | VAR_NAME ':' STAR
               {
                 GProperty* prop = new GProperty($1, INIT_STRING_AST("*"));
                 free($1);
@@ -731,109 +735,111 @@ condition_property: VAR_NAME COLON right_value
               }
         | datetime_comparable { $$ = $1;}
         | range_comparable { $$ = $1;}
-        | KW_ID COLON key
+        | KW_ID ':' key
               {
                 GProperty* prop = new GProperty("id", $3);
                 $$ = NewAst(NodeType::Property, prop, nullptr, 0);
               }
-        | AND COLON condition_array
+        | AND ':' condition_array
               {
                 GProperty* prop = new GProperty("and", $3);
                 $$ = NewAst(NodeType::BinaryExpression, prop, nullptr, 0);
               }
-        | OR COLON condition_array
+        | OR ':' condition_array
               {
                 GProperty* prop = new GProperty("or", $3);
                 $$ = NewAst(NodeType::BinaryExpression, prop, nullptr, 0);
               }
-        | group COLON LITERAL_STRING
+        | group ':' LITERAL_STRING
               {
                 struct GASTNode* value = INIT_STRING_AST($3);
                 free($3);
                 GProperty* prop = new GProperty("group", value);
                 $$ = NewAst(NodeType::Property, prop, nullptr, 0);
               }
-        | OP_NEAR COLON RANGE_BEGIN geometry_condition RANGE_END
+        | OP_NEAR ':' '{' geometry_condition '}'
               {
                 GObjectFunction* obj = (GObjectFunction*)($4->_value);
                 obj->setFunctionName("__near__", "__global__");
                 GProperty* prop = new GProperty("near", $4);
                 $$ = NewAst(NodeType::BinaryExpression, prop, nullptr, 0);
               };
-range_comparable: OP_GREAT_THAN_EQUAL COLON number
+range_comparable: OP_GREAT_THAN_EQUAL ':' range_comparable_obj
               {
                 GProperty* prop = new GProperty("gte", $3);
                 $$ = NewAst(NodeType::BinaryExpression, prop, nullptr, 0);
               }
-        | OP_LESS_THAN_EQUAL COLON number
+        | OP_LESS_THAN_EQUAL ':' range_comparable_obj
               {
                 GProperty* prop = new GProperty("lte", $3);
                 $$ = NewAst(NodeType::BinaryExpression, prop, nullptr, 0);
               }
-        | OP_GREAT_THAN COLON number
+        | OP_GREAT_THAN ':' range_comparable_obj
               {
                 GProperty* prop = new GProperty("gt", $3);
                 $$ = NewAst(NodeType::BinaryExpression, prop, nullptr, 0);
               }
-        | OP_LESS_THAN COLON number
+        | OP_LESS_THAN ':' range_comparable_obj
               {
                 GProperty* prop = new GProperty("lt", $3);
                 $$ = NewAst(NodeType::BinaryExpression, prop, nullptr, 0);
               };
-datetime_comparable: OP_GREAT_THAN_EQUAL COLON VAR_DATETIME
+range_comparable_obj: number { $$ = $1; }
+        | function_obj { $$ = $1; };
+datetime_comparable: OP_GREAT_THAN_EQUAL ':' VAR_DATETIME
               {
                 GLiteralDatetime* dt = new GLiteralDatetime($3);
                 GProperty* prop = new GProperty("gte", NewAst(NodeType::Literal, dt, nullptr, 0));
                 $$ = NewAst(NodeType::BinaryExpression, prop, nullptr, 0);
               }
-        | OP_LESS_THAN_EQUAL COLON VAR_DATETIME
+        | OP_LESS_THAN_EQUAL ':' VAR_DATETIME
               {
                 GLiteralDatetime* dt = new GLiteralDatetime($3);
                 GProperty* prop = new GProperty("lte", NewAst(NodeType::Literal, dt, nullptr, 0));
                 $$ = NewAst(NodeType::BinaryExpression, prop, nullptr, 0);
               }
-        | OP_GREAT_THAN COLON VAR_DATETIME
+        | OP_GREAT_THAN ':' VAR_DATETIME
               {
                 GLiteralDatetime* dt = new GLiteralDatetime($3);
                 GProperty* prop = new GProperty("gt", NewAst(NodeType::Literal, dt, nullptr, 0));
                 $$ = NewAst(NodeType::BinaryExpression, prop, nullptr, 0);
               }
-        | OP_LESS_THAN COLON VAR_DATETIME
+        | OP_LESS_THAN ':' VAR_DATETIME
               {
                 GLiteralDatetime* dt = new GLiteralDatetime($3);
                 GProperty* prop = new GProperty("lt", NewAst(NodeType::Literal, dt, nullptr, 0));
                 $$ = NewAst(NodeType::BinaryExpression, prop, nullptr, 0);
               };
-geometry_condition: OP_GEOMETRY COLON a_vector COMMA range_comparable
+geometry_condition: OP_GEOMETRY ':' a_vector ',' range_comparable
               {
                 GObjectFunction* obj = new GObjectFunction();
                 obj->addFunctionParam($3);
                 obj->addFunctionParam($5);
                 $$ = NewAst(NodeType::CallExpression, obj, nullptr, 0);
               }
-        | range_comparable COMMA OP_GEOMETRY COLON a_vector
+        | range_comparable ',' OP_GEOMETRY ':' a_vector
               {
                 GObjectFunction* obj = new GObjectFunction();
                 obj->addFunctionParam($5);
                 obj->addFunctionParam($1);
                 $$ = NewAst(NodeType::CallExpression, obj, nullptr, 0);
               };
-condition_array: LEFT_SQUARE RIGHT_SQUARE { $$ = nullptr; }
-        | LEFT_SQUARE condition_values RIGHT_SQUARE
+condition_array: '[' ']' { $$ = nullptr; }
+        | '[' condition_values ']'
               {
                 $$ = $2;
               }
         ;
-normal_array:    LEFT_SQUARE RIGHT_SQUARE { $$ = nullptr; }
-        | LEFT_SQUARE normal_values RIGHT_SQUARE
+normal_array:    '[' ']' { $$ = nullptr; }
+        | '[' normal_values ']'
               {
                 $$ = $2;
               }
-        | LEFT_SQUARE simple_values RIGHT_SQUARE
+        | '[' simple_values ']'
               {
                 $$ = $2;
               }
-        | error RIGHT_SQUARE
+        | error ']'
               {
                 printf("\033[22;31mDetail:\t%s:\033[22;0m\n",
                   "array is not a correct array");
@@ -847,7 +853,7 @@ normal_values: normal_value
                 values->addElement($1);
                 $$ = NewAst(NodeType::ArrayExpression, values, nullptr, 0);
               }
-        | normal_values COMMA normal_value
+        | normal_values ',' normal_value
               {
                 GArrayExpression* values = (GArrayExpression*)$1->_value;
                 values->addElement($3);
@@ -859,7 +865,7 @@ simple_values: simple_value
                 values->addElement($1);
                 $$ = NewAst(NodeType::ArrayExpression, values, nullptr, 0);
               }
-        | simple_values COMMA simple_value
+        | simple_values ',' simple_value
               {
                 GArrayExpression* values = (GArrayExpression*)$1->_value;
                 values->addElement($3);
@@ -870,29 +876,29 @@ condition_values: right_value {
                 values->addElement($1);
                 $$ = NewAst(NodeType::ArrayExpression, values, nullptr, 0);
               }
-        | condition_values COMMA right_value
+        | condition_values ',' right_value
               {
                 GArrayExpression* values = (GArrayExpression*)$1->_value;
                 values->addElement($3);
                 $$ = $1;
               }
-        | condition_values COMMA KW_REST {};
-a_link_condition: a_edge COLON a_value
+        | condition_values ',' KW_REST {};
+a_link_condition: a_edge ':' a_value
               {
                 GEdgeDeclaration* edge = new GEdgeDeclaration($1, $3);
                 $$ = NewAst(NodeType::EdgeDeclaration, edge, nullptr, 0);
               }
-        | a_edge COLON normal_json
+        | a_edge ':' normal_json
               {
                 GEdgeDeclaration* edge = new GEdgeDeclaration($1, $3);
                 $$ = NewAst(NodeType::EdgeDeclaration, edge, nullptr, 0);
               }
-        | a_edge COLON function_call
+        | a_edge ':' function_call
               {
                 GEdgeDeclaration* edge = new GEdgeDeclaration($1, $3);
                 $$ = NewAst(NodeType::EdgeDeclaration, edge, nullptr, 0);
               }
-        | a_edge COLON KW_REST
+        | a_edge ':' KW_REST
               {
                 GEdgeDeclaration* edge = new GEdgeDeclaration($1, INIT_STRING_AST("..."));
                 $$ = NewAst(NodeType::EdgeDeclaration, edge, nullptr, 0);
@@ -907,6 +913,8 @@ a_value:  LITERAL_STRING
               }
         | VAR_DECIMAL { $$ = INIT_NUMBER_AST($1, AttributeKind::Number); }
         | VAR_INTEGER { $$ = INIT_NUMBER_AST($1, AttributeKind::Integer); };
+key: VAR_INTEGER { $$ = INIT_NUMBER_AST($1, AttributeKind::Integer); }
+        | LITERAL_STRING { $$ = INIT_STRING_AST($1); free($1);};
 function_call: VAR_NAME function_params
               {
                 auto fname = INIT_STRING_AST($1);
@@ -918,11 +926,27 @@ function_call: VAR_NAME function_params
                   $$ = NewAst(NodeType::CallExpression, fname, $2, 1);
                 }
               };
-function_params:
-        | PARAM_BEGIN PARAM_END { $$ = nullptr; }
-        | PARAM_BEGIN STAR PARAM_END { $$ = INIT_STRING_AST("*"); }
-        | PARAM_BEGIN string_list PARAM_END { $$ = $2; }
+function_obj: function_params FUNCTION_ARROW '{' statements '}'
+              {
+                $$ = NewAst(NodeType::BlockStatement, $1, $4, 0);
+              };
+function_params
+        : '(' ')' { $$ = nullptr; }
+        | '(' STAR ')' { $$ = INIT_STRING_AST("*"); }
+        | '(' string_list ')' { $$ = $2; }
         ;
-key: VAR_INTEGER { $$ = INIT_NUMBER_AST($1, AttributeKind::Integer); }
-        | LITERAL_STRING { $$ = INIT_STRING_AST($1); free($1);};
+statements: statement { $$ = $1;}
+        | statements statement { $$ = $1;};
+statement
+        : if_state        { $$ = $1;}
+        | ret_state ';'   { $$ = $1;}
+        | expr ';'        { $$ = $1;}
+        | assign_state ';'{ $$ = $1;}
+        ;
+if_state: IF expr {};
+ret_state
+        : RETURN expr { $$ = $2; };
+assign_state: {};
+exprs: {};
+expr: a_value { printf("expr\n"); $$ = $1; };
 %%

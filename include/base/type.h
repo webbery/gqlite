@@ -17,7 +17,6 @@ enum NodeType {
   DumpStatement,
   ConditionStatement,
   GroupStatement,
-  IfStatement,
   // prediction
   GreaterThan,
   GreaterThanEqual,
@@ -35,6 +34,7 @@ enum NodeType {
   Identifier,
   Literal,
   BlockStatement,
+  IfStatement,
   ReturnStatement,
   BinaryExpression,
   ArrayExpression,

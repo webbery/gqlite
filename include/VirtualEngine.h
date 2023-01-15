@@ -69,6 +69,10 @@ public:
   GQL_Command_Type _cmdtype;
   GStorageEngine* _storage = nullptr;
 
+  // Record gscript count of `{` and `}`.
+  // _scriptRangeCnt++ if `{` increase,  other wise decrease if encounter `}`
+  int _scriptRangePairCnt = 0;
+
 private:
   struct PlanList {
     GPlan* _plan;

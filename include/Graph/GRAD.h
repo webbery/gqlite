@@ -20,6 +20,7 @@ struct EntityEdge {
 };
 
 using gkey_t = Variant<std::string, uint64_t>;
+//using lambda_expr = 
 using attribute_t = Variant<std::string, double, gql::GDatetime, gql::vector_double, gql::GBinary, int, long, uint64_t,
   gql::vector_uint8
 >;

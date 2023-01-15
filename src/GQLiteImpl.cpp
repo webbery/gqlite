@@ -68,12 +68,13 @@ int GQLiteImpl::create(const char* filename, gqlite_open_mode mode)
 void GQLiteImpl::exec(GVirtualEngine& stm)
 {
   // https://stackoverflow.com/questions/62820971/passing-an-argument-to-yylex
-  //yydebug = 1;
+  //yydebug = 1; // start bison debug
   yyscan_t scanner;
   yylex_init(&scanner);
   //yyset_debug(1, scanner);
-  // struct yyguts_t * yyg = (struct yyguts_t*)scanner;
+   struct yyguts_t * yyg = (struct yyguts_t*)scanner;
   // yy_flex_debug = 1;
+  BEGIN(GQL);
   yy_scan_string(stm.gql().c_str(), scanner);
   int tok = 0;
   int ret = yyparse(scanner, stm);

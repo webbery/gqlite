@@ -19,30 +19,61 @@
 DIGIT   [0-9]
 DECIMAL [0-9]+.[0-9]+
 
+%x COMMENT 
+%s GSCRIPT GQL
+
 %%
-^\/\/.*             { stm._errIndx += yyleng;}
-"("                 { stm._errIndx += 1; return PARAM_BEGIN;};
-")"                 { stm._errIndx += 1; return PARAM_END;};
-"{"                 { stm._errIndx += 1; return RANGE_BEGIN;};
-"}"                 { stm._errIndx += 1; return RANGE_END;};
+^\/\/               {
+                        stm._errIndx += yyleng;
+                        BEGIN COMMENT;
+                    }
+<COMMENT>{
+    .*              {return SKIP;}
+    "\n"            { BEGIN INITIAL; }
+    <<EOF>>         { return YYEOF;}
+}
+<GSCRIPT>{
+    [+\-*/&|^~!%=,]     {stm._errIndx += yyleng; return *yytext;};
+    "{"                 {
+                            stm._errIndx += yyleng;
+                            ++stm._scriptRangePairCnt;
+                            printf("match {\n");
+                            return *yytext;
+                        }
+    "}"                 {
+                            stm._scriptRangePairCnt--;
+                            if (stm._scriptRangePairCnt == 0) {
+                                BEGIN INITIAL;
+                            }
+                            printf("match }, %d\n", stm._scriptRangePairCnt);
+                            return *yytext;
+                        }
+    "if"                { stm._errIndx += yyleng; return IF; };
+    "else"              { stm._errIndx += yyleng; return ELSE; };
+    "return"            { stm._errIndx += yyleng; return RETURN;};
+    "null"              { stm._errIndx += yyleng;}
+}
+[()\[\]{}:,;]       { stm._errIndx += 1; return *yytext; }
 "\""                { stm._errIndx += 1; };
-"*"                 {
+<GQL>{
+    "*"            {
                         stm._errIndx += 3;
                         return STAR;
                     };
-[ ]*                { stm._errIndx += yyleng; };
-"\["                { stm._errIndx += 1; return LEFT_SQUARE; };
-"\]"                { stm._errIndx += 1; return RIGHT_SQUARE; };
-":"                 { stm._errIndx += 1; return COLON;};
-";"                 { stm._errIndx += 1; return SEMICOLON; }
-","                 { stm._errIndx += 1; return COMMA;};
-h'' {
+    "=>"            {
+                        stm._errIndx += yyleng;
+                        stm._scriptRangePairCnt = 0;
+                        BEGIN GSCRIPT;
+                        printf("begin gscript\n");
+                        return FUNCTION_ARROW;
+                    }
+    h''             {
                         memcpy(yylval->var_name, yytext + 1, yyleng - 2);
                         yylval->var_name[yyleng - 2] = '\0';
                         stm._errIndx += 1;
                         return VAR_HASH;
                     };
-0b'([A-Za-z0-9+/]{4})*([A-Za-z0-9+\/]{2}==|[A-Za-z0-9+\/]{3}=)?' {
+    0b'([A-Za-z0-9+/]{4})*([A-Za-z0-9+\/]{2}==|[A-Za-z0-9+\/]{3}=)?' {
                         yylval->__c = (char*)malloc(yyleng - 4);
                         memcpy(yylval->__c, yytext + 3, yyleng - 5);
                         yylval->__c[yyleng - 5] = '\0';
@@ -50,7 +81,7 @@ h'' {
                         // printf("create base64\n");
                         return VAR_BASE64;
                     };
-0d[0-9]+            {
+    0d[0-9]+            {
                         memcpy(yylval->var_name, yytext + 2, yyleng - 2);
                         yylval->var_name[yyleng - 2] = '\0';
                         yylval->__datetime = strtoll(yylval->var_name, nullptr, 10);
@@ -58,6 +89,7 @@ h'' {
                         stm._errIndx += yyleng;
                         return VAR_DATETIME;
                     };
+}
 '[a-zA-Z_]+[\w]*'    {
                         yylval->__c = (char*)malloc(yyleng - 1);
                         memcpy(yylval->__c, yytext + 1, yyleng - 2);
@@ -79,63 +111,61 @@ h'' {
                         stm._errIndx += yyleng;
                         return LITERAL_STRING;
                     };
-"extension"         {stm._errIndx += yyleng;};
-"show"              {
+<GQL>{
+    "show"              {
                         stm._errIndx += yyleng;
                         return CMD_SHOW;
                     };
-"graph"             {
+    "neighbor"          { stm._errIndx += yyleng;};
+    "graph"             {
                         stm._errIndx += yyleng;
                         return KW_GRAPH;
                     };
-"walk"              {stm._errIndx += yyleng; };
-"group"             {
+    "walk"              {stm._errIndx += yyleng; };
+    "group"             {
                         stm._errIndx += yyleng;
                         return group;
                     };
+}
 "order"             {stm._errIndx += yyleng;}
 "start"             {stm._errIndx += yyleng;};
 "with"              {stm._errIndx += yyleng;};
-"id"                {stm._errIndx += yyleng; return KW_ID;};
 "use"               { stm._errIndx += yyleng; };
-create              {
-                        stm._errIndx += yyleng;
-                        return KW_CREATE;
-                    };
-"drop"              { stm._errIndx += yyleng; return KW_DROP;};
-"remove"            { stm._errIndx += yyleng; return KW_REMOVE;};
-"delete"            { stm._errIndx += yyleng; return KW_DELETE;};
-"upset"             { stm._errIndx += yyleng; return KW_UPSET;};
-"vertex"            { stm._errIndx += yyleng; return KW_VERTEX;};
-"edge"              { stm._errIndx += yyleng; return KW_EDGE;};
-"ast"               { stm._errIndx += yyleng; return KW_AST;};
-"query"             { stm._errIndx += yyleng; return OP_QUERY;};
-"where"             { stm._errIndx += yyleng; return OP_WHERE;};
-"index"             { stm._errIndx += yyleng; return KW_INDEX;};
-"commit"            { stm._errIndx += yyleng; return KW_COMMIT;};
-"limit"             { stm._errIndx += yyleng; return limit;};
-"profile"           { stm._errIndx += yyleng; return profile;};
-"property"          { stm._errIndx += yyleng; return property;};
-"dump"              {
-                        stm._errIndx += yyleng;
-                        return dump;
-                    };
-"import"            {
-                        stm._errIndx += yyleng;
-                        return import;
-                    };
+<GQL>{
+    "id"                {stm._errIndx += yyleng; return KW_ID;};
+    create              {
+                            stm._errIndx += yyleng;
+                            return KW_CREATE;
+                        };
+    "drop"              { stm._errIndx += yyleng; return KW_DROP;};
+    "remove"            { stm._errIndx += yyleng; return KW_REMOVE;};
+    "delete"            { stm._errIndx += yyleng; return KW_DELETE;};
+    "upset"             { stm._errIndx += yyleng; return KW_UPSET;};
+    "vertex"            { stm._errIndx += yyleng; return KW_VERTEX;};
+    "edge"              { stm._errIndx += yyleng; return KW_EDGE;};
+    "ast"               { stm._errIndx += yyleng; return KW_AST;};
+    "query"             { stm._errIndx += yyleng; return OP_QUERY;};
+    "where"             { stm._errIndx += yyleng; return OP_WHERE;};
+    "index"             { stm._errIndx += yyleng; return KW_INDEX;};
+    "commit"            { stm._errIndx += yyleng; return KW_COMMIT;};
+    "limit"             { stm._errIndx += yyleng; return limit;};
+    "profile"           { stm._errIndx += yyleng; return profile;};
+    "property"          { stm._errIndx += yyleng; return property;};
+    "dump"              {
+                            stm._errIndx += yyleng;
+                            return dump;
+                        };
+    "import"            {
+                            stm._errIndx += yyleng;
+                            return import;
+                        };
+}
 "inf"               {
                         stm._errIndx += yyleng;
                         std::string s(yytext, yyleng);
                         yylval->__f = DBL_MAX;
                         return VAR_DECIMAL;
                     }
-(\bf)unction        { stm._errIndx += yyleng;};
-(\bi)f              { stm._errIndx += yyleng;};
-"else"              { stm._errIndx += yyleng;};
-"return"            { stm._errIndx += yyleng;};
-"neighbor"          { stm._errIndx += yyleng;};
-"null"              { stm._errIndx += yyleng;}
 "$gte"              { stm._errIndx += yyleng; return OP_GREAT_THAN_EQUAL;};
 "$lte"              { stm._errIndx += yyleng; return OP_LESS_THAN_EQUAL;};
 "$gt"               { stm._errIndx += yyleng; return OP_GREAT_THAN;};
@@ -170,13 +200,8 @@ create              {
                         stm._errIndx += yyleng;
                         return KW_REST;
                     };
-"."                 { stm._errIndx += 1; return dot;};
-"+"                 {stm._errIndx += yyleng;};
-"-"                 {stm._errIndx += yyleng;};
-"*"                 {stm._errIndx += yyleng;};
-"/"                 {stm._errIndx += yyleng;};
-"="                 {stm._errIndx += yyleng;};
-"\n"                {stm._errIndx += yyleng;};
+"."                 { stm._errIndx += 1; return *yytext;};
+"\n"                { stm._errIndx = 0;};
 [0-9]+              {
                         std::string s(yytext, yyleng);
                         yylval->__f = std::stod(s);
@@ -206,3 +231,6 @@ create              {
 // int yylex(yyscan_t* scan) {
 //     return 1;
 // }
+void startScript(struct yyguts_t * yyg) {
+    BEGIN(GSCRIPT);
+}

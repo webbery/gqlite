@@ -61,7 +61,7 @@ void successful_test(gqlite* pHandle, char* ptr) {
   // TEST_GRAMMAR("ast {create: 'ga', index: ['keyword', 'label']}");
   TEST_GRAMMAR("ast {upset: 'edge_test', edge: [ ['v1', --, 'v2'], ['v2', ->, 'v3'], ['v3', ->, 'v3'], ['v4'] ] };");
   // TEST_GRAMMAR("ast {upset: 'edge_test', vertex: [['v4', {color: '#000000', location: [131.24194, inf], create_time: 1}]]}");
-  TEST_GRAMMAR("// {drop: 'ga'}");
+  TEST_GRAMMAR("// {drop: 'ga'};");
   TEST_COMMAND("show graph;");
   TEST_GRAMMAR("{drop: 'ga'};");
   TEST_COMMAND("show graph;");
@@ -116,6 +116,15 @@ void successful_test(gqlite* pHandle, char* ptr) {
             "$geometry: [126, 126, 126],"
             "$lt: 10"
           "}"
+        "}"
+      "}"
+    "};");
+  TEST_GRAMMAR(
+    "{"
+      "query: 'g', in: 'ga',"
+      "where: {"
+        "color: {"
+            "$lt: ()=>{return 10;}"
         "}"
       "}"
     "};");
