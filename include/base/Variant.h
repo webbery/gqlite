@@ -18,12 +18,11 @@ namespace gql {
     {}
 
 #ifdef __linux__
-    virtual const char*
-    what() const
+    virtual const char* what() const 
 #if defined(__ANDROID__)
-      _NOEXCEPT
+    _NOEXCEPT
 #elif defined(__linux__)
-      _GLIBCXX_TXN_SAFE_DYN _GLIBCXX_NOTHROW
+    _GLIBCXX_NOTHROW
 #endif
     {
       return _msg.c_str();

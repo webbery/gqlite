@@ -63,7 +63,6 @@ set(QUERY_SOURCE ./query.cpp
 	../src/gutil.cpp
 	../src/walk/AStarWalk.cpp
 	../src/walk/RandomWalk.cpp
-	../src/base/DOT.cpp
 	../src/base/system/Platform.cpp
 	../src/base/system/EventEmitter.cpp
 	${SYMBOLS_SOURCE}

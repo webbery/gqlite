@@ -1,5 +1,14 @@
 #pragma once
+#if __cplusplus >= 201703L
 #include <any>
+#elif __cplusplus >= 201411L
+#include <experimental/any>
+
+namespace std{
+typedef experimental::any any;
+}
+#else
+#endif
 #include <map>
 #include <functional>
 #include <atomic>
