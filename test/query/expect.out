@@ -150,9 +150,11 @@ QUERY SUCCESS
 [v4, {"datatime":"0d1653315732","feature_name":[0.0,0.5],"filename":"垃圾堆.jpg"}]
 [v8, {"category":"HDR","datatime":"0d1651105732","feature_name":[0.5,0.0],"filename":"蓝天.jpg"}]
 QUERY SUCCESS
-[27]:	{remove: 'ruins', vertex: {id: '3'}};
+[27]:	{query: 'ruins', in: 'query_db', where: {feature_name: {$lte: () => {return 0.5;}}}};
+QUERY SUCCESS
+[28]:	{remove: 'ruins', vertex: {id: '3'}};
 REMOVE SUCCESS
-[28]:	{dump: 'query_db'};
+[29]:	{dump: 'query_db'};
 {create: 'query_db', group: [{addr: []},{ruins: [], index: ['category','feature_name','loc']}]};
 {upset: 'addr', vertex: [1, {'datatime':0d1651105732,'filename':'破墙1.jpg'}]};
 {upset: 'addr', vertex: [2, {'filename':'破墙2.jpg','loc':[131.24194,37.12532]}]};
@@ -175,6 +177,6 @@ REMOVE SUCCESS
 {upset: 'ruins', vertex: ['yu6', {'pid':461791488}]};
 {upset: 'ruins', vertex: ['yu7', {'name':'新分类2/新子类','pid':2821611776}]};
 EXECUTE COMMAND SUCCESS
-[29]:	{drop: 'query_db'};
+[30]:	{drop: 'query_db'};
 DROP SUCCESS
 ***** EXECUTE FINISH: "grammar.gql" *****

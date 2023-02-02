@@ -1,14 +1,14 @@
 #pragma once
 
-struct GASTNode;
+struct GListNode;
 class GVertexDeclaration {
 public:
-  GVertexDeclaration(GASTNode* key, GASTNode* nodes);
+  GVertexDeclaration(GListNode* key, GListNode* nodes);
   ~GVertexDeclaration();
 
-  GASTNode* key() const { return _key; }
-  GASTNode* vertex() const { return _head; }
+  GListNode* key() const { return _key; }
+  GListNode* vertex() const { return _head; }
 private:
-  GASTNode* _key;
-  GASTNode* _head;
+  GListNode* _key;
+  GListNode* _head;
 };

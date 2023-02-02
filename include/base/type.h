@@ -39,6 +39,7 @@ enum NodeType {
   BinaryExpression,
   ArrayExpression,
   ObjectExpression,
+  LambdaExpression,
   GQLExpression,
   CallExpression,
   MemberExpression,

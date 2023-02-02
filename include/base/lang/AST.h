@@ -1,4 +1,5 @@
 #pragma once
+#include "base/lang/LambdaExpression.h"
 #include "base/lang/lang.h"
 #include <list>
 #include <functional>
@@ -57,7 +58,7 @@ template <> struct GTypeTraits<NodeType::RemoveStatement> {
 };
 
 template <> struct GTypeTraits<NodeType::ObjectExpression> {
-  typedef GASTNode type;
+  typedef GListNode type;
 };
 
 template <> struct GTypeTraits<NodeType::GroupStatement> {
@@ -76,9 +77,9 @@ template <> struct GTypeTraits<NodeType::CallExpression> {
   typedef GObjectFunction type;
 };
 
-//template <> struct GTypeTraits<NodeType::BlockStatement> {
-//  typedef GObjectFunction type;
-//};
+template <> struct GTypeTraits<NodeType::LambdaExpression> {
+  typedef GLambdaExpression type;
+};
 
 /******************************
  * accept function will visit all nodes start from input node.
@@ -86,12 +87,19 @@ template <> struct GTypeTraits<NodeType::CallExpression> {
  * And parameter of path show current tree path of node type.
  ******************************/
 template <typename Visitor>
-VisitFlow accept(GASTNode* node, Visitor& visitor, std::list<NodeType>& path) {
+VisitFlow accept(GListNode* node, Visitor& visitor, std::list<NodeType>& path) {
   if (node == nullptr) return VisitFlow::Children;
   path.push_back(node->_nodetype);
   VisitFlow vf = VisitFlow::Children;
   switch(node->_nodetype) {
-    case NodeType::GQLExpression: visitor.apply(node, path); break;
+    case NodeType::GQLExpression: {
+      vf = visitor.apply(node, path);
+      while (node && vf == VisitFlow::Children) {
+        node = node->_children;
+        vf = accept(node, visitor, path);
+      }
+    }
+    break;
     case NodeType::CreationStatement:
     {
       GTypeTraits<NodeType::CreationStatement>::type* ptr = reinterpret_cast<GTypeTraits<NodeType::CreationStatement>::type*>(node->_value);
@@ -100,9 +108,9 @@ VisitFlow accept(GASTNode* node, Visitor& visitor, std::list<NodeType>& path) {
         case VisitFlow::Children:
         {
           GArrayExpression* groups = (GArrayExpression*)ptr->groups()->_value;
-          for (GASTNode* group: *groups) {
+          for (GListNode* group: *groups) {
             GGroupStmt* stmt = (GGroupStmt*)group->_value;
-            GASTNode* list = stmt->indexes();
+            GListNode* list = stmt->indexes();
             VisitFlow state = accept(list, visitor, path);
             if (state != VisitFlow::Children) return state;
           }
@@ -121,7 +129,7 @@ VisitFlow accept(GASTNode* node, Visitor& visitor, std::list<NodeType>& path) {
     break;
     case NodeType::VertexDeclaration:
     {
-      GASTNode* ptr = node;
+      GListNode* ptr = node;
       while (ptr)
       {
         GTypeTraits<NodeType::VertexDeclaration>::type* value = reinterpret_cast<GTypeTraits<NodeType::VertexDeclaration>::type*>(ptr->_value);
@@ -190,9 +198,9 @@ VisitFlow accept(GASTNode* node, Visitor& visitor, std::list<NodeType>& path) {
     break;
     case NodeType::ObjectExpression:
     {
-      vf = visitor.apply((GASTNode*)node->_value, path);
+      vf = visitor.apply((GListNode*)node->_value, path);
       if (vf == VisitFlow::Children) {
-        vf = accept((GASTNode*)node->_value, visitor, path);
+        vf = accept((GListNode*)node->_value, visitor, path);
       }
     }
     break;
@@ -235,46 +243,17 @@ VisitFlow accept(GASTNode* node, Visitor& visitor, std::list<NodeType>& path) {
 
     }
     break;
+    case NodeType::LambdaExpression: {
+      GTypeTraits<NodeType::LambdaExpression>::type* ptr = reinterpret_cast<GTypeTraits<NodeType::LambdaExpression>::type*>(node->_value);
+      vf = visitor.apply(ptr, path);
+    }
+    break;
     default: vf = visitor.apply(node, path); break;
   }
-  for (size_t idx = 0; idx < node->_size; ++idx) {
-    accept(node->_children + idx, visitor, path);
-  }
+  // for (size_t idx = 0; idx < node->_size; ++idx) {
+  //   accept(node->_children + idx, visitor, path);
+  // }
   path.pop_back();
   return vf;
 }
 
-/******************************************************
- * GeneralVisitor support default behavior for visiting all of AST nodes.
- * If you want to implement special visitor for some kind of nodes, you can inherit this
- * class and rewrite some member function in it.
- * ***************************************************/
-//struct GeneralVisitor {
-//  VisitFlow apply(GASTNode* stmt, std::list<NodeType>& path) {
-//    return VisitFlow::Children;
-//  }
-//  VisitFlow apply(GUpsetStmt* stmt, std::list<NodeType>& path) {
-//    return VisitFlow::Children;
-//  }
-//  VisitFlow apply(GQueryStmt* stmt, std::list<NodeType>& path) {
-//    return VisitFlow::Children;
-//  }
-//  VisitFlow apply(GGQLExpression* stmt, std::list<NodeType>& path) {
-//    return VisitFlow::Children;
-//  }
-//  VisitFlow apply(GProperty* stmt, std::list<NodeType>& path) {
-//    return VisitFlow::Children;
-//  }
-//  VisitFlow apply(GVertexDeclaration* stmt, std::list<NodeType>& path) {
-//    return VisitFlow::Children;
-//  }
-//  VisitFlow apply(GCreateStmt* stmt, std::list<NodeType>& path) {
-//    return VisitFlow::Children;
-//  }
-//  VisitFlow apply(GLiteral* stmt, std::list<NodeType>& path) {
-//    return VisitFlow::Children;
-//  }
-//  VisitFlow apply(GArrayExpression* stmt, std::list<NodeType>& path) {
-//    return VisitFlow::Children;
-//  }
-//};

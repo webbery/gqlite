@@ -10,7 +10,7 @@
 #include "base/system/Observer.h"
 
 class GQueryStmt;
-struct GASTNode;
+struct GListNode;
 class GScanPlan: public GPlan {
   /**
    * Parse Stmt to Plan info list.
@@ -37,7 +37,7 @@ class GScanPlan: public GPlan {
 
 public:
   GScanPlan(std::map<std::string, GVirtualNetwork*>& networks, GStorageEngine* store, GQueryStmt* stmt);
-  GScanPlan(std::map<std::string, GVirtualNetwork*>& networks, GStorageEngine* store, GASTNode* condition, const std::string& graph = "");
+  GScanPlan(std::map<std::string, GVirtualNetwork*>& networks, GStorageEngine* store, GListNode* condition, const std::string& graph = "");
   ~GScanPlan();
 
   void addObserver(IObserver* observer);
@@ -56,11 +56,11 @@ private:
   // scan indexes
   int scan();
 
-  void parseGroup(GASTNode* query);
+  void parseGroup(GListNode* query);
   /**
    * parse condition node, retrieve simple condition/graph pattern or other kind of condition
    */
-  void parseConditions(GASTNode* conditions);
+  void parseConditions(GListNode* conditions);
 
   bool pauseExit(GStorageEngine::cursor& cursor, ScanPlans::iterator itr);
 
@@ -95,7 +95,7 @@ private:
 
     PatternVisitor(QueryCondition& where) :_where(where) {}
 
-    VisitFlow apply(GASTNode* stmt, std::list<NodeType>& path);
+    VisitFlow apply(GListNode* stmt, std::list<NodeType>& path);
     VisitFlow apply(GUpsetStmt* stmt, std::list<NodeType>& path) {
       return VisitFlow::Return;
     }
@@ -116,6 +116,7 @@ private:
     VisitFlow apply(GEdgeDeclaration* stmt, std::list<NodeType>& path);
     VisitFlow apply(GWalkDeclaration* stmt, std::list<NodeType>& path);
     VisitFlow apply(GObjectFunction* stmt, std::list<NodeType>& path) { return VisitFlow::Return; }
+    VisitFlow apply(GLambdaExpression* stmt, std::list<NodeType>& path);
 
     void makeEdgeCondition(int index, GWalkDeclaration::Order order, EntityNode* start, EntityNode* end, bool direction);
     EntityNode* makeNodeCondition(int index, const std::string& str);
@@ -129,7 +130,7 @@ private:
     EntityNode* _node;
     VertexJsonVisitor(GraphPattern& pattern, EntityNode* node) :_pattern(pattern), _node(node) {}
 
-    VisitFlow apply(GASTNode* stmt, std::list<NodeType>& path) {
+    VisitFlow apply(GListNode* stmt, std::list<NodeType>& path) {
       return VisitFlow::Children;
     }
     VisitFlow apply(GUpsetStmt* stmt, std::list<NodeType>& path) {
@@ -152,6 +153,7 @@ private:
     VisitFlow apply(GEdgeDeclaration* stmt, std::list<NodeType>& path) { return VisitFlow::Return; }
     VisitFlow apply(GObjectFunction* stmt, std::list<NodeType>& path);
     VisitFlow apply(GWalkDeclaration* stmt, std::list<NodeType>& path) { return VisitFlow::Children; }
+    VisitFlow apply(GLambdaExpression* stmt, std::list<NodeType>& path) { return VisitFlow::Children; }
   };
 private:
   /**

@@ -34,7 +34,7 @@ GScanPlan::GScanPlan(std::map<std::string, GVirtualNetwork*>& networks, GStorage
   parseConditions(stmt->where());
 }
 
-GScanPlan::GScanPlan(std::map<std::string, GVirtualNetwork*>& networks, GStorageEngine* store, GASTNode* condition, const std::string& group)
+GScanPlan::GScanPlan(std::map<std::string, GVirtualNetwork*>& networks, GStorageEngine* store, GListNode* condition, const std::string& group)
   :GPlan(networks, store)
   , _queryType(QueryType::SimpleScan)
   ,_group(group)
@@ -298,7 +298,7 @@ int GScanPlan::scan()
   return ECode_Success;
 }
 
-void GScanPlan::parseGroup(GASTNode* query)
+void GScanPlan::parseGroup(GListNode* query)
 {
   if (query->_nodetype == NodeType::ArrayExpression) {
     GArrayExpression* arr = reinterpret_cast<GArrayExpression*>(query->_value);
@@ -326,7 +326,7 @@ void GScanPlan::parseGroup(GASTNode* query)
   }
 }
 
-void GScanPlan::parseConditions(GASTNode* conditions)
+void GScanPlan::parseConditions(GListNode* conditions)
 {
   if (conditions == nullptr) {
     _scanAll = true;
@@ -565,16 +565,16 @@ VisitFlow GScanPlan::PatternVisitor::apply(GArrayExpression* stmt, std::list<Nod
   // vertex condition or others
   for (auto itr = stmt->begin(), end = stmt->end(); itr != end; ++itr) {
     accept(*itr, *this, path);
-    //GASTNode* ptr = (*itr)->_children;
+    //GListNode* ptr = (*itr)->_children;
     //for (size_t indx = 0; indx < (*itr)->_size; ++indx) {
-    //  GASTNode* children = ptr + indx;
+    //  GListNode* children = ptr + indx;
     //  accept(children, *this, path);
     //}
   }
   return VisitFlow::SkipCurrent;
 }
 
-VisitFlow GScanPlan::PatternVisitor::apply(GASTNode* stmt, std::list<NodeType>& path)
+VisitFlow GScanPlan::PatternVisitor::apply(GListNode* stmt, std::list<NodeType>& path)
 {
   // object of vertex condition
   return VisitFlow::Children;
@@ -642,7 +642,7 @@ VisitFlow GScanPlan::PatternVisitor::apply(GProperty* stmt, std::list<NodeType>&
     GObjectFunction* obj = (GObjectFunction*)ptr->_value;
     std::vector<double> vec = GetVector((*obj)[0]);
 
-    GASTNode* comp = (*obj)[1];
+    GListNode* comp = (*obj)[1];
     GProperty* prop = (GProperty*)comp->_value;
     std::string comparable = prop->key();
     attribute_t attr = GetLiteral(prop->value());
@@ -688,9 +688,9 @@ VisitFlow GScanPlan::PatternVisitor::apply(GProperty* stmt, std::list<NodeType>&
   }
   else { // group's name
     last_key = key;
-    GASTNode* value = stmt->value();
+    GListNode* value = stmt->value();
 
-    auto addEqualLiteral = [this](GASTNode* value, int index) {
+    auto addEqualLiteral = [this](GListNode* value, int index) {
       if (value->_nodetype == NodeType::Literal) {
         std::string cond = GetString(value);
         if (cond == "*") {
@@ -794,6 +794,10 @@ VisitFlow GScanPlan::PatternVisitor::apply(GWalkDeclaration* stmt, std::list<Nod
     ptr = ptr->_next;
   }
   return VisitFlow::Children;
+}
+
+VisitFlow GScanPlan::PatternVisitor::apply(GLambdaExpression* stmt, std::list<NodeType>& path) {
+  return VisitFlow::Return;
 }
 
 VisitFlow GScanPlan::VertexJsonVisitor::apply(GProperty* stmt, std::list<NodeType>& path)

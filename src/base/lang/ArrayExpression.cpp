@@ -8,13 +8,13 @@ GArrayExpression::GArrayExpression()
 }
 
 GArrayExpression::~GArrayExpression() {
-  for (GASTNode* node: _elements) {
-    FreeAst(node);
+  for (GListNode* node: _elements) {
+    FreeNode(node);
   }
   _elements.clear();
 }
 
-void GArrayExpression::addElement(GASTNode* element) {
+void GArrayExpression::addElement(GListNode* element) {
   if (isBasicElement(element)) {
     GLiteral* literal = (GLiteral*)element->_value;
     switch (literal->kind()) {
@@ -35,7 +35,7 @@ void GArrayExpression::addElement(GASTNode* element) {
   _elements.emplace_back(element);
 }
 
-bool GArrayExpression::isBasicElement(GASTNode* node)
+bool GArrayExpression::isBasicElement(GListNode* node)
 {
   if (node->_nodetype == NodeType::Literal) {
     return true;

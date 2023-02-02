@@ -1,17 +1,17 @@
 #pragma once
 
-struct GASTNode;
+struct GListNode;
 class GQueryStmt {
 public:
-  GQueryStmt(GASTNode* query, GASTNode* graph, GASTNode* conditions);
+  GQueryStmt(GListNode* query, GListNode* graph, GListNode* conditions);
   ~GQueryStmt();
 
-  GASTNode* query()const { return _query; }
-  GASTNode* graph()const { return _graph; }
-  GASTNode* where()const { return _conditions; }
+  GListNode* query()const { return _query; }
+  GListNode* graph()const { return _graph; }
+  GListNode* where()const { return _conditions; }
 private:
-  GASTNode* _query;
-  GASTNode* _graph;
-  GASTNode* _conditions;
+  GListNode* _query;
+  GListNode* _graph;
+  GListNode* _conditions;
 
 };

@@ -4,12 +4,13 @@
 #include <fmt/printf.h>
 #include <cassert>
 #include "base/lang/AST.h"
+#include "base/type.h"
 
 #define RETURN_CASE_NODE_TYPE(node_type) case NodeType::node_type: return #node_type
 #define RETURN_CASE_PROP_KIND(prop_kind) case AttributeKind::prop_kind: return #prop_kind
 #define FREE_NODE(node) case 
 
-void FreeNode(GASTNode* node) {
+void FreeNodeImpl(GListNode* node) {
   switch (node->_nodetype)
   {
   case NodeType::CreationStatement:
@@ -98,14 +99,14 @@ void FreeNode(GASTNode* node) {
     break;
   case NodeType::VariableDeclarator:
   {
-    GASTNode* ptr = (GASTNode*)node->_value;
+    GListNode* ptr = (GListNode*)node->_value;
     FreeNode(ptr);
   }
     break;
   case NodeType::CallExpression:
   {
-    GASTNode* ptr = (GASTNode*)node->_value;
-    FreeNode(ptr);
+    GTypeTraits<NodeType::CallExpression>::type* ptr = reinterpret_cast<GTypeTraits<NodeType::CallExpression>::type*>(node->_value);
+    delete ptr;
   }
     break;
   case NodeType::GroupStatement:
@@ -126,28 +127,33 @@ void FreeNode(GASTNode* node) {
     delete ptr;
   }
   break;
+  case NodeType::LambdaExpression:
+  {
+    GTypeTraits<NodeType::LambdaExpression>::type* ptr = reinterpret_cast<GTypeTraits<NodeType::LambdaExpression>::type*>(node->_value);
+    delete ptr;
+  }
+  break;
   default:
     break;
   }
   delete node;
 }
 
-GASTNode* NewAst(enum NodeType type, void* value, GASTNode* children, size_t size) {
-  GASTNode* ast = new GASTNode;
+GListNode* MakeNode(enum NodeType type, void* value, GListNode* children) {
+  GListNode* ast = new GListNode;
   ast->_value = value;
   ast->_nodetype = type;
   ast->_children = children;
-  ast->_size = size;
   return ast;
 }
 
-void FreeAst(GASTNode* root) {
+void FreeNode(GListNode* root) {
   if (!root) return;
   if (!root->_value) return;
-  for (size_t idx = 0; idx < root->_size; ++idx) {
-    FreeAst(root->_children + idx);
+  if (root->_children) {
+    FreeNodeImpl(root->_children);
   }
-  FreeNode(root);
+  FreeNodeImpl(root);
 }
 
 std::string NodeType2String(NodeType nt) {
@@ -194,12 +200,12 @@ void printLine(const std::string& format, const std::string& str, size_t level) 
   fmt::print(format, str);
 }
 
-std::string GetString(GASTNode* node) {
+std::string GetString(GListNode* node) {
   GLiteral* str = (GLiteral*)node->_value;
   return str->raw();
 }
 
-attribute_t GetLiteral(GASTNode* node)
+attribute_t GetLiteral(GListNode* node)
 {
   attribute_t v;
   if (node->_nodetype != NodeType::Literal) return v;
@@ -221,7 +227,7 @@ attribute_t GetLiteral(GASTNode* node)
   return v;
 };
 
-std::vector<double> GetVector(GASTNode* node) {
+std::vector<double> GetVector(GListNode* node) {
   std::vector<double> v;
   if (node->_nodetype != NodeType::ArrayExpression) return v;
   GArrayExpression* arr = (GArrayExpression*)node->_value;
@@ -233,7 +239,7 @@ std::vector<double> GetVector(GASTNode* node) {
   return v;
 }
 
-VisitFlow GViewVisitor::apply(GASTNode* stmt, std::list<NodeType>& path) {
+VisitFlow GViewVisitor::apply(GListNode* stmt, std::list<NodeType>& path) {
   size_t level = path.size();
   printLine("`- type: {}\n", NodeType2String(stmt->_nodetype), level);
   // printLine("|- name: {}\n", stmt->name(), level);
@@ -311,6 +317,10 @@ VisitFlow GViewVisitor::apply(GEdgeDeclaration* stmt, std::list<NodeType>& path)
   //accept(stmt->to(), *this, path);
   path.pop_back();
   return VisitFlow::Children;
+}
+
+VisitFlow GViewVisitor::apply(GLambdaExpression* stmt, std::list<NodeType>& path) {
+  return VisitFlow::Return;
 }
 
 VisitFlow GViewVisitor::apply(GDropStmt* stmt, std::list<NodeType>& path)

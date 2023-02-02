@@ -62,7 +62,7 @@
     item[_key] = { {"value", value}, {OBJECT_TYPE_NAME, AttributeKind::Vector} };\
   }
 
-struct GASTNode;
+struct GListNode;
 class GScanPlan;
 class GUpsetPlan: public GPlan {
 public:
@@ -83,7 +83,7 @@ private:
     //GUpsetPlan& _plan;
     JSONVisitor(GUpsetPlan& plan) {}
     
-    VisitFlow apply(GASTNode* stmt, std::list<NodeType>& path) {
+    VisitFlow apply(GListNode* stmt, std::list<NodeType>& path) {
       return VisitFlow::Children;
     }
     VisitFlow apply(GUpsetStmt* stmt, std::list<NodeType>& path) {
@@ -165,7 +165,9 @@ private:
       return VisitFlow::Return;
     }
     VisitFlow apply(GWalkDeclaration* stmt, std::list<NodeType>& path) { return VisitFlow::Children; }
-
+    VisitFlow apply(GLambdaExpression* stmt, std::list<NodeType>& path) {
+      return VisitFlow::Children;
+    }
     void add() {
       if (!_key.empty()) {
         if (_values.size() == 1) {
@@ -190,7 +192,7 @@ private:
     GUpsetPlan& _plan;
 
     UpsetVisitor(GUpsetPlan& plan): _plan(plan) {}
-    VisitFlow apply(GASTNode* stmt, std::list<NodeType>& path) {
+    VisitFlow apply(GListNode* stmt, std::list<NodeType>& path) {
       return VisitFlow::Children;
     }
     VisitFlow apply(GUpsetStmt* stmt, std::list<NodeType>& path) {
@@ -234,7 +236,10 @@ private:
       return VisitFlow::Return;
     }
     VisitFlow apply(GWalkDeclaration* stmt, std::list<NodeType>& path) { return VisitFlow::Children; }
-    gkey_t getLiteral(GASTNode* node);
+    VisitFlow apply(GLambdaExpression* stmt, std::list<NodeType>& path) {
+      return VisitFlow::Children;
+    }
+    gkey_t getLiteral(GListNode* node);
   };
 
   friend struct UpsetVisitor;

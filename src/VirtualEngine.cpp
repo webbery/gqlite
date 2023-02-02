@@ -70,7 +70,7 @@ void GVirtualEngine::cleanPlans(PlanList* plans) {
   delete cur;
 }
 
-GVirtualEngine::PlanList* GVirtualEngine::makePlans(GASTNode* ast) {
+GVirtualEngine::PlanList* GVirtualEngine::makePlans(GListNode* ast) {
   if (ast == nullptr) return nullptr;
   PlanVisitor visitor(_networks, _storage, _result_callback, _handle);
   std::list<NodeType> ln;
@@ -93,7 +93,7 @@ int GVirtualEngine::executePlans(PlanList* plans) {
   return ret;
 }
 
-int GVirtualEngine::execAST(GASTNode* ast) {
+int GVirtualEngine::execAST(GListNode* ast) {
   if (_errorCode < 0) return _errorCode;
   if (!ast) return ECode_Success;
   PlanList* plans = makePlans(ast);
@@ -102,7 +102,7 @@ int GVirtualEngine::execAST(GASTNode* ast) {
   return ret;
 }
 
-int GVirtualEngine::execCommand(GASTNode* ast)
+int GVirtualEngine::execCommand(GListNode* ast)
 {
   GGQLExpression* expr = (GGQLExpression * )ast->_value;
   switch (expr->type())

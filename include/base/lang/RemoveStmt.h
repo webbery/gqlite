@@ -1,31 +1,31 @@
 #pragma once
 #include <string>
 
-struct GASTNode;
+struct GListNode;
 class GRemoveStmt {
 public:
   enum RemoveType{
     Vertex,
     Edge
   };
-  GRemoveStmt(const std::string& name, GASTNode* array);
+  GRemoveStmt(const std::string& name, GListNode* array);
   virtual ~GRemoveStmt();
 
   std::string name() const { return _name; }
-  GASTNode* node() const { return _array; }
+  GListNode* node() const { return _array; }
   RemoveType type() const { return _type; }
 protected:
   RemoveType _type;
   std::string _name;
-  GASTNode* _array;
+  GListNode* _array;
 };
 
 class GVertexRemoveStmt : public GRemoveStmt {
 public:
-  GVertexRemoveStmt(const std::string& name, GASTNode* array);
+  GVertexRemoveStmt(const std::string& name, GListNode* array);
 };
 
 class GEdgeRemoveStmt : public GRemoveStmt {
 public:
-  GEdgeRemoveStmt(const std::string& name, GASTNode* array);
+  GEdgeRemoveStmt(const std::string& name, GListNode* array);
 };

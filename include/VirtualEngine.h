@@ -24,7 +24,7 @@ enum GQL_Command_Type {
 };
 
 class GStorageEngine;
-struct GASTNode;
+struct GListNode;
 class GPlan;
 class GVirtualNetwork;
 class GVirtualEngine {
@@ -46,7 +46,7 @@ public:
    * @param ast an input AST from yacc
    * @return int 
    */
-  int execAST(GASTNode* ast);
+  int execAST(GListNode* ast);
 
   /**
    * @brief execute some simple command that have no complex ast
@@ -54,7 +54,7 @@ public:
    * @param ast an input AST from yacc
    * @return int 
    */
-  int execCommand(GASTNode* ast);
+  int execCommand(GListNode* ast);
 
   gqlite_callback _result_callback;
   std::string _gql;
@@ -88,7 +88,7 @@ private:
     gqlite_callback _cb;
     void* _handle;
     PlanVisitor(std::map<std::string, GVirtualNetwork*>& vn, GStorageEngine* store, gqlite_callback cb = nullptr, void* handle = nullptr)
-      :_vn(vn), _store(store), _handle(handle){
+      :_vn(vn), _store(store), _handle(handle) {
       _plans = new PlanList;
       _plans->_next = _plans;
       _plans->_parent = _plans;
@@ -102,7 +102,7 @@ private:
      */
     void add(GPlan* plan, bool threadable = false);
 
-    VisitFlow apply(GASTNode* stmt, std::list<NodeType>& path) {
+    VisitFlow apply(GListNode* stmt, std::list<NodeType>& path) {
       return VisitFlow::Children;
     }
     VisitFlow apply(GUpsetStmt* stmt, std::list<NodeType>& path);
@@ -133,9 +133,12 @@ private:
     VisitFlow apply(GEdgeDeclaration* stmt, std::list<NodeType>& path) {
       return VisitFlow::Children;
     }
+    VisitFlow apply(GLambdaExpression* stmt, std::list<NodeType>& path) {
+      return VisitFlow::Children;
+    }
   };
 private:
-  PlanList* makePlans(GASTNode* ast);
+  PlanList* makePlans(GListNode* ast);
   int executePlans(PlanList*);
   void cleanPlans(PlanList*);
 

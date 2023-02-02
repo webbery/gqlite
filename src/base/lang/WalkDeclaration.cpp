@@ -12,14 +12,14 @@ GWalkDeclaration::~GWalkDeclaration()
 {
   auto ptr = _walk;
   while (ptr) {
-    FreeAst(ptr->_element);
+    FreeNode(ptr->_element);
     auto next = ptr->_next;
     free(ptr);
     ptr = next;
   }
 }
 
-void GWalkDeclaration::add(GASTNode* node, bool isVertex)
+void GWalkDeclaration::add(GListNode* node, bool isVertex)
 {
   if (!_walk) {
     if (isVertex) _order = VertexEdge;
@@ -43,7 +43,7 @@ GWalkDeclaration::WalkElement* GWalkDeclaration::root() const
   return _walk;
 }
 
-GWalkDeclaration::WalkElement* GWalkDeclaration::init(GASTNode* node)
+GWalkDeclaration::WalkElement* GWalkDeclaration::init(GListNode* node)
 {
   auto ptr = (WalkElement*)malloc(sizeof(WalkElement));
   ptr->_next = nullptr;
@@ -52,21 +52,21 @@ GWalkDeclaration::WalkElement* GWalkDeclaration::init(GASTNode* node)
   return ptr;
 }
 
-GEdgeDeclaration::GEdgeDeclaration(const char* str, GASTNode* node)
+GEdgeDeclaration::GEdgeDeclaration(const char* str, GListNode* node)
   :_from(node),_to(node), _edge(nullptr)
   ,_direction(str)
 {
 
 }
 
-GEdgeDeclaration::GEdgeDeclaration(const char* str, GASTNode* from, GASTNode* to)
+GEdgeDeclaration::GEdgeDeclaration(const char* str, GListNode* from, GListNode* to)
   :_from(from),_to(to), _edge(nullptr)
   , _direction(str)
 {
 
 }
 
-GEdgeDeclaration::GEdgeDeclaration(GASTNode* connection, GASTNode* from, GASTNode* to)
+GEdgeDeclaration::GEdgeDeclaration(GListNode* connection, GListNode* from, GListNode* to)
   : _from(from), _to(to), _edge(connection)
 {
   if (connection->_nodetype == NodeType::Literal) {
@@ -81,13 +81,13 @@ GEdgeDeclaration::GEdgeDeclaration(GASTNode* connection, GASTNode* from, GASTNod
 GEdgeDeclaration::~GEdgeDeclaration()
 {
   if (_from != _to) {
-    FreeAst(_from);
+    FreeNode(_from);
   }
-  FreeAst(_to);
-  FreeAst(_edge);
+  FreeNode(_to);
+  FreeNode(_edge);
 }
 
-GASTNode* GEdgeDeclaration::value() const
+GListNode* GEdgeDeclaration::value() const
 {
   if (!_edge) return nullptr;
   if (_edge->_nodetype != EdgeDeclaration) return nullptr;

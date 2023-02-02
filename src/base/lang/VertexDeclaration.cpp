@@ -1,14 +1,14 @@
 #include "base/lang/VertexDeclaration.h"
 #include "base/lang/ASTNode.h"
 
-GVertexDeclaration::GVertexDeclaration(GASTNode* key, GASTNode* nodes)
+GVertexDeclaration::GVertexDeclaration(GListNode* key, GListNode* nodes)
 :_head(nodes)
 ,_key(key)
 {}
 
 GVertexDeclaration::~GVertexDeclaration() {
   if (_head) {
-    FreeAst(_head);
+    FreeNode(_head);
   }
-  FreeAst(_key);
+  FreeNode(_key);
 }

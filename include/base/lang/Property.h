@@ -1,15 +1,15 @@
 #pragma once
 #include <string>
 
-struct GASTNode;
+struct GListNode;
 class GProperty {
 public:
-  GProperty(const std::string& key, GASTNode* value);
+  GProperty(const std::string& key, GListNode* value);
   ~GProperty();
 
   std::string key() { return _key; }
-  GASTNode* value() { return _value; }
+  GListNode* value() { return _value; }
 private:
   std::string _key;
-  GASTNode* _value;
+  GListNode* _value;
 };

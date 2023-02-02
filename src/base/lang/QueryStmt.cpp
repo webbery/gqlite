@@ -1,14 +1,14 @@
 #include "base/lang/QueryStmt.h"
 #include "base/lang/ASTNode.h"
 
-GQueryStmt::GQueryStmt(GASTNode* query, GASTNode* graph, GASTNode* conditions)
+GQueryStmt::GQueryStmt(GListNode* query, GListNode* graph, GListNode* conditions)
 :_query(query)
 ,_graph(graph)
 ,_conditions(conditions){
 }
 
 GQueryStmt::~GQueryStmt() {
-  FreeAst(_query);
-  FreeAst(_graph);
-  FreeAst(_conditions);
+  FreeNode(_query);
+  FreeNode(_graph);
+  FreeNode(_conditions);
 }

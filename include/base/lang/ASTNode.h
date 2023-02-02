@@ -17,29 +17,26 @@ enum class VisitFlow {
   Children
 };
 
-struct GASTNode {
+struct GListNode {
   enum NodeType _nodetype;
   void* _value;
-  struct GASTNode* _children;
-  size_t _size;
+  struct GListNode* _children;
 };
 
-GASTNode* NewAst(enum NodeType type, void* value, GASTNode* children, size_t size);
-void FreeAst(GASTNode* root);
-void DumpAst(GASTNode* root, int level = 0);
-
-GASTNode* LoadAST();
+GListNode* MakeNode(enum NodeType type, void* value, GListNode* children);
+void FreeNode(GListNode* root);
+void DumpAst(GListNode* root, int level = 0);
 
 /****
  * 
  */
-std::string GetString(GASTNode* node);
-attribute_t GetLiteral(GASTNode* node);
-std::vector<double> GetVector(GASTNode* node);
+std::string GetString(GListNode* node);
+attribute_t GetLiteral(GListNode* node);
+std::vector<double> GetVector(GListNode* node);
 
 class GViewVisitor {
 public:
-  VisitFlow apply(GASTNode* stmt, std::list<NodeType>& path);
+  VisitFlow apply(GListNode* stmt, std::list<NodeType>& path);
   VisitFlow apply(GUpsetStmt* stmt, std::list<NodeType>& path);
   VisitFlow apply(GQueryStmt* stmt, std::list<NodeType>& path);
   VisitFlow apply(GGQLExpression* stmt, std::list<NodeType>& path);
@@ -60,6 +57,7 @@ public:
     return VisitFlow::Return;
   }
   VisitFlow apply(GEdgeDeclaration* stmt, std::list<NodeType>& path);
-  
+  VisitFlow apply(GLambdaExpression* stmt, std::list<NodeType>& path);
+
 private:
 };

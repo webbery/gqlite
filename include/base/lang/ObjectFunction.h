@@ -5,14 +5,15 @@
 
 class GObjectFunction : public GObjectStmt {
 public:
-  using Params = std::vector<GASTNode*>;
+  using Params = std::vector<GListNode*>;
   using iterator = Params::iterator;
   using const_iterator = Params::const_iterator;
 
   ~GObjectFunction();
   
   void setFunctionName(const char* name, const char* scope);
-  void addFunctionParam(GASTNode* node);
+  void addFunctionParam(GListNode* node);
+  void addFunctionParams(GListNode* node);
 
   std::string scope() { return _scope; }
   std::string name() { return _name; }
@@ -25,12 +26,12 @@ public:
   const_iterator params_end() const { return _params.end(); }
   iterator params_end() { return _params.end(); }
 
-  GASTNode* operator[](int index);
+  GListNode* operator[](int index);
 
 private:
   std::string _name;
   std::string _scope;
   std::string _identify;
 
-  std::vector<GASTNode*> _params;
+  std::vector<GListNode*> _params;
 };

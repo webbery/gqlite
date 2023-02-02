@@ -41,22 +41,22 @@ void yyerror(YYLTYPE* yyllocp, yyscan_t unused, GVirtualEngine& stm, const char*
     msg, stm.gql(), err_index);
 }
 
-struct GASTNode* INIT_STRING_AST(const char* key) {
+struct GListNode* INIT_STRING_AST(const char* key) {
   size_t len = strlen(key);
   // void* s = malloc(len);
   // memcpy(s, key, len);
   // printf("|-> %s\n", key);
   GLiteral* str = new GLiteralString(key, len);
-  return NewAst(NodeType::Literal, str, nullptr, 0);
+  return MakeNode(NodeType::Literal, str, nullptr);
 }
 
 template<typename T>
-struct GASTNode* INIT_NUMBER_AST(T v) {
+struct GListNode* INIT_NUMBER_AST(T v) {
   GLiteral* number = new GLiteralNumber(v);
-  return NewAst(NodeType::Literal, number, nullptr, 0);
+  return MakeNode(NodeType::Literal, number, nullptr);
 }
 
-struct GASTNode* INIT_NUMBER_AST(double v, AttributeKind kind) {
+struct GListNode* INIT_NUMBER_AST(double v, AttributeKind kind) {
   switch (kind) {
   case AttributeKind::Integer:
     if (v <= std::numeric_limits<int>::max()) {
@@ -82,7 +82,7 @@ void startScript(struct yyguts_t * yyg);
 %lex-param {GVirtualEngine& stm}
 %parse-param {GVirtualEngine& stm}
 %union {
-  struct GASTNode* node;
+  struct GListNode* node;
   double __f;
   char var_name[32];
   char* __c;
@@ -120,7 +120,7 @@ void startScript(struct yyguts_t * yyg);
 %type <node> condition_array normal_array
 %type <node> normal_properties condition_properties
 %type <node> where_expr a_walk vertex_start_walk edge_start_walk a_simple_graph condition_vertex a_walk_range
-%type <node> function_call function_params function_obj statements statement if_state ret_state expr assign_state
+%type <node> function_call function_params function_param_list function_arg_stmt lambda_expr statements statement if_state ret_state expr exprs assign_state
 %type <node> normal_property condition_property
 %type <node> gql
 %type <node> creation dump_graph
@@ -145,31 +145,31 @@ comment: SKIP{};
 line: gql
           {
             stm._errorCode = stm.execAST($1);
-            FreeAst($1);
+            FreeNode($1);
           }
         | utility_cmd { stm._cmdtype = GQL_Util; }
         ;
 gql: creation
           {
             GGQLExpression* expr = new GGQLExpression();
-            $$ = NewAst(NodeType::GQLExpression, expr, $1, 1);
+            $$ = MakeNode(NodeType::GQLExpression, expr, $1);
             stm._cmdtype = GQL_Creation;
           }
         | a_simple_query {
             GGQLExpression* expr = new GGQLExpression();
-            $$ = NewAst(NodeType::GQLExpression, expr, $1, 1);
+            $$ = MakeNode(NodeType::GQLExpression, expr, $1);
             stm._cmdtype = GQL_Query;
           }
         | upset_vertexes
           {
             GGQLExpression* expr = new GGQLExpression();
-            $$ = NewAst(NodeType::GQLExpression, expr, $1, 1);
+            $$ = MakeNode(NodeType::GQLExpression, expr, $1);
             stm._cmdtype = GQL_Upset;
           }
         | upset_edges
           {
             GGQLExpression* expr = new GGQLExpression();
-            $$ = NewAst(NodeType::GQLExpression, expr, $1, 1);
+            $$ = MakeNode(NodeType::GQLExpression, expr, $1);
             stm._cmdtype = GQL_Upset;
           }
         | remove_vertexes { $$ = $1; stm._cmdtype = GQL_Remove; }
@@ -177,13 +177,13 @@ gql: creation
         | drop_graph
           {
             GGQLExpression* expr = new GGQLExpression();
-            $$ = NewAst(NodeType::GQLExpression, expr, $1, 1);
+            $$ = MakeNode(NodeType::GQLExpression, expr, $1);
             stm._cmdtype = GQL_Drop;
           }
         | dump_graph
           {
             GGQLExpression* expr = new GGQLExpression();
-            $$ = NewAst(NodeType::GQLExpression, expr, $1, 1);
+            $$ = MakeNode(NodeType::GQLExpression, expr, $1);
             stm._cmdtype = GQL_Util;
           }
         ;
@@ -200,9 +200,9 @@ utility_cmd: CMD_SHOW KW_GRAPH
           {
             GGQLExpression* expr = new GGQLExpression(GGQLExpression::CMDType::SHOW_GRAPH_DETAIL, $3);
             free($3);
-            auto ast = NewAst(NodeType::GQLExpression, expr, nullptr, 0);
+            auto ast = MakeNode(NodeType::GQLExpression, expr, nullptr);
             stm._errorCode = stm.execCommand(ast);
-            FreeAst(ast);
+            FreeNode(ast);
           }
         | KW_AST gql
           {
@@ -211,7 +211,7 @@ utility_cmd: CMD_SHOW KW_GRAPH
             GViewVisitor visitor;
             std::list<NodeType> ln;
             accept($2, visitor, ln);
-            FreeAst($2);
+            FreeNode($2);
             stm._cmdtype = GQL_Util;
           }
         | profile gql {}
@@ -225,7 +225,7 @@ creation: '{' KW_CREATE ':' LITERAL_STRING ',' groups '}'
             {
               GCreateStmt* createStmt = new GCreateStmt($4, $6);
               free($4);
-              $$ = NewAst(NodeType::CreationStatement, createStmt, nullptr, 0);
+              $$ = MakeNode(NodeType::CreationStatement, createStmt, nullptr);
               stm._errorCode = ECode_Success;
             }
         | '{' KW_CREATE ':' LITERAL_STRING ',' KW_INDEX ':' function_call '}'
@@ -237,20 +237,20 @@ dump_graph: '{' dump ':' LITERAL_STRING '}'
               {
                 GDumpStmt* stmt = new GDumpStmt($4);
                 free($4);
-                $$ = NewAst(NodeType::DumpStatement, stmt, nullptr, 0);
+                $$ = MakeNode(NodeType::DumpStatement, stmt, nullptr);
                 stm._errorCode = ECode_Success;
               };
 upset_vertexes: '{' KW_UPSET ':' LITERAL_STRING ',' KW_VERTEX ':' vertex_list '}'
               {
                 GUpsetStmt* upsetStmt = new GUpsetStmt($4, $8);
                 free($4);
-                $$ = NewAst(NodeType::UpsetStatement, upsetStmt, nullptr, 0);
+                $$ = MakeNode(NodeType::UpsetStatement, upsetStmt, nullptr);
               }
         | '{' KW_UPSET ':' LITERAL_STRING ',' property ':' normal_json ',' where_expr '}'
               {
                 GUpsetStmt* upsetStmt = new GUpsetStmt($4, $8, $10);
                 free($4);
-                $$ = NewAst(NodeType::UpsetStatement, upsetStmt, nullptr, 0);
+                $$ = MakeNode(NodeType::UpsetStatement, upsetStmt, nullptr);
               }
         | error '}'
               {
@@ -264,31 +264,31 @@ remove_vertexes: '{' KW_REMOVE ':' LITERAL_STRING ',' KW_VERTEX ':' condition_ob
               {
                 GRemoveStmt* rmStmt = new GVertexRemoveStmt($4, $8);
                 free($4);
-                $$ = NewAst(NodeType::RemoveStatement, rmStmt, nullptr, 0);
+                $$ = MakeNode(NodeType::RemoveStatement, rmStmt, nullptr);
               };
 remove_edges: '{' KW_REMOVE ':' LITERAL_STRING ',' KW_EDGE ':' condition_links '}'
               {
                 GRemoveStmt* rmStmt = new GEdgeRemoveStmt($4, $8);
                 free($4);
-                $$ = NewAst(NodeType::RemoveStatement, rmStmt, nullptr, 0);
+                $$ = MakeNode(NodeType::RemoveStatement, rmStmt, nullptr);
               };
 upset_edges: '{' KW_UPSET ':' LITERAL_STRING ',' KW_EDGE ':' link '}'
               {
                 GUpsetStmt* upsetStmt = new GUpsetStmt($4, $8);
                 free($4);
-                $$ = NewAst(NodeType::UpsetStatement, upsetStmt, nullptr, 0);
+                $$ = MakeNode(NodeType::UpsetStatement, upsetStmt, nullptr);
               }
         | '{' KW_UPSET ':' LITERAL_STRING ',' KW_EDGE ':' '[' links ']' '}'
               {
                 GUpsetStmt* upsetStmt = new GUpsetStmt($4, $9);
                 free($4);
-                $$ = NewAst(NodeType::UpsetStatement, upsetStmt, nullptr, 0);
+                $$ = MakeNode(NodeType::UpsetStatement, upsetStmt, nullptr);
               };
 drop_graph: '{' KW_DROP ':' LITERAL_STRING '}'
               {
                 GDropStmt* dropStmt = new GDropStmt($4);
                 free($4);
-                $$ = NewAst(NodeType::DropStatement, dropStmt, nullptr, 0);
+                $$ = MakeNode(NodeType::DropStatement, dropStmt, nullptr);
               };
 groups: group ':' '[' group_list ']'
               {
@@ -298,7 +298,7 @@ group_list: a_group
               {
                 GArrayExpression* array = new GArrayExpression();
                 array->addElement($1);
-                $$ = NewAst(NodeType::ArrayExpression, array, nullptr, 0);
+                $$ = MakeNode(NodeType::ArrayExpression, array, nullptr);
               }
         | group_list ',' a_group
               {
@@ -319,19 +319,19 @@ vertex_group: LITERAL_STRING
               {
                 GGroupStmt* stmt = new GVertexGroupStmt($1);
                 free($1);
-                $$ = NewAst(NodeType::GroupStatement, stmt, nullptr, 0);
+                $$ = MakeNode(NodeType::GroupStatement, stmt, nullptr);
               }
         | '{' VAR_NAME ':' string_list '}'
               {
                 GGroupStmt* stmt = new GVertexGroupStmt($2, $4);
                 free($2);
-                $$ = NewAst(NodeType::GroupStatement, stmt, nullptr, 0);
+                $$ = MakeNode(NodeType::GroupStatement, stmt, nullptr);
               }
         | '{' VAR_NAME ':' string_list ',' KW_INDEX ':' string_list '}'
               {
                 GGroupStmt* stmt = new GVertexGroupStmt($2, $4, $8);
                 free($2);
-                $$ = NewAst(NodeType::GroupStatement, stmt, nullptr, 0);
+                $$ = MakeNode(NodeType::GroupStatement, stmt, nullptr);
               }
         ;
 edge_group: '[' LITERAL_STRING ',' '{' VAR_NAME ':' string_list '}' ',' LITERAL_STRING ']'
@@ -340,7 +340,7 @@ edge_group: '[' LITERAL_STRING ',' '{' VAR_NAME ':' string_list '}' ',' LITERAL_
                 free($2);
                 free($5);
                 free($10);
-                $$ = NewAst(NodeType::GroupStatement, stmt, nullptr, 0);
+                $$ = MakeNode(NodeType::GroupStatement, stmt, nullptr);
               }
         | '[' LITERAL_STRING ',' LITERAL_STRING ',' LITERAL_STRING ']'
               {
@@ -348,26 +348,26 @@ edge_group: '[' LITERAL_STRING ',' '{' VAR_NAME ':' string_list '}' ',' LITERAL_
                 free($2);
                 free($4);
                 free($6);
-                $$ = NewAst(NodeType::GroupStatement, stmt, nullptr, 0);
+                $$ = MakeNode(NodeType::GroupStatement, stmt, nullptr);
               }
         ;
 a_simple_query: 
            '{' query_kind '}'
                 {
                   GQueryStmt* queryStmt = new GQueryStmt($2, nullptr, nullptr);
-                  $$ = NewAst(NodeType::QueryStatement, queryStmt, nullptr, 0);
+                  $$ = MakeNode(NodeType::QueryStatement, queryStmt, nullptr);
                   stm._errorCode = ECode_Success;
                 }
         |  '{' query_kind ',' a_graph_expr '}'
                 {
                   GQueryStmt* queryStmt = new GQueryStmt($2, $4, nullptr);
-                  $$ = NewAst(NodeType::QueryStatement, queryStmt, nullptr, 0);
+                  $$ = MakeNode(NodeType::QueryStatement, queryStmt, nullptr);
                   stm._errorCode = ECode_Success;
                 }
         | '{' query_kind ',' a_graph_expr ',' where_expr '}'
                 {
                   GQueryStmt* queryStmt = new GQueryStmt($2, $4, $6);
-                  $$ = NewAst(NodeType::QueryStatement, queryStmt, nullptr, 0);
+                  $$ = MakeNode(NodeType::QueryStatement, queryStmt, nullptr);
                   stm._errorCode = ECode_Success;
                 };
 a_simple_graph: a_walk_range
@@ -405,7 +405,7 @@ vertex_start_walk: condition_vertex ',' connection
                   GWalkDeclaration* walkDecl = new GWalkDeclaration();
                   walkDecl->add($1, true);
                   walkDecl->add($3, false);
-                  $$ = NewAst(NodeType::WalkDeclaration, walkDecl, nullptr, 0);
+                  $$ = MakeNode(NodeType::WalkDeclaration, walkDecl, nullptr);
                 }
         | vertex_start_walk ',' condition_vertex ',' connection
                 {
@@ -418,7 +418,7 @@ edge_start_walk: connection ',' condition_vertex
                   GWalkDeclaration* walkDecl = new GWalkDeclaration();
                   walkDecl->add($1, true);
                   walkDecl->add($3, false);
-                  $$ = NewAst(NodeType::WalkDeclaration, walkDecl, nullptr, 0);
+                  $$ = MakeNode(NodeType::WalkDeclaration, walkDecl, nullptr);
                 }
         | edge_start_walk ',' connection ',' condition_vertex {};
 condition_vertex: condition_object { $$ = $1; }
@@ -448,7 +448,7 @@ string_list: LITERAL_STRING
                   GArrayExpression* array = new GArrayExpression();
                   array->addElement(INIT_STRING_AST($1));
                   free($1);
-                  $$ = NewAst(NodeType::ArrayExpression, array, nullptr, 0);
+                  $$ = MakeNode(NodeType::ArrayExpression, array, nullptr);
                 }
         | '[' strings ']'
               {
@@ -462,7 +462,7 @@ strings:  LITERAL_STRING
                   GArrayExpression* array = new GArrayExpression();
                   array->addElement(INIT_STRING_AST($1));
                   free($1);
-                  $$ = NewAst(NodeType::ArrayExpression, array, nullptr, 0);
+                  $$ = MakeNode(NodeType::ArrayExpression, array, nullptr);
                 }
         | strings ',' LITERAL_STRING
               {
@@ -475,7 +475,7 @@ intergers: VAR_INTEGER
               {
                 GArrayExpression* array = new GArrayExpression();
                 array->addElement(INIT_NUMBER_AST($1, AttributeKind::Integer));
-                $$ = NewAst(NodeType::ArrayExpression, array, nullptr, 0);
+                $$ = MakeNode(NodeType::ArrayExpression, array, nullptr);
               }
         | intergers ',' VAR_INTEGER
               {
@@ -501,7 +501,7 @@ graph_properties:
               {
                 GArrayExpression* array = new GArrayExpression();
                 array->addElement($1);
-                $$ = NewAst(NodeType::ArrayExpression, array, nullptr, 0);
+                $$ = MakeNode(NodeType::ArrayExpression, array, nullptr);
               }
         | graph_properties ',' graph_property
               {
@@ -513,19 +513,19 @@ graph_property:
           KW_VERTEX '.' VAR_NAME
               {
                 GMemberExpression* expr = new GMemberExpression(INIT_STRING_AST("vertex"), INIT_STRING_AST($3));
-                $$ = NewAst(NodeType::MemberExpression, expr, nullptr, 0);
+                $$ = MakeNode(NodeType::MemberExpression, expr, nullptr);
                 free($3);
               }
         | KW_EDGE '.' VAR_NAME
               {
                 GMemberExpression* expr = new GMemberExpression(INIT_STRING_AST("edge"), INIT_STRING_AST($3));
-                $$ = NewAst(NodeType::MemberExpression, expr, nullptr, 0);
+                $$ = MakeNode(NodeType::MemberExpression, expr, nullptr);
                 free($3);
               }
         |  VAR_NAME '.' VAR_NAME
               {
                 GMemberExpression* expr = new GMemberExpression(INIT_STRING_AST($1), INIT_STRING_AST($3));
-                $$ = NewAst(NodeType::MemberExpression, expr, nullptr, 0);
+                $$ = MakeNode(NodeType::MemberExpression, expr, nullptr);
                 free($3);
                 free($1);
               }
@@ -534,7 +534,7 @@ graph_property:
         | VAR_NAME '.' function_call
               {
                 auto scope = INIT_STRING_AST($1);
-                $$ = NewAst(NodeType::VariableDeclarator, scope, $3, 1);
+                $$ = MakeNode(NodeType::VariableDeclarator, scope, $3);
                 free($1);
               };
 vertex_list: '[' vertexes ']'
@@ -545,7 +545,7 @@ vertexes: vertex
               {
                 GArrayExpression* vertexes = new GArrayExpression();
                 vertexes->addElement($1);
-                $$ = NewAst(NodeType::ArrayExpression, vertexes, nullptr, 0);
+                $$ = MakeNode(NodeType::ArrayExpression, vertexes, nullptr);
               }
         | vertexes ',' vertex
               {
@@ -557,28 +557,28 @@ vertex: '[' LITERAL_STRING ',' normal_json ']'
               {
                 GVertexDeclaration* decl = new GVertexDeclaration(INIT_STRING_AST($2), $4);
                 free($2);
-                $$ = NewAst(NodeType::VertexDeclaration, decl, nullptr, 0);
+                $$ = MakeNode(NodeType::VertexDeclaration, decl, nullptr);
               }
         | '[' VAR_INTEGER ']'
               {
                 GVertexDeclaration* decl = new GVertexDeclaration(INIT_NUMBER_AST($2, AttributeKind::Integer), nullptr);
-                $$ = NewAst(NodeType::VertexDeclaration, decl, nullptr, 0);
+                $$ = MakeNode(NodeType::VertexDeclaration, decl, nullptr);
               }
         | '[' VAR_INTEGER ',' normal_json ']'
               {
                 GVertexDeclaration* decl = new GVertexDeclaration(INIT_NUMBER_AST($2, AttributeKind::Integer), $4);
-                $$ = NewAst(NodeType::VertexDeclaration, decl, nullptr, 0);
+                $$ = MakeNode(NodeType::VertexDeclaration, decl, nullptr);
               }
         | key
               {
                 GVertexDeclaration* decl = new GVertexDeclaration($1, nullptr);
-                $$ = NewAst(NodeType::VertexDeclaration, decl, nullptr, 0);
+                $$ = MakeNode(NodeType::VertexDeclaration, decl, nullptr);
               };
 condition_links: condition_link
               {
                 GArrayExpression* edges = new GArrayExpression();
                 edges->addElement($1);
-                $$ = NewAst(NodeType::ArrayExpression, edges, nullptr, 0);
+                $$ = MakeNode(NodeType::ArrayExpression, edges, nullptr);
               }
         | condition_links ',' condition_link
               {
@@ -590,7 +590,7 @@ condition_links: condition_link
 condition_link: '[' condition_link_item ',' connection ',' condition_link_item ']'
               {
                 GEdgeDeclaration* edge = new GEdgeDeclaration($4, $2, $6);
-                $$ = NewAst(NodeType::EdgeDeclaration, edge, nullptr, 0);
+                $$ = MakeNode(NodeType::EdgeDeclaration, edge, nullptr);
               };
 condition_link_item: VAR_INTEGER {$$ = INIT_NUMBER_AST($1, AttributeKind::Integer);}
         | LITERAL_STRING
@@ -604,7 +604,7 @@ links: link
               {
                 GArrayExpression* edges = new GArrayExpression();
                 edges->addElement($1);
-                $$ = NewAst(NodeType::ArrayExpression, edges, nullptr, 0);
+                $$ = MakeNode(NodeType::ArrayExpression, edges, nullptr);
               }
         | links ',' link
               {
@@ -615,12 +615,12 @@ links: link
 link: '[' key ',' connection ',' key ']'
               {
                 GEdgeDeclaration* edge = new GEdgeDeclaration($4, $2, $6);
-                $$ = NewAst(NodeType::EdgeDeclaration, edge, nullptr, 0);
+                $$ = MakeNode(NodeType::EdgeDeclaration, edge, nullptr);
               }
         | '[' key ']'
               {
                 GEdgeDeclaration* edge = new GEdgeDeclaration("--", $2);
-                $$ = NewAst(NodeType::EdgeDeclaration, edge, nullptr, 0);
+                $$ = MakeNode(NodeType::EdgeDeclaration, edge, nullptr);
               }
         ;
 multi_link: '[' key ',' a_edge ',' '[' strings ']' ']'
@@ -636,7 +636,7 @@ number_list: number
               {
                 GArrayExpression* elemts = new GArrayExpression();
                 elemts->addElement($1);
-                $$ = NewAst(NodeType::ArrayExpression, elemts, nullptr, 0);
+                $$ = MakeNode(NodeType::ArrayExpression, elemts, nullptr);
               }
         | number_list ',' number
               {
@@ -654,7 +654,7 @@ simple_value: VAR_BASE64
               {
                 GLiteralBinary* bin = new GLiteralBinary($1, "b64");
                 free($1);
-                $$ = NewAst(NodeType::Literal, bin, nullptr, 0);
+                $$ = MakeNode(NodeType::Literal, bin, nullptr);
               }
         | LITERAL_STRING
               {
@@ -664,7 +664,7 @@ simple_value: VAR_BASE64
         | VAR_DATETIME
               {
                 GLiteralDatetime* dt = new GLiteralDatetime($1);
-                $$ = NewAst(NodeType::Literal, dt, nullptr, 0);
+                $$ = MakeNode(NodeType::Literal, dt, nullptr);
               }
         | number
               {
@@ -672,11 +672,11 @@ simple_value: VAR_BASE64
               };
 normal_object: '{' normal_properties '}'
             {
-              $$ = NewAst(NodeType::ObjectExpression, $2, nullptr, 0);
+              $$ = MakeNode(NodeType::ObjectExpression, $2, nullptr);
             };
 condition_object: '{' condition_properties '}'
             {
-              $$ = NewAst(NodeType::ObjectExpression, $2, nullptr, 0);
+              $$ = MakeNode(NodeType::ObjectExpression, $2, nullptr);
             }
         | error '}'
             {
@@ -689,7 +689,7 @@ condition_object: '{' condition_properties '}'
 normal_properties: normal_property {
               GArrayExpression* props = new GArrayExpression();
               props->addElement($1);
-              $$ = NewAst(NodeType::ArrayExpression, props, nullptr, 0);
+              $$ = MakeNode(NodeType::ArrayExpression, props, nullptr);
             }
         | normal_properties ',' normal_property
               {
@@ -701,7 +701,7 @@ condition_properties: condition_property
               {
                 GArrayExpression* props = new GArrayExpression();
                 props->addElement($1);
-                $$ = NewAst(NodeType::ArrayExpression, props, nullptr, 0);
+                $$ = MakeNode(NodeType::ArrayExpression, props, nullptr);
               }
         | condition_properties ',' condition_property
               {
@@ -713,116 +713,116 @@ normal_property: VAR_NAME ':' simple_value
               {
                 GProperty* prop = new GProperty($1, $3);
                 free($1);
-                $$ = NewAst(NodeType::Property, prop, nullptr, 0);
+                $$ = MakeNode(NodeType::Property, prop, nullptr);
               }
         | VAR_NAME ':' normal_value
               {
                 GProperty* prop = new GProperty($1, $3);
                 free($1);
-                $$ = NewAst(NodeType::Property, prop, nullptr, 0);
+                $$ = MakeNode(NodeType::Property, prop, nullptr);
               };
 condition_property: VAR_NAME ':' right_value
               {
                 GProperty* prop = new GProperty($1, $3);
                 free($1);
-                $$ = NewAst(NodeType::Property, prop, nullptr, 0);
+                $$ = MakeNode(NodeType::Property, prop, nullptr);
               }
         | VAR_NAME ':' STAR
               {
                 GProperty* prop = new GProperty($1, INIT_STRING_AST("*"));
                 free($1);
-                $$ = NewAst(NodeType::Property, prop, nullptr, 0);
+                $$ = MakeNode(NodeType::Property, prop, nullptr);
               }
         | datetime_comparable { $$ = $1;}
         | range_comparable { $$ = $1;}
         | KW_ID ':' key
               {
                 GProperty* prop = new GProperty("id", $3);
-                $$ = NewAst(NodeType::Property, prop, nullptr, 0);
+                $$ = MakeNode(NodeType::Property, prop, nullptr);
               }
         | AND ':' condition_array
               {
                 GProperty* prop = new GProperty("and", $3);
-                $$ = NewAst(NodeType::BinaryExpression, prop, nullptr, 0);
+                $$ = MakeNode(NodeType::BinaryExpression, prop, nullptr);
               }
         | OR ':' condition_array
               {
                 GProperty* prop = new GProperty("or", $3);
-                $$ = NewAst(NodeType::BinaryExpression, prop, nullptr, 0);
+                $$ = MakeNode(NodeType::BinaryExpression, prop, nullptr);
               }
         | group ':' LITERAL_STRING
               {
-                struct GASTNode* value = INIT_STRING_AST($3);
+                struct GListNode* value = INIT_STRING_AST($3);
                 free($3);
                 GProperty* prop = new GProperty("group", value);
-                $$ = NewAst(NodeType::Property, prop, nullptr, 0);
+                $$ = MakeNode(NodeType::Property, prop, nullptr);
               }
         | OP_NEAR ':' '{' geometry_condition '}'
               {
                 GObjectFunction* obj = (GObjectFunction*)($4->_value);
                 obj->setFunctionName("__near__", "__global__");
                 GProperty* prop = new GProperty("near", $4);
-                $$ = NewAst(NodeType::BinaryExpression, prop, nullptr, 0);
+                $$ = MakeNode(NodeType::BinaryExpression, prop, nullptr);
               };
 range_comparable: OP_GREAT_THAN_EQUAL ':' range_comparable_obj
               {
                 GProperty* prop = new GProperty("gte", $3);
-                $$ = NewAst(NodeType::BinaryExpression, prop, nullptr, 0);
+                $$ = MakeNode(NodeType::BinaryExpression, prop, nullptr);
               }
         | OP_LESS_THAN_EQUAL ':' range_comparable_obj
               {
                 GProperty* prop = new GProperty("lte", $3);
-                $$ = NewAst(NodeType::BinaryExpression, prop, nullptr, 0);
+                $$ = MakeNode(NodeType::BinaryExpression, prop, nullptr);
               }
         | OP_GREAT_THAN ':' range_comparable_obj
               {
                 GProperty* prop = new GProperty("gt", $3);
-                $$ = NewAst(NodeType::BinaryExpression, prop, nullptr, 0);
+                $$ = MakeNode(NodeType::BinaryExpression, prop, nullptr);
               }
         | OP_LESS_THAN ':' range_comparable_obj
               {
                 GProperty* prop = new GProperty("lt", $3);
-                $$ = NewAst(NodeType::BinaryExpression, prop, nullptr, 0);
+                $$ = MakeNode(NodeType::BinaryExpression, prop, nullptr);
               };
 range_comparable_obj: number { $$ = $1; }
-        | function_obj { $$ = $1; };
+        | lambda_expr { $$ = $1; };
 datetime_comparable: OP_GREAT_THAN_EQUAL ':' VAR_DATETIME
               {
                 GLiteralDatetime* dt = new GLiteralDatetime($3);
-                GProperty* prop = new GProperty("gte", NewAst(NodeType::Literal, dt, nullptr, 0));
-                $$ = NewAst(NodeType::BinaryExpression, prop, nullptr, 0);
+                GProperty* prop = new GProperty("gte", MakeNode(NodeType::Literal, dt, nullptr));
+                $$ = MakeNode(NodeType::BinaryExpression, prop, nullptr);
               }
         | OP_LESS_THAN_EQUAL ':' VAR_DATETIME
               {
                 GLiteralDatetime* dt = new GLiteralDatetime($3);
-                GProperty* prop = new GProperty("lte", NewAst(NodeType::Literal, dt, nullptr, 0));
-                $$ = NewAst(NodeType::BinaryExpression, prop, nullptr, 0);
+                GProperty* prop = new GProperty("lte", MakeNode(NodeType::Literal, dt, nullptr));
+                $$ = MakeNode(NodeType::BinaryExpression, prop, nullptr);
               }
         | OP_GREAT_THAN ':' VAR_DATETIME
               {
                 GLiteralDatetime* dt = new GLiteralDatetime($3);
-                GProperty* prop = new GProperty("gt", NewAst(NodeType::Literal, dt, nullptr, 0));
-                $$ = NewAst(NodeType::BinaryExpression, prop, nullptr, 0);
+                GProperty* prop = new GProperty("gt", MakeNode(NodeType::Literal, dt, nullptr));
+                $$ = MakeNode(NodeType::BinaryExpression, prop, nullptr);
               }
         | OP_LESS_THAN ':' VAR_DATETIME
               {
                 GLiteralDatetime* dt = new GLiteralDatetime($3);
-                GProperty* prop = new GProperty("lt", NewAst(NodeType::Literal, dt, nullptr, 0));
-                $$ = NewAst(NodeType::BinaryExpression, prop, nullptr, 0);
+                GProperty* prop = new GProperty("lt", MakeNode(NodeType::Literal, dt, nullptr));
+                $$ = MakeNode(NodeType::BinaryExpression, prop, nullptr);
               };
 geometry_condition: OP_GEOMETRY ':' a_vector ',' range_comparable
               {
                 GObjectFunction* obj = new GObjectFunction();
                 obj->addFunctionParam($3);
                 obj->addFunctionParam($5);
-                $$ = NewAst(NodeType::CallExpression, obj, nullptr, 0);
+                $$ = MakeNode(NodeType::CallExpression, obj, nullptr);
               }
         | range_comparable ',' OP_GEOMETRY ':' a_vector
               {
                 GObjectFunction* obj = new GObjectFunction();
                 obj->addFunctionParam($5);
                 obj->addFunctionParam($1);
-                $$ = NewAst(NodeType::CallExpression, obj, nullptr, 0);
+                $$ = MakeNode(NodeType::CallExpression, obj, nullptr);
               };
 condition_array: '[' ']' { $$ = nullptr; }
         | '[' condition_values ']'
@@ -851,7 +851,7 @@ normal_values: normal_value
               {
                 GArrayExpression* values = new GArrayExpression();
                 values->addElement($1);
-                $$ = NewAst(NodeType::ArrayExpression, values, nullptr, 0);
+                $$ = MakeNode(NodeType::ArrayExpression, values, nullptr);
               }
         | normal_values ',' normal_value
               {
@@ -863,7 +863,7 @@ simple_values: simple_value
               {
                 GArrayExpression* values = new GArrayExpression();
                 values->addElement($1);
-                $$ = NewAst(NodeType::ArrayExpression, values, nullptr, 0);
+                $$ = MakeNode(NodeType::ArrayExpression, values, nullptr);
               }
         | simple_values ',' simple_value
               {
@@ -874,7 +874,7 @@ simple_values: simple_value
 condition_values: right_value {
                 GArrayExpression* values = new GArrayExpression();
                 values->addElement($1);
-                $$ = NewAst(NodeType::ArrayExpression, values, nullptr, 0);
+                $$ = MakeNode(NodeType::ArrayExpression, values, nullptr);
               }
         | condition_values ',' right_value
               {
@@ -886,22 +886,22 @@ condition_values: right_value {
 a_link_condition: a_edge ':' a_value
               {
                 GEdgeDeclaration* edge = new GEdgeDeclaration($1, $3);
-                $$ = NewAst(NodeType::EdgeDeclaration, edge, nullptr, 0);
+                $$ = MakeNode(NodeType::EdgeDeclaration, edge, nullptr);
               }
         | a_edge ':' normal_json
               {
                 GEdgeDeclaration* edge = new GEdgeDeclaration($1, $3);
-                $$ = NewAst(NodeType::EdgeDeclaration, edge, nullptr, 0);
+                $$ = MakeNode(NodeType::EdgeDeclaration, edge, nullptr);
               }
         | a_edge ':' function_call
               {
                 GEdgeDeclaration* edge = new GEdgeDeclaration($1, $3);
-                $$ = NewAst(NodeType::EdgeDeclaration, edge, nullptr, 0);
+                $$ = MakeNode(NodeType::EdgeDeclaration, edge, nullptr);
               }
         | a_edge ':' KW_REST
               {
                 GEdgeDeclaration* edge = new GEdgeDeclaration($1, INIT_STRING_AST("..."));
-                $$ = NewAst(NodeType::EdgeDeclaration, edge, nullptr, 0);
+                $$ = MakeNode(NodeType::EdgeDeclaration, edge, nullptr);
               };
 a_edge:   right_arrow { memcpy(&$$, "->", 3);}
         | left_arrow { memcpy(&$$, "<-", 3); }
@@ -915,25 +915,40 @@ a_value:  LITERAL_STRING
         | VAR_INTEGER { $$ = INIT_NUMBER_AST($1, AttributeKind::Integer); };
 key: VAR_INTEGER { $$ = INIT_NUMBER_AST($1, AttributeKind::Integer); }
         | LITERAL_STRING { $$ = INIT_STRING_AST($1); free($1);};
-function_call: VAR_NAME function_params
+function_call: VAR_NAME function_arg_stmt
               {
-                auto fname = INIT_STRING_AST($1);
+                GObjectFunction* obj = new GObjectFunction();
+                obj->setFunctionName($1, "");
+                obj->addFunctionParams($2);
                 free($1);
-                if ($2 == nullptr) {
-                  $$ = NewAst(NodeType::CallExpression, fname, $2, 0);
-                }
-                else {
-                  $$ = NewAst(NodeType::CallExpression, fname, $2, 1);
-                }
+                $$ = MakeNode(NodeType::CallExpression, obj, nullptr);
               };
-function_obj: function_params FUNCTION_ARROW '{' statements '}'
+lambda_expr: function_arg_stmt FUNCTION_ARROW '{' statements '}'
               {
-                $$ = NewAst(NodeType::BlockStatement, $1, $4, 0);
+                GLambdaExpression* expr = new GLambdaExpression($1, $4);
+                $$ = MakeNode(NodeType::LambdaExpression, expr, 0);
               };
-function_params
+function_arg_stmt
         : '(' ')' { $$ = nullptr; }
-        | '(' STAR ')' { $$ = INIT_STRING_AST("*"); }
-        | '(' string_list ')' { $$ = $2; }
+        | '(' function_params ')' { $$ = $2; }
+        ;
+function_params
+        : STAR { $$ = INIT_STRING_AST("*"); }
+        | function_param_list { $$ = $1; }
+        ;
+function_param_list
+        : a_value
+              {
+                GArrayExpression* arr = new GArrayExpression();
+                arr->addElement($1);
+                $$ = MakeNode(NodeType::ArrayExpression, arr, nullptr);
+              }
+        | function_param_list ',' a_value
+              {
+                GArrayExpression* arr = (GArrayExpression*)$1->_value;
+                arr->addElement($3);
+                $$ = $1;
+              }
         ;
 statements: statement { $$ = $1;}
         | statements statement { $$ = $1;};
@@ -943,10 +958,11 @@ statement
         | expr ';'        { $$ = $1;}
         | assign_state ';'{ $$ = $1;}
         ;
-if_state: IF expr {};
+if_state: IF expr { $$ = $2; };
 ret_state
         : RETURN expr { $$ = $2; };
-assign_state: {};
-exprs: {};
-expr: a_value { printf("expr\n"); $$ = $1; };
+assign_state: { $$ = nullptr; };
+exprs: expr { $$ = $1; }
+        | exprs ',' expr { $$ = $1; };
+expr: a_value { $$ = $1; };
 %%

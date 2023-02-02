@@ -4,7 +4,7 @@
 #include "base/lang/ASTNode.h"
 #include "base/Variant.h"
 
-struct GASTNode;
+struct GListNode;
 class GVirtualNetwork;
 class GStorageEngine;
 class GUtilPlan: public GPlan {

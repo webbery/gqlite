@@ -124,7 +124,7 @@ int GStorageEngine::open(const char* filename, StoreOption option) {
 
 bool GStorageEngine::isOpen()
 {
-  if (_schema.empty()) return false;
+  if (_schema.is_null() || _schema.empty()) return false;
   return true;
 }
 

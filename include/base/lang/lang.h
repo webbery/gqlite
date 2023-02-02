@@ -19,5 +19,6 @@
 #include "base/lang/ObjectFunction.h"
 #include "base/lang/GroupStmt.h"
 #include "base/lang/MemberExpression.h"
+#include "base/lang/LambdaExpression.h"
 #include "base/lang/DumpStmt.h"
 #include "base/lang/ASTNode.h"

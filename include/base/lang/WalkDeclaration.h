@@ -1,7 +1,7 @@
 #pragma once
 #include <string>
 
-struct GASTNode;
+struct GListNode;
 
 class GWalkDeclaration {
 public:
@@ -10,14 +10,14 @@ public:
     EdgeVertex,
   };
   struct WalkElement {
-    GASTNode* _element;
+    GListNode* _element;
     WalkElement* _next;
   };
 
   GWalkDeclaration();
   ~GWalkDeclaration();
 
-  void add(GASTNode* node, bool isVertex);
+  void add(GListNode* node, bool isVertex);
 
   size_t size() const { return _size; }
 
@@ -25,7 +25,7 @@ public:
 
   Order order() const { return _order; }
 private:
-  WalkElement* init(GASTNode* node);
+  WalkElement* init(GListNode* node);
 
 private:
   Order _order;
@@ -35,18 +35,18 @@ private:
 
 class GEdgeDeclaration {
 public:
-  GEdgeDeclaration(const char* str, GASTNode* node);
-  GEdgeDeclaration(const char* str, GASTNode* from, GASTNode* to);
-  GEdgeDeclaration(GASTNode* edge, GASTNode* from, GASTNode* to);
+  GEdgeDeclaration(const char* str, GListNode* node);
+  GEdgeDeclaration(const char* str, GListNode* from, GListNode* to);
+  GEdgeDeclaration(GListNode* edge, GListNode* from, GListNode* to);
   ~GEdgeDeclaration();
 
   std::string direction() const { return _direction; }
-  GASTNode* from() const { return _from; }
-  GASTNode* to() const { return _to; }
-  GASTNode* value() const;
+  GListNode* from() const { return _from; }
+  GListNode* to() const { return _to; }
+  GListNode* value() const;
 private:
-  GASTNode* _from;
-  GASTNode* _to;
-  GASTNode* _edge;
+  GListNode* _from;
+  GListNode* _to;
+  GListNode* _edge;
   std::string _direction;
 };

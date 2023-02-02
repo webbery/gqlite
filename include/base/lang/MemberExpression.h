@@ -1,15 +1,15 @@
 #pragma once
 #include <string>
 
-struct GASTNode;
+struct GListNode;
 class GMemberExpression {
 public:
-  GMemberExpression(GASTNode* obj, GASTNode* property, GASTNode* arguments = nullptr);
+  GMemberExpression(GListNode* obj, GListNode* property, GListNode* arguments = nullptr);
   ~GMemberExpression();
 
   std::string GetObjectName() const;
 private:
-  GASTNode* _obj;
-  GASTNode* _prop;
-  GASTNode* _args;
+  GListNode* _obj;
+  GListNode* _prop;
+  GListNode* _args;
 };

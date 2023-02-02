@@ -13,7 +13,7 @@ GUpsetPlan::GUpsetPlan(std::map<std::string, GVirtualNetwork*>& vn, GStorageEngi
 ,_class(ast->name())
 ,_scan(nullptr)
 {
-  GASTNode* condition = ast->conditions();
+  GListNode* condition = ast->conditions();
   if (condition) {
     _scan = new GScanPlan(vn, store, condition, _class);
   }
@@ -256,7 +256,7 @@ VisitFlow GUpsetPlan::UpsetVisitor::apply(GProperty* stmt, std::list<NodeType>& 
   return VisitFlow::SkipCurrent;
 }
 
-gkey_t GUpsetPlan::UpsetVisitor::getLiteral(GASTNode* node)
+gkey_t GUpsetPlan::UpsetVisitor::getLiteral(GListNode* node)
 {
   GLiteral* literal = (GLiteral*)(node->_value);
   gkey_t k;

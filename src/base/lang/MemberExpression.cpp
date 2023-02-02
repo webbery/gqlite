@@ -1,7 +1,7 @@
 #include "base/lang/MemberExpression.h"
 #include "base/lang/ASTNode.h"
 
-GMemberExpression::GMemberExpression(GASTNode* obj, GASTNode* property, GASTNode* arguments)
+GMemberExpression::GMemberExpression(GListNode* obj, GListNode* property, GListNode* arguments)
   :_obj(obj), _prop(property), _args(arguments)
 {
 
@@ -9,9 +9,9 @@ GMemberExpression::GMemberExpression(GASTNode* obj, GASTNode* property, GASTNode
 
 GMemberExpression::~GMemberExpression()
 {
-  FreeAst(_args);
-  FreeAst(_prop);
-  FreeAst(_obj);
+  FreeNode(_args);
+  FreeNode(_prop);
+  FreeNode(_obj);
 }
 
 std::string GMemberExpression::GetObjectName() const

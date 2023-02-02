@@ -25,7 +25,7 @@ void readCSV(const std::string& name, std::function<void(char*)> cb, bool skip_h
 
 TEST_CASE("init movies") {
   gqlite* pHandle = 0;
-  gqlite_open(&pHandle);
+  assert(gqlite_open(&pHandle) == ECode_Success);
 
   int major, minor, patch;
   assert(gqlite_version(pHandle, &major, &minor, &patch) == 0);

@@ -37,7 +37,7 @@ DECIMAL [0-9]+.[0-9]+
     "{"                 {
                             stm._errIndx += yyleng;
                             ++stm._scriptRangePairCnt;
-                            printf("match {\n");
+                            /* printf("match {\n"); */
                             return *yytext;
                         }
     "}"                 {
@@ -45,7 +45,7 @@ DECIMAL [0-9]+.[0-9]+
                             if (stm._scriptRangePairCnt == 0) {
                                 BEGIN INITIAL;
                             }
-                            printf("match }, %d\n", stm._scriptRangePairCnt);
+                            /* printf("match }, %d\n", stm._scriptRangePairCnt); */
                             return *yytext;
                         }
     "if"                { stm._errIndx += yyleng; return IF; };
@@ -64,7 +64,7 @@ DECIMAL [0-9]+.[0-9]+
                         stm._errIndx += yyleng;
                         stm._scriptRangePairCnt = 0;
                         BEGIN GSCRIPT;
-                        printf("begin gscript\n");
+                        /* printf("begin gscript\n"); */
                         return FUNCTION_ARROW;
                     }
     h''             {

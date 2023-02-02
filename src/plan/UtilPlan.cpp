@@ -16,13 +16,13 @@ GUtilPlan::GUtilPlan(std::map<std::string, GVirtualNetwork*>& vn, GStorageEngine
 :GPlan(vn, store) {
     _type = UtilType::Creation;
     _var = stmt->name();
-    GASTNode* groups = stmt->groups();
+    GListNode* groups = stmt->groups();
     if (groups) {
       GArrayExpression* array = (GArrayExpression*)groups->_value;
       for (auto item: *array) {
         GGroupStmt* group = reinterpret_cast<GGroupStmt*>(item->_value);
         std::string name = group->name();
-        GASTNode* node = group->properties();
+        GListNode* node = group->properties();
         if (node) {
           std::vector<std::string> props;
           GArrayExpression* array = reinterpret_cast<GArrayExpression*>(node->_value);
@@ -31,7 +31,7 @@ GUtilPlan::GUtilPlan(std::map<std::string, GVirtualNetwork*>& vn, GStorageEngine
           }
           _vParams2.emplace_back(props);
         }
-        GASTNode* indexes = group->indexes();
+        GListNode* indexes = group->indexes();
         if (indexes) {
           GArrayExpression* array = (GArrayExpression*)indexes->_value;
           for (auto item : *array) {

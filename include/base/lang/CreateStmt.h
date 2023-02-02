@@ -1,17 +1,17 @@
 #pragma once
 #include <string>
 
-struct GASTNode;
+struct GListNode;
 class GPlan;
 class GCreateStmt {
 public:
-  GCreateStmt(const std::string& name, GASTNode* groups);
+  GCreateStmt(const std::string& name, GListNode* groups);
   ~GCreateStmt();
 
   std::string name() const;
 
-  GASTNode* groups() const;
+  GListNode* groups() const;
 private:
   std::string _name;
-  GASTNode* _groups;
+  GListNode* _groups;
 };
