@@ -38,15 +38,14 @@ AST:
       |- type: Literal
       |- raw: vertex_db
       |- kind: String
-      `- type: ArrayExpression
-        |- type: ArrayExpression
-        |- #1
-          |- type: Property
-          |- key: category
-          |- value:
-            |- type: Literal
-            |- raw: 废墟
-            |- kind: String
+      |- type: ArrayExpression
+      |- #1
+        |- type: Property
+        |- key: category
+        |- value:
+          |- type: Literal
+          |- raw: 废墟
+          |- kind: String
 EXECUTE COMMAND SUCCESS
 [15]:	{query: 'ruins'};
 [1, {"datatime":"0d5","filename":"破墙0.jpg"}]
@@ -89,21 +88,19 @@ AST:
       |- type: Literal
       |- raw: vertex_db
       |- kind: String
-      `- type: ArrayExpression
-        |- type: ArrayExpression
-        |- #1
-          |- type: Property
-          |- key: datatime
-          |- value:
-            `- type: ArrayExpression
-              |- type: ArrayExpression
-              |- #1
-                |- type: Property
-                |- key: lt
-                |- value:
-                  |- type: Literal
-                  |- raw: 1653315732
-                  |- kind: Unknow Property Kind: 1
+      |- type: ArrayExpression
+      |- #1
+        |- type: Property
+        |- key: datatime
+        |- value:
+          |- type: ArrayExpression
+          |- #1
+            |- type: Property
+            |- key: lt
+            |- value:
+              |- type: Literal
+              |- raw: 1653315732
+              |- kind: Unknow Property Kind: 1
 EXECUTE COMMAND SUCCESS
 [21]:	{query: 'ruins', in: 'query_db', where: {datatime: {$lt: 0d1653315732}}};
 [1, {"datatime":"0d5","filename":"破墙0.jpg"}]
@@ -151,6 +148,22 @@ QUERY SUCCESS
 [v8, {"category":"HDR","datatime":"0d1651105732","feature_name":[0.5,0.0],"filename":"蓝天.jpg"}]
 QUERY SUCCESS
 [27]:	{query: 'ruins', in: 'query_db', where: {feature_name: {$lte: () => {return 0.5;}}}};
+[1, {"datatime":"0d5","filename":"破墙0.jpg"}]
+[3, null]
+[4, null]
+[5, null]
+[ff, {"filename":"破墙5.jpg","thumbnail":"0bAQI="}]
+[v1, {"datatime":"0d1653446732","feature_name":[0.0,0.0],"filename":"破旧小屋.jpg"}]
+[v2, {"category":"HDR","datatime":"0d1653446732","filename":"夕阳.jpg"}]
+[v3, {"category":"赛博朋克","datatime":"0d1653446732","filename":"阿丽塔.jpg"}]
+[v4, {"datatime":"0d1653315732","feature_name":[0.0,0.5],"filename":"垃圾堆.jpg"}]
+[v5, {"category":"HDR","datatime":"0d1653315732","filename":"海岸线.jpg"}]
+[v6, {"category":"赛博朋克","datatime":"0d1653315732","filename":"机械姬.jpg"}]
+[v7, {"datatime":"0d1651105732","feature_name":[0.0,1.5],"filename":"破墙.jpg"}]
+[v8, {"category":"HDR","datatime":"0d1651105732","feature_name":[0.5,0.0],"filename":"蓝天.jpg"}]
+[v9, {"category":"赛博朋克","datatime":"0d1651105732","filename":"大佐.jpg"}]
+[yu6, {"pid":461791488}]
+[yu7, {"name":"新分类2/新子类","pid":2821611776}]
 QUERY SUCCESS
 [28]:	{remove: 'ruins', vertex: {id: '3'}};
 REMOVE SUCCESS

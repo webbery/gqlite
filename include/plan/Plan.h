@@ -22,6 +22,9 @@ enum class ExecuteStatus {
   Stop
 };
 
+class GVM;
+struct Chunk;
+struct Compiler;
 class GPlan {
 public:
   GPlan(std::map<std::string, GVirtualNetwork*>& networks, GStorageEngine* store);
@@ -32,7 +35,7 @@ public:
    * For example: before update execute, we should check database created or not.
    */
   virtual int prepare() { return 0; }
-  virtual int execute(const std::function<ExecuteStatus(KeyType, const std::string& key, nlohmann::json& value, int status)>& processor) = 0;
+  virtual int execute(GVM* gvm, const std::function<ExecuteStatus(KeyType, const std::string& key, nlohmann::json& value, int status)>& processor) = 0;
   /**
    * Try to interrupt plan when it still working
    */
@@ -40,9 +43,17 @@ public:
   void addLeft(GPlan* plan) { _left = plan; }
 
   inline GPlan* left() { return _left; }
+
+  virtual void addChunk(Chunk* chunk) {_chunk = chunk;}
+  virtual Chunk* chunk() const { return _chunk; }
+
+  virtual void addCompiler(Compiler* compiler) {}
+
 protected:
   std::map<std::string, GVirtualNetwork*>& _networks;
   GStorageEngine* _store;
+  Chunk* _chunk;
+  Compiler* _compiler;
   GPlan* _left;
   GPlan* _right;
 };

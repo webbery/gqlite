@@ -18,16 +18,13 @@
 #include "base/lang/lang.h"
 #include "base/lang/AST.h"
 
-#define GET_GRAPH(name)  \
-  GGraph* pGraph = stm._graph->getGraph(name);\
-  if (!pGraph) {\
-    break;\
-  }
 } // top
 
 %code {
 #define YY_DECL \
        int yylex(YYSTYPE* yylval_param, YYLTYPE* yylloc_param, void* yyscanner, GVirtualEngine& stm)
+
+#define BINARY(op, left, right) MakeNode(NodeType::BinaryExpression, new GBinaryExpression(op, left, right), nullptr)
 
 void yyerror(YYLTYPE* yyllocp, yyscan_t unused, GVirtualEngine& stm, const char* msg) {
   std::string err_index;
@@ -77,12 +74,15 @@ struct GListNode* INIT_NUMBER_AST(double v, AttributeKind kind) {
 }
 
 void startScript(struct yyguts_t * yyg);
+
+void emit() {}
 } // %code
 
 %lex-param {GVirtualEngine& stm}
 %parse-param {GVirtualEngine& stm}
 %union {
   struct GListNode* node;
+  struct Chunk* chunk;
   double __f;
   char var_name[32];
   char* __c;
@@ -108,7 +108,7 @@ void startScript(struct yyguts_t * yyg);
 %token CMD_SHOW 
 %token OP_GREAT_THAN OP_LESS_THAN OP_GREAT_THAN_EQUAL OP_LESS_THAN_EQUAL equal AND OR OP_NEAR
 %token SKIP
-%token FUNCTION_ARROW RETURN IF ELSE
+%token FUNCTION_ARROW RETURN IF ELSE LET
 %token limit profile property
 
 %type <var_name> a_edge
@@ -120,7 +120,6 @@ void startScript(struct yyguts_t * yyg);
 %type <node> condition_array normal_array
 %type <node> normal_properties condition_properties
 %type <node> where_expr a_walk vertex_start_walk edge_start_walk a_simple_graph condition_vertex a_walk_range
-%type <node> function_call function_params function_param_list function_arg_stmt lambda_expr statements statement if_state ret_state expr exprs assign_state
 %type <node> normal_property condition_property
 %type <node> gql
 %type <node> creation dump_graph
@@ -134,6 +133,11 @@ void startScript(struct yyguts_t * yyg);
 %type <node> upset_edges edge_pattern connection a_link_condition
 %type <node> links link condition_links condition_link_item condition_link
 %type <node> key string_list strings intergers property_list a_vector number_list
+
+/*************** Graph Script ***************/
+%type <node> function_call function_params function_param_list function_arg_stmt
+%type <node> lambda_expr expr exprs  variant_decl declaration
+%type <node> statements statement if_state ret_state assign_state block 
 
 %%
 line_list: line_list line ';' {}
@@ -210,7 +214,7 @@ utility_cmd: CMD_SHOW KW_GRAPH
             // DumpAst($2);
             GViewVisitor visitor;
             std::list<NodeType> ln;
-            accept($2, visitor, ln);
+            accept($2, &visitor, ln);
             FreeNode($2);
             stm._cmdtype = GQL_Util;
           }
@@ -672,11 +676,11 @@ simple_value: VAR_BASE64
               };
 normal_object: '{' normal_properties '}'
             {
-              $$ = MakeNode(NodeType::ObjectExpression, $2, nullptr);
+              $$ = $2;
             };
 condition_object: '{' condition_properties '}'
             {
-              $$ = MakeNode(NodeType::ObjectExpression, $2, nullptr);
+              $$ = $2;
             }
         | error '}'
             {
@@ -743,12 +747,12 @@ condition_property: VAR_NAME ':' right_value
         | AND ':' condition_array
               {
                 GProperty* prop = new GProperty("and", $3);
-                $$ = MakeNode(NodeType::BinaryExpression, prop, nullptr);
+                $$ = MakeNode(NodeType::ObjectExpression, prop, nullptr);
               }
         | OR ':' condition_array
               {
                 GProperty* prop = new GProperty("or", $3);
-                $$ = MakeNode(NodeType::BinaryExpression, prop, nullptr);
+                $$ = MakeNode(NodeType::ObjectExpression, prop, nullptr);
               }
         | group ':' LITERAL_STRING
               {
@@ -762,27 +766,27 @@ condition_property: VAR_NAME ':' right_value
                 GObjectFunction* obj = (GObjectFunction*)($4->_value);
                 obj->setFunctionName("__near__", "__global__");
                 GProperty* prop = new GProperty("near", $4);
-                $$ = MakeNode(NodeType::BinaryExpression, prop, nullptr);
+                $$ = MakeNode(NodeType::ObjectExpression, prop, nullptr);
               };
 range_comparable: OP_GREAT_THAN_EQUAL ':' range_comparable_obj
               {
                 GProperty* prop = new GProperty("gte", $3);
-                $$ = MakeNode(NodeType::BinaryExpression, prop, nullptr);
+                $$ = MakeNode(NodeType::ObjectExpression, prop, nullptr);
               }
         | OP_LESS_THAN_EQUAL ':' range_comparable_obj
               {
                 GProperty* prop = new GProperty("lte", $3);
-                $$ = MakeNode(NodeType::BinaryExpression, prop, nullptr);
+                $$ = MakeNode(NodeType::ObjectExpression, prop, nullptr);
               }
         | OP_GREAT_THAN ':' range_comparable_obj
               {
                 GProperty* prop = new GProperty("gt", $3);
-                $$ = MakeNode(NodeType::BinaryExpression, prop, nullptr);
+                $$ = MakeNode(NodeType::ObjectExpression, prop, nullptr);
               }
         | OP_LESS_THAN ':' range_comparable_obj
               {
                 GProperty* prop = new GProperty("lt", $3);
-                $$ = MakeNode(NodeType::BinaryExpression, prop, nullptr);
+                $$ = MakeNode(NodeType::ObjectExpression, prop, nullptr);
               };
 range_comparable_obj: number { $$ = $1; }
         | lambda_expr { $$ = $1; };
@@ -790,25 +794,25 @@ datetime_comparable: OP_GREAT_THAN_EQUAL ':' VAR_DATETIME
               {
                 GLiteralDatetime* dt = new GLiteralDatetime($3);
                 GProperty* prop = new GProperty("gte", MakeNode(NodeType::Literal, dt, nullptr));
-                $$ = MakeNode(NodeType::BinaryExpression, prop, nullptr);
+                $$ = MakeNode(NodeType::ObjectExpression, prop, nullptr);
               }
         | OP_LESS_THAN_EQUAL ':' VAR_DATETIME
               {
                 GLiteralDatetime* dt = new GLiteralDatetime($3);
                 GProperty* prop = new GProperty("lte", MakeNode(NodeType::Literal, dt, nullptr));
-                $$ = MakeNode(NodeType::BinaryExpression, prop, nullptr);
+                $$ = MakeNode(NodeType::ObjectExpression, prop, nullptr);
               }
         | OP_GREAT_THAN ':' VAR_DATETIME
               {
                 GLiteralDatetime* dt = new GLiteralDatetime($3);
                 GProperty* prop = new GProperty("gt", MakeNode(NodeType::Literal, dt, nullptr));
-                $$ = MakeNode(NodeType::BinaryExpression, prop, nullptr);
+                $$ = MakeNode(NodeType::ObjectExpression, prop, nullptr);
               }
         | OP_LESS_THAN ':' VAR_DATETIME
               {
                 GLiteralDatetime* dt = new GLiteralDatetime($3);
                 GProperty* prop = new GProperty("lt", MakeNode(NodeType::Literal, dt, nullptr));
-                $$ = MakeNode(NodeType::BinaryExpression, prop, nullptr);
+                $$ = MakeNode(NodeType::ObjectExpression, prop, nullptr);
               };
 geometry_condition: OP_GEOMETRY ':' a_vector ',' range_comparable
               {
@@ -915,6 +919,7 @@ a_value:  LITERAL_STRING
         | VAR_INTEGER { $$ = INIT_NUMBER_AST($1, AttributeKind::Integer); };
 key: VAR_INTEGER { $$ = INIT_NUMBER_AST($1, AttributeKind::Integer); }
         | LITERAL_STRING { $$ = INIT_STRING_AST($1); free($1);};
+/* ---------------- Graph Script --------------- */
 function_call: VAR_NAME function_arg_stmt
               {
                 GObjectFunction* obj = new GObjectFunction();
@@ -950,19 +955,54 @@ function_param_list
                 $$ = $1;
               }
         ;
-statements: statement { $$ = $1;}
-        | statements statement { $$ = $1;};
+statements: statement
+              {
+                GArrayExpression* arr = new GArrayExpression();
+                arr->addElement($1);
+                $$ = MakeNode(NodeType::ArrayExpression, arr, nullptr);
+              }
+        | statements statement
+              {
+                GArrayExpression* arr = (GArrayExpression*)$1->_value;
+                arr->addElement($2);
+                $$ = $1;
+              };
 statement
-        : if_state        { $$ = $1;}
+        : block           { $$ = $1;}
         | ret_state ';'   { $$ = $1;}
         | expr ';'        { $$ = $1;}
         | assign_state ';'{ $$ = $1;}
+        | declaration ';' { $$ = $1;}
         ;
-if_state: IF expr { $$ = $2; };
+if_state: IF '(' expr ')' { $$ = $3; };
 ret_state
-        : RETURN expr { $$ = $2; };
+        : RETURN expr { $$ = MakeNode(NodeType::ReturnStatement, new GReturnStmt($2), nullptr); };
 assign_state: { $$ = nullptr; };
-exprs: expr { $$ = $1; }
-        | exprs ',' expr { $$ = $1; };
-expr: a_value { $$ = $1; };
+exprs: expr
+              {
+                GArrayExpression* arr = new GArrayExpression();
+                arr->addElement($1);
+                $$ = MakeNode(NodeType::ArrayExpression, arr, nullptr);
+              }
+        | exprs ',' expr
+              {
+                GArrayExpression* arr = (GArrayExpression*)$1->_value;
+                arr->addElement($3);
+                $$ = $1;
+              };
+block: '{' statement '}'  { $$ = MakeNode(NodeType::BlockStatement, new GBlockStmt($2), nullptr); };
+expr: a_value { $$ = $1; } 
+        | expr '+' expr { $$ = BINARY(GBinaryExpression::Operator::Add, $1, $3); }
+        | expr '-' expr { $$ = BINARY(GBinaryExpression::Operator::Subtract, $1, $3); }
+        | expr '*' expr { $$ = BINARY(GBinaryExpression::Operator::Multiply, $1, $3); }
+        | expr '/' expr { $$ = BINARY(GBinaryExpression::Operator::Divide, $1, $3); }
+        | expr '=' expr { $$ = BINARY(GBinaryExpression::Operator::Assign, $1, $3); }
+        | '(' exprs ')' { $$ = $2; }
+        ;
+declaration
+    : variant_decl { $$ = $1; }
+    ;
+variant_decl
+    : LET VAR_NAME { $$ = MakeNode(NodeType::VariableDeclaration, new GVariableDecl($2, nullptr), nullptr); free($2);}
+    | LET VAR_NAME '=' expr { $$ = MakeNode(NodeType::VariableDeclaration, new GVariableDecl($2, $4), nullptr); free($2);}
 %%

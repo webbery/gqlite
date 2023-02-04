@@ -37,6 +37,10 @@
 #define ECode_Query_Pause           601
 #define ECode_Remove_Unknow_Type    700
 
+#define ECode_Compile_Error         800
+#define ECode_Compile_Warn_Var_Exist  850
+#define ECode_Runtime_Error         900
+
 typedef void* gqlite;
 
 typedef struct _gqlite_statement {

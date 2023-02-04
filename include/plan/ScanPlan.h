@@ -7,6 +7,7 @@
 #include <thread>
 #include <vector>
 #include <stack>
+#include "base/lang/visitor/IVisitor.h"
 #include "base/system/Observer.h"
 
 class GQueryStmt;
@@ -42,7 +43,7 @@ public:
 
   void addObserver(IObserver* observer);
   virtual int prepare();
-  virtual int execute(const std::function<ExecuteStatus(KeyType, const std::string& key, nlohmann::json& value, int status)>&);
+  virtual int execute(GVM* gvm, const std::function<ExecuteStatus(KeyType, const std::string& key, nlohmann::json& value, int status)>&);
   virtual int interrupt();
 
   void start();
@@ -79,7 +80,7 @@ private:
    */
   ScanPlans evaluate(const ScanPlans& props);
 
-  struct PatternVisitor {
+  struct PatternVisitor : public GVisitor {
     QueryCondition& _where;
     // and/or index
     long _index[2] = {0, 1};
@@ -95,29 +96,14 @@ private:
 
     PatternVisitor(QueryCondition& where) :_where(where) {}
 
-    VisitFlow apply(GListNode* stmt, std::list<NodeType>& path);
-    VisitFlow apply(GUpsetStmt* stmt, std::list<NodeType>& path) {
-      return VisitFlow::Return;
-    }
-    VisitFlow apply(GQueryStmt* stmt, std::list<NodeType>& path) {
-      return VisitFlow::Return;
-    }
-    VisitFlow apply(GGQLExpression* stmt, std::list<NodeType>& path) {
-      return VisitFlow::Children;
-    }
     VisitFlow apply(GProperty* stmt, std::list<NodeType>& path);
     VisitFlow apply(GVertexDeclaration* stmt, std::list<NodeType>& path);
-    VisitFlow apply(GCreateStmt* stmt, std::list<NodeType>& path) { return VisitFlow::Return; }
-    VisitFlow apply(GDropStmt* stmt, std::list<NodeType>& path) { return VisitFlow::Return; }
-    VisitFlow apply(GDumpStmt* stmt, std::list<NodeType>& path) { return VisitFlow::Return; }
-    VisitFlow apply(GRemoveStmt* stmt, std::list<NodeType>& path) { return VisitFlow::Return; }
     VisitFlow apply(GLiteral* stmt, std::list<NodeType>& path);
     VisitFlow apply(GArrayExpression* stmt, std::list<NodeType>& path);
     VisitFlow apply(GEdgeDeclaration* stmt, std::list<NodeType>& path);
     VisitFlow apply(GWalkDeclaration* stmt, std::list<NodeType>& path);
-    VisitFlow apply(GObjectFunction* stmt, std::list<NodeType>& path) { return VisitFlow::Return; }
     VisitFlow apply(GLambdaExpression* stmt, std::list<NodeType>& path);
-
+    
     void makeEdgeCondition(int index, GWalkDeclaration::Order order, EntityNode* start, EntityNode* end, bool direction);
     EntityNode* makeNodeCondition(int index, const std::string& str);
   };
@@ -154,6 +140,10 @@ private:
     VisitFlow apply(GObjectFunction* stmt, std::list<NodeType>& path);
     VisitFlow apply(GWalkDeclaration* stmt, std::list<NodeType>& path) { return VisitFlow::Children; }
     VisitFlow apply(GLambdaExpression* stmt, std::list<NodeType>& path) { return VisitFlow::Children; }
+    VisitFlow apply(GReturnStmt* stmt, std::list<NodeType>& path) {
+      return VisitFlow::Return;
+    }
+    VisitFlow apply(GVariableDecl* stmt, std::list<NodeType>& path) { return VisitFlow::Return; }
   };
 private:
   /**
@@ -206,4 +196,5 @@ private:
    * save temp id that search from index
    */
   std::list< gkey_t > _resultSet;
+  GVM* _gvm;
 };

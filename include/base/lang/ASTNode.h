@@ -1,21 +1,11 @@
 #pragma once
 #include "../type.h"
+#include "base/lang/Literal.h"
 #include "base/lang/lang.h"
 #include <stddef.h>
 #include <list>
 #include "Graph/GRAD.h"
-
-/*************************
- * AST visitor flow control.
- * skip will not process current node.
- * return will stop recursive ast node.
- * children will visit its children.
- *************************/
-enum class VisitFlow {
-  SkipCurrent,
-  Return,
-  Children
-};
+#include "visitor/IVisitor.h"
 
 struct GListNode {
   enum NodeType _nodetype;
@@ -31,10 +21,34 @@ void DumpAst(GListNode* root, int level = 0);
  * 
  */
 std::string GetString(GListNode* node);
-attribute_t GetLiteral(GListNode* node);
+template<typename T>
+bool GetLiteral(GLiteral* literal, T& value) {
+  switch (literal->kind()) {
+  case AttributeKind::String:
+    value = literal->raw();
+    return true;
+  case AttributeKind::Datetime:
+    value = (double)atoll(literal->raw().c_str());
+    return true;
+  case AttributeKind::Integer:
+  case AttributeKind::Number:
+    value = (double)atof(literal->raw().c_str());
+    return true;
+  default:
+    break;
+  }
+  return false;
+}
+
+template<typename T>
+bool GetLiteral(GListNode* node, T& value) {
+  if (node->_nodetype != NodeType::Literal) return false;
+  GLiteral* literal = (GLiteral*)node->_value;
+  return GetLiteral(literal, value);
+}
 std::vector<double> GetVector(GListNode* node);
 
-class GViewVisitor {
+class GViewVisitor : public GVisitor {
 public:
   VisitFlow apply(GListNode* stmt, std::list<NodeType>& path);
   VisitFlow apply(GUpsetStmt* stmt, std::list<NodeType>& path);
@@ -58,6 +72,12 @@ public:
   }
   VisitFlow apply(GEdgeDeclaration* stmt, std::list<NodeType>& path);
   VisitFlow apply(GLambdaExpression* stmt, std::list<NodeType>& path);
+  VisitFlow apply(GReturnStmt* stmt, std::list<NodeType>& path) {
+    return VisitFlow::Return;
+  }
+  VisitFlow apply(GBinaryExpression* stmt, std::list<NodeType>& path) { return VisitFlow::Return; }
+  VisitFlow apply(GBlockStmt* stmt, std::list<NodeType>& path) { return VisitFlow::Return; }
+  VisitFlow apply(GVariableDecl* stmt, std::list<NodeType>& path) { return VisitFlow::Return; }
 
 private:
 };

@@ -3,7 +3,15 @@
 #include <string>
 #include <map>
 #include "base/MemoryPool.h"
+#include "base/gvm/Chunk.h"
+#include "base/gvm/Value.h"
+#include "base/gvm/Compiler.h"
 #include "base/lang/AST.h"
+#include "base/gvm/GVM.h"
+#include "base/lang/ASTNode.h"
+#include "base/lang/BlockStmt.h"
+#include "base/lang/GQLExpression.h"
+#include "base/lang/VariableDecl.h"
 
 // error code of parsing gql  
 #define GQL_GRAMMAR_ARRAY_FAIL    -256
@@ -56,15 +64,21 @@ public:
    */
   int execCommand(GListNode* ast);
 
+  /**
+   * @brief For graph script, this function emit byte code to chunk.
+   *        Then gvm will envoke the byte code and other plan will retrieve the result.
+   */
+  void emit(uint8_t byte);
+
   gqlite_callback _result_callback;
   std::string _gql;
   void* _handle;
 
   size_t _errIndx;
+
   // result code of sql executing result
   int _errorCode;
-  // message of sql executing result
-  //std::string _msg;
+
   // gql type
   GQL_Command_Type _cmdtype;
   GStorageEngine* _storage = nullptr;
@@ -81,14 +95,16 @@ private:
     PlanList* _next;
     PlanList* _parent;
   };
-  struct PlanVisitor {
+  struct PlanVisitor: public GVisitor {
     PlanList* _plans = nullptr;
+    Chunk* _chunk = nullptr;
     std::map<std::string, GVirtualNetwork*>& _vn;
     GStorageEngine* _store;
+    GVM* _gvm;
     gqlite_callback _cb;
     void* _handle;
-    PlanVisitor(std::map<std::string, GVirtualNetwork*>& vn, GStorageEngine* store, gqlite_callback cb = nullptr, void* handle = nullptr)
-      :_vn(vn), _store(store), _handle(handle) {
+    PlanVisitor(std::map<std::string, GVirtualNetwork*>& vn, GVM* gvm, GStorageEngine* store, gqlite_callback cb = nullptr, void* handle = nullptr)
+      :_vn(vn), _store(store), _handle(handle), _gvm(gvm) {
       _plans = new PlanList;
       _plans->_next = _plans;
       _plans->_parent = _plans;
@@ -102,20 +118,13 @@ private:
      */
     void add(GPlan* plan, bool threadable = false);
 
-    VisitFlow apply(GListNode* stmt, std::list<NodeType>& path) {
-      return VisitFlow::Children;
-    }
     VisitFlow apply(GUpsetStmt* stmt, std::list<NodeType>& path);
     VisitFlow apply(GQueryStmt* stmt, std::list<NodeType>& path);
-    VisitFlow apply(GGQLExpression* stmt, std::list<NodeType>& path) {
+
+    VisitFlow apply(GProperty* stmt, std::list<NodeType>& path) {
       return VisitFlow::Children;
     }
-    VisitFlow apply(GProperty* stmt, std::list<NodeType>& path) {
-      return VisitFlow::Return;
-    }
-    VisitFlow apply(GVertexDeclaration* stmt, std::list<NodeType>& path) {
-      return VisitFlow::Return;
-    }
+
     VisitFlow apply(GCreateStmt* stmt, std::list<NodeType>& path);
     VisitFlow apply(GDropStmt* stmt, std::list<NodeType>& path);
     VisitFlow apply(GDumpStmt* stmt, std::list<NodeType>& path);
@@ -133,8 +142,59 @@ private:
     VisitFlow apply(GEdgeDeclaration* stmt, std::list<NodeType>& path) {
       return VisitFlow::Children;
     }
+    VisitFlow apply(GLambdaExpression* stmt, std::list<NodeType>& path);
+    VisitFlow apply(GReturnStmt* stmt, std::list<NodeType>& path);
+  };
+
+  // read ast and generate byte code
+  struct ByteCodeVisitor: public GVisitor {
+    Chunk* _currentChunk = nullptr;
+    Compiler* _compiler = nullptr;
+    GVM* _gvm = nullptr;
+
+    ByteCodeVisitor(GVM* gvm):_currentChunk(new Chunk), _compiler(new Compiler), _gvm(gvm) {
+      
+    }
+
+    VisitFlow apply(GGQLExpression* stmt, std::list<NodeType>& path) {
+      return VisitFlow::Children;
+    }
+    VisitFlow apply(GProperty* stmt, std::list<NodeType>& path) {
+      return VisitFlow::Children;
+    }
+
+    VisitFlow apply(GLiteral* stmt, std::list<NodeType>& path);
+
+    VisitFlow apply(GArrayExpression* stmt, std::list<NodeType>& path) {
+      return VisitFlow::Children;
+    }
+    VisitFlow apply(GWalkDeclaration* stmt, std::list<NodeType>& path) {
+      return VisitFlow::Children;
+    }
+    VisitFlow apply(GEdgeDeclaration* stmt, std::list<NodeType>& path) {
+      return VisitFlow::Children;
+    }
     VisitFlow apply(GLambdaExpression* stmt, std::list<NodeType>& path) {
       return VisitFlow::Children;
+    }
+    VisitFlow apply(GReturnStmt* stmt, std::list<NodeType>& path);
+    VisitFlow apply(GBlockStmt* stmt, std::list<NodeType>& path);
+    VisitFlow apply(GBinaryExpression* stmt, std::list<NodeType>& path);
+    VisitFlow apply(GVariableDecl* stmt, std::list<NodeType>& path);
+
+    /**
+    * @brief For graph script, this function emit byte code to chunk.
+    *        Then gvm will envoke the byte code and other plan will retrieve the result.
+    */
+    void emit(uint8_t byte);
+    
+    template<typename... Types>
+    void emit(uint8_t byte, Types... args) {
+      if (!_currentChunk) {
+        _currentChunk = new Chunk;
+      }
+      _currentChunk->_code.push_back(byte);
+      emit(args...);
     }
   };
 private:
@@ -145,4 +205,6 @@ private:
 private:
   MemoryPool<char> _memory;
   std::map<std::string, GVirtualNetwork*> _networks;
+
+  GVM* _gvm = nullptr;
 };

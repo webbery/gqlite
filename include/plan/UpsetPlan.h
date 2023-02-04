@@ -4,6 +4,7 @@
 #include "base/lang/lang.h"
 #include "base/lang/AST.h"
 #include "base/Variant.h"
+#include "base/lang/visitor/IVisitor.h"
 #include "gutil.h"
 #include "json.hpp"
 #include "Graph/GRAD.h"
@@ -70,31 +71,19 @@ public:
   ~GUpsetPlan();
 
   virtual int prepare();
-  virtual int execute(const std::function<ExecuteStatus(KeyType, const std::string& key, nlohmann::json& value, int status)>&);
+  virtual int execute(GVM* gvm, const std::function<ExecuteStatus(KeyType, const std::string& key, nlohmann::json& value, int status)>&);
 
 private:
   /**
    * @brief JSONVisitor travels vertex/edge property and retrieve their infomation
    */
-  struct JSONVisitor {
+  struct JSONVisitor : public GVisitor {
     nlohmann::json _jsonify;    /** read property as an json */
     std::string _key;           /** current read key */
     std::vector<attribute_t> _values; /** current read value in _key */
     //GUpsetPlan& _plan;
     JSONVisitor(GUpsetPlan& plan) {}
-    
-    VisitFlow apply(GListNode* stmt, std::list<NodeType>& path) {
-      return VisitFlow::Children;
-    }
-    VisitFlow apply(GUpsetStmt* stmt, std::list<NodeType>& path) {
-      return VisitFlow::Children;
-    }
-    VisitFlow apply(GQueryStmt* stmt, std::list<NodeType>& path) {
-      return VisitFlow::Return;
-    }
-    VisitFlow apply(GGQLExpression* stmt, std::list<NodeType>& path) {
-      return VisitFlow::Children;
-    }
+
     VisitFlow apply(GProperty* stmt, std::list<NodeType>& path) {
       add();
       _key = stmt->key();
@@ -104,12 +93,7 @@ private:
     VisitFlow apply(GVertexDeclaration* stmt, std::list<NodeType>& path) {
       return VisitFlow::Children;
     }
-    VisitFlow apply(GCreateStmt* stmt, std::list<NodeType>& path) {
-      return VisitFlow::Return;
-    }
-    VisitFlow apply(GDumpStmt* stmt, std::list<NodeType>& path) {
-      return VisitFlow::SkipCurrent;
-    }
+
     VisitFlow apply(GLiteral* stmt, std::list<NodeType>& path) {
       switch (stmt->kind()) {
       case AttributeKind::Binary:
@@ -155,19 +139,12 @@ private:
     VisitFlow apply(GEdgeDeclaration* stmt, std::list<NodeType>& path) {
       return VisitFlow::Children;
     }
-    VisitFlow apply(GDropStmt* stmt, std::list<NodeType>& path) {
-      return VisitFlow::Return;
-    }
-    VisitFlow apply(GRemoveStmt* stmt, std::list<NodeType>& path) {
-      return VisitFlow::Return;
-    }
+   
     VisitFlow apply(GObjectFunction* stmt, std::list<NodeType>& path) {
       return VisitFlow::Return;
     }
     VisitFlow apply(GWalkDeclaration* stmt, std::list<NodeType>& path) { return VisitFlow::Children; }
-    VisitFlow apply(GLambdaExpression* stmt, std::list<NodeType>& path) {
-      return VisitFlow::Children;
-    }
+    
     void add() {
       if (!_key.empty()) {
         if (_values.size() == 1) {
@@ -188,57 +165,30 @@ private:
     }
   };
 
-  struct UpsetVisitor {
+  struct UpsetVisitor : public GVisitor {
     GUpsetPlan& _plan;
 
     UpsetVisitor(GUpsetPlan& plan): _plan(plan) {}
-    VisitFlow apply(GListNode* stmt, std::list<NodeType>& path) {
-      return VisitFlow::Children;
-    }
+
     VisitFlow apply(GUpsetStmt* stmt, std::list<NodeType>& path) {
       return VisitFlow::Children;
     }
-    VisitFlow apply(GQueryStmt* stmt, std::list<NodeType>& path) {
-      return VisitFlow::Return;
-    }
-    VisitFlow apply(GGQLExpression* stmt, std::list<NodeType>& path) {
-      return VisitFlow::Children;
-    }
+
     VisitFlow apply(GProperty* stmt, std::list<NodeType>& path);
 
-    VisitFlow apply(GDumpStmt* stmt, std::list<NodeType>& path) {
-      return VisitFlow::SkipCurrent;
-    }
     VisitFlow apply(GVertexDeclaration* stmt, std::list<NodeType>& path);
-    VisitFlow apply(GCreateStmt* stmt, std::list<NodeType>& path) {
-      return VisitFlow::Return;
-    }
-    VisitFlow apply(GLiteral* stmt, std::list<NodeType>& path) {
-      return VisitFlow::Children;
-    }
+
     VisitFlow apply(GArrayExpression* stmt, std::list<NodeType>& path) {
       VisitFlow vf = VisitFlow::Children;
       for (auto itr = stmt->begin(), end = stmt->end(); itr != end; ++itr) {
-        vf = accept(*itr, *this, path);
+        vf = accept(*itr, this, path);
         if (vf == VisitFlow::Children || vf == VisitFlow::SkipCurrent) continue;
         return vf;
       }
       return vf;
     }
     VisitFlow apply(GEdgeDeclaration* stmt, std::list<NodeType>& path);
-    VisitFlow apply(GDropStmt* stmt, std::list<NodeType>& path) {
-      return VisitFlow::Return;
-    }
-    VisitFlow apply(GRemoveStmt* stmt, std::list<NodeType>& path) {
-      return VisitFlow::Return;
-    }
-    VisitFlow apply(GObjectFunction* stmt, std::list<NodeType>& path) {
-      return VisitFlow::Return;
-    }
-    VisitFlow apply(GWalkDeclaration* stmt, std::list<NodeType>& path) { return VisitFlow::Children; }
-    VisitFlow apply(GLambdaExpression* stmt, std::list<NodeType>& path) {
-      return VisitFlow::Children;
-    }
+
     gkey_t getLiteral(GListNode* node);
   };
 

@@ -19,7 +19,7 @@ GUpsetPlan::GUpsetPlan(std::map<std::string, GVirtualNetwork*>& vn, GStorageEngi
   }
   UpsetVisitor visitor(*this);
   std::list<NodeType> ln;
-  accept(ast->node(), visitor, ln);
+  accept(ast->node(), &visitor, ln);
   _indexes = _store->getIndexes();
 }
 
@@ -43,14 +43,14 @@ int GUpsetPlan::prepare() {
   return ECode_Success;
 }
 
-int GUpsetPlan::execute(const std::function<ExecuteStatus(KeyType, const std::string& key, nlohmann::json& value, int status)>& processor) {
+int GUpsetPlan::execute(GVM* gvm, const std::function<ExecuteStatus(KeyType, const std::string& key, nlohmann::json& value, int status)>& processor) {
   if (_store) {
     if (!_scan) {
       if (_vertex) return upsetVertex();
       else return upsetEdge();
     }
     else {
-      _scan->execute([&](KeyType type, const std::string& key, nlohmann::json& value, int status) {
+      _scan->execute(gvm, [&](KeyType type, const std::string& key, nlohmann::json& value, int status) {
         if (status != ECode_Success) return ExecuteStatus::Stop;
 
         for (auto& item : _props.items()) {
@@ -215,7 +215,7 @@ VisitFlow GUpsetPlan::UpsetVisitor::apply(GEdgeDeclaration* stmt, std::list<Node
   gkey_t from = getLiteral(stmt->from());
   gkey_t to = getLiteral(stmt->to());
   JSONVisitor jv(_plan);
-  accept(stmt->value(), jv, path);
+  accept(stmt->value(), &jv, path);
   jv.add();
   std::string edge = jv._jsonify.dump();
   if (stmt->direction() == "->") {
@@ -237,7 +237,7 @@ VisitFlow GUpsetPlan::UpsetVisitor::apply(GVertexDeclaration* stmt, std::list<No
 {
   _plan._vertex = true;
   JSONVisitor jv(_plan);
-  accept(stmt->vertex(), jv, path);
+  accept(stmt->vertex(), &jv, path);
   jv.add();
   _plan._vertexes[getLiteral(stmt->key())] = jv._jsonify;
   return VisitFlow::Children;
@@ -247,7 +247,7 @@ VisitFlow GUpsetPlan::UpsetVisitor::apply(GProperty* stmt, std::list<NodeType>& 
 {
   if (_plan._scan) {
     JSONVisitor jv(_plan);
-    accept(stmt->value(), jv, path);
+    accept(stmt->value(), &jv, path);
     jv.add();
     for (auto& item : jv._jsonify.items()) {
       _plan._props[stmt->key()] = item.value();

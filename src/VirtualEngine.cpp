@@ -1,13 +1,21 @@
 #include "VirtualEngine.h"
+#include "base/gvm/Chunk.h"
+#include "base/lang/AST.h"
+#include "base/lang/BlockStmt.h"
+#include "base/lang/VariableDecl.h"
+#include "base/type.h"
 #include "gqlite.h"
 #include "StorageEngine.h"
 #include "base/lang/ASTNode.h"
+#include "plan/Plan.h"
 #include "plan/RemovePlan.h"
 #include "plan/UtilPlan.h"
 #include "plan/UpsetPlan.h"
 #include "plan/QueryPlan.h"
 #include "plan/ScanPlan.h"
 #include "VirtualNetwork.h"
+#include "base/system/exception/CompileException.h"
+#include "base/lang/visitor/VariantVisitor.h"
 
 void init_result_info(gqlite_result& result, const std::vector<std::string>& info) {
   result.count = info.size();
@@ -44,6 +52,7 @@ GVirtualEngine::GVirtualEngine(size_t memsize)
 , _result_callback(nullptr)
 {
   //_network = new GVirtualNetwork(memsize);
+  _gvm = new GVM();
 }
 
 GVirtualEngine::~GVirtualEngine() {
@@ -51,6 +60,7 @@ GVirtualEngine::~GVirtualEngine() {
   {
     delete item.second;
   }
+  delete _gvm;
 }
 
 void GVirtualEngine::cleanPlans(PlanList* plans) {
@@ -72,9 +82,9 @@ void GVirtualEngine::cleanPlans(PlanList* plans) {
 
 GVirtualEngine::PlanList* GVirtualEngine::makePlans(GListNode* ast) {
   if (ast == nullptr) return nullptr;
-  PlanVisitor visitor(_networks, _storage, _result_callback, _handle);
+  PlanVisitor visitor(_networks, _gvm, _storage, _result_callback, _handle);
   std::list<NodeType> ln;
-  accept(ast, visitor, ln);
+  accept(ast, &visitor, ln);
   return visitor._plans;
 }
 
@@ -85,7 +95,7 @@ int GVirtualEngine::executePlans(PlanList* plans) {
   {
     ret = cur->_plan->prepare();
     if (ret != ECode_Success) return ret;
-    ret = cur->_plan->execute([&](KeyType, const std::string& key, const std::string& value, int status) -> ExecuteStatus {
+    ret = cur->_plan->execute(_gvm, [&](KeyType, const std::string& key, const std::string& value, int status) -> ExecuteStatus {
       return ExecuteStatus::Continue; });
     if (ret != ECode_Success) return ret;
     cur = cur->_next;
@@ -176,4 +186,71 @@ VisitFlow GVirtualEngine::PlanVisitor::apply(GRemoveStmt* stmt, std::list<NodeTy
 
 VisitFlow GVirtualEngine::PlanVisitor::apply(GObjectFunction* stmt, std::list<NodeType>& path) {
   return VisitFlow::Children;
+}
+
+VisitFlow GVirtualEngine::PlanVisitor::apply(GLambdaExpression* stmt, std::list<NodeType>& path) {
+  ByteCodeVisitor visitor(_gvm);
+  std::list<NodeType> ln;
+  GListNode* block = stmt->block();
+  accept(block, &visitor, ln);
+  // disassembleChunk("lambda", *visitor._currentChunk);
+  _plans->_parent->_plan->addChunk(visitor._currentChunk);
+  _plans->_parent->_plan->addCompiler(visitor._compiler);
+  // generate byte code
+  return VisitFlow::SkipCurrent;
+}
+
+VisitFlow GVirtualEngine::PlanVisitor::apply(GReturnStmt* stmt, std::list<NodeType>& path) {
+  return VisitFlow::Children;
+}
+
+void GVirtualEngine::ByteCodeVisitor::emit(uint8_t byte) {
+  if (!_currentChunk) {
+    _currentChunk = new Chunk;
+  }
+  _currentChunk->_code.push_back(byte);
+}
+
+VisitFlow GVirtualEngine::ByteCodeVisitor::apply(GBinaryExpression* stmt, std::list<NodeType>& path) {
+  accept(stmt->left(), this, path);
+  accept(stmt->right(), this, path);
+  emit(stmt->getOperator());
+  return VisitFlow::SkipCurrent;
+}
+
+VisitFlow GVirtualEngine::ByteCodeVisitor::apply(GLiteral* stmt, std::list<NodeType>& path) {
+  Value v;
+  if (GetLiteral(stmt, v)) {
+    emit((uint8_t)OpCode::OP_CONSTANT, addConstant(*_currentChunk, v));
+  }
+  return VisitFlow::SkipCurrent;
+}
+
+VisitFlow GVirtualEngine::ByteCodeVisitor::apply(GReturnStmt* stmt, std::list<NodeType>& path) {
+  accept(stmt->expr(), this, path);
+  emit(stmt->getOperator());
+  return VisitFlow::SkipCurrent;
+}
+
+VisitFlow GVirtualEngine::ByteCodeVisitor::apply(GBlockStmt* stmt, std::list<NodeType>& path) {
+  _compiler->_scopeDepth += 1;
+  // accept(stmt->expr(), *this, path);
+  // emit(stmt->getOperator());
+  return VisitFlow::SkipCurrent;
+}
+
+VisitFlow GVirtualEngine::ByteCodeVisitor::apply(GVariableDecl* stmt, std::list<NodeType>& path) {
+  GVariantVisitor visitor;
+  accept(stmt->value(), &visitor, path);
+  if (_compiler->_scopeDepth == 0) {
+    // global variant
+    Value value = visitor.getVariant();
+    if (_gvm->setGlobalVariant(stmt->name(), value) == ECode_Compile_Warn_Var_Exist) {
+      throw GCompileException();
+    }
+    return VisitFlow::SkipCurrent;
+  }
+  // local variant
+
+  return VisitFlow::SkipCurrent;
 }

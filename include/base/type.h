@@ -17,12 +17,6 @@ enum NodeType {
   DumpStatement,
   ConditionStatement,
   GroupStatement,
-  // prediction
-  GreaterThan,
-  GreaterThanEqual,
-  Equal,
-  LessThan,
-  LessThanEqual,
   // Language
   Program,
   FunctionDeclaration,

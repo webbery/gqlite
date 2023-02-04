@@ -124,7 +124,8 @@ void successful_test(gqlite* pHandle, char* ptr) {
       "query: 'g', in: 'ga',"
       "where: {"
         "color: {"
-            "$lt: ()=>{return 10;}"
+          "$lt: ()=>{(1+2)*2/3-1;return 10;}"
+          //"$lt: ()=>{return 0.5;}"
         "}"
       "}"
     "};");

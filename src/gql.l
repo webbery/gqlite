@@ -16,8 +16,7 @@
 %option reentrant bison-bridge bison-locations
 %option noinput nounput noyywrap never-interactive
 
-DIGIT   [0-9]
-DECIMAL [0-9]+.[0-9]+
+DECIMAL [0-9]+\.[0-9]+
 
 %x COMMENT 
 %s GSCRIPT GQL
@@ -52,6 +51,7 @@ DECIMAL [0-9]+.[0-9]+
     "else"              { stm._errIndx += yyleng; return ELSE; };
     "return"            { stm._errIndx += yyleng; return RETURN;};
     "null"              { stm._errIndx += yyleng;}
+    "let"               { stm._errIndx += yyleng; return LET;}
 }
 [()\[\]{}:,;]       { stm._errIndx += 1; return *yytext; }
 "\""                { stm._errIndx += 1; };
@@ -67,12 +67,6 @@ DECIMAL [0-9]+.[0-9]+
                         /* printf("begin gscript\n"); */
                         return FUNCTION_ARROW;
                     }
-    h''             {
-                        memcpy(yylval->var_name, yytext + 1, yyleng - 2);
-                        yylval->var_name[yyleng - 2] = '\0';
-                        stm._errIndx += 1;
-                        return VAR_HASH;
-                    };
     0b'([A-Za-z0-9+/]{4})*([A-Za-z0-9+\/]{2}==|[A-Za-z0-9+\/]{3}=)?' {
                         yylval->__c = (char*)malloc(yyleng - 4);
                         memcpy(yylval->__c, yytext + 3, yyleng - 5);
@@ -202,17 +196,17 @@ DECIMAL [0-9]+.[0-9]+
                     };
 "."                 { stm._errIndx += 1; return *yytext;};
 "\n"                { stm._errIndx = 0;};
-[0-9]+              {
-                        std::string s(yytext, yyleng);
-                        yylval->__f = std::stod(s);
-                        stm._errIndx += yyleng;
-                        return VAR_INTEGER;
-                    };
 {DECIMAL}           {
                         std::string s(yytext, yyleng);
                         yylval->__f = std::stod(s);
                         stm._errIndx += yyleng;
                         return VAR_DECIMAL;
+                    };
+[0-9]+              {
+                        std::string s(yytext, yyleng);
+                        yylval->__f = std::stod(s);
+                        stm._errIndx += yyleng;
+                        return VAR_INTEGER;
                     };
 [a-zA-Z_]+[a-zA-Z0-9]* {
                         yylval->__c = (char*)malloc(yyleng + 1);
@@ -221,7 +215,7 @@ DECIMAL [0-9]+.[0-9]+
                         stm._errIndx += yyleng;
                         return VAR_NAME;
                     };
-.
+.                   
 %%
 /**
     1、flex模式只匹配输入字符或字符串一次

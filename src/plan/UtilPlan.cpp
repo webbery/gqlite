@@ -80,7 +80,7 @@ int GUtilPlan::prepare()
   return ret;
 }
 
-int GUtilPlan::execute(const std::function<ExecuteStatus(KeyType, const std::string& key, nlohmann::json& value, int status)>& processor) {
+int GUtilPlan::execute(GVM*, const std::function<ExecuteStatus(KeyType, const std::string& key, nlohmann::json& value, int status)>& processor) {
   switch (_type)
   {
   case UtilType::Creation:

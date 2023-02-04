@@ -14,6 +14,7 @@
 #include "gutil.h"
 #include "Type/Datetime.h"
 #include "base/math/Distance.h"
+#include "base/gvm/GVM.h"
 
 GScanPlan::GScanPlan(std::map<std::string, GVirtualNetwork*>& networks, GStorageEngine* store, GQueryStmt* stmt)
 :GPlan(networks, store)
@@ -118,12 +119,13 @@ int GScanPlan::prepare()
   return ECode_Success;
 }
 
-int GScanPlan::execute(const std::function<ExecuteStatus(KeyType, const std::string& key, nlohmann::json& value, int status)>& processor) {
+int GScanPlan::execute(GVM* gvm, const std::function<ExecuteStatus(KeyType, const std::string& key, nlohmann::json& value, int status)>& processor) {
   _interrupt.store(false);
   start();
 #ifdef GQLITE_MULTI_THREAD
   _worker = std::thread(&GScanPlan::scan, this);
 #else
+  _gvm = gvm;
   scan(processor);
 #endif
   return ECode_Success;
@@ -336,7 +338,7 @@ void GScanPlan::parseConditions(GListNode* conditions)
 
   PatternVisitor visitor(_where);
   std::list<NodeType> lNodes;
-  accept(conditions, visitor, lNodes);
+  accept(conditions, &visitor, lNodes);
   for (int i = 0; i < (int)LogicalPredicate::Max; ++i) {
     if (_where._patterns[visitor._index[i]]._edges.size() > 1) {
       _queryType = QueryType::Match;
@@ -405,6 +407,11 @@ gkey_t GScanPlan::getKey(KeyType type, mdbx::slice& slice)
 bool GScanPlan::predictVertex(gkey_t key, nlohmann::json& row)
 {
   bool result = true;
+  if (_chunk) {
+    if (_gvm->interpret(*_chunk) == ECode_Success) {
+      Value res = _gvm->result();
+    }
+  }
   std::vector<std::string>::iterator aitr;
   for (int index = 0; index < (long)LogicalPredicate::Max; ++index) {
     if (_where._patterns[index]._nodes.size()) {
@@ -564,7 +571,7 @@ VisitFlow GScanPlan::PatternVisitor::apply(GArrayExpression* stmt, std::list<Nod
 {
   // vertex condition or others
   for (auto itr = stmt->begin(), end = stmt->end(); itr != end; ++itr) {
-    accept(*itr, *this, path);
+    accept(*itr, this, path);
     //GListNode* ptr = (*itr)->_children;
     //for (size_t indx = 0; indx < (*itr)->_size; ++indx) {
     //  GListNode* children = ptr + indx;
@@ -572,12 +579,6 @@ VisitFlow GScanPlan::PatternVisitor::apply(GArrayExpression* stmt, std::list<Nod
     //}
   }
   return VisitFlow::SkipCurrent;
-}
-
-VisitFlow GScanPlan::PatternVisitor::apply(GListNode* stmt, std::list<NodeType>& path)
-{
-  // object of vertex condition
-  return VisitFlow::Children;
 }
 
 VisitFlow GScanPlan::PatternVisitor::apply(GProperty* stmt, std::list<NodeType>& path)
@@ -588,7 +589,9 @@ VisitFlow GScanPlan::PatternVisitor::apply(GProperty* stmt, std::list<NodeType>&
   int index = _isAnd ? 0 : 1;
   if (key == "lt") {
     _attrs[index].push_back(last_key);
-    attribute_t attr = GetLiteral(stmt->value());
+    attribute_t attr;
+    if (!GetLiteral(stmt->value(), attr))
+      return VisitFlow::SkipCurrent;
     predicate_t pred = static_cast<std::function<bool(const attribute_t&)>>([attr](const attribute_t& input)->bool {
       return input < attr;
       });
@@ -596,7 +599,9 @@ VisitFlow GScanPlan::PatternVisitor::apply(GProperty* stmt, std::list<NodeType>&
   }
   else if (key == "gt") {
     _attrs[index].push_back(last_key);
-    attribute_t attr = GetLiteral(stmt->value());
+    attribute_t attr;
+    if (!GetLiteral(stmt->value(), attr))
+      return VisitFlow::SkipCurrent;
     predicate_t pred = static_cast<std::function<bool(const attribute_t&)>>([attr](const attribute_t& input)->bool {
       return input > attr;
       });
@@ -604,7 +609,10 @@ VisitFlow GScanPlan::PatternVisitor::apply(GProperty* stmt, std::list<NodeType>&
   }
   else if (key == "lte") {
     _attrs[index].push_back(last_key);
-    attribute_t attr = GetLiteral(stmt->value());
+    attribute_t attr;
+    if (!GetLiteral(stmt->value(), attr))
+      return VisitFlow::SkipCurrent;
+
     predicate_t pred = static_cast<std::function<bool(const attribute_t&)>>([attr](const attribute_t& input)->bool {
       return input <= attr;
       });
@@ -612,7 +620,10 @@ VisitFlow GScanPlan::PatternVisitor::apply(GProperty* stmt, std::list<NodeType>&
   }
   else if (key == "gte") {
     _attrs[index].push_back(last_key);
-    attribute_t attr = GetLiteral(stmt->value());
+    attribute_t attr;
+    if (!GetLiteral(stmt->value(), attr))
+      return VisitFlow::SkipCurrent;
+
     predicate_t pred = static_cast<std::function<bool(const attribute_t&)>>([attr](const attribute_t& input)->bool {
       return input >= attr;
       });
@@ -645,7 +656,10 @@ VisitFlow GScanPlan::PatternVisitor::apply(GProperty* stmt, std::list<NodeType>&
     GListNode* comp = (*obj)[1];
     GProperty* prop = (GProperty*)comp->_value;
     std::string comparable = prop->key();
-    attribute_t attr = GetLiteral(prop->value());
+    attribute_t attr;
+    if (!GetLiteral(prop->value(), attr))
+      return VisitFlow::SkipCurrent;
+
     double right = attr.Get<double>();
 
     if (comparable == "lt") {
@@ -702,7 +716,9 @@ VisitFlow GScanPlan::PatternVisitor::apply(GProperty* stmt, std::list<NodeType>&
           return;
         }
       }
-      attribute_t attr = GetLiteral(value);
+      attribute_t attr;
+      if (!GetLiteral(value, attr))
+        return;
       if (!attr.empty()) {
         _attrs[index].push_back(last_key);
         predicate_t pred = static_cast<std::function<bool(const attribute_t&)>>([attr](const attribute_t& input)->bool {
@@ -721,7 +737,7 @@ VisitFlow GScanPlan::PatternVisitor::apply(GProperty* stmt, std::list<NodeType>&
       }
     }
     else {
-      return accept(value, *this, path);
+      return accept(value, this, path);
     }
   }
   return VisitFlow::Children;

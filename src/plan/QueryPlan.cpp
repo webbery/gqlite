@@ -2,6 +2,7 @@
 #include "plan/ScanPlan.h"
 #include "StorageEngine.h"
 #include "gutil.h"
+#include "base/gvm/GVM.h"
 
 namespace {
   void init_vertex(gqlite_vertex* vertex, uint8_t type, std::string& sID) {
@@ -35,10 +36,15 @@ int GQueryPlan::prepare()
   return _scan->prepare();
 }
 
-int GQueryPlan::execute(const std::function<ExecuteStatus(KeyType, const std::string& key, nlohmann::json& value, int status)>& processor)
+void GQueryPlan::addChunk(Chunk* chunk)
+{
+  _scan->addChunk(chunk);
+}
+
+int GQueryPlan::execute(GVM* gvm, const std::function<ExecuteStatus(KeyType, const std::string& key, nlohmann::json& value, int status)>& processor)
 {
   if (_cb) {
-    _scan->execute([this](KeyType type, const std::string& key, nlohmann::json& value, int status) {
+    _scan->execute(gvm, [this](KeyType type, const std::string& key, nlohmann::json& value, int status) {
       gqlite_result result;
       result.count = 1;
       result.type = gqlite_result_type_node;

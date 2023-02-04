@@ -34,10 +34,10 @@ GRemovePlan::~GRemovePlan()
 }
 
 
-int GRemovePlan::execute(const std::function<ExecuteStatus(KeyType, const std::string& key, nlohmann::json& value, int status)>& processor)
+int GRemovePlan::execute(GVM* gvm, const std::function<ExecuteStatus(KeyType, const std::string& key, nlohmann::json& value, int status)>& processor)
 {
   std::vector<std::string> keys;
-  _scan->execute([&keys](KeyType, const std::string& key, nlohmann::json& value, int status) {
+  _scan->execute(gvm, [&keys](KeyType, const std::string& key, nlohmann::json& value, int status) {
     if (status != ECode_Success) return ExecuteStatus::Stop;
 
     keys.emplace_back(key);
