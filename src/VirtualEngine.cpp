@@ -242,15 +242,17 @@ VisitFlow GVirtualEngine::ByteCodeVisitor::apply(GBlockStmt* stmt, std::list<Nod
 VisitFlow GVirtualEngine::ByteCodeVisitor::apply(GVariableDecl* stmt, std::list<NodeType>& path) {
   GVariantVisitor visitor;
   accept(stmt->value(), &visitor, path);
+  Value value = visitor.getVariant();
   if (_compiler->_scopeDepth == 0) {
     // global variant
-    Value value = visitor.getVariant();
     if (_gvm->setGlobalVariant(stmt->name(), value) == ECode_Compile_Warn_Var_Exist) {
       throw GCompileException();
     }
     return VisitFlow::SkipCurrent;
   }
   // local variant
-
+  auto& var = _compiler->_variant[_compiler->_count++];
+  var._name = stmt->name();
+  var._depth = _compiler->_scopeDepth;
   return VisitFlow::SkipCurrent;
 }

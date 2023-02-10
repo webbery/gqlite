@@ -3,6 +3,7 @@
 #include <typeindex>
 #include <cstring>
 #include <tuple>
+#include <string>
 
 namespace gql {
   std::string format(const char* fmt, ...);

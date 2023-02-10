@@ -4,9 +4,9 @@
 #include <map>
 #include <list>
 #include <thread>
-#include <zstd.h>
 #include "json.hpp"
 #include "base/type.h"
+#include <unordered_map>
 
 #define TEST_TIME(func) {\
   auto startTime = std::chrono::high_resolution_clock::now();\
@@ -234,7 +234,10 @@ private:
 
     std::string _curDBPath;
 
-    ZSTD_CDict* _cdict;
-    ZSTD_DDict* _ddict;
-    ZSTD_CCtx* _cctx;
+    /**
+     * In order to compress json-liked data, key can be encode to dict for saving many disk.
+     * _key2id for write operation and _id2key for read operation
+    */
+    std::unordered_map<std::string, uint8_t> _key2id;
+    std::unordered_map<uint8_t, std::string> _id2key;
 };

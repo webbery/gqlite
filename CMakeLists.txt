@@ -117,12 +117,11 @@ endif ()
 
 add_definitions(-DTHREAD_COUNT=4)
 
-include_directories(./include ./third_party/libmdbx ./third_party/eigen ./third_party/fmt/include ./third_party/zstd/lib)
+include_directories(./include ./third_party/libmdbx ./third_party/eigen ./third_party/fmt/include)
 
 file(GLOB_RECURSE BASE_SOURCES "src/*.cpp")
 
 # set(FMT_CAN_MODULE ON CACHE BOOL "Build a module instead of a traditional library." FORCE)
-add_subdirectory(third_party/zstd/build/cmake)
 add_subdirectory(third_party/libmdbx)
 add_subdirectory(third_party/fmt)
 
@@ -139,7 +138,6 @@ endif()
 
 # message("USE COMPILER: " ${CMAKE_CXX_COMPILER_ID})
 add_definitions(-DYY_NO_UNISTD_H)
-add_compile_definitions(BINARY_DIR="${zstd_BINARY_DIR}/lib")
 option(GQLITE_BUILD_SHARED    "build gqlite shared library"   OFF)
 if (GQLITE_BUILD_SHARED)
 add_library(gqlite SHARED 
@@ -152,14 +150,12 @@ add_library(gqlite
 endif()
 target_link_libraries(gqlite mdbx-static fmt::fmt )
 
-add_dependencies(gqlite zstd)
 if (WIN32)
   
 else (WIN32)
 	if (GQLITE_BUILD_TEST)
 		target_link_libraries(gqlite ${CMAKE_DL_LIBS} m)
 	endif(GQLITE_BUILD_TEST)
-	target_link_libraries(gqlite ${zstd_BINARY_DIR}/lib/libzstd.a)
 endif(WIN32)
 
 add_dependencies(gqlite generated_tokens generated_grammar)

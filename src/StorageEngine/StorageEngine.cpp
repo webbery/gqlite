@@ -5,9 +5,9 @@
 #include <atomic>
 #include "gutil.h"
 
-#ifdef WIN32
-#pragma comment(lib, BINARY_DIR "/" CMAKE_INTDIR "/zstd_static.lib")
-#endif
+// #ifdef WIN32
+// #pragma comment(lib, BINARY_DIR "/" CMAKE_INTDIR "/zstd_static.lib")
+// #endif
 
 #define GRAPH_EXCEPTION_CATCH(expr) try{\
   expr;\
@@ -65,9 +65,7 @@ namespace {
 }
 
 GStorageEngine::GStorageEngine() noexcept
-  :_cdict(nullptr)
-  ,_ddict(nullptr)
-, _cctx(nullptr) {
+{
 }
 
 GStorageEngine::~GStorageEngine() {
@@ -171,23 +169,13 @@ void GStorageEngine::initDict(int compressLvl)
   else {
     compressLvl = _schema[SCHEMA_GLOBAL][GLOBAL_COMPRESS_LEVEL];
   }
-  static std::map<int, size_t> dictSize = {
-    {1, 32 * 1024},
-    {2, 64 * 1024},
-    {3, 1024 * 1024},
-  };
-  if (_schema[SCHEMA_GLOBAL].count(GLOBAL_COMPRESS_DICT)) {
-    std::vector<uint8_t> bin = _schema[SCHEMA_GLOBAL][GLOBAL_COMPRESS_DICT];
-    if (bin.size() >= dictSize[compressLvl] - 5)
-      _ddict = ZSTD_createDDict(bin.data(), bin.size());
+  if (compressLvl == 1) { // compress only for json-liked data's key
   }
-  else {
-    char* buffer = (char*)malloc(dictSize[compressLvl]);
-    _cdict = ZSTD_createCDict(buffer, dictSize[compressLvl], compressLvl);
-    free(buffer);
+  else if (compressLvl == 2) {
+    // use multiple compress for data, such as RLE/XOR/Delta/Zig-zag/Snappy/Simple8b
   }
-  _cctx = ZSTD_createCCtx();
-
+  else if (compressLvl == 3) { // reserved
+  }
   if (_schema[SCHEMA_GLOBAL][GLOBAL_GQL_VERSION].empty()) {
     _schema[SCHEMA_GLOBAL][GLOBAL_GQL_VERSION] = GQL_VERSION;
   }
@@ -195,18 +183,6 @@ void GStorageEngine::initDict(int compressLvl)
 
 void GStorageEngine::releaseDict()
 {
-  if (_cctx) {
-    ZSTD_freeCCtx(_cctx);
-    _cctx = nullptr;
-  }
-  if (_cdict) {
-    ZSTD_freeCDict(_cdict);
-    _cdict = nullptr;
-  }
-  if (_ddict) {
-    ZSTD_freeDDict(_ddict);
-    _ddict = nullptr;
-  }
 }
 
 void GStorageEngine::addMap(const std::string& prop, KeyType type) {
@@ -365,13 +341,7 @@ int GStorageEngine::write(const std::string& prop, const std::string& key, void*
   thread_local auto id = std::this_thread::get_id();
 
   size_t cSize = len;
-#ifdef _ENABLE_COMPRESS_
-  void* buffer = malloc(2 * len);
-  if (_cdict) ZSTD_compress_usingCDict(_cctx, buffer, 2 * len, value, len, _cdict);
-  //else if (_ddict) ZSTD_compress_usingDDict(_cctx, buffer,)
-#else
   void* buffer = value;
-#endif
   mdbx::slice data(buffer, cSize);
   ::put(_txns[id], handle, key, data);
 #ifdef _ENABLE_COMPRESS_
@@ -551,13 +521,8 @@ int GStorageEngine::write(const std::string& prop, uint64_t key, void* value, si
   }
   auto handle = getOrCreateHandle(prop, mdbx::key_mode::ordinal);
   // compress
-#ifdef _ENABLE_COMPRESS_
-  void* buffer = malloc(2 * len);
-  size_t cSize = ZSTD_compress_usingCDict(_cctx, buffer, 2* len, value, len, _cdict);
-#else
   void* buffer = value;
   size_t cSize = len;
-#endif
   thread_local auto id = std::this_thread::get_id();
   mdbx::slice data(buffer, cSize);
   ::put(_txns[id], handle, key, data);
