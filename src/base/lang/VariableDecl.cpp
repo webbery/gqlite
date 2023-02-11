@@ -2,5 +2,4 @@
 #include "base/lang/ASTNode.h"
 
 GVariableDecl::~GVariableDecl(){
-  FreeNode(_value);
 }

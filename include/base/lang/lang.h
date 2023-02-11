@@ -24,4 +24,5 @@
 #include "base/lang/LambdaExpression.h"
 #include "base/lang/DumpStmt.h"
 #include "base/lang/ReturnStmt.h"
+#include "base/lang/AssignStmt.h"
 #include "base/lang/ASTNode.h"

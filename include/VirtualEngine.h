@@ -130,18 +130,14 @@ private:
     VisitFlow apply(GDumpStmt* stmt, std::list<NodeType>& path);
     VisitFlow apply(GRemoveStmt* stmt, std::list<NodeType>& path);
     VisitFlow apply(GObjectFunction* stmt, std::list<NodeType>& path);
-    VisitFlow apply(GLiteral* stmt, std::list<NodeType>& path) {
-      return VisitFlow::Children;
-    }
+
     VisitFlow apply(GArrayExpression* stmt, std::list<NodeType>& path) {
       return VisitFlow::Children;
     }
     VisitFlow apply(GWalkDeclaration* stmt, std::list<NodeType>& path) {
       return VisitFlow::Children;
     }
-    VisitFlow apply(GEdgeDeclaration* stmt, std::list<NodeType>& path) {
-      return VisitFlow::Children;
-    }
+
     VisitFlow apply(GLambdaExpression* stmt, std::list<NodeType>& path);
     VisitFlow apply(GReturnStmt* stmt, std::list<NodeType>& path);
   };
@@ -153,34 +149,22 @@ private:
     GVM* _gvm = nullptr;
 
     ByteCodeVisitor(GVM* gvm):_currentChunk(new Chunk), _compiler(new Compiler), _gvm(gvm) {
-      
+      initCompiler(_compiler);
     }
 
-    VisitFlow apply(GGQLExpression* stmt, std::list<NodeType>& path) {
-      return VisitFlow::Children;
-    }
     VisitFlow apply(GProperty* stmt, std::list<NodeType>& path) {
       return VisitFlow::Children;
     }
 
     VisitFlow apply(GLiteral* stmt, std::list<NodeType>& path);
 
-    VisitFlow apply(GArrayExpression* stmt, std::list<NodeType>& path) {
-      return VisitFlow::Children;
-    }
-    VisitFlow apply(GWalkDeclaration* stmt, std::list<NodeType>& path) {
-      return VisitFlow::Children;
-    }
-    VisitFlow apply(GEdgeDeclaration* stmt, std::list<NodeType>& path) {
-      return VisitFlow::Children;
-    }
     VisitFlow apply(GLambdaExpression* stmt, std::list<NodeType>& path) {
       return VisitFlow::Children;
     }
     VisitFlow apply(GReturnStmt* stmt, std::list<NodeType>& path);
     VisitFlow apply(GBlockStmt* stmt, std::list<NodeType>& path);
     VisitFlow apply(GBinaryExpression* stmt, std::list<NodeType>& path);
-    VisitFlow apply(GVariableDecl* stmt, std::list<NodeType>& path);
+    VisitFlow apply(GAssignStmt* stmt, std::list<NodeType>& path);
 
     /**
     * @brief For graph script, this function emit byte code to chunk.
@@ -196,6 +180,8 @@ private:
       _currentChunk->_code.push_back(byte);
       emit(args...);
     }
+
+    void namedVariant(const std::string& name, bool isAssign);
   };
 private:
   PlanList* makePlans(GListNode* ast);

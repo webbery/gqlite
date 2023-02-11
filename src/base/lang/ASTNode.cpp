@@ -4,145 +4,64 @@
 #include <fmt/printf.h>
 #include <cassert>
 #include "base/lang/AST.h"
+#include "base/lang/visitor/IVisitor.h"
 #include "base/type.h"
 
 #define RETURN_CASE_NODE_TYPE(node_type) case NodeType::node_type: return #node_type
 #define RETURN_CASE_PROP_KIND(prop_kind) case AttributeKind::prop_kind: return #prop_kind
-#define FREE_NODE(node) case 
+#define RUN_VisitFlow_Children(action) {\
+  switch (vf) {\
+  case VisitFlow::Return: return vf;\
+  case VisitFlow::Children:\
+    vf = accept(value->action, visitor, path);\
+    break;\
+  case VisitFlow::SkipCurrent:\
+    vf = pre;\
+    break;\
+  default:\
+    break;\
+  }\
+}
+
+#define DELETE_OBJECT(nodetype) \
+  case NodeType::nodetype:\
+  {\
+    GTypeTraits<NodeType::nodetype>::type* ptr = reinterpret_cast<GTypeTraits<NodeType::nodetype>::type*>(node->_value);\
+    delete ptr;\
+  }\
+  break
 
 void FreeNodeImpl(GListNode* node) {
   switch (node->_nodetype)
   {
-  case NodeType::CreationStatement:
-  {
-    GTypeTraits<NodeType::CreationStatement>::type* ptr = reinterpret_cast<GTypeTraits<NodeType::CreationStatement>::type*>(node->_value);
-    delete ptr;
-  }
-    break;
-  case NodeType::UpsetStatement:
-  {
-    GTypeTraits<NodeType::UpsetStatement>::type* ptr = reinterpret_cast<GTypeTraits<NodeType::UpsetStatement>::type*>(node->_value);
-    delete ptr;
-  }
-    break;
-  case NodeType::QueryStatement:
-  {
-    GTypeTraits<NodeType::QueryStatement>::type* ptr = reinterpret_cast<GTypeTraits<NodeType::QueryStatement>::type*>(node->_value);
-    delete ptr;
-  }
-    break;
-  case NodeType::WalkDeclaration:
-  {
-    GTypeTraits<NodeType::WalkDeclaration>::type* ptr = reinterpret_cast<GTypeTraits<NodeType::WalkDeclaration>::type*>(node->_value);
-    delete ptr;
-  }
-    break;
-  case NodeType::VertexDeclaration:
-  {
-    GTypeTraits<NodeType::VertexDeclaration>::type* ptr = reinterpret_cast<GTypeTraits<NodeType::VertexDeclaration>::type*>(node->_value);
-    delete ptr;
-  }
-    break;
-  case NodeType::EdgeDeclaration:
-  {
-    GTypeTraits<NodeType::EdgeDeclaration>::type* ptr = reinterpret_cast<GTypeTraits<NodeType::EdgeDeclaration>::type*>(node->_value);
-    delete ptr;
-  }
-    break;
-  case NodeType::DropStatement:
-  {
-    GTypeTraits<NodeType::DropStatement>::type* ptr = reinterpret_cast<GTypeTraits<NodeType::DropStatement>::type*>(node->_value);
-    delete ptr;
-  }
-    break;
-  case NodeType::Literal:
-  {
-    GTypeTraits<NodeType::Literal>::type* ptr = static_cast<GTypeTraits<NodeType::Literal>::type*>(node->_value);
-    delete ptr;
-  }
-    break;
-  case NodeType::GQLExpression:
-  {
-    GTypeTraits<NodeType::GQLExpression>::type* ptr = reinterpret_cast<GTypeTraits<NodeType::GQLExpression>::type*>(node->_value);
-    delete ptr;
-  }
-    break;
-  case NodeType::ArrayExpression:
-  {
-    GTypeTraits<NodeType::ArrayExpression>::type* ptr = reinterpret_cast<GTypeTraits<NodeType::ArrayExpression>::type*>(node->_value);
-    delete ptr;
-  }
-    break;
-  case NodeType::RemoveStatement:
-  {
-    GTypeTraits<NodeType::RemoveStatement>::type* ptr = reinterpret_cast<GTypeTraits<NodeType::RemoveStatement>::type*>(node->_value);
-    delete ptr;
-  }
-    break;
-  case NodeType::ObjectExpression:
-  {
-    GTypeTraits<NodeType::ObjectExpression>::type* ptr = reinterpret_cast<GTypeTraits<NodeType::ObjectExpression>::type*>(node->_value);
-    delete ptr;
-  }
-    break;
-  case NodeType::Property:
-  {
-    GTypeTraits<NodeType::Property>::type* ptr = reinterpret_cast<GTypeTraits<NodeType::Property>::type*>(node->_value);
-    delete ptr;
-  }
-    break;
-  case NodeType::BinaryExpression:
-  {
-    GTypeTraits<NodeType::BinaryExpression>::type* ptr = reinterpret_cast<GTypeTraits<NodeType::BinaryExpression>::type*>(node->_value);
-    delete ptr;
-  }
-    break;
+    DELETE_OBJECT(CreationStatement);
+    DELETE_OBJECT(UpsetStatement);
+    DELETE_OBJECT(QueryStatement);
+    DELETE_OBJECT(WalkDeclaration);
+    DELETE_OBJECT(VertexDeclaration);
+    DELETE_OBJECT(EdgeDeclaration);
+    DELETE_OBJECT(DropStatement);
+    DELETE_OBJECT(Literal);
+    DELETE_OBJECT(GQLExpression);
+    DELETE_OBJECT(ArrayExpression);
+    DELETE_OBJECT(RemoveStatement);
+    DELETE_OBJECT(ObjectExpression);
+    DELETE_OBJECT(Property);
+    DELETE_OBJECT(BinaryExpression);
+    DELETE_OBJECT(CallExpression);
+    DELETE_OBJECT(GroupStatement);
+    DELETE_OBJECT(MemberExpression);
+    DELETE_OBJECT(DumpStatement);
+    DELETE_OBJECT(LambdaExpression);
+    DELETE_OBJECT(BlockStatement);
+    DELETE_OBJECT(VariableDeclaration);
+    DELETE_OBJECT(AssignStatement);
   case NodeType::VariableDeclarator:
   {
     GListNode* ptr = (GListNode*)node->_value;
     FreeNode(ptr);
   }
     break;
-  case NodeType::CallExpression:
-  {
-    GTypeTraits<NodeType::CallExpression>::type* ptr = reinterpret_cast<GTypeTraits<NodeType::CallExpression>::type*>(node->_value);
-    delete ptr;
-  }
-    break;
-  case NodeType::GroupStatement:
-  {
-    GTypeTraits<NodeType::GroupStatement>::type* ptr = reinterpret_cast<GTypeTraits<NodeType::GroupStatement>::type*>(node->_value);
-    delete ptr;
-  }
-    break;
-  case NodeType::MemberExpression:
-  {
-    GTypeTraits<NodeType::MemberExpression>::type* ptr = reinterpret_cast<GTypeTraits<NodeType::MemberExpression>::type*>(node->_value);
-    delete ptr;
-  }
-    break;
-  case NodeType::DumpStatement:
-  {
-    GTypeTraits<NodeType::DumpStatement>::type* ptr = reinterpret_cast<GTypeTraits<NodeType::DumpStatement>::type*>(node->_value);
-    delete ptr;
-  }
-  break;
-  case NodeType::LambdaExpression:
-  {
-    GTypeTraits<NodeType::LambdaExpression>::type* ptr = reinterpret_cast<GTypeTraits<NodeType::LambdaExpression>::type*>(node->_value);
-    delete ptr;
-  }
-  break;
-  case NodeType::BlockStatement:
-  {
-    GTypeTraits<NodeType::BlockStatement>::type* ptr = reinterpret_cast<GTypeTraits<NodeType::BlockStatement>::type*>(node->_value);
-    delete ptr;
-  }
-  case NodeType::VariableDeclaration:
-  {
-    GTypeTraits<NodeType::VariableDeclaration>::type* ptr = reinterpret_cast<GTypeTraits<NodeType::VariableDeclaration>::type*>(node->_value);
-    delete ptr;
-  }
   default:
     break;
   }
@@ -190,6 +109,8 @@ std::string NodeType2String(NodeType nt) {
     RETURN_CASE_NODE_TYPE(WalkDeclaration);
     RETURN_CASE_NODE_TYPE(DropStatement);
     RETURN_CASE_NODE_TYPE(RemoveStatement);
+    RETURN_CASE_NODE_TYPE(LambdaExpression);
+    RETURN_CASE_NODE_TYPE(AssignStatement);
   default: return "Unknow Node Type: " + std::to_string((int)nt);
   }
 }
@@ -198,6 +119,7 @@ std::string PropertyKind2String(AttributeKind kind) {
   switch (kind) {
     RETURN_CASE_PROP_KIND(Binary);
     RETURN_CASE_PROP_KIND(Number);
+    RETURN_CASE_PROP_KIND(Integer);
     RETURN_CASE_PROP_KIND(String);
   default: return "Unknow Property Kind: " + std::to_string((int)kind);
   }
@@ -205,7 +127,7 @@ std::string PropertyKind2String(AttributeKind kind) {
 
 void printLine(const std::string& format, const std::string& str, size_t level) {
   for (size_t lvl = 0; lvl < level; ++lvl) {
-    fmt::printf("  ");
+    fmt::printf(": ");
   }
   fmt::print(format, str);
 }
@@ -308,7 +230,28 @@ VisitFlow GViewVisitor::apply(GEdgeDeclaration* stmt, std::list<NodeType>& path)
 }
 
 VisitFlow GViewVisitor::apply(GLambdaExpression* stmt, std::list<NodeType>& path) {
-  return VisitFlow::Return;
+  size_t level = path.size();
+  printLine("|- type: {}\n", NodeType2String(LambdaExpression), level);
+  return VisitFlow::Children;
+}
+
+VisitFlow GViewVisitor::apply(GReturnStmt* stmt, std::list<NodeType>& path) {
+  size_t level = path.size();
+  printLine("|- type: {}\n", NodeType2String(ReturnStatement), level);
+  return VisitFlow::Children;
+}
+
+VisitFlow GViewVisitor::apply(GBlockStmt* stmt, std::list<NodeType>& path) {
+  size_t level = path.size();
+  printLine("|- type: {}\n", NodeType2String(BlockStatement), level);
+  return VisitFlow::Children;
+}
+
+VisitFlow GViewVisitor::apply(GVariableDecl* stmt, std::list<NodeType>& path) {
+  size_t level = path.size();
+  printLine("|- type: {}\n", NodeType2String(VariableDeclaration), level);
+  printLine("|- name: {}\n", stmt->name(), level);
+  return VisitFlow::Children;
 }
 
 VisitFlow GViewVisitor::apply(GDropStmt* stmt, std::list<NodeType>& path)
@@ -318,9 +261,35 @@ VisitFlow GViewVisitor::apply(GDropStmt* stmt, std::list<NodeType>& path)
   return VisitFlow::Children;
 }
 
+VisitFlow GViewVisitor::apply(GBinaryExpression* stmt, std::list<NodeType>& path) {
+  accept(stmt->left(), this, path);
+  size_t level = path.size();
+  printLine("|- type: {}\n", NodeType2String(BinaryExpression), level);
+  auto op = [](uint8_t o){
+    switch ((GBinaryExpression::Operator)o) {
+    case GBinaryExpression::Operator::Add: return "+";
+    case GBinaryExpression::Operator::Subtract: return "-";
+    case GBinaryExpression::Operator::Multiply: return "*";
+    case GBinaryExpression::Operator::Divide: return "/";
+    default: return "unknow operator";
+    }
+  };
+  
+  printLine("|- type: {}\n", op(stmt->getOperator()), level);
+  accept(stmt->right(), this, path);
+  return VisitFlow::Children;
+}
+
 VisitFlow GViewVisitor::apply(GObjectFunction* stmt, std::list<NodeType>& path) {
   size_t level = path.size();
   printLine("|- type: {}\n", NodeType2String(CallExpression), level);
+  return VisitFlow::Children;
+}
+
+VisitFlow GViewVisitor::apply(GAssignStmt* stmt, std::list<NodeType>& path) {
+  size_t level = path.size();
+  printLine("|- type: {}\n", NodeType2String(AssignStatement), level);
+  printLine("|- name: {}\n", stmt->name(), level);
   return VisitFlow::Children;
 }
 
@@ -370,15 +339,9 @@ VisitFlow accept(GListNode* node, GVisitor* visitor, std::list<NodeType>& path) 
       while (ptr)
       {
         GTypeTraits<NodeType::VertexDeclaration>::type* value = reinterpret_cast<GTypeTraits<NodeType::VertexDeclaration>::type*>(ptr->_value);
+        VisitFlow pre = vf;
         vf = visitor->apply(value, path);
-        switch(vf) {
-          case VisitFlow::Children:
-          {
-            accept(value->vertex(), visitor, path);
-          }
-          break;
-          default: break;
-        }
+        RUN_VisitFlow_Children(vertex());
         ptr = ptr->_children;
       }
     }
@@ -392,8 +355,10 @@ VisitFlow accept(GListNode* node, GVisitor* visitor, std::list<NodeType>& path) 
     case NodeType::ArrayExpression:
     {
       GTypeTraits<NodeType::ArrayExpression>::type* ptr = reinterpret_cast<GTypeTraits<NodeType::ArrayExpression>::type*>(node->_value);
+      VisitFlow pre = vf;
       vf = visitor->apply(ptr, path);
       switch(vf) {
+        case VisitFlow::Return: return vf;
         case VisitFlow::Children:
         {
           auto itr = ptr->begin();
@@ -403,6 +368,9 @@ VisitFlow accept(GListNode* node, GVisitor* visitor, std::list<NodeType>& path) 
           }
         }
         break;
+        case VisitFlow::SkipCurrent:
+          vf = pre;
+          break;
         default:
         break;
       }
@@ -421,22 +389,27 @@ VisitFlow accept(GListNode* node, GVisitor* visitor, std::list<NodeType>& path) 
     case NodeType::ObjectExpression:
     case NodeType::Property:
     {
-      GTypeTraits<NodeType::Property>::type* ptr = reinterpret_cast<GTypeTraits<NodeType::Property>::type*>(node->_value);
-      vf = visitor->apply(ptr, path);
-      switch (vf)
-      {
-      case VisitFlow::Children:
-        vf = accept(ptr->value(), visitor, path);
-        break;
-      default:
-        break;
-      }
+      GTypeTraits<NodeType::Property>::type* value = reinterpret_cast<GTypeTraits<NodeType::Property>::type*>(node->_value);
+      VisitFlow pre = vf;
+      vf = visitor->apply(value, path);
+      RUN_VisitFlow_Children(value());
     }
     break;
     case NodeType::BinaryExpression:
     {
-      GTypeTraits<NodeType::BinaryExpression>::type* ptr = reinterpret_cast<GTypeTraits<NodeType::BinaryExpression>::type*>(node->_value);
-      vf = visitor->apply(ptr, path);
+      GTypeTraits<NodeType::BinaryExpression>::type* value = reinterpret_cast<GTypeTraits<NodeType::BinaryExpression>::type*>(node->_value);
+      VisitFlow pre = vf;
+      vf = visitor->apply(value, path);
+      switch (vf) {
+      case VisitFlow::Return: return vf;
+      case VisitFlow::Children:
+        break;
+      case VisitFlow::SkipCurrent:
+        vf = pre;
+        break;
+      default:
+          break;
+      }
     }
     break;
     case NodeType::EdgeDeclaration:
@@ -465,33 +438,47 @@ VisitFlow accept(GListNode* node, GVisitor* visitor, std::list<NodeType>& path) 
     break;
     case NodeType::RemoveStatement:
     {
-      GTypeTraits<NodeType::RemoveStatement>::type* ptr = reinterpret_cast<GTypeTraits<NodeType::RemoveStatement>::type*>(node->_value);
-      vf = visitor->apply(ptr, path);
+      GTypeTraits<NodeType::RemoveStatement>::type* value = reinterpret_cast<GTypeTraits<NodeType::RemoveStatement>::type*>(node->_value);
+      vf = visitor->apply(value, path);
     }
     break;
     case NodeType::CallExpression: {
-      GTypeTraits<NodeType::CallExpression>::type* ptr = reinterpret_cast<GTypeTraits<NodeType::CallExpression>::type*>(node->_value);
-      vf = visitor->apply(ptr, path);
+      GTypeTraits<NodeType::CallExpression>::type* value = reinterpret_cast<GTypeTraits<NodeType::CallExpression>::type*>(node->_value);
+      vf = visitor->apply(value, path);
     }
     break;
     case NodeType::BlockStatement: {
-      GTypeTraits<NodeType::BlockStatement>::type* ptr = reinterpret_cast<GTypeTraits<NodeType::BlockStatement>::type*>(node->_value);
-      vf = visitor->apply(ptr, path);
+      GTypeTraits<NodeType::BlockStatement>::type* value = reinterpret_cast<GTypeTraits<NodeType::BlockStatement>::type*>(node->_value);
+      VisitFlow pre = vf;
+      vf = visitor->apply(value, path);
+      RUN_VisitFlow_Children(block());
     }
     break;
     case NodeType::LambdaExpression: {
-      GTypeTraits<NodeType::LambdaExpression>::type* ptr = reinterpret_cast<GTypeTraits<NodeType::LambdaExpression>::type*>(node->_value);
-      vf = visitor->apply(ptr, path);
+      GTypeTraits<NodeType::LambdaExpression>::type* value = reinterpret_cast<GTypeTraits<NodeType::LambdaExpression>::type*>(node->_value);
+      VisitFlow pre = vf;
+      vf = visitor->apply(value, path);
+      RUN_VisitFlow_Children(block());
     }
     break;
     case NodeType::ReturnStatement: {
-      GTypeTraits<NodeType::ReturnStatement>::type* ptr = reinterpret_cast<GTypeTraits<NodeType::ReturnStatement>::type*>(node->_value);
-      vf = visitor->apply(ptr, path);
+      GTypeTraits<NodeType::ReturnStatement>::type* value = reinterpret_cast<GTypeTraits<NodeType::ReturnStatement>::type*>(node->_value);
+      VisitFlow pre = vf;
+      vf = visitor->apply(value, path);
+      RUN_VisitFlow_Children(expr());
     }
     break;
     case NodeType::VariableDeclaration: {
-      GTypeTraits<NodeType::VariableDeclaration>::type* ptr = reinterpret_cast<GTypeTraits<NodeType::VariableDeclaration>::type*>(node->_value);
-      vf = visitor->apply(ptr, path);
+      GTypeTraits<NodeType::VariableDeclaration>::type* value = reinterpret_cast<GTypeTraits<NodeType::VariableDeclaration>::type*>(node->_value);
+      VisitFlow pre = vf;
+      vf = visitor->apply(value, path);
+    }
+    break;
+    case NodeType::AssignStatement: {
+      GTypeTraits<NodeType::AssignStatement>::type* value = reinterpret_cast<GTypeTraits<NodeType::AssignStatement>::type*>(node->_value);
+      VisitFlow pre = vf;
+      vf = visitor->apply(value, path);
+      RUN_VisitFlow_Children(value());
     }
     break;
     default: vf = visitor->apply(node, path); break;

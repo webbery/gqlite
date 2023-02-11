@@ -1,5 +1,6 @@
 #pragma once
 #include "../type.h"
+#include "base/lang/AssignStmt.h"
 #include "base/lang/Literal.h"
 #include "base/lang/lang.h"
 #include <stddef.h>
@@ -72,12 +73,11 @@ public:
   }
   VisitFlow apply(GEdgeDeclaration* stmt, std::list<NodeType>& path);
   VisitFlow apply(GLambdaExpression* stmt, std::list<NodeType>& path);
-  VisitFlow apply(GReturnStmt* stmt, std::list<NodeType>& path) {
-    return VisitFlow::Return;
-  }
-  VisitFlow apply(GBinaryExpression* stmt, std::list<NodeType>& path) { return VisitFlow::Return; }
-  VisitFlow apply(GBlockStmt* stmt, std::list<NodeType>& path) { return VisitFlow::Return; }
-  VisitFlow apply(GVariableDecl* stmt, std::list<NodeType>& path) { return VisitFlow::Return; }
+  VisitFlow apply(GReturnStmt* stmt, std::list<NodeType>& path);
+  VisitFlow apply(GBinaryExpression* stmt, std::list<NodeType>& path);
+  VisitFlow apply(GBlockStmt* stmt, std::list<NodeType>& path);
+  VisitFlow apply(GVariableDecl* stmt, std::list<NodeType>& path);
+  VisitFlow apply(GAssignStmt* stmt, std::list<NodeType>& path);
 
 private:
 };

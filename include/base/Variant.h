@@ -231,7 +231,7 @@ public:
     return *this;
   }
 
-  constexpr bool empty() {
+  constexpr bool empty() const{
     return _indx < 0;
   }
 

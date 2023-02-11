@@ -69,6 +69,7 @@ if (CMAKE_BUILD_TYPE STREQUAL "Debug")
 			"tool/getopt.c"
 			"tool/getopt.h"
 			"test/uint.hpp"
+			"test/gramma.cpp"
 			"third_party/catch2/catch.hpp"
 			"include/base/parallel/pam/*"
 			"include/base/parallel/parlay/*"

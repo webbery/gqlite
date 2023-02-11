@@ -30,6 +30,7 @@ enum NodeType {
   BlockStatement,
   IfStatement,
   ReturnStatement,
+  AssignStatement,
   BinaryExpression,
   ArrayExpression,
   ObjectExpression,

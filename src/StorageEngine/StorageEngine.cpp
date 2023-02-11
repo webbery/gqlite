@@ -169,13 +169,19 @@ void GStorageEngine::initDict(int compressLvl)
   else {
     compressLvl = _schema[SCHEMA_GLOBAL][GLOBAL_COMPRESS_LEVEL];
   }
-  if (compressLvl == 1) { // compress only for json-liked data's key
+  switch(compressLvl) {
+    case 3: // reserved
+    case 2: // use multiple compress for data, such as RLE/XOR/Delta/Zig-zag/Snappy/Simple8b
+    case 1: // compress only for json-liked data's key
+    if (!_schema[SCHEMA_GLOBAL][GLOBAL_COMPRESS_DICT].empty()) {
+      _id2key = _schema[SCHEMA_GLOBAL][GLOBAL_COMPRESS_DICT];
+      for (auto& item: _id2key) {
+        _key2id[item.second] = item.first;
+      }
+    }
+    default: break;
   }
-  else if (compressLvl == 2) {
-    // use multiple compress for data, such as RLE/XOR/Delta/Zig-zag/Snappy/Simple8b
-  }
-  else if (compressLvl == 3) { // reserved
-  }
+  
   if (_schema[SCHEMA_GLOBAL][GLOBAL_GQL_VERSION].empty()) {
     _schema[SCHEMA_GLOBAL][GLOBAL_GQL_VERSION] = GQL_VERSION;
   }
@@ -183,6 +189,9 @@ void GStorageEngine::initDict(int compressLvl)
 
 void GStorageEngine::releaseDict()
 {
+  if (_id2key.size()) {
+    _schema[SCHEMA_GLOBAL][GLOBAL_COMPRESS_DICT] = _id2key;
+  }
 }
 
 void GStorageEngine::addMap(const std::string& prop, KeyType type) {

@@ -1,5 +1,6 @@
 #include "VirtualEngine.h"
 #include "base/gvm/Chunk.h"
+#include "base/gvm/Compiler.h"
 #include "base/lang/AST.h"
 #include "base/lang/BlockStmt.h"
 #include "base/lang/VariableDecl.h"
@@ -16,6 +17,7 @@
 #include "VirtualNetwork.h"
 #include "base/system/exception/CompileException.h"
 #include "base/lang/visitor/VariantVisitor.h"
+#include <cstdint>
 
 void init_result_info(gqlite_result& result, const std::vector<std::string>& info) {
   result.count = info.size();
@@ -191,9 +193,10 @@ VisitFlow GVirtualEngine::PlanVisitor::apply(GObjectFunction* stmt, std::list<No
 VisitFlow GVirtualEngine::PlanVisitor::apply(GLambdaExpression* stmt, std::list<NodeType>& path) {
   ByteCodeVisitor visitor(_gvm);
   std::list<NodeType> ln;
-  GListNode* block = stmt->block();
-  accept(block, &visitor, ln);
-  // disassembleChunk("lambda", *visitor._currentChunk);
+  accept(stmt->block(), &visitor, ln);
+#ifdef _DEBUG
+   disassembleChunk("lambda", *visitor._currentChunk);
+#endif
   _plans->_parent->_plan->addChunk(visitor._currentChunk);
   _plans->_parent->_plan->addCompiler(visitor._compiler);
   // generate byte code
@@ -210,6 +213,24 @@ void GVirtualEngine::ByteCodeVisitor::emit(uint8_t byte) {
   }
   _currentChunk->_code.push_back(byte);
 }
+
+void GVirtualEngine::ByteCodeVisitor::namedVariant(const std::string& name, bool isAssign) {
+  uint8_t opGet, opSet;
+  short index = resolveLocal(_compiler, name);
+  if (index == -1) {
+    opSet = (uint8_t)OpCode::OP_SET_GLOBAL;
+    opGet = (uint8_t)OpCode::OP_GET_GLOBAL;
+  } else {
+    opSet = (uint8_t)OpCode::OP_SET_LOCAL;
+    opGet = (uint8_t)OpCode::OP_GET_LOCAL;
+  }
+  if (isAssign) {
+    emit(opSet, index);
+  } else {
+    emit(opGet, index);
+  }
+}
+
 
 VisitFlow GVirtualEngine::ByteCodeVisitor::apply(GBinaryExpression* stmt, std::list<NodeType>& path) {
   accept(stmt->left(), this, path);
@@ -234,25 +255,24 @@ VisitFlow GVirtualEngine::ByteCodeVisitor::apply(GReturnStmt* stmt, std::list<No
 
 VisitFlow GVirtualEngine::ByteCodeVisitor::apply(GBlockStmt* stmt, std::list<NodeType>& path) {
   _compiler->_scopeDepth += 1;
-  // accept(stmt->expr(), *this, path);
-  // emit(stmt->getOperator());
+  accept(stmt->block(), this, path);
+  _compiler->_scopeDepth -= 1;
+  // set to gvm
+  while (_compiler->_count > 0 && _compiler->_variant[_compiler->_count - 1]._depth > _compiler->_scopeDepth) {
+    emit((uint8_t)OpCode::OP_POP);
+    _compiler->_count--;
+  }
   return VisitFlow::SkipCurrent;
 }
 
-VisitFlow GVirtualEngine::ByteCodeVisitor::apply(GVariableDecl* stmt, std::list<NodeType>& path) {
+VisitFlow GVirtualEngine::ByteCodeVisitor::apply(GAssignStmt* stmt, std::list<NodeType>& path) {
+  accept(stmt->decl(), this, path);
   GVariantVisitor visitor;
   accept(stmt->value(), &visitor, path);
   Value value = visitor.getVariant();
-  if (_compiler->_scopeDepth == 0) {
-    // global variant
-    if (_gvm->setGlobalVariant(stmt->name(), value) == ECode_Compile_Warn_Var_Exist) {
-      throw GCompileException();
-    }
-    return VisitFlow::SkipCurrent;
-  }
-  // local variant
-  auto& var = _compiler->_variant[_compiler->_count++];
-  var._name = stmt->name();
-  var._depth = _compiler->_scopeDepth;
+  _gvm->declareLocalVariant(_compiler, stmt->name(), value);
+  namedVariant(stmt->name(), true);
+  
   return VisitFlow::SkipCurrent;
 }
+

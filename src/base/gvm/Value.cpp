@@ -3,13 +3,13 @@
 
 void printValue(const Value& value) {
   value.visit([](double v){
-    fmt::printf("{}", v);
+    fmt::print("{}", v);
   },
   [](std::string v) {
-    fmt::printf("{}", v);
+    fmt::print("{}", v);
   },
   [](bool v) {
-    fmt::printf("{}", v);
+    fmt::print("{}", v);
   });
 }
 
@@ -35,6 +35,15 @@ Value operator + (const Value& left, const Value& right) {
     },
     [&lv](bool rv) -> std::string {
       throw std::runtime_error("an error accour when string + boolean");
+    },
+    [&lv](int rv) -> std::string {
+      throw std::runtime_error("an error accour when string + number");
+    },
+      [&lv](long rv) -> std::string {
+      throw std::runtime_error("an error accour when string + number");
+    },
+    [&lv](uint64_t rv) -> std::string {
+      throw std::runtime_error("an error accour when string + number");
     });
   },
   [&right, &value](bool lv) {
@@ -46,7 +55,58 @@ Value operator + (const Value& left, const Value& right) {
     },
     [&lv](bool rv) -> bool {
       return lv + rv;
+    }/*,
+    [&lv](int rv) -> bool {
+      throw std::runtime_error("an error accour when bool + number");
+    },
+    [&lv](long rv) -> bool {
+      throw std::runtime_error("an error accour when bool + number");
+    },
+    [&lv](uint64_t rv) -> bool {
+      throw std::runtime_error("an error accour when bool + number");
+    }*/);
+  },
+  [&right, &value](int lv) {
+    value = right.visit([&lv](double rv) ->double {
+      return lv + rv;
+    },
+    [&lv](std::string rv) -> double {
+      throw std::runtime_error("an error accour when number + string");
+    },
+    [&lv](bool rv) -> double {
+      return lv + rv;
     });
+  },
+  [&right, &value](long lv) {
+    value = right.visit([&lv](double rv) ->double {
+      return lv + rv;
+      },
+      [&lv](std::string rv) -> double {
+        throw std::runtime_error("an error accour when number + string");
+      },
+      [&lv](bool rv) -> double {
+        return lv + rv;
+      });
+  },
+  [&right, &value](uint64_t lv) {
+    value = right.visit([&lv](double rv) ->double {
+      return lv + rv;
+      },
+      [&lv](std::string rv) -> double {
+        throw std::runtime_error("an error accour when number + string");
+      },
+      [&lv](bool rv) -> double {
+        return lv + rv;
+      }/*,
+        [&lv](int rv) -> double {
+        return lv + rv;
+      },
+        [&lv](long rv) -> double {
+        return lv + rv;
+      },
+        [&lv](uint64_t rv) -> double {
+        return lv + rv;
+      }*/);
   });
   return value;
 }

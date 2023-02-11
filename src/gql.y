@@ -113,8 +113,8 @@ void emit() {}
 
 %type <var_name> a_edge
 %type <node> a_graph_expr
-%type <node> condition_json normal_json
-%type <node> condition_value normal_value number right_value simple_value geometry_condition range_comparable datetime_comparable range_comparable_obj
+%type <node> normal_json
+%type <node> normal_value number right_value simple_value geometry_condition range_comparable datetime_comparable range_comparable_obj
 %type <node> condition_values normal_values simple_values
 %type <node> normal_object condition_object
 %type <node> condition_array normal_array
@@ -132,11 +132,11 @@ void emit() {}
 %type <node> drop_graph remove_vertexes remove_edges
 %type <node> upset_edges edge_pattern connection a_link_condition
 %type <node> links link condition_links condition_link_item condition_link
-%type <node> key string_list strings intergers property_list a_vector number_list
+%type <node> key string_list strings intergers a_vector number_list
 
 /*************** Graph Script ***************/
 %type <node> function_call function_params function_param_list function_arg_stmt
-%type <node> lambda_expr expr exprs  variant_decl declaration
+%type <node> lambda_expr expr exprs declaration
 %type <node> statements statement if_state ret_state assign_state block 
 
 %%
@@ -928,9 +928,9 @@ function_call: VAR_NAME function_arg_stmt
                 free($1);
                 $$ = MakeNode(NodeType::CallExpression, obj, nullptr);
               };
-lambda_expr: function_arg_stmt FUNCTION_ARROW '{' statements '}'
+lambda_expr: function_arg_stmt FUNCTION_ARROW block
               {
-                GLambdaExpression* expr = new GLambdaExpression($1, $4);
+                GLambdaExpression* expr = new GLambdaExpression($1, $3);
                 $$ = MakeNode(NodeType::LambdaExpression, expr, 0);
               };
 function_arg_stmt
@@ -977,7 +977,9 @@ statement
 if_state: IF '(' expr ')' { $$ = $3; };
 ret_state
         : RETURN expr { $$ = MakeNode(NodeType::ReturnStatement, new GReturnStmt($2), nullptr); };
-assign_state: { $$ = nullptr; };
+assign_state
+        : VAR_NAME '=' expr { $$ = MakeNode(NodeType::AssignStatement, new GAssignStmt(INIT_STRING_AST($1), $3), nullptr); free($1);}
+        | declaration '=' expr { $$ = MakeNode(NodeType::AssignStatement, new GAssignStmt($1, $3), nullptr); };
 exprs: expr
               {
                 GArrayExpression* arr = new GArrayExpression();
@@ -990,19 +992,15 @@ exprs: expr
                 arr->addElement($3);
                 $$ = $1;
               };
-block: '{' statement '}'  { $$ = MakeNode(NodeType::BlockStatement, new GBlockStmt($2), nullptr); };
+block: '{' statements '}'  { $$ = MakeNode(NodeType::BlockStatement, new GBlockStmt($2), nullptr); };
 expr: a_value { $$ = $1; } 
         | expr '+' expr { $$ = BINARY(GBinaryExpression::Operator::Add, $1, $3); }
         | expr '-' expr { $$ = BINARY(GBinaryExpression::Operator::Subtract, $1, $3); }
         | expr '*' expr { $$ = BINARY(GBinaryExpression::Operator::Multiply, $1, $3); }
         | expr '/' expr { $$ = BINARY(GBinaryExpression::Operator::Divide, $1, $3); }
-        | expr '=' expr { $$ = BINARY(GBinaryExpression::Operator::Assign, $1, $3); }
         | '(' exprs ')' { $$ = $2; }
         ;
 declaration
-    : variant_decl { $$ = $1; }
+    : LET VAR_NAME { $$ = MakeNode(NodeType::VariableDeclaration, new GVariableDecl($2), nullptr); free($2);}
     ;
-variant_decl
-    : LET VAR_NAME { $$ = MakeNode(NodeType::VariableDeclaration, new GVariableDecl($2, nullptr), nullptr); free($2);}
-    | LET VAR_NAME '=' expr { $$ = MakeNode(NodeType::VariableDeclaration, new GVariableDecl($2, $4), nullptr); free($2);}
 %%

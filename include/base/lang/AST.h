@@ -1,5 +1,6 @@
 #pragma once
 #include "base/lang/ASTNode.h"
+#include "base/lang/AssignStmt.h"
 #include "base/lang/GQLExpression.h"
 #include "base/lang/lang.h"
 #include "base/type.h"
@@ -95,6 +96,9 @@ template <> struct GTypeTraits<NodeType::VariableDeclaration> {
   typedef GVariableDecl type;
 };
 
+template <> struct GTypeTraits<NodeType::AssignStatement> {
+  typedef GAssignStmt type;
+};
 /******************************
  * accept function will visit all nodes start from input node.
  * We define ourself's visitor to process nodes when type is matched.

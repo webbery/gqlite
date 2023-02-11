@@ -10,6 +10,11 @@
   chunk._code.push_back((uint8_t)byte)
 
 enum class OpCode {
+  OP_SET_GLOBAL,
+  OP_SET_LOCAL,
+  OP_GET_GLOBAL,
+  OP_GET_LOCAL,
+  OP_POP,
   /** < declaration */
   OP_DEF_GLOBAL,
   OP_DEF_LOCAL,
@@ -33,5 +38,7 @@ struct Chunk {
 
 int addConstant(Chunk& chunk, const Value& value);
 
+#ifdef _DEBUG
 void disassembleChunk(const char* name, const Chunk& chunk);
 int disassembleInstruction(const Chunk& chunk, int offset);
+#endif

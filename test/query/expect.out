@@ -31,21 +31,21 @@ UPSET SUCCESS
 UPSET SUCCESS
 [14]:	ast {query: 'ruins', in: 'vertex_db', where: {category: '废墟'}};
 AST:
-  `- type: GQLExpression
-    |- type: QueryStatement
-    |- query:
-    |- graph:
-      |- type: Literal
-      |- raw: vertex_db
-      |- kind: String
-      |- type: ArrayExpression
-      |- #1
-        |- type: Property
-        |- key: category
-        |- value:
-          |- type: Literal
-          |- raw: 废墟
-          |- kind: String
+: `- type: GQLExpression
+: : |- type: QueryStatement
+: : |- query:
+: : |- graph:
+: : : |- type: Literal
+: : : |- raw: vertex_db
+: : : |- kind: String
+: : : |- type: ArrayExpression
+: : : |- #1
+: : : : |- type: Property
+: : : : |- key: category
+: : : : |- value:
+: : : : : |- type: Literal
+: : : : : |- raw: 废墟
+: : : : : |- kind: String
 EXECUTE COMMAND SUCCESS
 [15]:	{query: 'ruins'};
 [1, {"datatime":"0d5","filename":"破墙0.jpg"}]
@@ -81,26 +81,26 @@ QUERY SUCCESS
 QUERY SUCCESS
 [20]:	ast {query: 'ruins', in: 'vertex_db', where: {datatime: {$lt: 1653315732}}};
 AST:
-  `- type: GQLExpression
-    |- type: QueryStatement
-    |- query:
-    |- graph:
-      |- type: Literal
-      |- raw: vertex_db
-      |- kind: String
-      |- type: ArrayExpression
-      |- #1
-        |- type: Property
-        |- key: datatime
-        |- value:
-          |- type: ArrayExpression
-          |- #1
-            |- type: Property
-            |- key: lt
-            |- value:
-              |- type: Literal
-              |- raw: 1653315732
-              |- kind: Unknow Property Kind: 1
+: `- type: GQLExpression
+: : |- type: QueryStatement
+: : |- query:
+: : |- graph:
+: : : |- type: Literal
+: : : |- raw: vertex_db
+: : : |- kind: String
+: : : |- type: ArrayExpression
+: : : |- #1
+: : : : |- type: Property
+: : : : |- key: datatime
+: : : : |- value:
+: : : : : |- type: ArrayExpression
+: : : : : |- #1
+: : : : : : |- type: Property
+: : : : : : |- key: lt
+: : : : : : |- value:
+: : : : : : : |- type: Literal
+: : : : : : : |- raw: 1653315732
+: : : : : : : |- kind: Integer
 EXECUTE COMMAND SUCCESS
 [21]:	{query: 'ruins', in: 'query_db', where: {datatime: {$lt: 0d1653315732}}};
 [1, {"datatime":"0d5","filename":"破墙0.jpg"}]
