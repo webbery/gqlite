@@ -14,7 +14,18 @@ public:
     va_end(arg_ptr);
   }
 
-  const char* what() const { return _msg; }
+#ifdef __linux__
+    virtual const char* what() const 
+#if defined(__ANDROID__)
+    _NOEXCEPT
+#elif defined(__linux__)
+    _GLIBCXX_NOTHROW
+#endif
+    {
+      return _msg;
+    }
+#endif
+
 private:
   char _msg[MAX_BUFFER_SIZE];
 };
