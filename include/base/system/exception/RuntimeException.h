@@ -1,12 +1,13 @@
 #pragma once
+#include <cstdarg>
 #include <string>
 #include <exception>
-#include <cstdarg>
 
 #define MAX_BUFFER_SIZE 256
-class GCompileException : public std::exception {
+
+class GRuntimeException : public std::exception {
 public:
-  GCompileException(const char* fmt, ...){
+  GRuntimeException(const char* fmt, ...){
     va_list arg_ptr;
     va_start(arg_ptr, fmt);
     vsnprintf(_msg, MAX_BUFFER_SIZE, fmt, arg_ptr);

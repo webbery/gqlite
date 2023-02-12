@@ -10,7 +10,7 @@ public:
   virtual int prepare();
   virtual int execute(GVM* gvm, const std::function<ExecuteStatus(KeyType, const std::string& key, nlohmann::json& value, int status)>&);
 
-  virtual void addChunk(Chunk* chunk);
+  virtual void addCompiler(Compiler* c);
   
 private:
   void convert_vertex(KeyType type, const std::string& key, nlohmann::json& value, gqlite_result& result);

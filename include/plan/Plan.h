@@ -44,16 +44,12 @@ public:
 
   inline GPlan* left() { return _left; }
 
-  virtual void addChunk(Chunk* chunk) {_chunk = chunk;}
-  virtual Chunk* chunk() const { return _chunk; }
-
-  virtual void addCompiler(Compiler* compiler) {}
+  virtual void addCompiler(Compiler* compiler) { _compiler = compiler; }
 
 protected:
   std::map<std::string, GVirtualNetwork*>& _networks;
   GStorageEngine* _store;
-  Chunk* _chunk;
-  Compiler* _compiler;
   GPlan* _left;
   GPlan* _right;
+  Compiler* _compiler;
 };

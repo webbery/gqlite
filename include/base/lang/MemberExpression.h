@@ -8,6 +8,8 @@ public:
   ~GMemberExpression();
 
   std::string GetObjectName() const;
+  std::string GetPropertyName() const;
+  
 private:
   GListNode* _obj;
   GListNode* _prop;

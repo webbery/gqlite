@@ -27,6 +27,8 @@ public:
   iterator end() { return _elements.end(); }
 
   GListNode* operator[](int idx) { return _elements[idx]; }
+
+  void clear() { _elements.clear(); }
 private:
   bool isBasicElement(GListNode*);
 
@@ -34,5 +36,3 @@ private:
   std::vector<GListNode*> _elements;
   ElementType _type;
 };
-
-GListNode* InitList(struct GListNode* item);

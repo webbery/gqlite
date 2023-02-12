@@ -135,7 +135,7 @@ void emit() {}
 %type <node> key string_list strings intergers a_vector number_list
 
 /*************** Graph Script ***************/
-%type <node> function_call function_params function_param_list function_arg_stmt
+%type <node> call_expr function_params function_param_list function_arg_stmt
 %type <node> lambda_expr expr exprs declaration
 %type <node> statements statement if_state ret_state assign_state block 
 
@@ -232,7 +232,7 @@ creation: '{' KW_CREATE ':' LITERAL_STRING ',' groups '}'
               $$ = MakeNode(NodeType::CreationStatement, createStmt, nullptr);
               stm._errorCode = ECode_Success;
             }
-        | '{' KW_CREATE ':' LITERAL_STRING ',' KW_INDEX ':' function_call '}'
+        | '{' KW_CREATE ':' LITERAL_STRING ',' KW_INDEX ':' call_expr '}'
               {
                 free($4);
               }
@@ -533,14 +533,7 @@ graph_property:
                 free($3);
                 free($1);
               }
-        | KW_VERTEX '.' function_call {}
-        | KW_EDGE '.' function_call {}
-        | VAR_NAME '.' function_call
-              {
-                auto scope = INIT_STRING_AST($1);
-                $$ = MakeNode(NodeType::VariableDeclarator, scope, $3);
-                free($1);
-              };
+        ;
 vertex_list: '[' vertexes ']'
               {
                 $$ = $2;
@@ -897,7 +890,7 @@ a_link_condition: a_edge ':' a_value
                 GEdgeDeclaration* edge = new GEdgeDeclaration($1, $3);
                 $$ = MakeNode(NodeType::EdgeDeclaration, edge, nullptr);
               }
-        | a_edge ':' function_call
+        | a_edge ':' call_expr
               {
                 GEdgeDeclaration* edge = new GEdgeDeclaration($1, $3);
                 $$ = MakeNode(NodeType::EdgeDeclaration, edge, nullptr);
@@ -920,12 +913,20 @@ a_value:  LITERAL_STRING
 key: VAR_INTEGER { $$ = INIT_NUMBER_AST($1, AttributeKind::Integer); }
         | LITERAL_STRING { $$ = INIT_STRING_AST($1); free($1);};
 /* ---------------- Graph Script --------------- */
-function_call: VAR_NAME function_arg_stmt
+call_expr
+        : VAR_NAME function_arg_stmt
               {
                 GObjectFunction* obj = new GObjectFunction();
                 obj->setFunctionName($1, "");
                 obj->addFunctionParams($2);
                 free($1);
+                $$ = MakeNode(NodeType::CallExpression, obj, nullptr);
+              }
+        | graph_property function_arg_stmt
+              {
+                GObjectFunction* obj = new GObjectFunction();
+                obj->setFunctionName($1, "");
+                obj->addFunctionParams($2);
                 $$ = MakeNode(NodeType::CallExpression, obj, nullptr);
               };
 lambda_expr: function_arg_stmt FUNCTION_ARROW block
@@ -979,7 +980,8 @@ ret_state
         : RETURN expr { $$ = MakeNode(NodeType::ReturnStatement, new GReturnStmt($2), nullptr); };
 assign_state
         : VAR_NAME '=' expr { $$ = MakeNode(NodeType::AssignStatement, new GAssignStmt(INIT_STRING_AST($1), $3), nullptr); free($1);}
-        | declaration '=' expr { $$ = MakeNode(NodeType::AssignStatement, new GAssignStmt($1, $3), nullptr); };
+        | declaration '=' expr { $$ = MakeNode(NodeType::AssignStatement, new GAssignStmt($1, $3), nullptr); }
+        ;
 exprs: expr
               {
                 GArrayExpression* arr = new GArrayExpression();
@@ -993,12 +995,14 @@ exprs: expr
                 $$ = $1;
               };
 block: '{' statements '}'  { $$ = MakeNode(NodeType::BlockStatement, new GBlockStmt($2), nullptr); };
-expr: a_value { $$ = $1; } 
-        | expr '+' expr { $$ = BINARY(GBinaryExpression::Operator::Add, $1, $3); }
+expr:     expr '+' expr { $$ = BINARY(GBinaryExpression::Operator::Add, $1, $3); }
         | expr '-' expr { $$ = BINARY(GBinaryExpression::Operator::Subtract, $1, $3); }
         | expr '*' expr { $$ = BINARY(GBinaryExpression::Operator::Multiply, $1, $3); }
         | expr '/' expr { $$ = BINARY(GBinaryExpression::Operator::Divide, $1, $3); }
         | '(' exprs ')' { $$ = $2; }
+        | lambda_expr { $$ = $1; }
+        | call_expr { $$ = $1; }
+        | a_value { $$ = $1; }
         ;
 declaration
     : LET VAR_NAME { $$ = MakeNode(NodeType::VariableDeclaration, new GVariableDecl($2), nullptr); free($2);}

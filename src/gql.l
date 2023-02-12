@@ -40,6 +40,7 @@ DECIMAL [0-9]+\.[0-9]+
                             return *yytext;
                         }
     "}"                 {
+                            stm._errIndx += yyleng;
                             stm._scriptRangePairCnt--;
                             if (stm._scriptRangePairCnt == 0) {
                                 BEGIN INITIAL;
@@ -50,23 +51,24 @@ DECIMAL [0-9]+\.[0-9]+
     "if"                { stm._errIndx += yyleng; return IF; };
     "else"              { stm._errIndx += yyleng; return ELSE; };
     "return"            { stm._errIndx += yyleng; return RETURN;};
+    "for"               { stm._errIndx += yyleng;}
     "null"              { stm._errIndx += yyleng;}
     "let"               { stm._errIndx += yyleng; return LET;}
 }
 [()\[\]{}:,;]       { stm._errIndx += 1; return *yytext; }
 "\""                { stm._errIndx += 1; };
+"=>"                {
+                        stm._errIndx += yyleng;
+                        if (stm._scriptRangePairCnt == 0) {
+                            BEGIN GSCRIPT;
+                        }
+                        return FUNCTION_ARROW;
+                    }
 <GQL>{
     "*"            {
                         stm._errIndx += 3;
                         return STAR;
                     };
-    "=>"            {
-                        stm._errIndx += yyleng;
-                        stm._scriptRangePairCnt = 0;
-                        BEGIN GSCRIPT;
-                        /* printf("begin gscript\n"); */
-                        return FUNCTION_ARROW;
-                    }
     0b'([A-Za-z0-9+/]{4})*([A-Za-z0-9+\/]{2}==|[A-Za-z0-9+\/]{3}=)?' {
                         yylval->__c = (char*)malloc(yyleng - 4);
                         memcpy(yylval->__c, yytext + 3, yyleng - 5);

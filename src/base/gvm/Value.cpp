@@ -10,7 +10,43 @@ void printValue(const Value& value) {
   },
   [](bool v) {
     fmt::print("{}", v);
+  },
+  [](int v) {
+    fmt::print("{}", v);
+  },
+  [](long v) {
+    fmt::print("{}", v);
+  },
+  [](uint64_t v) {
+    fmt::print("{}", v);
   });
+}
+
+std::string getValueString(const Value& value) {
+  std::string s;
+  value.visit([&s](double v){
+    s += std::to_string(v);
+  },
+  [&s](std::string v) {
+    s += v;
+  },
+  [&s](bool v) {
+    if (v) {
+      s += "true";
+    } else {
+      s += "false";
+    }
+  },
+  [&s](int v) {
+    s += std::to_string(v);
+  },
+  [&s](long v) {
+    s += std::to_string(v);
+  },
+  [&s](uint64_t v) {
+    s += std::to_string(v);
+  });
+  return s;
 }
 
 Value operator + (const Value& left, const Value& right) {

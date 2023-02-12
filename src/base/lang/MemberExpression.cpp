@@ -18,3 +18,7 @@ std::string GMemberExpression::GetObjectName() const
 {
   return GetString(_obj);
 }
+
+std::string GMemberExpression::GetPropertyName() const {
+  return GetString(_prop);
+}

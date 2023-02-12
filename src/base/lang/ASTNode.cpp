@@ -4,6 +4,7 @@
 #include <fmt/printf.h>
 #include <cassert>
 #include "base/lang/AST.h"
+#include "base/lang/ASTNode.h"
 #include "base/lang/visitor/IVisitor.h"
 #include "base/type.h"
 
@@ -62,6 +63,10 @@ void FreeNodeImpl(GListNode* node) {
     FreeNode(ptr);
   }
     break;
+  case NodeType::ConditionStatement: {
+    GListNode* ptr = (GListNode*)node->_value;
+    FreeNode(ptr);
+  }
   default:
     break;
   }
@@ -481,6 +486,10 @@ VisitFlow accept(GListNode* node, GVisitor* visitor, std::list<NodeType>& path) 
       RUN_VisitFlow_Children(value());
     }
     break;
+    case NodeType::ConditionStatement: {
+      GListNode* value = (GListNode*)node->_value;
+      vf = visitor->apply(value, path);
+    }
     default: vf = visitor->apply(node, path); break;
   }
   path.pop_back();

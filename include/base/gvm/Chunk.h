@@ -24,16 +24,38 @@ enum class OpCode {
   OP_MULTIPLY,
   OP_DIVIDE,
   OP_NEGATE,
+  OP_CALL,
   /** < Control */
   OP_IF,
   OP_ELSE,
   OP_CONSTANT,
   OP_RETURN,
+  /**< Other */
+  OP_INTRINSIC,
 };
 
+#define MAX_BYTE_CODE   1024
 struct Chunk {
-  std::vector<uint8_t> _code;
+  Chunk() :_code(MAX_BYTE_CODE), _codeSize(0) {}
+
+  void push(uint8_t c) {
+    _code[_codeSize++] = c;
+  }
+
+  uint8_t back() { return _code[_codeSize - 1]; }
+
+  void pop() { --_codeSize; }
+
+  uint8_t at(int index) const { return _code[index]; }
+
+  size_t size() const { return _codeSize; }
+
+  uint8_t* ptr(int idx = 0) { return &_code[idx]; }
+
   ConstPoolValue _values;
+private:
+  std::vector<uint8_t> _code;
+  short _codeSize;
 };
 
 int addConstant(Chunk& chunk, const Value& value);

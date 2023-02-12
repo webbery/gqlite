@@ -15,6 +15,7 @@
 #include "Type/Datetime.h"
 #include "base/math/Distance.h"
 #include "base/gvm/GVM.h"
+#include "base/gvm/Compiler.h"
 
 GScanPlan::GScanPlan(std::map<std::string, GVirtualNetwork*>& networks, GStorageEngine* store, GQueryStmt* stmt)
 :GPlan(networks, store)
@@ -407,8 +408,8 @@ gkey_t GScanPlan::getKey(KeyType type, mdbx::slice& slice)
 bool GScanPlan::predictVertex(gkey_t key, nlohmann::json& row)
 {
   bool result = true;
-  if (_chunk) {
-    if (_gvm->interpret(*_chunk) == ECode_Success) {
+  if (_compiler) {
+    if (_gvm->interpret(_compiler->_func) == ECode_Success) {
       Value res = _gvm->result();
     }
   }

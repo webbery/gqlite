@@ -12,6 +12,7 @@ public:
   ~GObjectFunction();
   
   void setFunctionName(const char* name, const char* scope);
+  void setFunctionName(GListNode* node, const char* scope);
   void addFunctionParam(GListNode* node);
   void addFunctionParams(GListNode* node);
 
@@ -26,8 +27,14 @@ public:
   const_iterator params_end() const { return _params.end(); }
   iterator params_end() { return _params.end(); }
 
+  size_t size() const { return _params.size(); }
+
   GListNode* operator[](int index);
 
+  bool isIntrinsic() {
+    if (_name == "console.info") return true;
+    return false;
+  }
 private:
   std::string _name;
   std::string _scope;

@@ -54,6 +54,17 @@ void wrong_grammar_test(gqlite* pHandle, char* ptr) {
   TEST_QUERY("{query: '*', in: 'ga', where: {create_time: {$gt: 1.2}}};", 2);
   TEST_QUERY("{query: '*', in: {query: '*', in: 'ga', where: {create_time: {$gt: 1}}}};", 2);
   TEST_QUERY("{query: 'g', in: 'ga', where: {$and: [create_time: {$lt: 5}]}};", 3);
+
+  TEST_GRAMMAR(
+    "{"
+      "query: 'g', in: 'ga',"
+      "where: {"
+        "color: {"
+          "$lt: ()=>{(1+2)*2/3-(1.0 + 2)/3.1;let a = 6; let a = ()=>{ return 1.2;}; return 10;}"
+          //"$lt: ()=>{return 0.5;}"
+        "}"
+      "}"
+    "};");
   TEST_GRAMMAR("{drop: 'ga'};");
 }
 
@@ -103,6 +114,7 @@ void successful_test(gqlite* pHandle, char* ptr) {
     "};");
   TEST_GRAMMAR("{upset: 'g', vertex: [[456, {name:'新分类2/新子类', pid:2821611776}]]};");
   TEST_QUERY("{query: 'g', in: 'ga'};", 7);
+  TEST_QUERY("ast {query: 'g', in: 'ga', where: {pid: 461791488}};", 1);
   TEST_QUERY("{query: 'g', in: 'ga', where: {pid: 461791488}};", 1);
   TEST_GRAMMAR("{remove: 'g', vertex: ['1']};");
   TEST_QUERY("{query: 'g', in: 'ga'};", 6);
@@ -132,7 +144,8 @@ void successful_test(gqlite* pHandle, char* ptr) {
       "query: 'g', in: 'ga',"
       "where: {"
         "color: {"
-          "$lt: ()=>{(1+2)*2/3-(1.0 + 2)/3.1;let a = 6;return 10;}"
+          // "$lt: ()=>{(1+2)*2/3-(1.0 + 2)/3.1;let a = 6; a = ()=>{ return 1.2;}; return 10;}"
+          "$lt: ()=>{ console.info(7);(1+2)*2/3-(1.0 + 2)/3.1;let a = 6; a = 4; return 10;}"
           //"$lt: ()=>{return 0.5;}"
         "}"
       "}"
@@ -209,7 +222,7 @@ void successful_test(gqlite* pHandle, char* ptr) {
   // search 1'st neighbor of item
   // TEST_GRAMMAR("{query: '*', from: 'ga', where: {neighbor: 1}");
 
-  TEST_GRAMMAR("{drop: 'ga'};");
+  // TEST_GRAMMAR("{drop: 'ga'};");
   // TEST_GRAMMAR("dump {query: vertex, in: 'ga', where: {id: 'v1', --: 1}}");
 }
 

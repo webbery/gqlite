@@ -142,47 +142,6 @@ private:
     VisitFlow apply(GReturnStmt* stmt, std::list<NodeType>& path);
   };
 
-  // read ast and generate byte code
-  struct ByteCodeVisitor: public GVisitor {
-    Chunk* _currentChunk = nullptr;
-    Compiler* _compiler = nullptr;
-    GVM* _gvm = nullptr;
-
-    ByteCodeVisitor(GVM* gvm):_currentChunk(new Chunk), _compiler(new Compiler), _gvm(gvm) {
-      initCompiler(_compiler);
-    }
-
-    VisitFlow apply(GProperty* stmt, std::list<NodeType>& path) {
-      return VisitFlow::Children;
-    }
-
-    VisitFlow apply(GLiteral* stmt, std::list<NodeType>& path);
-
-    VisitFlow apply(GLambdaExpression* stmt, std::list<NodeType>& path) {
-      return VisitFlow::Children;
-    }
-    VisitFlow apply(GReturnStmt* stmt, std::list<NodeType>& path);
-    VisitFlow apply(GBlockStmt* stmt, std::list<NodeType>& path);
-    VisitFlow apply(GBinaryExpression* stmt, std::list<NodeType>& path);
-    VisitFlow apply(GAssignStmt* stmt, std::list<NodeType>& path);
-
-    /**
-    * @brief For graph script, this function emit byte code to chunk.
-    *        Then gvm will envoke the byte code and other plan will retrieve the result.
-    */
-    void emit(uint8_t byte);
-    
-    template<typename... Types>
-    void emit(uint8_t byte, Types... args) {
-      if (!_currentChunk) {
-        _currentChunk = new Chunk;
-      }
-      _currentChunk->_code.push_back(byte);
-      emit(args...);
-    }
-
-    void namedVariant(const std::string& name, bool isAssign);
-  };
 private:
   PlanList* makePlans(GListNode* ast);
   int executePlans(PlanList*);

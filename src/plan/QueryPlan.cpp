@@ -36,10 +36,10 @@ int GQueryPlan::prepare()
   return _scan->prepare();
 }
 
-void GQueryPlan::addChunk(Chunk* chunk)
-{
-  _scan->addChunk(chunk);
+void GQueryPlan::addCompiler(Compiler* c) {
+  _scan->addCompiler(c);
 }
+
 
 int GQueryPlan::execute(GVM* gvm, const std::function<ExecuteStatus(KeyType, const std::string& key, nlohmann::json& value, int status)>& processor)
 {

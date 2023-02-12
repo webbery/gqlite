@@ -1,45 +1,22 @@
 #pragma once
 #include "IVisitor.h"
 #include "base/lang/ASTNode.h"
-#include "base/lang/Literal.h"
 
+class GVM;
+struct Compiler;
 class GVariantVisitor : public GVisitor {
 public:
-  GVariantVisitor():_literal(nullptr) {}
+  GVariantVisitor(GVM* gvm = nullptr, Compiler* compiler = nullptr):_literal(nullptr), _gvm(gvm), _compiler(compiler) {}
 
-  virtual VisitFlow apply(GLiteral* node, std::list<NodeType>&) {
-    _literal = node;
-    return VisitFlow::SkipCurrent;
-  }
+  virtual VisitFlow apply(GLiteral* node, std::list<NodeType>&);
 
-  virtual VisitFlow apply(GProperty*, std::list<NodeType>&) {
-    return VisitFlow::Children;
-  }
+  virtual VisitFlow apply(GProperty*, std::list<NodeType>&);
 
-  Value getVariant() {
-    if (!_literal) return Value();
-    switch (_literal->kind()) {
-    case AttributeKind::String:
-        return _literal->raw();
-    case AttributeKind::Number:
-      return atof(_literal->raw().c_str());
-    case AttributeKind::Integer: {
-      double v = atof(_literal->raw().c_str());
-      if (v <= std::numeric_limits<int>::max()) {
-        return (int)v;
-      }
-      else if (v <= std::numeric_limits<long>::max()) {
-        return (long)v;
-      }
-      else if (v > 0 && v <= std::numeric_limits<uint64_t>::max()) {
-        return (uint64_t)v;
-      }
-      return v;
-    }
-    default:
-        return Value();
-    }
-  }
+  VisitFlow apply(GLambdaExpression* stmt, std::list<NodeType>& path);
+
+  Value getVariant();
 private:
+  Compiler* _compiler;
   GLiteral* _literal;
+  GVM* _gvm;
 };

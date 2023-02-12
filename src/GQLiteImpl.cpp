@@ -70,7 +70,7 @@ int GQLiteImpl::create(const char* filename, gqlite_open_mode mode)
 void GQLiteImpl::exec(GVirtualEngine& stm)
 {
   // https://stackoverflow.com/questions/62820971/passing-an-argument-to-yylex
-  // yydebug = 1; // start bison debug
+   //yydebug = 1; // start bison debug
   yyscan_t scanner;
   yylex_init(&scanner);
   //yyset_debug(1, scanner);
