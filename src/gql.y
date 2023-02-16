@@ -135,7 +135,7 @@ void emit() {}
 %type <node> key string_list strings intergers a_vector number_list
 
 /*************** Graph Script ***************/
-%type <node> call_expr function_params function_param_list function_arg_stmt
+%type <node> call_expr function_params function_param_list function_arg_stmt right_param_list left_param_list
 %type <node> lambda_expr expr exprs declaration
 %type <node> statements statement if_state ret_state assign_state block 
 
@@ -943,16 +943,36 @@ function_params
         | function_param_list { $$ = $1; }
         ;
 function_param_list
+        : right_param_list { $$ = $1; }
+        | left_param_list { $$ = $1; }
+        ;
+right_param_list
         : a_value
               {
                 GArrayExpression* arr = new GArrayExpression();
                 arr->addElement($1);
                 $$ = MakeNode(NodeType::ArrayExpression, arr, nullptr);
               }
-        | function_param_list ',' a_value
+        | right_param_list ',' a_value
               {
                 GArrayExpression* arr = (GArrayExpression*)$1->_value;
                 arr->addElement($3);
+                $$ = $1;
+              }
+        ;
+left_param_list
+        : VAR_NAME
+              {
+                GArrayExpression* arr = new GArrayExpression();
+                arr->addElement(MakeNode(NodeType::VariableDeclaration, new GVariableDecl($1), nullptr));
+                free($1);
+                $$ = MakeNode(NodeType::ArrayExpression, arr, nullptr);
+              }
+        | left_param_list ',' VAR_NAME
+              {
+                GArrayExpression* arr = (GArrayExpression*)$1->_value;
+                arr->addElement(MakeNode(NodeType::VariableDeclaration, new GVariableDecl($3), nullptr));
+                free($3);
                 $$ = $1;
               }
         ;

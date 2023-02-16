@@ -2,7 +2,10 @@
 #include "base/lang/visitor/ByteCodeVisitor.h"
 
 VisitFlow GVariantVisitor::apply(GLiteral* node, std::list<NodeType>&) {
-  _literal = node;
+  Value arg = getVariant(node);
+  int idxParam = addConstant(_compiler->currentChunk(), arg);
+  // Note: different with Byte Code visitor, TODO: check and unify them!!
+  _compiler->emit((uint8_t)OpCode::OP_CONSTANT, idxParam);
   return VisitFlow::SkipCurrent;
 }
 
@@ -16,15 +19,21 @@ VisitFlow GVariantVisitor::apply(GLambdaExpression* stmt, std::list<NodeType>& p
   return VisitFlow::SkipCurrent;
 }
 
-Value GVariantVisitor::getVariant() {
-  if (!_literal) return Value();
-  switch (_literal->kind()) {
+VisitFlow GVariantVisitor::apply(GVariableDecl* var, std::list<NodeType>& path) {
+  std::string name = var->name();
+  _compiler->namedVariant(name, false);
+  return VisitFlow::SkipCurrent;
+}
+
+Value GVariantVisitor::getVariant(GLiteral* node) {
+  if (!node) return Value();
+  switch (node->kind()) {
   case AttributeKind::String:
-      return _literal->raw();
+      return node->raw();
   case AttributeKind::Number:
-    return atof(_literal->raw().c_str());
+    return atof(node->raw().c_str());
   case AttributeKind::Integer: {
-    double v = atof(_literal->raw().c_str());
+    double v = atof(node->raw().c_str());
     if (v <= std::numeric_limits<int>::max()) {
       return (int)v;
     }

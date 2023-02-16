@@ -29,9 +29,9 @@ enum class OpCode {
   OP_IF,
   OP_ELSE,
   OP_CONSTANT,
+  OP_JUMP,
   OP_RETURN,
   /**< Other */
-  OP_INTRINSIC,
 };
 
 #define MAX_BYTE_CODE   1024

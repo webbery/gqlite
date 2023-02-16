@@ -298,6 +298,7 @@ public:
     if (_tindex == typeid(T)) {
       return f(Get<T>());
     }
+    printf("bad cast: %s\n", typeid(T).name());
     throw std::bad_cast();
   }
   template<typename Func, typename... Rest>

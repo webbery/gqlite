@@ -1,5 +1,6 @@
 #include "base/gvm/Value.h"
 #include <fmt/printf.h>
+#include "base/gvm/Object.h"
 
 void printValue(const Value& value) {
   value.visit([](double v){
@@ -19,6 +20,12 @@ void printValue(const Value& value) {
   },
   [](uint64_t v) {
     fmt::print("{}", v);
+  },
+  [](FunctionObj* v) {
+    fmt::print("function <{}>", v->name);
+  },
+  [](NativeObj* v) {
+    fmt::print("native function");
   });
 }
 

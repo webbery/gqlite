@@ -6,7 +6,7 @@ class GVM;
 struct Compiler;
 class GVariantVisitor : public GVisitor {
 public:
-  GVariantVisitor(GVM* gvm = nullptr, Compiler* compiler = nullptr):_literal(nullptr), _gvm(gvm), _compiler(compiler) {}
+  GVariantVisitor(GVM* gvm = nullptr, Compiler* compiler = nullptr):_gvm(gvm), _compiler(compiler) {}
 
   virtual VisitFlow apply(GLiteral* node, std::list<NodeType>&);
 
@@ -14,9 +14,10 @@ public:
 
   VisitFlow apply(GLambdaExpression* stmt, std::list<NodeType>& path);
 
-  Value getVariant();
+  VisitFlow apply(GVariableDecl* var, std::list<NodeType>& path);
+
+  Value getVariant(GLiteral* node);
 private:
   Compiler* _compiler;
-  GLiteral* _literal;
   GVM* _gvm;
 };

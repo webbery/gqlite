@@ -23,13 +23,6 @@ static int byteInstruction(const char* name, const Chunk& chunk, int offset) {
   return offset + 2;
 }
 
-int dynamicInstruction(const char* name, const Chunk& chunk, int offset) {
-  uint8_t slot = chunk.at(offset + 1);
-  fmt::printf("%-16s %d\n", name, slot);
-  uint8_t skip = chunk.at(offset + 2);
-  return offset + skip + 3;
-}
-
 int disassembleInstruction(const Chunk& chunk, int offset) {
   fmt::printf("%04d ", offset);
   auto instruction = chunk.at(offset);
@@ -46,7 +39,7 @@ int disassembleInstruction(const Chunk& chunk, int offset) {
   case OpCode::OP_SET_LOCAL: return byteInstruction("OP_SET_LOCAL", chunk, offset);
   case OpCode::OP_SET_GLOBAL: return byteInstruction("OP_SET_GLOBAL", chunk, offset);
   case OpCode::OP_GET_GLOBAL: return byteInstruction("OP_GET_GLOBAL", chunk, offset);
-  case OpCode::OP_INTRINSIC: return dynamicInstruction("OP_INTRINSIC", chunk, offset);
+  case OpCode::OP_CALL: return byteInstruction("OP_CALL", chunk, offset);
   case OpCode::OP_POP: return simpleInstruction("OP_POP", offset);
   case OpCode::OP_RETURN: return simpleInstruction("OP_RETURN", offset);
   default:

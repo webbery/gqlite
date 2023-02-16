@@ -31,10 +31,6 @@ public:
 
   GListNode* operator[](int index);
 
-  bool isIntrinsic() {
-    if (_name == "console.info") return true;
-    return false;
-  }
 private:
   std::string _name;
   std::string _scope;

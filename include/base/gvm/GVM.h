@@ -28,14 +28,27 @@ public:
 
   void declareLocalVariant(Compiler* compiler, const std::string& name, const Value& value);
 
+  bool isGlobalExist(const std::string& name);
+
+  const Value& getGlobalVariant(const std::string& name) const;
+
 private:
   int run();
 
   void push(Value&& value);
   void push(const Value& value);
+
+  bool call(FunctionObj* fn, int argCnt);
+
+  bool callValue(const Value& value, int argCnt);
+
+  void frameInfo();
+
+  void registNativeFunction(const char* name, NativeFunc func);
+  
 private:
   Value _stack[MAX_STACK];
-  int _stackSize;
+  Value* _stackTop;
 
   std::vector<CallFrame> _frame;
   int _frameSize;

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "base/lang/ObjectFunction.h"
+#include "base/lang/VariableDecl.h"
 #include "base/lang/visitor/IVisitor.h"
 #include "base/gvm/Compiler.h"
 #include "base/lang/AST.h"
@@ -25,20 +26,12 @@ public:
 
   VisitFlow apply(GObjectFunction* func, std::list<NodeType>& path);
 
-private:
-    /**
-    * @brief For graph script, this function emit byte code to chunk.
-    *        Then gvm will envoke the byte code and other plan will retrieve the result.
-    */
-    void emit(uint8_t byte);
-    
-    template<typename... Types>
-    void emit(uint8_t byte, Types... args) {
-      _compiler->currentChunk().push(byte);
-      emit(args...);
-    }
+  VisitFlow apply(GVariableDecl* var, std::list<NodeType>& path);
 
-    void namedVariant(const std::string& name, bool isAssign);
 private:
   GVM* _gvm;
+  /**
+   * Check if assigning.
+   */
+  bool _assigning;
 };

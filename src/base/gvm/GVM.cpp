@@ -10,27 +10,29 @@
 #include <fmt/printf.h>
 #include <cassert>
 #include <list>
+#include <typeinfo>
+#include <utility>
 #include "base/system/exception/CompileException.h"
 #include "base/gvm/Compiler.h"
-
-//#define DEBUG_TRACE_EXECUTION
+#include "base/gvm/Object.h"
 
 namespace {
-  void runIntriscFunction(const char* name, const std::list<Value>& args) {
-    if (strcmp(name, "console.info") == 0) {
-      std::string info;
-      for (auto& v: args) {
-        info += getValueString(v);
-      }
-      fmt::print("{}\n", info);
+  Value nativeClock(int argCnt, Value* args) {
+    return double(clock())/CLOCKS_PER_SEC;
+  }
+
+  Value nativePrint(int argCnt, Value* args) {
+    for (int i = 0; i < argCnt; ++i) {
+      printValue(*(args + i));
     }
-    else {
-      throw GRuntimeException("call unknow function `%s`", name);
-    }
+    return Value();
   }
 }
 
-GVM::GVM():_frame(MAX_FRAME), _stackSize(0), _frameSize(0) {}
+GVM::GVM():_frame(MAX_FRAME), _stackTop(&_stack[0]), _frameSize(0) {
+  registNativeFunction("clock", nativeClock);
+  registNativeFunction("console.info", nativePrint);
+}
 
 int GVM::setGlobalVariant(const std::string& name, const Value& value) {
   auto itr = _global.find(name);
@@ -45,12 +47,65 @@ int GVM::setGlobalVariant(const std::string& name, const Value& value) {
   return ECode_Success;
 }
 
+bool GVM::isGlobalExist(const std::string& name) {
+  auto itr = _global.find(name);
+  if (itr == _global.end())
+    return false;
+  return true;
+}
+
+const Value& GVM::getGlobalVariant(const std::string& name) const {
+  return _global.at(name);
+}
+
 void GVM::push(Value&& value) {
-  _stack[_stackSize++] = value;
+  *_stackTop++ = value;
 }
 
 void GVM::push(const Value& value) {
-  _stack[_stackSize++] = value;
+  *_stackTop++ = value;
+}
+
+bool GVM::call(FunctionObj* fn, int argCnt) {
+  if (argCnt != fn->arity) {
+    throw GRuntimeException("Expected %d arguments but got %d.", fn->arity, argCnt);
+  }
+
+  if (_frameSize == MAX_FRAME) {
+    throw GRuntimeException("Stack Overflow.");
+  }
+  CallFrame& frame = _frame[_frameSize++];
+  frame._func = fn;
+  frame._ip = fn->chunk.ptr();
+  frame._slots = _stackTop - argCnt - 1;
+  return true;
+}
+
+bool GVM::callValue(const Value& value, int argCnt) {
+  return value.visit([this, argCnt](FunctionObj* func) {
+    auto ret = call(func, argCnt);
+    return ret;
+  },
+  [this, argCnt](NativeObj* callee) {
+    NativeFunc func = callee->_func;
+    Value v = func(argCnt, _stackTop - argCnt);
+    _stackTop -= argCnt + 1;
+    if (!v.empty()) push(v);
+    return true;
+  });
+}
+
+void GVM::registNativeFunction(const char* name, NativeFunc func) {
+  _global[name] = new NativeObj(func);
+}
+
+void GVM::frameInfo() {
+  for (int i = _frameSize - 1; i >=0; --i) {
+    CallFrame& frame = _frame[i];
+    FunctionObj* func = frame._func;
+    size_t ins = frame._ip - func->chunk.ptr() - 1;
+    printf("[line -] in %s\n", func->name.c_str());
+  }
 }
 
 void GVM::declareLocalVariant(Compiler* compiler, const std::string& name, const Value& value) {
@@ -85,29 +140,30 @@ int GVM::interpret(FunctionObj* entry) {
   if (!entry) {
     return ECode_Fail;
   }
-  _stackSize = 0;
+  _stackTop = &_stack[0];
   push(entry);
-  CallFrame& frame = _frame[_frameSize++];
-  frame._func = entry;
-  frame._ip = entry->chunk.ptr();
-  frame._slots = _stack;
+  callValue(entry, 0);
   try {
     return run();
   } catch (const GRuntimeException& exp) {
     fmt::print("{}\n", exp.what());
-    _stackSize = 0;
+    _stackTop = &_stack[0];
     return ECode_Runtime_Error;
   }catch (const std::runtime_error& err) {
     fmt::print("runtime error occurd: {}\n", err.what());
-    _stackSize = 0;
+    _stackTop = &_stack[0];
     return ECode_Runtime_Error;
-  } catch (const std::exception& err) {
+  } catch(const std::bad_cast& err) {
+    fmt::print("value error occurd: {}\n", err.what());
+    _stackTop = &_stack[0];
+    return ECode_Fail;
+  }catch (const std::exception& err) {
     fmt::print("gvm error occurd: {}\n", err.what());
-    _stackSize = 0;
+    _stackTop = &_stack[0];
     return ECode_Fail;
   } catch (...) {
     fmt::print("gvm unknow error\n");
-    _stackSize = 0;
+    _stackTop = &_stack[0];
     return ECode_Fail;
   }
 }
@@ -119,26 +175,25 @@ int GVM::run() {
 #define READ_STRING() (READ_VALUE().Get<std::string>())
 #define READ_INT() (READ_VALUE().Get<int>())
 #define BINARY_OP(op) do{\
-    Value& left = _stack[--_stackSize];\
-    Value& right = _stack[_stackSize - 1];\
-    _stack[_stackSize - 1] = std::move(right op left);\
+    Value& left = *(--_stackTop);\
+    Value& right = *(_stackTop - 1);\
+    right = std::move(right op left);\
   } while(false);
 
   OpCode instruction;
   do {
-#ifdef DEBUG_TRACE_EXECUTION
-    disassembleInstruction(chunk, _ip - &chunk._code[0]);
+#ifdef _DEBUG
+    extern int disassembleInstruction(const Chunk& chunk, int offset);
+    //disassembleInstruction(frame._func->chunk, frame._ip - frame._func->chunk.ptr());
 #endif
     switch (instruction = (OpCode)READ_BYTE()) {
     // case OpCode::OP_NEGATE:   _values.top() = -_values.top(); break;
-    case OpCode::OP_INTRINSIC: {
-      const std::string& name = READ_STRING();
-      int n = READ_BYTE();
-      std::list<Value> args;
-      for (int i = 0; i < n; ++i) {
-        args.push_back(READ_VALUE());
-      }
-      runIntriscFunction(name.c_str(), args);
+    case OpCode::OP_CALL: {
+      int argsCnt = READ_BYTE();
+      //for (Value* start = &(_stack[0]); start < _stackTop; ++start) {
+      //  printValue(*start);
+      //}
+      callValue(*(_stackTop - argsCnt - 1), argsCnt);
       break;
     }
     case OpCode::OP_ADD:      BINARY_OP(+); break;
@@ -147,15 +202,24 @@ int GVM::run() {
     case OpCode::OP_DIVIDE:   BINARY_OP(/); break;
     case OpCode::OP_CONSTANT: {
       const Value& constant = READ_VALUE();
-      _stack[_stackSize++] = constant;
+      *_stackTop++ = constant;
       break;
     }
-    case OpCode::OP_RETURN:
-       if (_stackSize) --_stackSize;
-      return ECode_Success;
+    case OpCode::OP_RETURN: {
+      Value& result = *_stackTop--;
+      --_frameSize;
+      if (_frameSize == 0) {
+        --_stackTop;
+        return ECode_Success;
+      }
+      _stackTop = frame._slots;
+      push(result);
+      frame = _frame[_frameSize - 1];
+      break; 
+    }
     case OpCode::OP_DEF_GLOBAL: {
       const Value& name = READ_VALUE();
-      _global[name.Get<std::string>()] = _stack[_stackSize - 1];
+      _global[name.Get<std::string>()] = *_stackTop;
       break;
     }
     case OpCode::OP_SET_GLOBAL: {
@@ -164,7 +228,7 @@ int GVM::run() {
       if (itr == _global.end()) {
         throw GRuntimeException("undefine variable `%s`", name.c_str());
       }
-      itr->second = _stack[_stackSize - 1];
+      itr->second = *_stackTop;
       break;
     }
     case OpCode::OP_GET_GLOBAL: {
@@ -177,7 +241,7 @@ int GVM::run() {
       break;
     }
     case OpCode::OP_SET_LOCAL: {
-      READ_VALUE() = _stack[_stackSize - 1];
+      READ_VALUE() = *_stackTop;
       break;
     }
     case OpCode::OP_GET_LOCAL: {
@@ -185,7 +249,10 @@ int GVM::run() {
       break;
     }
     case OpCode::OP_POP: {
-      --_stackSize;
+      --_stackTop;
+      break;
+    }
+    case OpCode::OP_JUMP: {
       break;
     }
     default:
