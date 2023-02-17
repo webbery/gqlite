@@ -19,6 +19,7 @@ struct CallFrame {
 class GVM {
 public:
   GVM();
+  ~GVM();
 
   int interpret(FunctionObj* entry);
 

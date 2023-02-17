@@ -1,5 +1,4 @@
 #include "StorageEngine.h"
-#include <iostream>
 #include <cassert>
 #include <catch.hpp>
 #include <fstream>
@@ -28,7 +27,7 @@ TEST_CASE("basic storage api") {
   StoreOption opt;
   opt.compress = 1;
   CHECK(engine.open("testdb", opt) == ECode_Success);
-  std::cout << "schema: "<< engine.getSchema() << std::endl;
+  printf("schema: %s\n", engine.getSchema().dump().c_str());
   engine.addMap("revert_index", KeyType::Byte);
   engine.addMap("revert_index", KeyType::Byte);
   std::string value("hello gqlite");

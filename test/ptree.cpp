@@ -1,4 +1,3 @@
-#include <iostream>
 #include "base/PACTree.h"
 
 int main() {
@@ -6,6 +5,5 @@ int main() {
   ptree.set(1, 1);
   for (auto itr = ptree.begin(); itr != ptree.end(); ++itr) {
     int value = *itr;
-    std::cout<<value<<std::endl;
   }
 }

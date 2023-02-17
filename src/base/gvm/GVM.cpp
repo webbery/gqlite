@@ -34,6 +34,12 @@ GVM::GVM():_frame(MAX_FRAME), _stackTop(&_stack[0]), _frameSize(0) {
   registNativeFunction("console.info", nativePrint);
 }
 
+GVM::~GVM() {
+  unregistNativeFunction("console.info");
+  unregistNativeFunction("clock");
+}
+
+
 int GVM::setGlobalVariant(const std::string& name, const Value& value) {
   auto itr = _global.find(name);
   if (itr != _global.end()) {
@@ -195,8 +201,10 @@ int GVM::run() {
     // case OpCode::OP_NEGATE:   _values.top() = -_values.top(); break;
     case OpCode::OP_CALL: {
       int argsCnt = READ_BYTE();
+      //fmt::print("----------");
       //for (Value* start = &(_stack[0]); start < _stackTop; ++start) {
       //  printValue(*start);
+      //  fmt::print("\n");
       //}
       callValue(*(_stackTop - argsCnt - 1), argsCnt);
       break;
@@ -250,7 +258,9 @@ int GVM::run() {
       break;
     }
     case OpCode::OP_GET_LOCAL: {
-      push(std::move(READ_VALUE()));
+      Value v = std::move(READ_VALUE());
+      //printValue(v);
+      push(v);
       break;
     }
     case OpCode::OP_POP: {
