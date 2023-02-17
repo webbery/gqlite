@@ -45,6 +45,8 @@ private:
   void frameInfo();
 
   void registNativeFunction(const char* name, NativeFunc func);
+
+  void unregistNativeFunction(const char* name);
   
 private:
   Value _stack[MAX_STACK];
