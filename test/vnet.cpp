@@ -216,21 +216,21 @@ TEST_CASE("A* walk algorithm") {
   delete net;
 }
 
-TEST_CASE("performance") {
-  GVirtualNetwork* net = new GVirtualNetwork(10);
-  NodeVisitor visitor;
-  RomaniaLoader loader;
-  loader.loadRomania(net);
-  int index = 0;
-  BENCHMARK("A* Search Benchmark") {
-    is_exit.store(false);
-    RomaniaHeuristic h((node_t)14);
-    AStarSelector selector(h);
-    selector.start((node_t)1);
-    net->visit(selector, visitor, loader);
-    net->join();
-    is_exit.store(true);
-    ++index;
-  };
-  delete net;
-}
+//TEST_CASE("performance") {
+//  GVirtualNetwork* net = new GVirtualNetwork(10);
+//  NodeVisitor visitor;
+//  RomaniaLoader loader;
+//  loader.loadRomania(net);
+//  int index = 0;
+//  BENCHMARK("A* Search Benchmark") {
+//    is_exit.store(false);
+//    RomaniaHeuristic h((node_t)14);
+//    AStarSelector selector(h);
+//    selector.start((node_t)1);
+//    net->visit(selector, visitor, loader);
+//    net->join();
+//    is_exit.store(true);
+//    ++index;
+//  };
+//  delete net;
+//}

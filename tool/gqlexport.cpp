@@ -10,7 +10,7 @@ int main(int argc, char** argv) {
   // if (argc < 2) return -1;
   gqlite* pHandle = 0;
   gqlite_open(&pHandle, "gql_db");
-  printf("22222\n");
+  printf("not implement\n");
   gqlite_statement* statement = 0;
   gqlite_create(pHandle, "{dump: 'ga'}", &statement);
   printf("33333\n");

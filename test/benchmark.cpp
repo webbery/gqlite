@@ -50,7 +50,7 @@ int main(int argc, char** argv) {
     }
     gqlite_open(&gHandle, g_dbfile.c_str());
   } else {
-    gqlite_open(&gHandle);
+    gqlite_open(&gHandle, nullptr);
   }
 
   #define LINE_MAX_SIZE 1024

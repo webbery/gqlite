@@ -221,7 +221,7 @@ int main(int argc, char** argv) {
   if (dbfile.size()) {
     ret = gqlite_open(&pHandle, dbfile.c_str());
   } else {
-    ret = gqlite_open(&pHandle);
+    ret = gqlite_open(&pHandle, nullptr);
   }
   if (ret) return ret;
   printf("GQLite Version %s\nWritting by Webberg.\n\nMIT License. Build: %s\n", PROJECT_VERSION, GIT_REVISION_SHA);

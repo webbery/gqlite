@@ -1,5 +1,8 @@
 #pragma once
 #include <stdint.h>
+#ifndef __cplusplus
+#include <stdbool.h>
+#endif
 
 #ifdef _WIN32
 #ifdef gqlite_EXPORTS
@@ -44,7 +47,7 @@
 typedef void* gqlite;
 
 typedef struct _gqlite_statement {
-
+  int value;
 }gqlite_statement;
 
 enum gqlite_primitive_type {
@@ -91,7 +94,7 @@ typedef struct _gqlite_node {
     gqlite_vertex* _vertex;
     gqlite_edge* _edge;
   };
-  _gqlite_node* _next;
+  struct _gqlite_node* _next;
 }gqlite_node;
 
 enum gqlite_result_type {
@@ -105,7 +108,7 @@ typedef struct _gqlite_result {
     char** infos;
   };
   uint32_t count;
-  gqlite_result_type type;
+  enum gqlite_result_type type;
   int errcode;
   // 
   float cost;
@@ -115,7 +118,7 @@ typedef struct _gqlite_result {
 extern "C" {
 #endif
 
-  SYMBOL_EXPORT int gqlite_open(gqlite** ppDb, const char* filename = nullptr);
+  SYMBOL_EXPORT int gqlite_open(gqlite** ppDb, const char* filename);
 
   /**
    * @brief get current opened db version
