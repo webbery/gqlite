@@ -99,6 +99,11 @@ void GVM::registNativeFunction(const char* name, NativeFunc func) {
   _global[name] = new NativeObj(func);
 }
 
+void GVM::unregistNativeFunction(const char* name) {
+  delete _global[name].Get<NativeObj*>();
+}
+
+
 void GVM::frameInfo() {
   for (int i = _frameSize - 1; i >=0; --i) {
     CallFrame& frame = _frame[i];

@@ -43,6 +43,10 @@ Here is GQlite's framework:
 Use command with `git clone --recursive https://github.com/webbery/gqlite.git` to clone this repository.
 ###  2.1. <a name='ubuntu'></a>ubuntu  
 Install latest version of bison.  
+``` bash
+# Build type can be Release or Debug. If Build type is `Debug`, 'gcorv' should be install before build.
+cmake -DCMAKE_BUILD_TYPE=Release gqlite_root_dir
+```
 ###  2.2. <a name='macos'></a>macos  
 Install latest version of bison.  
 ###  2.3. <a name='windows'></a>windows  

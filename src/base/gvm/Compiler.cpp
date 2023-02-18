@@ -1,5 +1,6 @@
 #include "base/gvm/Compiler.h"
 #include "base/system/exception/CompileException.h"
+#include <limits>
 
 int16_t resolveLocal(const Compiler* compiler, const std::string& name) {
   for (int16_t i = compiler->_count - 1; i >= 0; --i) {

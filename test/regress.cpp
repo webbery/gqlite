@@ -11,7 +11,6 @@
 #endif
 #include <string>
 #include <filesystem>
-#include <iostream>
 #include <fstream>
 #include "gqlite.h"
 #include "../tool/stdout.h"
@@ -94,21 +93,26 @@ static int parse_opt(int argc, char** argv) {
 }
 
 int bengin_capture(const char* output_filename, FILE*& fp) {
-  fp = fopen(output_filename, "w");
 #ifdef WIN32
+  fp = fopen(output_filename, "w");
   int stdout_bk = _dup(_fileno(stdout));
   _dup2(_fileno(fp), _fileno(stdout));
-#else
-  int stdout_bk = dup(fileno(stdout));
-  dup2(fileno(fp), fileno(stdout));
-#endif
-  
   return stdout_bk;
+#else
+  // int stdout_bk = dup(fileno(stdout));
+  // dup2(fileno(fp), fileno(stdout));
+  fp = freopen(output_filename, "w", stdout);
+  return 0;
+#endif
 }
 
 void close_capture(int pipe, FILE* fp) {
+#ifdef WIN32
   fclose(fp);
   dup2(pipe, fileno(stdout));
+#else
+  fclose(fp);
+#endif
 }
 
 int main(int argc, char** argv) {
@@ -124,7 +128,6 @@ int main(int argc, char** argv) {
   }
 
   std::string outfile = g_inputdir + SPLASH_WORD +"current.out";
-  std::cout<<" Result: "<<outfile.c_str()<<std::endl;
   FILE* fp = nullptr;
   int outfd = bengin_capture(outfile.c_str(), fp);
   gqlite* gHandle = nullptr;
@@ -143,7 +146,7 @@ int main(int argc, char** argv) {
     std::string curfile = file.path().u8string();
     if (curfile.find("current.out") != std::string::npos || curfile.find("expect.out") != std::string::npos) continue;
     // load script
-    std::cout << "***** EXECUTE: " << file.path().filename() << " *****" <<std::endl;
+    printf("***** EXECUTE: \"%s\" *****\n", file.path().filename().c_str());
     std::ifstream fs;
     fs.open(file.path().u8string().c_str(), std::ios_base::in);
     int lineno = 0;
@@ -151,7 +154,7 @@ int main(int argc, char** argv) {
       char* ptr = nullptr;
       if (strlen(gql) == 0) break;
       // execute script
-      std::cout << "["<< lineno<<"]:\t" << gql << std::endl;
+      printf("[%d]:\t%s\n", lineno, gql);
       int value = gqlite_exec(gHandle, gql, gqlite_exec_callback, nullptr, &ptr);
       char* msg = gqlite_error(gHandle, value);
       if (msg) {
@@ -161,7 +164,7 @@ int main(int argc, char** argv) {
       lineno += 1;
       memset(gql, 0, LINE_MAX_SIZE);
     }
-    std::cout << "***** EXECUTE FINISH: " << file.path().filename() << " *****" << std::endl;
+    printf("***** EXECUTE FINISH: \"%s\" *****\n", file.path().filename().c_str());
   }
   gqlite_close(gHandle);
   close_capture(outfd, fp);
@@ -195,7 +198,7 @@ int main(int argc, char** argv) {
   }
   else {
 #ifdef WIN32
-    std::cout << "Run Command: " << cmd << std::endl;
+    printf("Run Command: %s\n", cmd.c_str());
     if (status == -1) {
       switch (errno) {
       case E2BIG:
