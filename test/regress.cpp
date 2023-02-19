@@ -93,26 +93,12 @@ static int parse_opt(int argc, char** argv) {
 }
 
 int bengin_capture(const char* output_filename, FILE*& fp) {
-#ifdef WIN32
-  fp = fopen(output_filename, "w");
-  int stdout_bk = _dup(_fileno(stdout));
-  _dup2(_fileno(fp), _fileno(stdout));
-  return stdout_bk;
-#else
-  // int stdout_bk = dup(fileno(stdout));
-  // dup2(fileno(fp), fileno(stdout));
   fp = freopen(output_filename, "w", stdout);
   return 0;
-#endif
 }
 
 void close_capture(int pipe, FILE* fp) {
-#ifdef WIN32
   fclose(fp);
-  dup2(pipe, fileno(stdout));
-#else
-  fclose(fp);
-#endif
 }
 
 int main(int argc, char** argv) {
@@ -146,7 +132,7 @@ int main(int argc, char** argv) {
     std::string curfile = file.path().u8string();
     if (curfile.find("current.out") != std::string::npos || curfile.find("expect.out") != std::string::npos) continue;
     // load script
-    printf("***** EXECUTE: \"%s\" *****\n", file.path().filename().c_str());
+    printf("***** EXECUTE: \"%s\" *****\n", file.path().filename().u8string().c_str());
     std::ifstream fs;
     fs.open(file.path().u8string().c_str(), std::ios_base::in);
     int lineno = 0;
@@ -164,7 +150,7 @@ int main(int argc, char** argv) {
       lineno += 1;
       memset(gql, 0, LINE_MAX_SIZE);
     }
-    printf("***** EXECUTE FINISH: \"%s\" *****\n", file.path().filename().c_str());
+    printf("***** EXECUTE FINISH: \"%s\" *****\n", file.path().filename().u8string().c_str());
   }
   gqlite_close(gHandle);
   close_capture(outfd, fp);
@@ -198,7 +184,6 @@ int main(int argc, char** argv) {
   }
   else {
 #ifdef WIN32
-    printf("Run Command: %s\n", cmd.c_str());
     if (status == -1) {
       switch (errno) {
       case E2BIG:

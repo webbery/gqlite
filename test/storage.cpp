@@ -1,4 +1,5 @@
 #include "StorageEngine.h"
+#include "gqlite.h"
 #include <cassert>
 #include <catch.hpp>
 #include <fstream>
@@ -26,8 +27,8 @@ TEST_CASE("basic storage api") {
   GStorageEngine engine;
   StoreOption opt;
   opt.compress = 1;
+  opt.mode = ReadWriteOption::read_write;
   CHECK(engine.open("testdb", opt) == ECode_Success);
-  printf("schema: %s\n", engine.getSchema().dump().c_str());
   engine.addMap("revert_index", KeyType::Byte);
   engine.addMap("revert_index", KeyType::Byte);
   std::string value("hello gqlite");
@@ -41,6 +42,7 @@ TEST_CASE("cursor api") {
   GStorageEngine engine;
   StoreOption opt;
   opt.compress = 1;
+  opt.mode = ReadWriteOption::read_write;
   CHECK(engine.open("testdb", opt) == ECode_Success);
   const std::string propname("name");
   engine.addMap(propname, KeyType::Integer);
@@ -64,6 +66,7 @@ TEST_CASE("empty storage") {
   GStorageEngine engine;
   StoreOption opt;
   opt.compress = 1;
+  opt.mode = ReadWriteOption::read_write;
   CHECK(engine.open("testdb", opt) == ECode_Success);
   engine.addMap("index", KeyType::Byte);
   std::string value;
@@ -77,6 +80,7 @@ TEST_CASE("movielens") {
   GStorageEngine engine;
   StoreOption opt;
   opt.compress = 1;
+  opt.mode = ReadWriteOption::read_write;
   engine.open("mvlens", opt);
   // create movie map
   engine.addMap("movie", KeyType::Integer);
@@ -125,6 +129,23 @@ TEST_CASE("movielens") {
     uint64_t k = (uid << 16 | mid);
     engine.write("tags", k, tag, strlen(tag));
   });
+  std::string a_tag;
+  k = ((uint64_t)610 << 16 | (uint64_t)168248);
+  engine.read("tags", k, a_tag);
+  CHECK(a_tag == "Heroic Bloodshed");
+}
+
+TEST_CASE("read_mode") {
+  GStorageEngine engine;
+  StoreOption opt;
+  opt.compress = 1;
+  opt.mode = ReadWriteOption::read_only;
+  CHECK(engine.open("mvlens", opt) == ECode_Success);
+  uint64_t k = ((uint64_t)517 << 16 | (uint64_t)1721);
+  std::string a_rate;
+  engine.read("rate", k, a_rate);
+  float f_rate = *(float*)a_rate.data();
+  CHECK(f_rate == 3.5);
   std::string a_tag;
   k = ((uint64_t)610 << 16 | (uint64_t)168248);
   engine.read("tags", k, a_tag);

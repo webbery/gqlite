@@ -59,16 +59,18 @@ struct alignas(8) MapInfo {
   uint8_t       reserved : 2;
 };
 
-struct StoreOption {
-  uint8_t       compress;   /**< compress level: 0~ */
-  std::string   directory;  /**< directory of graph file */
-};
-
 enum class ReadWriteOption {
   read_only,
   write_only,
   read_write
 };
+
+struct StoreOption {
+  uint8_t       compress;   /**< compress level: 0~ */
+  std::string   directory;  /**< directory of graph file */
+  ReadWriteOption mode;   /**< read write mode */
+};
+
 
 class GStorageEngine {
 public:
@@ -170,7 +172,7 @@ public:
 
     int startTrans(ReadWriteOption opt = ReadWriteOption::read_write);
 
-    int finishTrans();
+    // int finishTrans();
 
     int rollbackTrans();
 
@@ -212,7 +214,7 @@ private:
     /*
      * @brief schema is used to record the graph's information
      */
-    mdbx::map_handle openSchema();
+    mdbx::map_handle openSchema(ReadWriteOption option);
 
     void initMap(StoreOption);
 
