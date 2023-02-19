@@ -16,6 +16,8 @@ public:
 
   VisitFlow apply(GVariableDecl* var, std::list<NodeType>& path);
 
+  VisitFlow apply(GBinaryExpression* stmt, std::list<NodeType>& path);
+
   Value getVariant(GLiteral* node);
 private:
   Compiler* _compiler;

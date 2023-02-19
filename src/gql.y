@@ -94,6 +94,9 @@ void emit() {}
 
 %start line_list
 
+%left '+' '-'
+%left '*' '/'
+
 %token <var_name> VAR_HASH
 %token <__f> VAR_DECIMAL
 %token <__c> VAR_BASE64 LITERAL_STRING VAR_NAME LITERAL_PATH

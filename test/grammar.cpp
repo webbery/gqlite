@@ -144,8 +144,9 @@ void successful_test(gqlite* pHandle, char* ptr) {
       "query: 'g', in: 'ga',"
       "where: {"
         "color: {"
-          //"$lt: ()=>{console.info(7); clock(); (1+2)*2/3-(1.0 + 2)/3.1;let a = 6; console.info(a); a = ()=>{ return 1.2;}; return 10;}"
-          "$lt: ()=>{let a = 6; console.info(a);}"
+          "$lt: ()=>{clock(); let a = 6; a = (1+2)*2/3*2.0-(1.0 + 2)/3.1;console.info(a); return 10;}"
+          // "$lt: ()=>{return 10;}"
+          //"$lt: ()=>{console.info(7);let a = 6; a = (1+2)*2/3 - (1.0 + 2)/3.1; console.info(a);}"
         "}"
       "}"
     "};");

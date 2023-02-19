@@ -591,8 +591,11 @@ VisitFlow GScanPlan::PatternVisitor::apply(GProperty* stmt, std::list<NodeType>&
   if (key == "lt") {
     _attrs[index].push_back(last_key);
     attribute_t attr;
-    if (!GetLiteral(stmt->value(), attr))
+    if (!GetLiteral(stmt->value(), attr)) {
+      //return accept(stmt->value(), this, path);
       return VisitFlow::SkipCurrent;
+    }
+
     predicate_t pred = static_cast<std::function<bool(const attribute_t&)>>([attr](const attribute_t& input)->bool {
       return input < attr;
       });
@@ -611,8 +614,10 @@ VisitFlow GScanPlan::PatternVisitor::apply(GProperty* stmt, std::list<NodeType>&
   else if (key == "lte") {
     _attrs[index].push_back(last_key);
     attribute_t attr;
-    if (!GetLiteral(stmt->value(), attr))
+    if (!GetLiteral(stmt->value(), attr)) {
       return VisitFlow::SkipCurrent;
+      //return accept(stmt->value(), this, path);
+    }
 
     predicate_t pred = static_cast<std::function<bool(const attribute_t&)>>([attr](const attribute_t& input)->bool {
       return input <= attr;

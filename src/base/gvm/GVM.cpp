@@ -216,13 +216,21 @@ int GVM::run() {
     case OpCode::OP_CONSTANT: {
       const Value& constant = READ_VALUE();
       *_stackTop++ = constant;
+      //printf("OP_CONSTANT value: "); printValue(constant);
       break;
     }
     case OpCode::OP_RETURN: {
-      Value& result = *_stackTop--;
+      //fmt::print("----------");
+      //for (Value* start = &(_stack[0]); start < _stackTop; ++start) {
+      //  printf("return value: "); printValue(*start);
+      //  fmt::print("\n");
+      //}
+      Value& result = *(--_stackTop);
       --_frameSize;
       if (_frameSize == 0) {
-        --_stackTop;
+        //printf("return value: "); printValue(result);
+        //printValue(*_stackTop); printf("\n");
+        //--_stackTop;
         return ECode_Success;
       }
       _stackTop = frame._slots;
@@ -254,12 +262,13 @@ int GVM::run() {
       break;
     }
     case OpCode::OP_SET_LOCAL: {
-      READ_VALUE() = *_stackTop;
+      frame._slots[READ_BYTE()] = *(_stackTop - 1);
+      //printf("set local: ");  printValue(*(_stackTop - 1)); printf("\n");
       break;
     }
     case OpCode::OP_GET_LOCAL: {
-      Value v = std::move(READ_VALUE());
-      //printValue(v);
+      Value v = frame._slots[READ_BYTE()];
+      //printf("get local: ");  printValue(v); printf("\n");
       push(v);
       break;
     }

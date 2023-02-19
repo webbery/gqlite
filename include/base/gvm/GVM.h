@@ -23,7 +23,7 @@ public:
 
   int interpret(FunctionObj* entry);
 
-  const Value& result() const { return _final; }
+  const Value& result() const { return *_stackTop; }
 
   int setGlobalVariant(const std::string& name, const Value& value);
 
@@ -56,7 +56,6 @@ private:
   std::vector<CallFrame> _frame;
   int _frameSize;
 
-  Value _final;
   /**
   * @brief Here we use map but not hash_map because of memory considered and program may be not so large.
   *        An optimization can be find here: https://abseil.io/about/design/swisstables

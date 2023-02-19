@@ -28,10 +28,11 @@ public:
 
   VisitFlow apply(GVariableDecl* var, std::list<NodeType>& path);
 
+  bool hasReturn() const { return _return; }
 private:
   GVM* _gvm;
   /**
-   * Check if assigning.
+   * Check if return.
    */
-  bool _assigning;
+  bool _return;
 };

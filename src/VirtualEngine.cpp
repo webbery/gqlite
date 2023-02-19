@@ -195,9 +195,12 @@ VisitFlow GVirtualEngine::PlanVisitor::apply(GLambdaExpression* stmt, std::list<
   GByteCodeVisitor visitor(_gvm);
   std::list<NodeType> ln;
   accept(stmt->block(), &visitor, ln);
+  if (!visitor.hasReturn()) {
+    visitor._compiler->emit((uint8_t)OpCode::OP_RETURN);
+  }
 #ifdef _DEBUG
   std::string funcName = visitor._compiler->_func->name;
-   disassembleChunk(funcName.empty()? "lambda" : funcName.c_str(), visitor._compiler->currentChunk());
+   //disassembleChunk(funcName.empty()? "lambda" : funcName.c_str(), visitor._compiler->currentChunk());
 #endif
   _plans->_parent->_plan->addCompiler(visitor._compiler);
   // generate byte code

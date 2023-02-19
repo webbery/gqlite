@@ -65,6 +65,9 @@ Value operator + (const Value& left, const Value& right) {
     [&lv](std::string rv) ->double {
       throw std::runtime_error("an error accour when number + string");
     },
+    [&lv](int rv) {
+      return lv + rv;
+    },
     [&lv](bool rv) -> double {
       throw std::runtime_error("an error accour when number + boolean");
     });
@@ -88,6 +91,18 @@ Value operator + (const Value& left, const Value& right) {
     [&lv](uint64_t rv) -> std::string {
       throw std::runtime_error("an error accour when string + number");
     });
+  },
+  [&right, &value](int lv) {
+    value = right.visit([&lv](double rv) ->double {
+      return lv + rv;
+      },
+      [&lv](int rv) ->double {
+        return lv + rv;
+      },
+      [&lv](long rv) ->double {
+        return lv + rv;
+      }
+    );
   },
   [&right, &value](bool lv) {
     value = right.visit([&lv](double rv) ->bool {
@@ -160,6 +175,9 @@ Value operator - (const Value& left, const Value& right) {
     value = right.visit([&lv](double rv) {
       return lv - rv;
     },
+    [&lv](int rv) {
+      return lv - rv;
+    },
     [&lv](std::string rv) ->double {
       throw std::runtime_error("an error accour when number - string");
     },
@@ -178,6 +196,14 @@ Value operator - (const Value& left, const Value& right) {
       throw std::runtime_error("an error accour when string - boolean");
     });
   },
+  [&right, &value](int lv) {
+    value = right.visit([&lv](double rv) -> double {
+      return lv - rv;
+      },
+      [&lv](int rv) -> double {
+        return lv - rv;
+      });
+  },
   [&right, &value](bool lv) {
     value = right.visit([&lv](double rv) ->bool {
       throw std::runtime_error("an error accour when boolean - double");
@@ -188,7 +214,8 @@ Value operator - (const Value& left, const Value& right) {
     [&lv](bool rv) -> bool {
       return lv - rv;
     });
-  });
+  }
+    );
   return value;
 }
 
@@ -196,6 +223,9 @@ Value operator * (const Value& left, const Value& right) {
   Value value;
   left.visit([&right, &value](double lv) {
     value = right.visit([&lv](double rv) {
+      return lv * rv;
+    },
+    [&lv](int rv) {
       return lv * rv;
     },
     [&lv](std::string rv) ->double {
@@ -216,6 +246,14 @@ Value operator * (const Value& left, const Value& right) {
       throw std::runtime_error("an error accour when string * string");
     });
   },
+  [&right, &value](int lv) {
+    value = right.visit([&lv](double rv) -> double {
+      return (double)lv * rv;
+      },
+      [&lv](int rv) -> double {
+        return (double)lv * rv;
+      });
+  },
   [&right, &value](bool lv) {
     value = right.visit([&lv](double rv) ->bool {
       throw std::runtime_error("an error accour when boolean * double");
@@ -234,10 +272,19 @@ Value operator / (const Value& left, const Value& right) {
   Value value;
   left.visit([&right, &value](double lv) {
     value = right.visit([&lv](double rv) {
+      if (rv == 0) {
+        throw std::runtime_error("divider is 0");
+      }
       return lv / rv;
     },
     [&lv](std::string rv) ->double {
       throw std::runtime_error("an error accour when number / string");
+    },
+    [&lv](int rv) {
+      if (rv == 0) {
+        throw std::runtime_error("divider is 0");
+      }
+      return lv / rv;
     },
     [&lv](bool rv) -> double {
       throw std::runtime_error("an error accour when number / boolean");
@@ -253,8 +300,21 @@ Value operator / (const Value& left, const Value& right) {
     [&lv](bool rv) -> std::string {
       throw std::runtime_error("an error accour when string / boolean");
     });
-  }
-  ,
+  },
+  [&right, &value](int lv) {
+    value = right.visit([&lv](double rv) -> double {
+      if (rv == 0) {
+        throw std::runtime_error("divider is 0");
+      }
+      return (double)lv / rv;
+      },
+      [&lv](int rv) -> double {
+        if (rv == 0) {
+          throw std::runtime_error("divider is 0");
+        }
+        return (double)lv / rv;
+      });
+  },
   [&right, &value](bool lv) {
     value = right.visit([&lv](double rv) ->bool {
       throw std::runtime_error("an error accour when boolean / double");

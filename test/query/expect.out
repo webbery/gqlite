@@ -147,7 +147,7 @@ QUERY SUCCESS
 [v4, {"datatime":"0d1653315732","feature_name":[0.0,0.5],"filename":"垃圾堆.jpg"}]
 [v8, {"category":"HDR","datatime":"0d1651105732","feature_name":[0.5,0.0],"filename":"蓝天.jpg"}]
 QUERY SUCCESS
-[27]:	{query: 'ruins', in: 'query_db', where: {feature_name: {$lte: () => {return 0.5;}}}};
+[27]:	{query: 'ruins', in: 'query_db', where: {feature_name: {$lte: () => {let a = 17; a = (1+2)*2/3-(1.0 + 2)/3.1; return 0.5;}}}};
 [1, {"datatime":"0d5","filename":"破墙0.jpg"}]
 [3, null]
 [4, null]

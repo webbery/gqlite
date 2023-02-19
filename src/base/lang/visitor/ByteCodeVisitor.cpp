@@ -9,7 +9,7 @@
 #include "base/type.h"
 
 GByteCodeVisitor::GByteCodeVisitor(GVM* gvm, Compiler* compiler)
-: _gvm(gvm){
+: _gvm(gvm), _return(false) {
   if (compiler == nullptr) {
     _compiler = new Compiler(nullptr);
   }
@@ -21,6 +21,7 @@ GByteCodeVisitor::GByteCodeVisitor(GVM* gvm, Compiler* compiler)
 VisitFlow GByteCodeVisitor::apply(GReturnStmt* stmt, std::list<NodeType>& path) {
   accept(stmt->expr(), this, path);
   _compiler->emit(stmt->getOperator());
+  _return = true;
   return VisitFlow::SkipCurrent;
 }
 
@@ -47,6 +48,9 @@ VisitFlow GByteCodeVisitor::apply(GAssignStmt* stmt, std::list<NodeType>& path) 
   accept(stmt->decl(), this, path);
   GVariantVisitor visitor(_gvm, _compiler);
   accept(stmt->value(), &visitor, path);
+  if (!stmt->isDecl()) {
+    _compiler->namedVariant(stmt->name(), true);
+  }
   //Value value = visitor.getVariant();
   //_gvm->declareLocalVariant(_compiler, stmt->name(), value);
   //_compiler->namedVariant(stmt->name(), true);
@@ -87,7 +91,6 @@ VisitFlow GByteCodeVisitor::apply(GObjectFunction* func, std::list<NodeType>& pa
     }
   }
   _compiler->emit((uint8_t)OpCode::OP_CALL, idxArgCount);
-  _compiler->emit((uint8_t)OpCode::OP_RETURN);
   return VisitFlow::SkipCurrent;
 }
 

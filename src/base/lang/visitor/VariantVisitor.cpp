@@ -25,6 +25,12 @@ VisitFlow GVariantVisitor::apply(GVariableDecl* var, std::list<NodeType>& path) 
   return VisitFlow::SkipCurrent;
 }
 
+VisitFlow GVariantVisitor::apply(GBinaryExpression* stmt, std::list<NodeType>& path) {
+  accept(stmt->left(), this, path);
+  accept(stmt->right(), this, path);
+  _compiler->emit(stmt->getOperator());
+  return VisitFlow::SkipCurrent;
+}
 Value GVariantVisitor::getVariant(GLiteral* node) {
   if (!node) return Value();
   switch (node->kind()) {

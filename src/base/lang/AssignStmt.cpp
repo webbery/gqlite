@@ -7,9 +7,11 @@ GAssignStmt::GAssignStmt(GListNode* name, GListNode* value)
 {
   if (_node->_nodetype == NodeType::Literal) {
     _name = GetString(_node);
+    _decl = false;
   } else {
     GVariableDecl* decl = (GVariableDecl*)_node->_value;
     _name = decl->name();
+    _decl = true;
   }
 }
 

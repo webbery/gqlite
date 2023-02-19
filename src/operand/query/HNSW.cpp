@@ -32,6 +32,7 @@ GHNSW::GHNSW(GVirtualNetwork* network, GStorageEngine* store, const char* index_
   if (!_storage->isOpen()) {
     StoreOption option;
     option.compress = 1;
+    option.mode = ReadWriteOption::read_write;
     _storage->open(graph, option);
   }
   for (uint8_t level = 0; level < MAX_LAYER_SIZE; ++level) {
