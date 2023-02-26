@@ -11,7 +11,6 @@ void __stdcall __win_entry(LPVOID lpParameter) {
 }
 #else
 void __unix_entry(uint32_t l32, uint32_t h32) {
-  printf("entry()\n");
   uintptr_t ptr = (uintptr_t)l32 | ((uintptr_t)h32 << 32);
   GCoSchedule* schedule = (GCoSchedule*)ptr;
   int id = schedule->_current;
@@ -92,7 +91,6 @@ GCoSchedule::~GCoSchedule() {
 }
 
 void GCoSchedule::join() {
-  printf("join()\n");
 }
 
 void GCoSchedule::run() {
@@ -109,7 +107,6 @@ void GCoSchedule::run() {
     }
   }
   _coroutines.clear();
-  printf("finish\n");
 }
 
 void GCoSchedule::init(GCoroutine* c) {

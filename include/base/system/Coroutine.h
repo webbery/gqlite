@@ -5,7 +5,7 @@
 #include <map>
 #if defined(WIN32)
 #include <windows.h>
-#elif defined(__APPLE__) && defined(__MACH__)
+#elif (defined(__APPLE__) && defined(__MACH__)) || defined(__ANDROID__)
 #include <sys/ucontext.h>
 #else
 #include <ucontext.h>
