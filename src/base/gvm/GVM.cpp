@@ -29,7 +29,9 @@ namespace {
   }
 }
 
-GVM::GVM():_frame(MAX_FRAME), _stackTop(&_stack[0]), _frameSize(0) {
+GVM::GVM(GStorageEngine* storage)
+  :_frame(MAX_FRAME), _stackTop(&_stack[0]), _frameSize(0)
+  ,_storage(storage) {
   registNativeFunction("clock", nativeClock);
   registNativeFunction("console.info", nativePrint);
 }

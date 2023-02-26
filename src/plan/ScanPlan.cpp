@@ -1,7 +1,11 @@
 #include "plan/ScanPlan.h"
+#include "base/lang/AST.h"
 #include "base/lang/ASTNode.h"
 #include "base/lang/QueryStmt.h"
 #include "base/lang/ObjectFunction.h"
+#include "base/lang/visitor/AttributeVisitor.h"
+#include "base/lang/visitor/WalkVisitor.h"
+#include "base/lang/visitor/WhereVisitor.h"
 #include "base/system/Observer.h"
 #include "gqlite.h"
 #include "StorageEngine.h"
@@ -312,11 +316,11 @@ void GScanPlan::parseGroup(GListNode* query)
       {
         GMemberExpression* expr = (GMemberExpression*)(*itr)->_value;
         _group = expr->GetObjectName();
-        _queries[0].push_back({ 0, _group });
+        initQueryGroups(_group);
       }
         break;
       case NodeType::Literal:
-        _queries[0].push_back({ 0, GetString(*itr) });
+        initQueryGroups(GetString(*itr));
         break;
       default:
         break;
@@ -325,7 +329,7 @@ void GScanPlan::parseGroup(GListNode* query)
   }
   else if (query->_nodetype == NodeType::Literal) {
     _group = GetString(query);
-    _queries[0].push_back({ 0, _group });
+    initQueryGroups(_group);
   }
 }
 
@@ -337,6 +341,7 @@ void GScanPlan::parseConditions(GListNode* conditions)
   }
   _scanAll = false;
 
+  // GWhereVisitor visitor(_where);
   PatternVisitor visitor(_where);
   std::list<NodeType> lNodes;
   accept(conditions, &visitor, lNodes);
@@ -487,6 +492,21 @@ bool GScanPlan::predict(KeyType type, gkey_t key, nlohmann::json& row)
     return predictVertex(key, row);
   }
   
+}
+
+void GScanPlan::initQueryGroups(const std::string& group) {
+  if (group == "*") {
+    auto& allGroups = _store->getSchema()[SCHEMA_CLASS];
+    std::string all = allGroups.dump();
+    for (auto& group: allGroups.items()) {
+      std::string name = group.key();
+      if (name == MAP_BASIC) continue;
+      _queries[0].push_back({ 0, name });
+    }
+  }
+  else {
+    _queries[0].push_back({ 0, _group });
+  }
 }
 
 bool GScanPlan::predictEdge(gkey_t key, nlohmann::json& row)
@@ -749,99 +769,17 @@ VisitFlow GScanPlan::PatternVisitor::apply(GProperty* stmt, std::list<NodeType>&
   return VisitFlow::Children;
 }
 
-VisitFlow GScanPlan::PatternVisitor::apply(GEdgeDeclaration* stmt, std::list<NodeType>& path)
-{
-  _qt = QueryType::Match;
-  if (stmt->from() && stmt->to()) {
-    int index = _isAnd ? 0 : 1;
-    EntityNode* start = makeNodeCondition(index, GetString(stmt->from()));
-    EntityNode* end = makeNodeCondition(index, GetString(stmt->to()));
-    makeEdgeCondition(index, GWalkDeclaration::VertexEdge, start, end, stmt->direction() != "--");
-  }
-  return VisitFlow::SkipCurrent;
-}
-
-void GScanPlan::PatternVisitor::makeEdgeCondition(int index, GWalkDeclaration::Order order, EntityNode* start, EntityNode* end, bool direction)
-{
-  EntityEdge* edge = new EntityEdge;
-  if (order == GWalkDeclaration::VertexEdge) {
-      edge->_start = start;
-      edge->_end = end;
-  }
-  edge->_direction = direction;
-  _where._patterns[index]._edges.push_back(edge);
-}
-
-EntityNode* GScanPlan::PatternVisitor::makeNodeCondition(int index, const std::string& str)
-{
-  EntityNode* node = new EntityNode;
-  if (str != "*") node->_label = str;
-  return node;
-}
-
 VisitFlow GScanPlan::PatternVisitor::apply(GWalkDeclaration* stmt, std::list<NodeType>& path)
 {
   int index = _isAnd ? 0 : 1;
   auto& grad = _where._patterns[index];
-  auto order = stmt->order();
-  EntityNode* node = nullptr;
-  auto ptr = stmt->root();
-  while (ptr) {
-    auto element = ptr->_element;
-    if (element->_nodetype == EdgeDeclaration) {
-
-    }
-    else {
-      std::string str = GetString(ptr->_element);
-      int dir = 0;
-
-      if (str == "--" || str == "->") {
-        makeEdgeCondition(index, order, node, nullptr, (str == "--")? 0 : 1);
-      }
-      else if (str == "<-") {
-        makeEdgeCondition(index, order, nullptr, node, 1);
-      }
-      else {
-        node = makeNodeCondition(index, str);
-        auto& edges = _where._patterns[index]._edges;
-        if (edges.size()) {
-          auto& lastEdge = edges.back();
-          if (order == GWalkDeclaration::VertexEdge) {
-            if (lastEdge->_end) { lastEdge->_start = node; }
-            else lastEdge->_end = node;
-          }
-        }
-      }
-    }
-    ptr = ptr->_next;
-  }
-  return VisitFlow::Children;
+  GWalkVisitor visitor(&grad);
+  VisitFlow vf = visitor.apply(stmt,path);
+  if (visitor.isMatch()) _qt = QueryType::Match;
+  return vf;
 }
 
 VisitFlow GScanPlan::PatternVisitor::apply(GLambdaExpression* stmt, std::list<NodeType>& path) {
-  return VisitFlow::Return;
+  return VisitFlow::SkipCurrent;
 }
 
-VisitFlow GScanPlan::VertexJsonVisitor::apply(GProperty* stmt, std::list<NodeType>& path)
-{
-  return VisitFlow::Children;
-}
-
-VisitFlow GScanPlan::VertexJsonVisitor::apply(GVertexDeclaration* stmt, std::list<NodeType>& path)
-{
-  return VisitFlow::Children;
-}
-
-VisitFlow GScanPlan::VertexJsonVisitor::apply(GLiteral* stmt, std::list<NodeType>& path)
-{
-  return VisitFlow::Children;
-}
-
-VisitFlow GScanPlan::VertexJsonVisitor::apply(GArrayExpression* stmt, std::list<NodeType>& path)
-{
-  return VisitFlow::Children;
-}
-VisitFlow GScanPlan::VertexJsonVisitor::apply(GObjectFunction* stmt, std::list<NodeType>& path)
-{
-  return VisitFlow::Children;
-}

@@ -278,8 +278,6 @@ HMM:
     ]
 };
 ```
-###  4.7. <a name='CeateJob'></a>Ceate Job
-###  4.8. <a name='Transition'></a>Transition
 ##  5. <a name='Utility'></a>Utility
 ###  5.1. <a name='ShowGraphs'></a>Show Graphs
 ```
@@ -296,3 +294,5 @@ use graph 'xxx'
 2. Laxman Dhulipala, Guy Blelloch, Yan Gu, Yihan Sun. PaC-trees: Supporting Parallel and Compressed Purely-Functional Collections.  
 3. Amine Ghrab, Oscar Romero, Sabri Skhiri etc. GRAD: On Graph Database Modeling.  
 4. [向量索引算法HNSW和NSG的比较](https://zhuanlan.zhihu.com/p/105594786)  
+5. Daniel Lemirea, Leonid Boytsov. Decoding billions of integers per second through vectorization.  
+6. Thorup Mikkel. Undirected single-source shortest paths with positive integer weights in linear time.  

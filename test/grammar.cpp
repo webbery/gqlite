@@ -197,6 +197,7 @@ void successful_test(gqlite* pHandle, char* ptr) {
     "};"
   );
   // query 1'st order neighber
+  TEST_QUERY("{query: 'e', in: 'ga', where: ['player102', ->: min(), 'team201']};", 0);
   TEST_QUERY("{query: 'e', in: 'ga'};", 4);
   TEST_QUERY("{query: 'e', in: 'ga', where: ['v1', --, *]};", 1);
   TEST_QUERY("{query: 'e', in: 'ga', where: ['v1', ->, *]};", 0);

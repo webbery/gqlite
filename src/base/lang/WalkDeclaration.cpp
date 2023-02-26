@@ -53,10 +53,16 @@ GWalkDeclaration::WalkElement* GWalkDeclaration::init(GListNode* node)
 }
 
 GEdgeDeclaration::GEdgeDeclaration(const char* str, GListNode* node)
-  :_from(node),_to(node), _edge(nullptr)
+  :_from(nullptr),_to(nullptr), _edge(nullptr)
   ,_direction(str)
 {
-
+  if (node->_nodetype == NodeType::Literal) {
+    _from = node;
+    _to = node;
+  }
+  else {
+    _edge = node;
+  }
 }
 
 GEdgeDeclaration::GEdgeDeclaration(const char* str, GListNode* from, GListNode* to)
@@ -90,7 +96,9 @@ GEdgeDeclaration::~GEdgeDeclaration()
 GListNode* GEdgeDeclaration::value() const
 {
   if (!_edge) return nullptr;
-  if (_edge->_nodetype != EdgeDeclaration) return nullptr;
-  GEdgeDeclaration* edge = (GEdgeDeclaration*)_edge->_value;
-  return edge ? edge->from() : nullptr;
+  if (_edge->_nodetype == EdgeDeclaration) {
+    GEdgeDeclaration* edge = (GEdgeDeclaration*)_edge->_value;
+    return edge ? edge->from() : nullptr;
+  }
+  return _edge;
 }

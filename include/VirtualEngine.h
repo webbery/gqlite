@@ -48,6 +48,12 @@ public:
 
   void* alloc(size_t size);
 
+  void initStorage(GStorageEngine* storage);
+
+  void releaseStorage();
+
+  GStorageEngine* storage() const { return _storage; }
+
   /**
    * @brief parse an AST, then execute it.
    * 
@@ -81,7 +87,6 @@ public:
 
   // gql type
   GQL_Command_Type _cmdtype;
-  GStorageEngine* _storage = nullptr;
 
   // Record gscript count of `{` and `}`.
   // _scriptRangeCnt++ if `{` increase,  other wise decrease if encounter `}`
@@ -152,4 +157,5 @@ private:
   std::map<std::string, GVirtualNetwork*> _networks;
 
   GVM* _gvm = nullptr;
+  GStorageEngine* _storage = nullptr;
 };

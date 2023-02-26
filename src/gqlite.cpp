@@ -87,8 +87,8 @@ SYMBOL_EXPORT int gqlite_version(gqlite* ppDb, int* major, int* minor, int* patc
   GQLiteImpl* impl = (GQLiteImpl*)ppDb;
   if (!impl) return 0;
   GVirtualEngine* stm = impl->engine();
-  if (!stm || !stm->_storage) return 0;
-  auto pStorage = stm->_storage;
+  if (!stm || !stm->storage()) return 0;
+  auto pStorage = stm->storage();
   if (!pStorage->isOpen()) return 0;
   auto schema = pStorage->getSchema();
   std::string version = schema[SCHEMA_GLOBAL][GLOBAL_GQL_VERSION];

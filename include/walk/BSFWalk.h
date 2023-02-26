@@ -7,7 +7,7 @@ public:
   GBFSHeuristic(node_t target): IAStarHeuristic(target), _order(0) {}
 
   double operator()(const node_info& cur, const node_info& node) {
-    return _order += 0.00005;
+    return _order += 1;
   }
 
   double h(node_t id) {
@@ -15,7 +15,7 @@ public:
   }
 
 private:
-  double _order;
+  uint16_t _order;
 };
 
 template<typename Graph>

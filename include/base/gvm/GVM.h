@@ -1,5 +1,6 @@
 #pragma once
 #include "Chunk.h"
+#include "StorageEngine.h"
 #include "base/gvm/Object.h"
 #include "base/gvm/Value.h"
 #include <stack>
@@ -18,7 +19,7 @@ struct CallFrame {
 
 class GVM {
 public:
-  GVM();
+  GVM(GStorageEngine* storage);
   ~GVM();
 
   int interpret(FunctionObj* entry);
@@ -61,4 +62,6 @@ private:
   *        An optimization can be find here: https://abseil.io/about/design/swisstables
   */
   std::map<std::string, Value> _global;
+
+  GStorageEngine* _storage;
 };

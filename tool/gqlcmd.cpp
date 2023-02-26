@@ -232,7 +232,7 @@ int main(int argc, char** argv) {
     std::string input(result);
     free(result);
     trim(input);
-    if (input == "exit") {
+    if (input == ".exit") {
       break;
     }
     if (input == "dot on") {

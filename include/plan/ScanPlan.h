@@ -73,6 +73,8 @@ private:
   bool predictVertex(gkey_t key, nlohmann::json& row);
   bool predict(const std::function<bool(const attribute_t&)>& op, const nlohmann::json& attr)const;
 
+  void initQueryGroups(const std::string& group);
+
   /**
    * @brief evaluate the order of simple scan's indexes
    * 
@@ -100,51 +102,10 @@ private:
     VisitFlow apply(GVertexDeclaration* stmt, std::list<NodeType>& path);
     VisitFlow apply(GLiteral* stmt, std::list<NodeType>& path);
     VisitFlow apply(GArrayExpression* stmt, std::list<NodeType>& path);
-    VisitFlow apply(GEdgeDeclaration* stmt, std::list<NodeType>& path);
     VisitFlow apply(GWalkDeclaration* stmt, std::list<NodeType>& path);
     VisitFlow apply(GLambdaExpression* stmt, std::list<NodeType>& path);
-    
-    void makeEdgeCondition(int index, GWalkDeclaration::Order order, EntityNode* start, EntityNode* end, bool direction);
-    EntityNode* makeNodeCondition(int index, const std::string& str);
   };
 
-  /**
-   * @brief vertex query condition visitor
-   */
-  struct VertexJsonVisitor {
-    GraphPattern& _pattern;
-    EntityNode* _node;
-    VertexJsonVisitor(GraphPattern& pattern, EntityNode* node) :_pattern(pattern), _node(node) {}
-
-    VisitFlow apply(GListNode* stmt, std::list<NodeType>& path) {
-      return VisitFlow::Children;
-    }
-    VisitFlow apply(GUpsetStmt* stmt, std::list<NodeType>& path) {
-      return VisitFlow::Return;
-    }
-    VisitFlow apply(GQueryStmt* stmt, std::list<NodeType>& path) {
-      return VisitFlow::Return;
-    }
-    VisitFlow apply(GGQLExpression* stmt, std::list<NodeType>& path) {
-      return VisitFlow::Children;
-    }
-    VisitFlow apply(GProperty* stmt, std::list<NodeType>& path);
-    VisitFlow apply(GVertexDeclaration* stmt, std::list<NodeType>& path);
-    VisitFlow apply(GCreateStmt* stmt, std::list<NodeType>& path) { return VisitFlow::Return; }
-    VisitFlow apply(GDropStmt* stmt, std::list<NodeType>& path) { return VisitFlow::Return; }
-    VisitFlow apply(GDumpStmt* stmt, std::list<NodeType>& path) { return VisitFlow::Return; }
-    VisitFlow apply(GRemoveStmt* stmt, std::list<NodeType>& path) { return VisitFlow::Return; }
-    VisitFlow apply(GLiteral* stmt, std::list<NodeType>& path);
-    VisitFlow apply(GArrayExpression* stmt, std::list<NodeType>& path);
-    VisitFlow apply(GEdgeDeclaration* stmt, std::list<NodeType>& path) { return VisitFlow::Return; }
-    VisitFlow apply(GObjectFunction* stmt, std::list<NodeType>& path);
-    VisitFlow apply(GWalkDeclaration* stmt, std::list<NodeType>& path) { return VisitFlow::Children; }
-    VisitFlow apply(GLambdaExpression* stmt, std::list<NodeType>& path) { return VisitFlow::Children; }
-    VisitFlow apply(GReturnStmt* stmt, std::list<NodeType>& path) {
-      return VisitFlow::Return;
-    }
-    VisitFlow apply(GVariableDecl* stmt, std::list<NodeType>& path) { return VisitFlow::Return; }
-  };
 private:
   /**
    * @brief A query type that mark difference query.

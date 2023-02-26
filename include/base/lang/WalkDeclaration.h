@@ -35,8 +35,15 @@ private:
 
 class GEdgeDeclaration {
 public:
+  /**
+  * @param str the describe of direction, such as ->/--/<-
+  * @param node if nodetype is Literal, it means a node that point to itself.
+  *             Otherwis the node is an edge properties or function that point out the search method
+  */
   GEdgeDeclaration(const char* str, GListNode* node);
+
   GEdgeDeclaration(const char* str, GListNode* from, GListNode* to);
+
   GEdgeDeclaration(GListNode* edge, GListNode* from, GListNode* to);
   ~GEdgeDeclaration();
 

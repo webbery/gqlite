@@ -41,8 +41,8 @@ int GQLiteImpl::open(const char* filename, gqlite_open_mode mode)
 
 int GQLiteImpl::close()
 {
-  if (_ve->_storage) {
-    delete _ve->_storage;
+  if (_ve->storage()) {
+    _ve->releaseStorage();
     return true;
   }
   return true;
@@ -54,16 +54,16 @@ int GQLiteImpl::create(const char* filename, gqlite_open_mode mode)
     StoreOption opt;
     opt.compress = 1;
     opt.mode = ReadWriteOption::read_write;
-    if (_ve->_storage == nullptr) {
-      _ve->_storage = new GStorageEngine();
+    if (_ve->storage() == nullptr) {
+      _ve->initStorage(new GStorageEngine());
     }
-    return _ve->_storage->open(filename, opt);
+    return _ve->storage()->open(filename, opt);
   }
   else {
-    if (_ve->_storage) {
-      delete _ve->_storage;
+    if (_ve->storage()) {
+      _ve->releaseStorage();
     }
-    _ve->_storage = new GStorageEngine();
+    _ve->initStorage(new GStorageEngine());
   }
   return ECode_Success;
 }

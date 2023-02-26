@@ -6,7 +6,8 @@
 
 struct FunctionObj;
 struct NativeObj;
-using Value = Variant<double, std::string, bool, int, long, uint64_t, FunctionObj*, NativeObj*>;
+struct ClassObj;
+using Value = Variant<double, std::string, bool, int, long, uint64_t, FunctionObj*, NativeObj*, ClassObj*>;
 using ConstPoolValue = std::vector<Value>;
 
 void printValue(const Value& value);

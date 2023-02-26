@@ -1,2 +1,2 @@
-{query: '*', in: 'basketballplayer', where: ['player102', ->: ..., 'team201']};
-{query: '*', in: 'basketballplayer', where: ['player102', ->: min('distance'), 'team201']};
+{query: 'follow', in: 'basketballplayer', where: ['player102', <-: min(), 'player113']};
+{query: 'follow', in: 'basketballplayer', where: ['player102', ->: min('distance'), 'team201']};

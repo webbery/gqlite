@@ -2,11 +2,15 @@
 #include <thread>
 #include <mutex>
 #include <chrono>
+#include "ScanObserver.h"
+#include "StorageEngine.h"
 #include "VirtualNetwork.h"
 #include "walk/AStarWalk.h"
 #include "walk/BSFWalk.h"
 #include "walk/RandomWalk.h"
 #include "walk/BidirectionWalk.h"
+#include "Loader.h"
+#include "plan/ScanPlan.h"
 
 std::atomic_bool is_exit(false);
 
@@ -182,8 +186,32 @@ TEST_CASE("bread search first walk algorithm") {
  //assert(cnt == 11);
 }
 
+TEST_CASE("bread search first walk algorithm with native loader") {
+  is_exit.store(false);
+  GVirtualNetwork* net = new GVirtualNetwork(100);
+  NodeVisitor visitor;
+  GStorageEngine engine;
+  StoreOption opt;
+  opt.compress = 0;
+  opt.mode = ReadWriteOption::read_only;
+  assert(engine.open("basketballplayer",  opt) == ECode_Success);
+  
+  std::map<std::string, GVirtualNetwork*> networds = {{"follow", net}};
+  GLoader loader;
+  GScanObserver* observer = new GScanObserver(&loader);
+  GScanPlan plan(networds, &engine, nullptr, "follow");
+  plan.addObserver(observer);
+  
+  GBFSHeuristic h((node_t)100);
+  GBFSSelector<virtual_graph_t> selector(h);
+  net->visit(selector, visitor, loader);
+  is_exit.store(true);
+  engine.close();
+  delete net;
+  //assert(cnt == 11);
+}
+
 TEST_CASE("A* walk algorithm") {
-  printf("Start A*\n");
   is_exit.store(false);
   GVirtualNetwork* net = new GVirtualNetwork(10);
   NodeVisitor visitor;

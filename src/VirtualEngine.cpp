@@ -53,9 +53,9 @@ GVirtualEngine::GVirtualEngine(size_t memsize)
 , _errorCode(ECode_GQL_Parse_Fail)
 , _cmdtype(GQL_Command_Size)
 , _result_callback(nullptr)
+,_gvm(nullptr)
 {
   //_network = new GVirtualNetwork(memsize);
-  _gvm = new GVM();
 }
 
 GVirtualEngine::~GVirtualEngine() {
@@ -63,7 +63,17 @@ GVirtualEngine::~GVirtualEngine() {
   {
     delete item.second;
   }
-  delete _gvm;
+  if (_gvm) delete _gvm;
+}
+
+void GVirtualEngine::initStorage(GStorageEngine* storage) {
+  _gvm = new GVM(storage);
+  _storage = storage;
+}
+
+void GVirtualEngine::releaseStorage() {
+  delete _gvm; _gvm = nullptr;
+  delete _storage;
 }
 
 void GVirtualEngine::cleanPlans(PlanList* plans) {

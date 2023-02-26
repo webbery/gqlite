@@ -78,7 +78,7 @@ set(VNET_SOURCE ./vnet.cpp
 	../src/Graph/EntityNode.cpp
 	../src/Graph/EntityEdge.cpp
 	../src/ScanObserver.cpp
-	../src/StorageEngine/Loader.cpp
+	../src/StorageEngine/StorageEngine.cpp
 	../src/VirtualNetwork.cpp
 	../src/gutil.cpp
 	${SYMBOLS_SOURCE}
@@ -114,6 +114,11 @@ set(FAIL_SOURCE ./fail.cpp
 
 set(BENCHMARK_SOURCE ./benchmark.cpp)
 
+set(COROUTINE_SOURCE ./coro.cpp
+  ../src/base/system/Coroutine.cpp
+  ${SYMBOLS_SOURCE}
+)
+
 IF (APPLE)
 ELSEIF (UNIX)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -finstrument-functions")
@@ -133,9 +138,10 @@ add_executable(infomation ${INFOMATION_SOURCE})
 add_executable(match ${MATCH_SOURCE})
 # add_executable(fail ${FAIL_SOURCE})
 add_executable(benchmark ${BENCHMARK_SOURCE})
+add_executable(coroutine ${COROUTINE_SOURCE})
 
 set(storage_LINK_OPTIONS fmt::fmt-header-only mdbx-static)
-set(vnet_LINK_OPTIONS fmt::fmt-header-only)
+set(vnet_LINK_OPTIONS gqlite)
 set(grammar_LINK_OPTIONS gqlite fmt::fmt-header-only)
 set(movielens_LINK_OPTIONS gqlite)
 set(regress_LINK_OPTIONS gqlite fmt::fmt-header-only)
@@ -208,11 +214,10 @@ add_test(NAME query COMMAND query)
 add_test(NAME grammar COMMAND grammar)
 add_test(NAME ptree COMMAND ptree)
 # add_test(NAME fail COMMAND fail)
-add_test(NAME vnet COMMAND vnet)
 add_test(NAME decision COMMAND decision)
 add_test(NAME infomation COMMAND infomation)
 add_test(NAME match COMMAND match)
-add_test(NAME basketball_player_prepare COMMAND regress --inputdir=./basketballplayer-2.X --outputdir=./basketballplayer-2.X
+add_test(NAME basketball_player_prepare COMMAND regress --inputdir=./basketballplayer-2.X --outputdir=./basketballplayer-2.X --dbfile=./basketballplayer
 	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 add_test(NAME regress_vertex COMMAND regress --inputdir=./vertex --outputdir=./vertex
 	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
@@ -227,5 +232,7 @@ add_test(NAME regress_util COMMAND regress --inputdir=./walk --outputdir=./util 
 add_test(NAME regress_error COMMAND regress --inputdir=./error --outputdir=./error
   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 add_test(NAME movielens COMMAND movielens)
+add_test(NAME vnet COMMAND vnet)
+add_test(NAME coroutine COMMAND coroutine)
 
 # set_tests_properties(fail PROPERTIES WILL_FAIL TRUE)

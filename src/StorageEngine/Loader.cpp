@@ -1,11 +1,11 @@
 #include "Loader.h"
 
-GLoader::GLoader(GScanPlan* plan)
+GLoader::GLoader()
 {
 
 }
 
-bool GLoader::load()
+bool GLoader::load() const
 {
   return false;
 }
