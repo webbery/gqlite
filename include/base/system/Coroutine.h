@@ -22,13 +22,13 @@ public:
   friend void __stdcall __win_entry(LPVOID lpParameter);
 #else
   friend void __unix_entry(uint32_t l32, uint32_t h32);
+  friend void __save_stack(GCoroutine* c, char* top);
 #endif
   friend class GCoSchedule;
 
   enum class Status {
     Uninitialize,
     Ready,
-    Await,
     Suspend,
     Running,
     Finish,
@@ -45,13 +45,20 @@ private:
   void init(std::function<void(GCoroutine*)> const& func);
 
   template <typename F>
-  GCoroutine(F func):_status(Status::Uninitialize),_id(0) { init(func); }
+  GCoroutine(F func):_status(Status::Uninitialize),_id(0)
+#ifndef  WIN32
+    , _stack(nullptr), _cap(0)
+#endif
+  { init(func); }
 
 private:
 #if defined(WIN32)
   LPVOID _context;
 #else
   ucontext_t _context;
+  char* _stack;
+  size_t _cap;
+  size_t _size;
 #endif
   std::function<void(GCoroutine*)> _func;
 

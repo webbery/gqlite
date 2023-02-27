@@ -19,8 +19,17 @@ void __unix_entry(uint32_t l32, uint32_t h32) {
   c->_status = GCoroutine::Status::Finish;
 }
 
-static void __save_stack(GCoroutine* c, char* top) {
-
+void __save_stack(GCoroutine* c, char* top) {
+  char dummy = 0;
+  size_t cap = top - &dummy;
+  assert(cap <= STACK_SIZE);
+  if (c->_cap < cap) {
+    free(c->_stack);
+    c->_cap = cap;
+    c->_stack = malloc(c->_cap);
+  }
+  c->_size = cap;
+  memcpy(c->_stack, &dummy, c->_size);
 }
 #endif
 
@@ -32,12 +41,12 @@ GCoroutine::~GCoroutine() {
 #ifdef WIN32
   DeleteFiber(_context);
 #else
+  if (_stack) free(_stack);
 #endif
 }
 
 void GCoroutine::resume() {
   switch (_status) {
-    case Status::Await:
     case Status::Ready: {
       _schedule->_current = _id;
       _status = Status::Running;
@@ -56,7 +65,13 @@ void GCoroutine::resume() {
     break;
     case Status::Suspend: {
       _schedule->_current = _id;
-
+      _status = Status::Running;
+#ifdef WIN32
+      SwitchToFiber(_context);
+#else
+      memcpy(_schedule->_stack + STACK_SIZE - _size, _stack, _size);
+      swapcontext(&_schedule->_main, &_context);
+#endif
     }
     break;
     default:
@@ -66,10 +81,11 @@ void GCoroutine::resume() {
 
 void GCoroutine::yield() {
   auto id = _schedule->_current;
+  _status = Status::Suspend;
 #ifdef WIN32
+  SwitchToFiber(_schedule->_main);
 #else
   __save_stack(this, _schedule->_stack + STACK_SIZE);
-  _status = Status::Suspend;
   _schedule->_current = 0;
   swapcontext(&_context, &_schedule->_main);
 #endif
