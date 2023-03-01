@@ -6,6 +6,7 @@ project(GQLlite)
 option(GQLITE_BUILD_TEST    "build gqlite test"   OFF)
 
 set(CMAKE_CXX_STANDARD 17)
+enable_language(ASM)
 IF (WIN32)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Zc:__cplusplus")
 # foreach(CMAKE_TARGET_FLAG
@@ -43,8 +44,8 @@ if (CMAKE_SYSTEM_NAME MATCHES "Android")
 	add_definitions(-DANDROID_ARM_NEON=TRUE)
 	if (ANDROID_ABI MATCHES "armeabi-v7a")
 		add_definitions(-D__ARM_ARCH_2__)
-		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mfpu=neon")
-		elseif (ANDROID_ABI MATCHES "armeabi-v8a")
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mfpu=neon -marm")
+	elseif (ANDROID_ABI MATCHES "armeabi-v8a")
 	elseif(ANDROID_ABI MATCHES "x86_64")
 		add_definitions(-D__x86_64__)
 		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mavx")
@@ -122,6 +123,13 @@ add_definitions(-DTHREAD_COUNT=4)
 include_directories(./include ./third_party/libmdbx ./third_party/eigen ./third_party/fmt/include)
 
 file(GLOB_RECURSE BASE_SOURCES "src/*.cpp")
+if (CMAKE_SYSTEM_NAME MATCHES "Android")
+file(GLOB_RECURSE ANDROID_SOURCE  "src/*.S")
+set(ALL_SOURCE ${BASE_SOURCES} ${ANDROID_SOURCE})
+
+else(CMAKE_SYSTEM_NAME MATCHES "Android")
+set(ALL_SOURCE ${BASE_SOURCES} )
+endif(CMAKE_SYSTEM_NAME MATCHES "Android")
 
 # set(FMT_CAN_MODULE ON CACHE BOOL "Build a module instead of a traditional library." FORCE)
 add_subdirectory(third_party/libmdbx)
@@ -144,11 +152,11 @@ add_definitions(-DYY_NO_UNISTD_H)
 option(GQLITE_BUILD_SHARED    "build gqlite shared library"   OFF)
 if (GQLITE_BUILD_SHARED)
 add_library(gqlite SHARED 
-	${BASE_SOURCES}
+	${ALL_SOURCE}
 )
 else()
 add_library(gqlite
-	${BASE_SOURCES}
+	${ALL_SOURCE}
 )
 endif()
 target_link_libraries(gqlite mdbx-static fmt::fmt )

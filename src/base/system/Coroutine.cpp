@@ -1,5 +1,19 @@
 #include "base/system/Coroutine.h"
+#include <cassert>
 #include <cstdlib>
+#include <cstring>
+
+#ifdef __ANDROID__
+extern int getcontext (ucontext_t *__ucp);
+
+extern int setcontext (const ucontext_t *__ucp);
+
+extern int swapcontext (ucontext_t *__restrict __oucp,
+			const ucontext_t *__restrict __ucp);
+
+extern void makecontext (ucontext_t *__ucp, void (*__func) (void),
+			 int __argc, ...);
+#endif
 
 #ifdef WIN32
 void __stdcall __win_entry(LPVOID lpParameter) {
@@ -26,7 +40,7 @@ void __save_stack(GCoroutine* c, char* top) {
   if (c->_cap < cap) {
     free(c->_stack);
     c->_cap = cap;
-    c->_stack = malloc(c->_cap);
+    c->_stack = (char*)malloc(c->_cap);
   }
   c->_size = cap;
   memcpy(c->_stack, &dummy, c->_size);
