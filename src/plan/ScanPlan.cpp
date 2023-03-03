@@ -4,6 +4,7 @@
 #include "base/lang/QueryStmt.h"
 #include "base/lang/ObjectFunction.h"
 #include "base/lang/visitor/WalkVisitor.h"
+#include "base/system/Coroutine.h"
 #include "base/system/Observer.h"
 #include "gqlite.h"
 #include "StorageEngine.h"
@@ -19,8 +20,8 @@
 #include "base/gvm/GVM.h"
 #include "base/gvm/Compiler.h"
 
-GScanPlan::GScanPlan(std::map<std::string, GVirtualNetwork*>& networks, GStorageEngine* store, GQueryStmt* stmt)
-:GPlan(networks, store)
+GScanPlan::GScanPlan(std::map<std::string, GVirtualNetwork*>& networks, GStorageEngine* store, GQueryStmt* stmt, GCoSchedule* schedule)
+:GPlan(networks, store, schedule)
 , _queryType(QueryType::SimpleScan)
 , _state(ScanState::Stop)
 {
@@ -38,8 +39,8 @@ GScanPlan::GScanPlan(std::map<std::string, GVirtualNetwork*>& networks, GStorage
   parseConditions(stmt->where());
 }
 
-GScanPlan::GScanPlan(std::map<std::string, GVirtualNetwork*>& networks, GStorageEngine* store, GListNode* condition, const std::string& group)
-  :GPlan(networks, store)
+GScanPlan::GScanPlan(std::map<std::string, GVirtualNetwork*>& networks, GStorageEngine* store, GListNode* condition, GCoSchedule* schedule, const std::string& group)
+  :GPlan(networks, store, schedule)
   , _queryType(QueryType::SimpleScan)
   ,_group(group)
 {

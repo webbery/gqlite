@@ -19,11 +19,12 @@ namespace {
   }
 }
 
-GQueryPlan::GQueryPlan(std::map<std::string, GVirtualNetwork*>& networks, GStorageEngine* store, GQueryStmt* stmt, gqlite_callback cb, void* cbHandle)
-  :GPlan(networks, store)
+GQueryPlan::GQueryPlan(std::map<std::string, GVirtualNetwork*>& networks, GStorageEngine* store, GQueryStmt* stmt,
+  GCoSchedule* schedule, gqlite_callback cb, void* cbHandle)
+  :GPlan(networks, store, schedule)
   , _cb(cb), _handle(cbHandle)
 {
-  _scan = new GScanPlan(networks, store, stmt);
+  _scan = new GScanPlan(networks, store, stmt, schedule);
 }
 
 GQueryPlan::~GQueryPlan()

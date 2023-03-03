@@ -3,9 +3,8 @@
 #include <mutex>
 #include <condition_variable>
 #include <list>
+#include "base/system/Coroutine.h"
 #include "walk/WalkFactory.h"
-#include "base/parallel/parlay/sequence.h"
-#include "base/system/EventEmitter.h"
 #include "base/type.h"
 
 class GNode;
@@ -38,7 +37,7 @@ public:
     WalkStop
   };
 
-  GVirtualNetwork(size_t maxMem);
+  GVirtualNetwork(GCoSchedule* schedule, size_t maxMem);
   ~GVirtualNetwork();
 
   /**
@@ -84,39 +83,26 @@ public:
    */
   template<typename Selector, typename Visitor, typename DataLoader>
   void visit(Selector& selector, Visitor visitor, DataLoader loader) {
-    // wait for start
-    _event.on((int)VNMessage::NodeLoaded, [&event = this->_event,&vg = this->_vg, visitor, loader, &selector](const std::any& ) {
-      int result = selector.walk(vg, visitor);
-      if (result & WalkResult::WR_Preload) {
-        std::any a;
-        if (loader.load()) {
-          event.emit((int)VNMessage::NodeLoaded,a);
-        }
-        else {
-          event.emit((int)VNMessage::LastNodeLoaded, a);
-        }
+//     // wait for start、
+    std::atomic_bool isFinish = false;
+    _schedule->createCoroutine([&loader, &isFinish](GCoroutine* co) {
+      printf("Data Load.\n");
+      while (loader.load()) {
+        co->yield();
       }
+      isFinish.store(true);
+      printf("Load Finish.\n");
     });
-    _event.on((int)VNMessage::LastNodeLoaded, [](const std::any&) {
-#if defined(GQLITE_ENABLE_PRINT)
-      printf("finish\n");
-#endif
-      });
-    _event.on((int)VNMessage::WalkInterrupt, [](const std::any&) {
-    });
-    _event.on((int)VNMessage::WalkStop, [](const std::any& a) {
-#if defined(GQLITE_ENABLE_PRINT)
-      printf("stop\n");
-#endif
-      });
-    std::any a;
-    if (loader.load()) {
+    _schedule->createCoroutine([&](GCoroutine* co) {
+      printf("Data Walk.\n");
       selector.stand(_vg);
-      _event.emit((int)VNMessage::NodeLoaded, a);
-    }
-    else {
-      _event.emit((int)VNMessage::LastNodeLoaded, a);
-    }
+      while (selector.walk(_vg, visitor) & WalkResult::WR_Preload) {
+        printf("Walk to load.\n");
+        if (isFinish) break;
+        co->yield();
+      }
+      printf("Walk exit.\n");
+    });
   }
 
   GMap<uint64_t, uint64_t>::node_collection access(node_t key) {
@@ -152,7 +138,7 @@ private:
 private:
   size_t _maxMemory;
 
-  GEventEmitter _event;
+  GCoSchedule* _schedule{nullptr};
 
   std::vector<std::string> _groups;
 #if defined(_PRINT_FORMAT_)

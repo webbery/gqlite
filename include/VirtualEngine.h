@@ -12,6 +12,7 @@
 #include "base/lang/BlockStmt.h"
 #include "base/lang/GQLExpression.h"
 #include "base/lang/VariableDecl.h"
+#include "base/system/Coroutine.h"
 
 // error code of parsing gql  
 #define GQL_GRAMMAR_ARRAY_FAIL    -256
@@ -41,7 +42,7 @@ public:
   static const char* GetErrorInfo(int code);
 
   GVirtualEngine(size_t);
-  GVirtualEngine( const char* gql, gqlite_callback cb);
+  //GVirtualEngine( const char* gql, gqlite_callback cb);
   ~GVirtualEngine();
   
   const std::string& gql() const {return _gql;}
@@ -105,11 +106,13 @@ private:
     Chunk* _chunk = nullptr;
     std::map<std::string, GVirtualNetwork*>& _vn;
     GStorageEngine* _store;
+    GCoSchedule* _schedule;
     GVM* _gvm;
     gqlite_callback _cb;
     void* _handle;
-    PlanVisitor(std::map<std::string, GVirtualNetwork*>& vn, GVM* gvm, GStorageEngine* store, gqlite_callback cb = nullptr, void* handle = nullptr)
-      :_vn(vn), _store(store), _handle(handle), _gvm(gvm) {
+    PlanVisitor(std::map<std::string, GVirtualNetwork*>& vn, GVM* gvm, GStorageEngine* store, 
+      GCoSchedule* schedule, gqlite_callback cb = nullptr, void* handle = nullptr)
+      :_vn(vn), _store(store), _handle(handle), _gvm(gvm), _schedule(schedule) {
       _plans = new PlanList;
       _plans->_next = _plans;
       _plans->_parent = _plans;
@@ -154,8 +157,10 @@ private:
 
 private:
   MemoryPool<char> _memory;
+
+  GCoSchedule* _schedule{ nullptr };
   std::map<std::string, GVirtualNetwork*> _networks;
 
-  GVM* _gvm = nullptr;
-  GStorageEngine* _storage = nullptr;
+  GVM* _gvm{ nullptr };
+  GStorageEngine* _storage{ nullptr };
 };

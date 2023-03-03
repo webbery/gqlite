@@ -5,7 +5,8 @@ class GScanPlan;
 class GQueryStmt;
 class GQueryPlan : public GPlan {
 public:
-  GQueryPlan(std::map<std::string, GVirtualNetwork*>& network, GStorageEngine* store, GQueryStmt* stmt, gqlite_callback cb, void* cbHandle);
+  GQueryPlan(std::map<std::string, GVirtualNetwork*>& network, GStorageEngine* store, GQueryStmt* stmt,
+    GCoSchedule* schedule, gqlite_callback cb, void* cbHandle);
   ~GQueryPlan();
   virtual int prepare();
   virtual int execute(GVM* gvm, const std::function<ExecuteStatus(KeyType, const std::string& key, nlohmann::json& value, int status)>&);

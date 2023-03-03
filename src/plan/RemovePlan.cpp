@@ -21,11 +21,11 @@ namespace {
 
 }
 
-GRemovePlan::GRemovePlan(std::map<std::string, GVirtualNetwork*>& networks, GStorageEngine* store, GRemoveStmt* stmt)
-  :GPlan(networks, store)
+GRemovePlan::GRemovePlan(std::map<std::string, GVirtualNetwork*>& networks, GStorageEngine* store, GRemoveStmt* stmt, GCoSchedule* schedule)
+  :GPlan(networks, store, schedule)
 {
   _group = stmt->name();
-  _scan = new GScanPlan(networks, _store, stmt->node(), _group);
+  _scan = new GScanPlan(networks, _store, stmt->node(), schedule, _group);
 }
 
 GRemovePlan::~GRemovePlan()

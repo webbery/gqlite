@@ -37,8 +37,8 @@ class GScanPlan: public GPlan {
   };
 
 public:
-  GScanPlan(std::map<std::string, GVirtualNetwork*>& networks, GStorageEngine* store, GQueryStmt* stmt);
-  GScanPlan(std::map<std::string, GVirtualNetwork*>& networks, GStorageEngine* store, GListNode* condition, const std::string& graph = "");
+  GScanPlan(std::map<std::string, GVirtualNetwork*>& networks, GStorageEngine* store, GQueryStmt* stmt, GCoSchedule* schedule);
+  GScanPlan(std::map<std::string, GVirtualNetwork*>& networks, GStorageEngine* store, GListNode* condition, GCoSchedule* schedule, const std::string& graph = "");
   ~GScanPlan();
 
   void addObserver(IObserver* observer);

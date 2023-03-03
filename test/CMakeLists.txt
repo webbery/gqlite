@@ -64,7 +64,7 @@ set(QUERY_SOURCE ./query.cpp
 	../src/walk/AStarWalk.cpp
 	../src/walk/RandomWalk.cpp
 	../src/base/system/Platform.cpp
-	../src/base/system/EventEmitter.cpp
+	../src/base/system/Coroutine.cpp
 	${SYMBOLS_SOURCE}
 )
 
@@ -74,7 +74,7 @@ set(PTREE_SOURCE ./ptree.cpp
 set(VNET_SOURCE ./vnet.cpp
 	../src/walk/RandomWalk.cpp
 	../src/walk/AStarWalk.cpp
-	../src/base/system/EventEmitter.cpp
+	../src/base/system/Coroutine.cpp
 	../src/Graph/EntityNode.cpp
 	../src/Graph/EntityEdge.cpp
 	../src/ScanObserver.cpp

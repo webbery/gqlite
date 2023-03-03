@@ -97,8 +97,7 @@ private:
 class RomaniaLoader {
 public:
   bool load() const {
-    if (is_exit) return false;
-    return true;
+    return false;
   }
 
   void loadRomania(GVirtualNetwork* net) {
@@ -162,58 +161,60 @@ public:
  * https://people.math.osu.edu/husen.1/teaching/571/random_walks.pdf
  */
 TEST_CASE("random walk algorithm") {
-  GVirtualNetwork* net = new GVirtualNetwork(10);
+  GCoSchedule schedule;
+  GVirtualNetwork* net = new GVirtualNetwork(&schedule, 10);
   NodeVisitor visitor;
   NodeLoader loader(net);
   GRandomWalkSelector selector("");
   net->visit(selector, visitor, loader);
-  net->join();
+  schedule.run();
   delete net;
   assert(cnt == 11);
   // fmt::print("walk: {}\n", vnames);
 }
 
 TEST_CASE("bread search first walk algorithm") {
- GVirtualNetwork* net = new GVirtualNetwork(100);
- NodeVisitor visitor;
- NodeLoader loader(net);
- GBFSHeuristic h((node_t)100);
- GBFSSelector<virtual_graph_t> selector(h);
- net->visit(selector, visitor, loader);
- is_exit.store(true);
- // std::this_thread::sleep_for(std::chrono::milliseconds(40));
- delete net;
- //assert(cnt == 11);
-}
-
-TEST_CASE("bread search first walk algorithm with native loader") {
-  is_exit.store(false);
-  GVirtualNetwork* net = new GVirtualNetwork(100);
+  GCoSchedule schedule;
+  GVirtualNetwork* net = new GVirtualNetwork(&schedule, 100);
   NodeVisitor visitor;
-  GStorageEngine engine;
-  StoreOption opt;
-  opt.compress = 0;
-  opt.mode = ReadWriteOption::read_only;
-  assert(engine.open("basketballplayer",  opt) == ECode_Success);
-  
-  std::map<std::string, GVirtualNetwork*> networds = {{"follow", net}};
-  GLoader loader;
-  GScanObserver* observer = new GScanObserver(&loader);
-  GScanPlan plan(networds, &engine, nullptr, "follow");
-  plan.addObserver(observer);
-  
+  NodeLoader loader(net);
   GBFSHeuristic h((node_t)100);
   GBFSSelector<virtual_graph_t> selector(h);
   net->visit(selector, visitor, loader);
+  schedule.run();
   is_exit.store(true);
-  engine.close();
+  // std::this_thread::sleep_for(std::chrono::milliseconds(40));
   delete net;
   //assert(cnt == 11);
 }
 
+TEST_CASE("bread search first walk algorithm with native loader") {
+  //GCoSchedule schedule;
+  //GVirtualNetwork* net = new GVirtualNetwork(&schedule, 100);
+  //NodeVisitor visitor;
+  //GStorageEngine engine;
+  //StoreOption opt;
+  //opt.compress = 0;
+  //opt.mode = ReadWriteOption::read_only;
+  //assert(engine.open("basketballplayer",  opt) == ECode_Success);
+  //
+  //std::map<std::string, GVirtualNetwork*> networds = {{"follow", net}};
+  //GScanPlan plan(networds, &engine, nullptr, "follow");
+
+  //GLoader loader;
+  //GScanObserver* observer = new GScanObserver(&loader);
+  //plan.addObserver(observer);
+  //
+  //GBFSHeuristic h((node_t)100);
+  //GBFSSelector<virtual_graph_t> selector(h);
+  //net->visit(selector, visitor, loader);
+  //engine.close();
+  //delete net;
+}
+
 TEST_CASE("A* walk algorithm") {
-  is_exit.store(false);
-  GVirtualNetwork* net = new GVirtualNetwork(10);
+  GCoSchedule schedule;
+  GVirtualNetwork* net = new GVirtualNetwork(&schedule, 10);
   NodeVisitor visitor;
   RomaniaLoader loader;
   loader.loadRomania(net);
@@ -221,8 +222,7 @@ TEST_CASE("A* walk algorithm") {
   AStarSelector selector(h);
   selector.start((node_t)0);
   net->visit(selector, visitor, loader);
-  net->join();
-  is_exit.store(true);
+  schedule.run();
   std::vector<uint64_t> path;
   for (auto nid : h.path()) {
     path.push_back((uint64_t)nid);

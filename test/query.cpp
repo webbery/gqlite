@@ -12,10 +12,11 @@
 TEST_CASE("add operation") {
   const int dim[] = { 8/*, 32, 64, 128*/ };
   const int num_elements[] = { 80/*, 320, 1280, 5120*/ };
+  GCoSchedule schedule;
   for (int elm_indx = 0; elm_indx < sizeof(num_elements) / sizeof(int); ++elm_indx) {
     for (int dim_indx = 0; dim_indx < sizeof(dim) / sizeof(int); ++dim_indx) {
       GStorageEngine* storage = new GStorageEngine();
-      GVirtualNetwork* net = new GVirtualNetwork(100);
+      GVirtualNetwork* net = new GVirtualNetwork(&schedule, 100);
       std::string graph_name("hnsw");
       graph_name += "_" + std::to_string(num_elements[elm_indx]) + "_" + std::to_string(dim[dim_indx]);
       GHNSW* instance = new GHNSW(net, storage, "default", "hnsw", graph_name.c_str());
@@ -40,8 +41,9 @@ TEST_CASE("add operation") {
 TEST_CASE("query operation") {
  const int dim = 2;
  const int num_elements = 20;
+ GCoSchedule schedule;
  GStorageEngine* storage = new GStorageEngine();
- GVirtualNetwork* net = new GVirtualNetwork(100);
+ GVirtualNetwork* net = new GVirtualNetwork(&schedule, 100);
  GHNSW* instance = new GHNSW(net, storage, "default", "hnsw", "hnsw_80_8");
  std::vector< std::vector<double> > cond;
  instance->get({ 1 }, cond);

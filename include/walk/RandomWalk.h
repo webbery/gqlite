@@ -2,7 +2,6 @@
 #include <list>
 #include <random>
 #include "WalkFactory.h"
-#include "base/parallel/parlay/sequence.h"
 #include <condition_variable>
 #include <mutex>
 

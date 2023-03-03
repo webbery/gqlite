@@ -55,7 +55,7 @@ GVirtualEngine::GVirtualEngine(size_t memsize)
 , _result_callback(nullptr)
 ,_gvm(nullptr)
 {
-  //_network = new GVirtualNetwork(memsize);
+  _schedule = new GCoSchedule();
 }
 
 GVirtualEngine::~GVirtualEngine() {
@@ -64,6 +64,7 @@ GVirtualEngine::~GVirtualEngine() {
     delete item.second;
   }
   if (_gvm) delete _gvm;
+  delete _schedule;
 }
 
 void GVirtualEngine::initStorage(GStorageEngine* storage) {
@@ -95,7 +96,7 @@ void GVirtualEngine::cleanPlans(PlanList* plans) {
 
 GVirtualEngine::PlanList* GVirtualEngine::makePlans(GListNode* ast) {
   if (ast == nullptr) return nullptr;
-  PlanVisitor visitor(_networks, _gvm, _storage, _result_callback, _handle);
+  PlanVisitor visitor(_networks, _gvm, _storage, _schedule, _result_callback, _handle);
   std::list<NodeType> ln;
   accept(ast, &visitor, ln);
   return visitor._plans;
@@ -159,7 +160,7 @@ void GVirtualEngine::PlanVisitor::add(GPlan* plan, bool threadable)
 }
 
 VisitFlow GVirtualEngine::PlanVisitor::apply(GUpsetStmt* stmt, std::list<NodeType>& path) {
-  GPlan* plan = new GUpsetPlan(_vn, _store, stmt);
+  GPlan* plan = new GUpsetPlan(_vn, _store, stmt, _schedule);
   add(plan);
   return VisitFlow::Children;
 }
@@ -178,7 +179,7 @@ VisitFlow GVirtualEngine::PlanVisitor::apply(GDropStmt* stmt, std::list<NodeType
 
 VisitFlow GVirtualEngine::PlanVisitor::apply(GQueryStmt* stmt, std::list<NodeType>& path)
 {
-  GPlan* plan = new GQueryPlan(_vn, _store, stmt, _cb, this->_handle);
+  GPlan* plan = new GQueryPlan(_vn, _store, stmt, _schedule, _cb, this->_handle);
   add(plan);
   return VisitFlow::Return;
 }
@@ -192,7 +193,7 @@ VisitFlow GVirtualEngine::PlanVisitor::apply(GDumpStmt* stmt, std::list<NodeType
 
 VisitFlow GVirtualEngine::PlanVisitor::apply(GRemoveStmt* stmt, std::list<NodeType>& path)
 {
-  GPlan* plan = new GRemovePlan(_vn, _store, stmt);
+  GPlan* plan = new GRemovePlan(_vn, _store, stmt, _schedule);
   add(plan);
   return VisitFlow::Return;
 }

@@ -2,7 +2,6 @@
 #include <cassert>
 #include <cstdlib>
 #include <cstring>
-
 #ifdef __ANDROID__
 extern int getcontext (ucontext_t *__ucp);
 
@@ -16,6 +15,7 @@ extern void makecontext (ucontext_t *__ucp, void (*__func) (void),
 #endif
 
 #ifdef WIN32
+#include <strsafe.h>
 void __stdcall __win_entry(LPVOID lpParameter) {
   GCoSchedule* schedule = (GCoSchedule*)lpParameter;
   GCoroutine* c = schedule->_coroutines[schedule->_current];
@@ -108,13 +108,41 @@ void GCoroutine::yield() {
 GCoSchedule::GCoSchedule():_current(0) {
 #ifdef WIN32
   _main = ConvertThreadToFiber(NULL);
+  if (!_main) {
+    DWORD dw = GetLastError();
+    LPVOID lpMsgBuf;
+    FormatMessage(
+      FORMAT_MESSAGE_ALLOCATE_BUFFER |
+      FORMAT_MESSAGE_FROM_SYSTEM |
+      FORMAT_MESSAGE_IGNORE_INSERTS,
+      NULL,
+      dw,
+      MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+      (LPTSTR)&lpMsgBuf,
+      0, NULL);
+    LPVOID lpDisplayBuf = (LPVOID)LocalAlloc(LMEM_ZEROINIT,
+      (lstrlen((LPCTSTR)lpMsgBuf) + 40) * sizeof(TCHAR));
+    StringCchPrintf((LPTSTR)lpDisplayBuf,
+      LocalSize(lpDisplayBuf) / sizeof(TCHAR),
+      TEXT("failed with error %d: %s"),
+      dw, lpMsgBuf);
+    std::string message((LPCTSTR)lpDisplayBuf);
+    printf("error:%s\n", message.c_str());
+  }
 #else
   _stack = (char*)malloc(STACK_SIZE);
 #endif
 }
 
 GCoSchedule::~GCoSchedule() {
+  for (auto itr = _coroutines.begin(); itr != _coroutines.end(); ++itr) {
+    delete itr->second;
+  }
+  _coroutines.clear();
 #ifdef WIN32
+  if (!ConvertFiberToThread()) {
+    printf("release coroutine fail.\n");
+  }
 #else
   free(_stack);
 #endif
@@ -137,6 +165,7 @@ void GCoSchedule::run() {
     }
   }
   _coroutines.clear();
+  printf("run finish\n");
 }
 
 void GCoSchedule::init(GCoroutine* c) {

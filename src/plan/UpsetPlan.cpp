@@ -7,15 +7,16 @@
 #include "gutil.h"
 #include <fmt/printf.h>
 #include <fmt/color.h>
+#include "base/system/Coroutine.h"
 
-GUpsetPlan::GUpsetPlan(std::map<std::string, GVirtualNetwork*>& vn, GStorageEngine* store, GUpsetStmt* ast)
-:GPlan(vn, store)
+GUpsetPlan::GUpsetPlan(std::map<std::string, GVirtualNetwork*>& vn, GStorageEngine* store, GUpsetStmt* ast, GCoSchedule* schedule)
+:GPlan(vn, store, schedule)
 ,_class(ast->name())
 ,_scan(nullptr)
 {
   GListNode* condition = ast->conditions();
   if (condition) {
-    _scan = new GScanPlan(vn, store, condition, _class);
+    _scan = new GScanPlan(vn, store, condition, _schedule, _class);
   }
   UpsetVisitor visitor(*this);
   std::list<NodeType> ln;
@@ -148,7 +149,7 @@ void GUpsetPlan::addVectorIndex(const std::string& index, uint32_t id, const std
 GVirtualNetwork* GUpsetPlan::generateNetwork(const std::string& branch)
 {
   if (!_networks[branch]) {
-    _networks[branch] = new GVirtualNetwork(1024);
+    _networks[branch] = new GVirtualNetwork(_schedule, 1024);
   }
   return _networks[branch];
 }

@@ -5,7 +5,6 @@
 #include <map>
 #include <set>
 #include <list>
-#include "parlay/sequence.h"
 #include "json.hpp"
 #include "Graph/Node.h"
 #include "Graph/Edge.h"
@@ -74,7 +73,7 @@ public:
   }
 
   void clean() {
-    parlay::parallel_for(0, _visitedNodes.size(), [&](size_t idx) {
+    std::for_each(_visitedNodes.begin(), _visitedNodes.end(), [&](size_t idx) {
       node_t nodeID = _visitedNodes[idx];
     });
   }
@@ -132,7 +131,7 @@ public:
   }
   
 private:
-  parlay::sequence<node_t> _visitedNodes;
+  std::vector<node_t> _visitedNodes;
   pam_node _nodes;
   pam_edge _edges;
 };

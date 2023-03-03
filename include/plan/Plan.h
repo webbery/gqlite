@@ -25,9 +25,10 @@ enum class ExecuteStatus {
 class GVM;
 struct Chunk;
 struct Compiler;
+class GCoSchedule;
 class GPlan {
 public:
-  GPlan(std::map<std::string, GVirtualNetwork*>& networks, GStorageEngine* store);
+  GPlan(std::map<std::string, GVirtualNetwork*>& networks, GStorageEngine* store, GCoSchedule* schedule);
   virtual ~GPlan();
   
   /** After Plan created, before Plan execute,
@@ -52,4 +53,5 @@ protected:
   GPlan* _left;
   GPlan* _right;
   Compiler* _compiler;
+  GCoSchedule* _schedule;
 };

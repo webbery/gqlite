@@ -4,13 +4,14 @@
 #include "Graph/EntityNode.h"
 #include "gutil.h"
 
-GVirtualNetwork::GVirtualNetwork(size_t maxMem)
-:_maxMemory(maxMem)
+GVirtualNetwork::GVirtualNetwork(GCoSchedule* schedule, size_t maxMem)
+:_maxMemory(maxMem), _schedule(schedule)
 {
 }
 
 GVirtualNetwork::~GVirtualNetwork() {
-  _event.join();
+  // _event.join();
+  printf("delete GVirtualNetwork\n");
 }
 
 int GVirtualNetwork::addNode(node_t id, const std::vector<node_attr_t>& attr, const nlohmann::json& value, uint8_t level) {
@@ -19,7 +20,7 @@ int GVirtualNetwork::addNode(node_t id, const std::vector<node_attr_t>& attr, co
     std::future<size_t> fut = std::async(&GVirtualNetwork::clean, this);
     fut.get();
   }
-  if (_event.is_finish()) return -1;
+  // if (_event.is_finish()) return -1;
   // add nodes
   auto& nodes = _vg.nodes();
   if (nodes.count(id)) {
@@ -57,7 +58,7 @@ int GVirtualNetwork::deleteNode(node_t id, bool mark /*= true*/)
 
 int GVirtualNetwork::addEdge(edge_t id, node_t from, node_t to,
   const std::vector<node_attr_t>& attr, const nlohmann::json& value, int8_t level) {
-  if (_event.is_finish()) return -1;
+  // if (_event.is_finish()) return -1;
   //
   assert(_vg.nodes().count(from));
   assert(_vg.nodes().count(to));
@@ -116,14 +117,14 @@ int GVirtualNetwork::deleteEdge(edge_t id, bool mark)
 
 void GVirtualNetwork::join()
 {
-  _event.join();
+  // _event.join();
 }
 
 void GVirtualNetwork::release() {
-  std::any arg = std::make_any<int>(0);
-  _event.emit((int)VNMessage::WalkStop, arg);
-  _event.finish();
-  _event.join();
+  // std::any arg = std::make_any<int>(0);
+  // _event.emit((int)VNMessage::WalkStop, arg);
+  // _event.finish();
+  // _event.join();
 }
 
 bool GVirtualNetwork::neighbors(node_t node, std::set<node_t>& n, int8_t level)

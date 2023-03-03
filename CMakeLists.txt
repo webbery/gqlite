@@ -45,13 +45,34 @@ if (CMAKE_SYSTEM_NAME MATCHES "Android")
 	if (ANDROID_ABI MATCHES "armeabi-v7a")
 		add_definitions(-D__ARM_ARCH_2__)
 		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mfpu=neon -marm")
+		set(ANDROID_SOURCE src/base/system/ucontext/getcontext.S
+						   src/base/system/ucontext/arm/makecontext.c
+						   src/base/system/ucontext/arm/setcontext.S
+						   src/base/system/ucontext/arm/swapcontext.S)
 	elseif (ANDROID_ABI MATCHES "armeabi-v8a")
+		set(ANDROID_SOURCE ./src/base/system/ucontext/getcontext.S
+							./src/base/system/ucontext/aarch64/makecontext.c
+							./src/base/system/ucontext/aarch64/sysdep.c
+							./src/base/system/ucontext/aarch64/setcontext.S
+							./src/base/system/ucontext/aarch64/swapcontext.S)
 	elseif(ANDROID_ABI MATCHES "x86_64")
 		add_definitions(-D__x86_64__)
 		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mavx")
+		set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pie -std=c99")
+		# set(ANDROID_SOURCE src/base/system/ucontext/getcontext.S
+		# 					src/base/system/ucontext/x86/makecontext.c
+		# 					src/base/system/ucontext/x86/sysdep.c
+		# 					src/base/system/ucontext/x86/setcontext.S
+		# 					src/base/system/ucontext/x86/swapcontext.S)
 	elseif(ANDROID_ABI MATCHES "x86")
 		add_definitions(-D__x86_64__)
 		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mavx")
+		set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pie -std=c99")
+		set(ANDROID_SOURCE ./src/base/system/ucontext/getcontext.S
+							./src/base/system/ucontext/x86/makecontext.S
+							./src/base/system/ucontext/x86/sysdep.S
+							./src/base/system/ucontext/x86/setcontext.S
+							./src/base/system/ucontext/x86/swapcontext.S)
 	endif()
 else ()
 add_definitions(-D_GLIBCXX_USE_CXX11_ABI=0)
@@ -124,12 +145,12 @@ include_directories(./include ./third_party/libmdbx ./third_party/eigen ./third_
 
 file(GLOB_RECURSE BASE_SOURCES "src/*.cpp")
 if (CMAKE_SYSTEM_NAME MATCHES "Android")
-file(GLOB_RECURSE ANDROID_SOURCE  "src/*.S")
 set(ALL_SOURCE ${BASE_SOURCES} ${ANDROID_SOURCE})
-
+message("===========Android files: " ${ANDROID_SOURCE})
 else(CMAKE_SYSTEM_NAME MATCHES "Android")
 set(ALL_SOURCE ${BASE_SOURCES} )
 endif(CMAKE_SYSTEM_NAME MATCHES "Android")
+
 
 # set(FMT_CAN_MODULE ON CACHE BOOL "Build a module instead of a traditional library." FORCE)
 add_subdirectory(third_party/libmdbx)

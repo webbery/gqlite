@@ -120,7 +120,7 @@ int main(int argc, char** argv) {
   if (g_dbfile.size()) {
     std::filesystem::path p(g_dbfile);
     if (p.is_relative()) {
-      g_dbfile = g_inputdir + g_dbfile;
+      g_dbfile = g_inputdir + SPLASH_WORD + g_dbfile;
     }
     gqlite_open(&gHandle, g_dbfile.c_str());
   } else {

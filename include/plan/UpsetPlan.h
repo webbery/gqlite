@@ -67,7 +67,7 @@ struct GListNode;
 class GScanPlan;
 class GUpsetPlan: public GPlan {
 public:
-  GUpsetPlan(std::map<std::string, GVirtualNetwork*>& vn, GStorageEngine* store, GUpsetStmt* stmt);
+  GUpsetPlan(std::map<std::string, GVirtualNetwork*>& vn, GStorageEngine* store, GUpsetStmt* stmt, GCoSchedule* schedule);
   ~GUpsetPlan();
 
   virtual int prepare();

@@ -7,6 +7,7 @@
 #include <windows.h>
 #elif (defined(__APPLE__) && defined(__MACH__)) || defined(__ANDROID__)
 #include <sys/ucontext.h>
+#include <ucontext.h>
 #else
 #include <ucontext.h>
 #endif

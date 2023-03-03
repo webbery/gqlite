@@ -13,7 +13,7 @@
 }
 
 GUtilPlan::GUtilPlan(std::map<std::string, GVirtualNetwork*>& vn, GStorageEngine* store, GCreateStmt* stmt)
-:GPlan(vn, store) {
+:GPlan(vn, store, nullptr) {
     _type = UtilType::Creation;
     _var = stmt->name();
     GListNode* groups = stmt->groups();
@@ -51,13 +51,13 @@ GUtilPlan::GUtilPlan(std::map<std::string, GVirtualNetwork*>& vn, GStorageEngine
 }
 
 GUtilPlan::GUtilPlan(std::map<std::string, GVirtualNetwork*>& vn, GStorageEngine* store, GDropStmt* stmt)
-:GPlan(vn, store) {
+:GPlan(vn, store, nullptr) {
   _type = UtilType::Drop;
   _var = stmt->name();
 }
 
 GUtilPlan::GUtilPlan(std::map<std::string, GVirtualNetwork*>& vn, GStorageEngine* store, GDumpStmt* stmt)
-  : GPlan(vn, store)
+  : GPlan(vn, store, nullptr)
 {
   _type = UtilType::Dump;
   _var = stmt->name();
