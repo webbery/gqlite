@@ -1,6 +1,4 @@
 #include <catch.hpp>
-#include <thread>
-#include <mutex>
 #include <chrono>
 #include "ScanObserver.h"
 #include "StorageEngine.h"
@@ -67,18 +65,13 @@ Edge RomaniaEdges = {
   {(edge_t)23, EdgeInfo{{(net::node_t)7, (net::node_t)10}, 120}},
 };
 
-class NodeVisitor {
-public:
-  void operator()(node_t, const node_info&) {}
-};
-
 int cnt = 0;
 class NodeLoader {
 public:
   NodeLoader(GVirtualNetwork* net) : _net(net) { cnt = 0; }
 
   bool load() const {
-    if (++cnt > maxTimes || is_exit) return false;
+    if (++cnt > maxTimes) return false;
     for (auto& item : RomaniaNodes) {
       if (_net->addNode(item.first, std::get<1>(item.second), std::get<2>(item.second))) return false;
     }
@@ -163,7 +156,7 @@ public:
 TEST_CASE("random walk algorithm") {
   GCoSchedule schedule;
   GVirtualNetwork* net = new GVirtualNetwork(&schedule, 10);
-  NodeVisitor visitor;
+  std::function<void(uint64_t, const node_info&)> visitor = [](node_t, const node_info&) {};
   NodeLoader loader(net);
   GRandomWalkSelector selector("");
   net->visit(selector, visitor, loader);
@@ -173,20 +166,20 @@ TEST_CASE("random walk algorithm") {
   // fmt::print("walk: {}\n", vnames);
 }
 
-TEST_CASE("bread search first walk algorithm") {
-  GCoSchedule schedule;
-  GVirtualNetwork* net = new GVirtualNetwork(&schedule, 100);
-  NodeVisitor visitor;
-  NodeLoader loader(net);
-  GBFSHeuristic h((node_t)100);
-  GBFSSelector<virtual_graph_t> selector(h);
-  net->visit(selector, visitor, loader);
-  schedule.run();
-  is_exit.store(true);
-  // std::this_thread::sleep_for(std::chrono::milliseconds(40));
-  delete net;
-  //assert(cnt == 11);
-}
+ TEST_CASE("bread search first walk algorithm") {
+   GCoSchedule schedule;
+   GVirtualNetwork* net = new GVirtualNetwork(&schedule, 100);
+   auto visitor = [](node_t, const node_info&) {};
+   NodeLoader loader(net);
+   GBFSHeuristic h((node_t)100);
+   GBFSSelector<virtual_graph_t> selector(h);
+   net->visit(selector, visitor, loader);
+   schedule.run();
+   is_exit.store(true);
+   // std::this_thread::sleep_for(std::chrono::milliseconds(40));
+   delete net;
+   //assert(cnt == 11);
+ }
 
 TEST_CASE("bread search first walk algorithm with native loader") {
   //GCoSchedule schedule;
@@ -212,37 +205,37 @@ TEST_CASE("bread search first walk algorithm with native loader") {
   //delete net;
 }
 
-TEST_CASE("A* walk algorithm") {
-  GCoSchedule schedule;
-  GVirtualNetwork* net = new GVirtualNetwork(&schedule, 10);
-  NodeVisitor visitor;
-  RomaniaLoader loader;
-  loader.loadRomania(net);
-  RomaniaHeuristic h((node_t)13);
-  AStarSelector selector(h);
-  selector.start((node_t)0);
-  net->visit(selector, visitor, loader);
-  schedule.run();
-  std::vector<uint64_t> path;
-  for (auto nid : h.path()) {
-    path.push_back((uint64_t)nid);
-  }
-  assert(path.size() == 5);
-  //for (auto itr = path.begin(); itr != path.end(); ++itr) {
-  //  std::string addr = std::get<2>(RomaniaNodes[*itr])[1];
-  //  printf("%s(%ld) -> ", addr.c_str(), *itr);
-  //}
-  std::vector<uint64_t> ln = { 1, 8, 9, 12, 13 };
-  CHECK_THAT(path, Catch::Matchers::Equals(ln));
-  //printf("\n");
-  auto itr = path.begin();
-  assert(*itr++ == 1);
-  assert(*itr++ == 8);
-  assert(*itr++ == 9);
-  assert(*itr++ == 12);
-  assert(*itr++ == 13);
-  delete net;
-}
+ TEST_CASE("A* walk algorithm") {
+   GCoSchedule schedule;
+   GVirtualNetwork* net = new GVirtualNetwork(&schedule, 10);
+   auto visitor = [](node_t, const node_info&) {};
+   RomaniaLoader loader;
+   loader.loadRomania(net);
+   RomaniaHeuristic h((node_t)13);
+   AStarSelector selector(h);
+   selector.start((node_t)0);
+   net->visit(selector, visitor, loader);
+   schedule.run();
+   std::vector<uint64_t> path;
+   for (auto nid : h.path()) {
+     path.push_back((uint64_t)nid);
+   }
+   assert(path.size() == 5);
+   //for (auto itr = path.begin(); itr != path.end(); ++itr) {
+   //  std::string addr = std::get<2>(RomaniaNodes[*itr])[1];
+   //  printf("%s(%ld) -> ", addr.c_str(), *itr);
+   //}
+   std::vector<uint64_t> ln = { 1, 8, 9, 12, 13 };
+   CHECK_THAT(path, Catch::Matchers::Equals(ln));
+   //printf("\n");
+   auto itr = path.begin();
+   assert(*itr++ == 1);
+   assert(*itr++ == 8);
+   assert(*itr++ == 9);
+   assert(*itr++ == 12);
+   assert(*itr++ == 13);
+   delete net;
+ }
 
 //TEST_CASE("performance") {
 //  GVirtualNetwork* net = new GVirtualNetwork(10);

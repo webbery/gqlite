@@ -42,6 +42,7 @@ public:
   void resume();
 
   Status status() const { return _status; }
+  uint8_t id() const { return _id; }
 private:
   void init(std::function<void(GCoroutine*)> const& func);
 

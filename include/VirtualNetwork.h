@@ -81,27 +81,21 @@ public:
    * @param visitor how to visit node's element
    * @param loader if node is not exist, try to load a batch nodes that will be visited.
    */
-  template<typename Selector, typename Visitor, typename DataLoader>
+  template<typename Selector, typename DataLoader, typename Visitor>
   void visit(Selector& selector, Visitor visitor, DataLoader loader) {
 //     // wait for start、
-    std::atomic_bool isFinish = false;
-    _schedule->createCoroutine([&loader, &isFinish](GCoroutine* co) {
-      printf("Data Load.\n");
+    _schedule->createCoroutine([loader, &isFinish = this->_visitFinish](GCoroutine* co) {
       while (loader.load()) {
         co->yield();
       }
-      isFinish.store(true);
-      printf("Load Finish.\n");
+      isFinish = true;
     });
-    _schedule->createCoroutine([&](GCoroutine* co) {
-      printf("Data Walk.\n");
-      selector.stand(_vg);
-      while (selector.walk(_vg, visitor) & WalkResult::WR_Preload) {
-        printf("Walk to load.\n");
+    _schedule->createCoroutine([&selector, &vg = this->_vg, &isFinish = this->_visitFinish, visitor](GCoroutine* co) {
+      selector.stand(vg);
+      while (selector.walk(vg, visitor) & WalkResult::WR_Preload) {
         if (isFinish) break;
         co->yield();
       }
-      printf("Walk exit.\n");
     });
   }
 
@@ -137,6 +131,7 @@ private:
 
 private:
   size_t _maxMemory;
+  bool _visitFinish{false};
 
   GCoSchedule* _schedule{nullptr};
 

@@ -15,7 +15,7 @@ void GRandomWalkSelector::stand(virtual_graph_t& vg)
 
 }
 
-int GRandomWalkSelector::walk(virtual_graph_t& vg, std::function<void(node_t, const node_info&)> f) {
+int GRandomWalkSelector::walk(virtual_graph_t& vg, const std::function<void(node_t, const node_info&)>& f) {
   // auto itr = vg._mNodesInstance.begin();
   return WalkResult::WR_Visited|WalkResult::WR_Preload;
 }

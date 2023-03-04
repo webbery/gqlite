@@ -11,7 +11,6 @@ GVirtualNetwork::GVirtualNetwork(GCoSchedule* schedule, size_t maxMem)
 
 GVirtualNetwork::~GVirtualNetwork() {
   // _event.join();
-  printf("delete GVirtualNetwork\n");
 }
 
 int GVirtualNetwork::addNode(node_t id, const std::vector<node_attr_t>& attr, const nlohmann::json& value, uint8_t level) {

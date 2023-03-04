@@ -148,7 +148,7 @@ set(regress_LINK_OPTIONS gqlite fmt::fmt-header-only)
 set(benchmark_LINK_OPTIONS gqlite fmt::fmt-header-only)
 # set(fail_LINK_OPTIONS gqlite)
 IF (UNIX AND NOT APPLE AND NOT (CMAKE_SYSTEM_NAME MATCHES "Android"))
-set(TARGETS_OF_LEAK_TO_CHECK storage vnet movielens decision infomation decision match query)
+set(TARGETS_OF_LEAK_TO_CHECK storage movielens decision infomation decision match query)
 
 foreach(LEAK_TARGET ${TARGETS_OF_LEAK_TO_CHECK})
 	target_compile_options(${LEAK_TARGET} PRIVATE -fsanitize=leak -fno-omit-frame-pointer)

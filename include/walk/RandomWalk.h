@@ -10,7 +10,7 @@ public:
   GRandomWalkSelector(const std::string& prop, double dumping = 0.9);
 
   virtual void stand(virtual_graph_t& vg);
-  virtual int walk(virtual_graph_t& vg, std::function<void(node_t, const node_info&)>);
+  virtual int walk(virtual_graph_t& vg, const std::function<void(node_t, const node_info&)>& f);
 
 private:
   // GVertex* next();

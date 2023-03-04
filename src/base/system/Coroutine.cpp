@@ -84,7 +84,10 @@ void GCoroutine::resume() {
       SwitchToFiber(_context);
 #else
       memcpy(_schedule->_stack + STACK_SIZE - _size, _stack, _size);
-      swapcontext(&_schedule->_main, &_context);
+      if (-1 == swapcontext(&_schedule->_main, &_context)) {
+        printf("error with coroutine\n");
+      }
+      assert(_status != Status::Running);
 #endif
     }
     break;
@@ -94,7 +97,6 @@ void GCoroutine::resume() {
 }
 
 void GCoroutine::yield() {
-  auto id = _schedule->_current;
   _status = Status::Suspend;
 #ifdef WIN32
   SwitchToFiber(_schedule->_main);
@@ -136,7 +138,7 @@ GCoSchedule::GCoSchedule():_current(0) {
 
 GCoSchedule::~GCoSchedule() {
   for (auto itr = _coroutines.begin(); itr != _coroutines.end(); ++itr) {
-    delete itr->second;
+      delete itr->second;
   }
   _coroutines.clear();
 #ifdef WIN32
@@ -164,8 +166,6 @@ void GCoSchedule::run() {
       }
     }
   }
-  _coroutines.clear();
-  printf("run finish\n");
 }
 
 void GCoSchedule::init(GCoroutine* c) {
