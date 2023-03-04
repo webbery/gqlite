@@ -6,6 +6,9 @@
 #if defined(WIN32)
 #include <windows.h>
 #elif (defined(__APPLE__) && defined(__MACH__)) || defined(__ANDROID__)
+#ifndef _XOPEN_SOURCE
+#define _XOPEN_SOURCE
+#endif
 #include <sys/ucontext.h>
 #include <ucontext.h>
 #else

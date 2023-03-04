@@ -235,5 +235,7 @@ add_test(NAME regress_error COMMAND regress --inputdir=./error --outputdir=./err
 add_test(NAME movielens COMMAND movielens)
 add_test(NAME vnet COMMAND vnet)
 add_test(NAME coroutine COMMAND coroutine)
+add_test(NAME benchmark_basketball_player COMMAND benchmark ../test/benchmark/vertex.gs ../test/basketballplayer
+  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 
 # set_tests_properties(fail PROPERTIES WILL_FAIL TRUE)

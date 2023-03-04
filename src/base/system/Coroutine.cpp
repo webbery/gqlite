@@ -2,6 +2,8 @@
 #include <cassert>
 #include <cstdlib>
 #include <cstring>
+#include <string>
+
 #ifdef __ANDROID__
 extern int getcontext (ucontext_t *__ucp);
 
@@ -12,6 +14,17 @@ extern int swapcontext (ucontext_t *__restrict __oucp,
 
 extern void makecontext (ucontext_t *__ucp, void (*__func) (void),
 			 int __argc, ...);
+#endif
+
+#if __SANITIZE_ADDRESS__
+#include <sanitizer/asan_interface.h>
+extern "C" {
+  void __sanitizer_start_switch_fiber(void** fake_stack_save, const void* stack_bottom, size_t stack_size);
+  void __sanitizer_finish_switch_fiber(void* fake_stack_save, const void** stack_bottom_old, size_t* stack_size_old);
+}
+#else
+static inline void __sanitizer_start_switch_fiber(...) { }
+static inline void __sanitizer_finish_switch_fiber(...) { }
 #endif
 
 #ifdef WIN32
@@ -111,25 +124,25 @@ GCoSchedule::GCoSchedule():_current(0) {
 #ifdef WIN32
   _main = ConvertThreadToFiber(NULL);
   if (!_main) {
-    DWORD dw = GetLastError();
-    LPVOID lpMsgBuf;
-    FormatMessage(
-      FORMAT_MESSAGE_ALLOCATE_BUFFER |
-      FORMAT_MESSAGE_FROM_SYSTEM |
-      FORMAT_MESSAGE_IGNORE_INSERTS,
-      NULL,
-      dw,
-      MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-      (LPTSTR)&lpMsgBuf,
-      0, NULL);
-    LPVOID lpDisplayBuf = (LPVOID)LocalAlloc(LMEM_ZEROINIT,
-      (lstrlen((LPCTSTR)lpMsgBuf) + 40) * sizeof(TCHAR));
-    StringCchPrintf((LPTSTR)lpDisplayBuf,
-      LocalSize(lpDisplayBuf) / sizeof(TCHAR),
-      TEXT("failed with error %d: %s"),
-      dw, lpMsgBuf);
-    std::string message((LPCTSTR)lpDisplayBuf);
-    printf("error:%s\n", message.c_str());
+    //DWORD dw = GetLastError();
+    //LPVOID lpMsgBuf;
+    //FormatMessage(
+    //  FORMAT_MESSAGE_ALLOCATE_BUFFER |
+    //  FORMAT_MESSAGE_FROM_SYSTEM |
+    //  FORMAT_MESSAGE_IGNORE_INSERTS,
+    //  NULL,
+    //  dw,
+    //  MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+    //  (LPTSTR)&lpMsgBuf,
+    //  0, NULL);
+    //LPVOID lpDisplayBuf = (LPVOID)LocalAlloc(LMEM_ZEROINIT,
+    //  (lstrlen((LPCTSTR)lpMsgBuf) + 40) * sizeof(TCHAR));
+    //StringCchPrintf((LPTSTR)lpDisplayBuf,
+    //  LocalSize(lpDisplayBuf) / sizeof(TCHAR),
+    //  TEXT("failed with error %d: %s"),
+    //  dw, lpMsgBuf);
+    //std::string message((LPCTSTR)lpDisplayBuf);
+    //printf("error:%s\n", message.c_str());
   }
 #else
   _stack = (char*)malloc(STACK_SIZE);
