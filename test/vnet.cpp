@@ -162,7 +162,7 @@ TEST_CASE("random walk algorithm") {
   net->visit(selector, visitor, loader);
   schedule.run();
   delete net;
-  assert(cnt == 11);
+  CHECK(cnt == 11);
   // fmt::print("walk: {}\n", vnames);
 }
 
@@ -220,7 +220,7 @@ TEST_CASE("bread search first walk algorithm with native loader") {
    for (auto nid : h.path()) {
      path.push_back((uint64_t)nid);
    }
-   assert(path.size() == 5);
+   CHECK(path.size() == 5);
    //for (auto itr = path.begin(); itr != path.end(); ++itr) {
    //  std::string addr = std::get<2>(RomaniaNodes[*itr])[1];
    //  printf("%s(%ld) -> ", addr.c_str(), *itr);
@@ -229,11 +229,11 @@ TEST_CASE("bread search first walk algorithm with native loader") {
    CHECK_THAT(path, Catch::Matchers::Equals(ln));
    //printf("\n");
    auto itr = path.begin();
-   assert(*itr++ == 1);
-   assert(*itr++ == 8);
-   assert(*itr++ == 9);
-   assert(*itr++ == 12);
-   assert(*itr++ == 13);
+   CHECK(*itr++ == 1);
+   CHECK(*itr++ == 8);
+   CHECK(*itr++ == 9);
+   CHECK(*itr++ == 12);
+   CHECK(*itr++ == 13);
    delete net;
  }
 

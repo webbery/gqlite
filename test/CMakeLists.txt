@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.8)
 project(GQLlite_Test)
 
 include_directories(../include ../third_party/catch2)
@@ -13,6 +13,7 @@ endif(UNIX)
 else()
 endif()
 
+file(GLOB_RECURSE ASM_COROUTINE_SOURCES "../src/**${GQLITE_CPU_ARCHITECHURE}_${GQLITE_TARGET_SYSTEM}_${GQLITE_ASM_COMPILER}.${GQLITE_ASM_SUFFIX}")
 set(TEST_GRAMMAR_SOURCE ./grammar.cpp ${SYMBOLS_SOURCE})
 set(STORAGE_SOURCE
 	./storage.cpp
@@ -65,6 +66,7 @@ set(QUERY_SOURCE ./query.cpp
 	../src/walk/RandomWalk.cpp
 	../src/base/system/Platform.cpp
 	../src/base/system/Coroutine.cpp
+	${ASM_COROUTINE_SOURCES}
 	${SYMBOLS_SOURCE}
 )
 
@@ -138,7 +140,8 @@ add_executable(infomation ${INFOMATION_SOURCE})
 add_executable(match ${MATCH_SOURCE})
 # add_executable(fail ${FAIL_SOURCE})
 add_executable(benchmark ${BENCHMARK_SOURCE})
-add_executable(coroutine ${COROUTINE_SOURCE})
+add_executable(coroutine ${ASM_COROUTINE_SOURCES} ${COROUTINE_SOURCE})
+# set_source_files_properties(${ASM_COROUTINE_SOURCES} PROPERTIES COMPILE_FLAGS "/safeseh")
 
 set(storage_LINK_OPTIONS fmt::fmt-header-only mdbx-static)
 set(vnet_LINK_OPTIONS gqlite)
@@ -235,7 +238,7 @@ add_test(NAME regress_error COMMAND regress --inputdir=./error --outputdir=./err
 add_test(NAME movielens COMMAND movielens)
 add_test(NAME vnet COMMAND vnet)
 add_test(NAME coroutine COMMAND coroutine)
-add_test(NAME benchmark_basketball_player COMMAND benchmark ../test/benchmark/vertex.gs ../test/basketballplayer
+add_test(NAME benchmark_basketball_player COMMAND benchmark ./benchmark/vertex.gs ./basketballplayer
   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 
 # set_tests_properties(fail PROPERTIES WILL_FAIL TRUE)

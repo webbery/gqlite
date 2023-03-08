@@ -10,6 +10,7 @@
 #include "base/system/exception/CompileException.h"
 #include "gqlite.h"
 #include "StorageEngine.h"
+#include "plan/PathPlan.h"
 #include "plan/Plan.h"
 #include "plan/RemovePlan.h"
 #include "plan/UtilPlan.h"
@@ -53,8 +54,10 @@ GVirtualEngine::GVirtualEngine(size_t memsize)
 , _errorCode(ECode_GQL_Parse_Fail)
 , _cmdtype(GQL_Command_Size)
 , _result_callback(nullptr)
-,_gvm(nullptr)
 {
+  _gvm = nullptr;
+  _storage = nullptr;
+  _graph = nullptr;
   _schedule = new GCoSchedule();
 }
 
@@ -221,3 +224,9 @@ VisitFlow GVirtualEngine::PlanVisitor::apply(GLambdaExpression* stmt, std::list<
 VisitFlow GVirtualEngine::PlanVisitor::apply(GReturnStmt* stmt, std::list<NodeType>& path) {
   return VisitFlow::Children;
 }
+
+VisitFlow GVirtualEngine::PlanVisitor::apply(GWalkDeclaration* stmt, std::list<NodeType>& path) {
+  GPlan* plan = new GPathQuery(_vn, _store, nullptr, _schedule, _cb, this->_handle, "");
+  return VisitFlow::SkipCurrent;
+}
+

@@ -3,31 +3,46 @@
 #include <memory>
 #include <functional>
 #include <map>
-#if defined(WIN32)
-#include <windows.h>
-#elif (defined(__APPLE__) && defined(__MACH__)) || defined(__ANDROID__)
-#ifndef _XOPEN_SOURCE
-#define _XOPEN_SOURCE
-#endif
-#include <sys/ucontext.h>
-#include <ucontext.h>
-#else
-#include <ucontext.h>
-#endif
 
-#ifndef STACK_SIZE
-#define STACK_SIZE (1024*1024)
-#endif
+typedef void*   fcontext_t;
+struct transfer_t {
+    fcontext_t  fctx;
+    void    *   data;
+};
+
+template< std::size_t Max, std::size_t Default, std::size_t Min >
+class simple_stack_allocator
+{
+public:
+    static std::size_t maximum_stacksize()
+    { return Max; }
+
+    static std::size_t default_stacksize()
+    { return Default; }
+
+    static std::size_t minimum_stacksize()
+    { return Min; }
+
+    void * allocate( std::size_t size) const
+    {
+        void * limit = malloc( size);
+        if ( ! limit) throw std::bad_alloc();
+
+        return static_cast< char * >( limit) + size;
+    }
+
+    void deallocate( void * vp, std::size_t size) const
+    {
+        void * limit = static_cast< char * >( vp) - size;
+        free( limit);
+    }
+};
+using stack_allocator = simple_stack_allocator<8 * 1024 * 1024, 64 * 1024, 8 * 1024>;
 
 class GCoSchedule;
 class GCoroutine{
 public:
-#ifdef WIN32
-  friend void __stdcall __win_entry(LPVOID lpParameter);
-#else
-  friend void __unix_entry(uint32_t l32, uint32_t h32);
-  friend void __save_stack(GCoroutine* c, char* top);
-#endif
+  friend void __coroutine_entry(transfer_t t);
   friend class GCoSchedule;
 
   enum class Status {
@@ -51,21 +66,14 @@ private:
 
   template <typename F>
   GCoroutine(F func):_status(Status::Uninitialize),_id(0)
-#ifndef  WIN32
-    , _stack(nullptr), _cap(0)
-#endif
   { init(func); }
 
 private:
-#if defined(WIN32)
-  LPVOID _context;
-#else
-  ucontext_t _context;
-  char* _stack;
-  size_t _cap;
-  size_t _size;
-#endif
   std::function<void(GCoroutine*)> _func;
+
+  fcontext_t _ctx{nullptr};
+
+  void* _stack{nullptr};
 
   GCoSchedule* _schedule;
 
@@ -76,11 +84,7 @@ private:
 
 class GCoSchedule {
 public:
-#ifdef WIN32
-  friend void __stdcall __win_entry(LPVOID lpParameter);
-#else
-  friend void __unix_entry(uint32_t l32, uint32_t h32);
-#endif
+  friend void __coroutine_entry(transfer_t t);
   friend class GCoroutine;
 
   enum class ScheduleType {
@@ -106,12 +110,8 @@ public:
   size_t size() const;
 
 private:
-#if defined(WIN32)
-  LPVOID _main;
-#else
-  ucontext_t _main;
-  char* _stack;
-#endif
   uint8_t _current;
+  fcontext_t _main;
+  stack_allocator _alloc;
   std::map<uint8_t, GCoroutine*> _coroutines;
 };

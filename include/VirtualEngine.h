@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include <string>
 #include <map>
+#include "Context.h"
 #include "base/MemoryPool.h"
 #include "base/gvm/Chunk.h"
 #include "base/gvm/Value.h"
@@ -36,7 +37,7 @@ class GStorageEngine;
 struct GListNode;
 class GPlan;
 class GVirtualNetwork;
-class GVirtualEngine {
+class GVirtualEngine : public GContext {
 public:
   static uint32_t GenerateIndex();
   static const char* GetErrorInfo(int code);
@@ -142,9 +143,7 @@ private:
     VisitFlow apply(GArrayExpression* stmt, std::list<NodeType>& path) {
       return VisitFlow::Children;
     }
-    VisitFlow apply(GWalkDeclaration* stmt, std::list<NodeType>& path) {
-      return VisitFlow::Children;
-    }
+    VisitFlow apply(GWalkDeclaration* stmt, std::list<NodeType>& path);
 
     VisitFlow apply(GLambdaExpression* stmt, std::list<NodeType>& path);
     VisitFlow apply(GReturnStmt* stmt, std::list<NodeType>& path);
@@ -158,9 +157,6 @@ private:
 private:
   MemoryPool<char> _memory;
 
-  GCoSchedule* _schedule{ nullptr };
   std::map<std::string, GVirtualNetwork*> _networks;
 
-  GVM* _gvm{ nullptr };
-  GStorageEngine* _storage{ nullptr };
 };

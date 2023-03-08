@@ -6,6 +6,12 @@
 enum class QueryType;
 class GWalkVisitor: public GVisitor {
 public:
+  enum class WalkType {
+    EdgeQuery,    /*< query edge like vertex query*/
+    GraphMatch,   /*< subgraph match */
+    PathQuery,    /*< query path */
+  };
+
   GWalkVisitor(GraphPattern* pattern);
 
   VisitFlow apply(GEdgeDeclaration* stmt, std::list<NodeType>& path);
@@ -14,7 +20,7 @@ public:
 
   VisitFlow apply(GObjectFunction*, std::list<NodeType>&);
 
-  bool isMatch() const { return _isMatch; }
+  WalkType walkType() const { return _walkType; }
 private:
   void makeEdgeCondition(GWalkDeclaration::Order order, EntityNode* start, EntityNode* end, bool direction);
 
@@ -26,5 +32,5 @@ private:
    */
   GraphPattern* _graph;
 
-  bool _isMatch;
+  WalkType _walkType;
 };

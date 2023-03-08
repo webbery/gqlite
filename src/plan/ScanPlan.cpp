@@ -774,7 +774,7 @@ VisitFlow GScanPlan::PatternVisitor::apply(GWalkDeclaration* stmt, std::list<Nod
   auto& grad = _where._patterns[index];
   GWalkVisitor visitor(&grad);
   VisitFlow vf = visitor.apply(stmt,path);
-  if (visitor.isMatch()) _qt = QueryType::Match;
+  // if (visitor.walkType() == GraphMatch) _qt = QueryType::Match;
   return vf;
 }
 

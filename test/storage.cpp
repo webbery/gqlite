@@ -28,11 +28,11 @@ TEST_CASE("basic storage api") {
   StoreOption opt;
   opt.compress = 1;
   opt.mode = ReadWriteOption::read_write;
-  CHECK(engine.open("testdb", opt) == ECode_Success);
+  CHECK(engine.open("storage.db", opt) == ECode_Success);
   engine.addMap("revert_index", KeyType::Byte);
   engine.addMap("revert_index", KeyType::Byte);
   std::string value("hello gqlite");
-  engine.write("revert_index", "key", value.data(), value.size());
+  CHECK(ECode_Success == engine.write("revert_index", "key", value.data(), value.size()));
   std::string result;
   engine.read("revert_index", "key", result);
   CHECK(result == value);
@@ -43,7 +43,7 @@ TEST_CASE("cursor api") {
   StoreOption opt;
   opt.compress = 1;
   opt.mode = ReadWriteOption::read_write;
-  CHECK(engine.open("testdb", opt) == ECode_Success);
+  CHECK(engine.open("storage.db", opt) == ECode_Success);
   const std::string propname("name");
   engine.addMap(propname, KeyType::Integer);
   int32_t key = 0;
@@ -67,10 +67,10 @@ TEST_CASE("empty storage") {
   StoreOption opt;
   opt.compress = 1;
   opt.mode = ReadWriteOption::read_write;
-  CHECK(engine.open("testdb", opt) == ECode_Success);
+  CHECK(engine.open("storage.db", opt) == ECode_Success);
   engine.addMap("index", KeyType::Byte);
   std::string value;
-  engine.write("index", "key", value.data(), value.size());
+  CHECK(ECode_Success == engine.write("index", "key", value.data(), value.size()));
   std::string result;
   engine.read("index", "key", result);
   CHECK(result == value);
@@ -81,7 +81,7 @@ TEST_CASE("movielens") {
   StoreOption opt;
   opt.compress = 1;
   opt.mode = ReadWriteOption::read_write;
-  engine.open("mvlens", opt);
+  engine.open("mvlens.db", opt);
   // create movie map
   engine.addMap("movie", KeyType::Integer);
   readCSV("movies.csv", [&engine](char* buffer) {
@@ -140,7 +140,7 @@ TEST_CASE("read_mode") {
   StoreOption opt;
   opt.compress = 1;
   opt.mode = ReadWriteOption::read_only;
-  CHECK(engine.open("mvlens", opt) == ECode_Success);
+  CHECK(engine.open("mvlens.db", opt) == ECode_Success);
   uint64_t k = ((uint64_t)517 << 16 | (uint64_t)1721);
   std::string a_rate;
   engine.read("rate", k, a_rate);

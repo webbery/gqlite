@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <iostream>
 #include <atomic>
+#include "gqlite.h"
 #include "gutil.h"
 #include "mdbx.h"
 #include "mdbx.h++"
@@ -371,11 +372,10 @@ int GStorageEngine::write(const std::string& prop, const std::string& key, void*
   size_t cSize = len;
   void* buffer = value;
   mdbx::slice data(buffer, cSize);
-  ::put(_txns[id], handle, key, data);
-#ifdef _ENABLE_COMPRESS_
-  free(buffer);
-#endif
-  return ECode_Success;
+  if (0 == ::put(_txns[id], handle, key, data)) {
+    return ECode_Success;
+  }
+  return ECode_Fail;
 }
 
 int GStorageEngine::write(const std::string& mapname, const std::string& key, const nlohmann::json& value)
@@ -553,12 +553,10 @@ int GStorageEngine::write(const std::string& prop, uint64_t key, void* value, si
   size_t cSize = len;
   thread_local auto id = std::this_thread::get_id();
   mdbx::slice data(buffer, cSize);
-  ::put(_txns[id], handle, key, data);
-#ifdef _ENABLE_COMPRESS_
-  free(buffer);
-#endif
-  return ECode_Success;
-
+  if (0 == ::put(_txns[id], handle, key, data)) {
+    return ECode_Success;
+  }
+  return ECode_Fail;
 }
 int GStorageEngine::read(const std::string& prop, uint64_t key, std::string& value) {
   assert(isMapExist(prop) || isIndexExist(prop));

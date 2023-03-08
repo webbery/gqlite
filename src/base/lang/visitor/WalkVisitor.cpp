@@ -29,7 +29,7 @@ namespace gql {
 }
 
 GWalkVisitor::GWalkVisitor(GraphPattern* pattern)
-  :_graph(pattern), _isMatch(false) {}
+  :_graph(pattern), _walkType(WalkType::EdgeQuery) {}
 
 void GWalkVisitor::makeEdgeCondition(GWalkDeclaration::Order order, EntityNode* start, EntityNode* end, bool direction) {
   EntityEdge* edge = new EntityEdge;
@@ -86,7 +86,7 @@ VisitFlow GWalkVisitor::apply(GWalkDeclaration* walk, std::list<NodeType>& _) {
 }
 
 VisitFlow GWalkVisitor::apply(GEdgeDeclaration* stmt, std::list<NodeType>& path) {
-  _isMatch = true;
+  _walkType = WalkType::GraphMatch;
   if (stmt->from() && stmt->to()) {
     EntityNode* start = makeNodeCondition(GetString(stmt->from()));
     EntityNode* end = makeNodeCondition(GetString(stmt->to()));

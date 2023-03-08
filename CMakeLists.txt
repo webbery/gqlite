@@ -1,14 +1,31 @@
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.8)
 
 project(GQLlite)
 
 # set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 option(GQLITE_BUILD_TEST    "build gqlite test"   OFF)
 
+include(TargetArch.cmake)
+target_architecture(GQLITE_CPU_ARCHITECHURE)
+
+message("Check Compiler: " ${CMAKE_CXX_COMPILER})
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
+set(GQLITE_ASM_COMPILER "masm")
+set(GQLITE_ASM_SUFFIX "asm")
+elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+set(GQLITE_ASM_COMPILER "gas")
+set(GQLITE_ASM_SUFFIX "S")
+elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+set(GQLITE_ASM_COMPILER "clang_gas")
+set(GQLITE_ASM_SUFFIX "S")
+endif()
+
 set(CMAKE_CXX_STANDARD 17)
-enable_language(ASM)
 IF (WIN32)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Zc:__cplusplus")
+set(GQLITE_TARGET_SYSTEM "ms_pe")
+enable_language(ASM_MASM)
+message("- asm compiler: " ${CMAKE_ASM_COMPILER})
 # foreach(CMAKE_TARGET_FLAG
 # 	CMAKE_C_FLAGS_DEBUG_INIT
 # 	CMAKE_C_FLAGS_RELEASE_INIT
@@ -27,14 +44,18 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Zc:__cplusplus")
 ELSEIF (APPLE)
 set(CMAKE_CXX_FLAGS_RELEASE "$ENV{CXXFLAGS} -fpic -ftree-vectorize -Ofast")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpic -ftree-vectorize -mavx")
+set(GQLITE_TARGET_SYSTEM "sysv_macho")
+enable_language(ASM)
 # if (CMAKE_SYSTEM_NAME MATCHES "Android")
 # add_definitions(-DANDROID_ARM_NEON=TRUE)
 # else ()
 # set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native -mfma")
 # endif()
 ELSEIF (UNIX)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpic -ftree-vectorize -fopenmp")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpic -ftree-vectorize")
 set(CMAKE_C_FLAGS "-Wno-writable-strings -Wno-comment")
+set(GQLITE_TARGET_SYSTEM "sysv_elf")
+enable_language(ASM)
 
 if (GQLITE_BUILD_TEST)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O1 -fno-omit-frame-pointer -fno-optimize-sibling-calls")
@@ -45,38 +66,20 @@ if (CMAKE_SYSTEM_NAME MATCHES "Android")
 	if (ANDROID_ABI MATCHES "armeabi-v7a")
 		add_definitions(-D__ARM_ARCH_2__)
 		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mfpu=neon -marm")
-		set(ANDROID_SOURCE src/base/system/ucontext/getcontext.S
-						   src/base/system/ucontext/arm/makecontext.c
-						   src/base/system/ucontext/arm/setcontext.S
-						   src/base/system/ucontext/arm/swapcontext.S)
-	elseif (ANDROID_ABI MATCHES "armeabi-v8a")
-		set(ANDROID_SOURCE ./src/base/system/ucontext/getcontext.S
-							./src/base/system/ucontext/aarch64/makecontext.c
-							./src/base/system/ucontext/aarch64/sysdep.c
-							./src/base/system/ucontext/aarch64/setcontext.S
-							./src/base/system/ucontext/aarch64/swapcontext.S)
+	elseif (ANDROID_ABI MATCHES "arm64-v8a")
 	elseif(ANDROID_ABI MATCHES "x86_64")
 		add_definitions(-D__x86_64__)
 		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mavx")
 		set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pie -std=c99")
-		# set(ANDROID_SOURCE src/base/system/ucontext/getcontext.S
-		# 					src/base/system/ucontext/x86/makecontext.c
-		# 					src/base/system/ucontext/x86/sysdep.c
-		# 					src/base/system/ucontext/x86/setcontext.S
-		# 					src/base/system/ucontext/x86/swapcontext.S)
 	elseif(ANDROID_ABI MATCHES "x86")
 		add_definitions(-D__x86_64__)
 		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mavx")
 		set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pie -std=c99")
-		set(ANDROID_SOURCE ./src/base/system/ucontext/getcontext.S
-							./src/base/system/ucontext/x86/makecontext.S
-							./src/base/system/ucontext/x86/sysdep.S
-							./src/base/system/ucontext/x86/setcontext.S
-							./src/base/system/ucontext/x86/swapcontext.S)
+
 	endif()
 else ()
 add_definitions(-D_GLIBCXX_USE_CXX11_ABI=0)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -lrt -march=native -mfma -mavx")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -lrt -march=native -mfma -mavx -fopenmp")
 endif()
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
@@ -101,7 +104,6 @@ endif()
 # ctest_coverage(BUILD test)
 ELSE ()
 ENDIF ()
-
 
 include(GetGitRevisionDescription.cmake)
 get_git_head_revision(GIT_REFSPEC GIT_REVISION_SHA)
@@ -144,12 +146,8 @@ add_definitions(-DTHREAD_COUNT=4)
 include_directories(./include ./third_party/libmdbx ./third_party/eigen ./third_party/fmt/include)
 
 file(GLOB_RECURSE BASE_SOURCES "src/*.cpp")
-if (CMAKE_SYSTEM_NAME MATCHES "Android")
-set(ALL_SOURCE ${BASE_SOURCES} ${ANDROID_SOURCE})
-message("===========Android files: " ${ANDROID_SOURCE})
-else(CMAKE_SYSTEM_NAME MATCHES "Android")
-set(ALL_SOURCE ${BASE_SOURCES} )
-endif(CMAKE_SYSTEM_NAME MATCHES "Android")
+message("asm: *_" ${GQLITE_CPU_ARCHITECHURE}_${GQLITE_TARGET_SYSTEM}_${GQLITE_ASM_COMPILER}.${GQLITE_ASM_SUFFIX})
+file(GLOB_RECURSE ASM_CONTEXT_SOURCES "src/*${GQLITE_CPU_ARCHITECHURE}_${GQLITE_TARGET_SYSTEM}_${GQLITE_ASM_COMPILER}.${GQLITE_ASM_SUFFIX}")
 
 
 # set(FMT_CAN_MODULE ON CACHE BOOL "Build a module instead of a traditional library." FORCE)
@@ -173,14 +171,15 @@ add_definitions(-DYY_NO_UNISTD_H)
 option(GQLITE_BUILD_SHARED    "build gqlite shared library"   OFF)
 if (GQLITE_BUILD_SHARED)
 add_library(gqlite SHARED 
-	${ALL_SOURCE}
+	${BASE_SOURCES} ${ASM_CONTEXT_SOURCES}
 )
 else()
 add_library(gqlite
-	${ALL_SOURCE}
+	${BASE_SOURCES} ${ASM_CONTEXT_SOURCES}
 )
 endif()
 target_link_libraries(gqlite mdbx-static fmt::fmt )
+target_compile_definitions(gqlite PUBLIC BOOST_CONTEXT_EXPORT=)
 
 if (WIN32)
   

@@ -1,1 +1,1 @@
-1;{query: 'player', in: 'basketballplayer', where: {id: 'player102'}};time:2
+1;{query: 'player', in: 'basketballplayer', where: {id: 'player102'}};time:5
