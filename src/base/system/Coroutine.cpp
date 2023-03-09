@@ -71,10 +71,7 @@ GCoSchedule::GCoSchedule():_current(0) {
 }
 
 GCoSchedule::~GCoSchedule() {
-  for (auto itr = _coroutines.begin(); itr != _coroutines.end(); ++itr) {
-      delete itr->second;
-  }
-  _coroutines.clear();
+  assert(_coroutines.size() == 0);
 }
 
 void GCoSchedule::join() {

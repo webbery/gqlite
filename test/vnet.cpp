@@ -1,6 +1,5 @@
 #include <catch.hpp>
 #include <chrono>
-#include "ScanObserver.h"
 #include "StorageEngine.h"
 #include "VirtualNetwork.h"
 #include "walk/AStarWalk.h"

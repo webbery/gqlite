@@ -79,7 +79,6 @@ set(VNET_SOURCE ./vnet.cpp
 	../src/base/system/Coroutine.cpp
 	../src/Graph/EntityNode.cpp
 	../src/Graph/EntityEdge.cpp
-	../src/ScanObserver.cpp
 	../src/StorageEngine/StorageEngine.cpp
 	../src/VirtualNetwork.cpp
 	../src/gutil.cpp

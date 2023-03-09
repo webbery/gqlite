@@ -4,7 +4,7 @@ class GVM;
 class GCoSchedule;
 class GStorageEngine;
 class GVirtualNetwork;
-struct GPlaneNode;
+class GPlaneNode;
 
 struct GContext {
   GPlaneNode* _root;

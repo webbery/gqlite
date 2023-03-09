@@ -1,6 +1,5 @@
 #include <catch.hpp>
 #include "base/system/Coroutine.h"
-#include "base/system/context.h"
 
 struct Test{
   Test(GCoSchedule* s): _schedule(s) {}
