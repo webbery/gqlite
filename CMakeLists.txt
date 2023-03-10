@@ -158,7 +158,9 @@ include_directories(./include ./third_party/libmdbx ./third_party/eigen ./third_
 
 file(GLOB_RECURSE BASE_SOURCES "src/*.cpp")
 message("asm: *_" ${GQLITE_CPU_ARCHITECHURE}_${GQLITE_TARGET_SYSTEM}_${GQLITE_ASM_COMPILER}.${GQLITE_ASM_SUFFIX})
-file(GLOB_RECURSE ASM_CONTEXT_SOURCES "src/*${GQLITE_CPU_ARCHITECHURE}_${GQLITE_TARGET_SYSTEM}_${GQLITE_ASM_COMPILER}.${GQLITE_ASM_SUFFIX}")
+set(ASM_CONTEXT_SOURCES "src/base/system/fcontext/jump_${GQLITE_CPU_ARCHITECHURE}_${GQLITE_TARGET_SYSTEM}_${GQLITE_ASM_COMPILER}.${GQLITE_ASM_SUFFIX}" 
+									  "src/base/system/fcontext/make_${GQLITE_CPU_ARCHITECHURE}_${GQLITE_TARGET_SYSTEM}_${GQLITE_ASM_COMPILER}.${GQLITE_ASM_SUFFIX}"
+)
 
 
 # set(FMT_CAN_MODULE ON CACHE BOOL "Build a module instead of a traditional library." FORCE)
