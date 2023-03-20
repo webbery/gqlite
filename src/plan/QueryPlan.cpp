@@ -1,4 +1,5 @@
 #include "plan/QueryPlan.h"
+#include "Context.h"
 #include "plan/ScanPlan.h"
 #include "StorageEngine.h"
 #include "gutil.h"
@@ -19,12 +20,11 @@ namespace {
   }
 }
 
-GQueryPlan::GQueryPlan(std::map<std::string, GVirtualNetwork*>& networks, GStorageEngine* store, GQueryStmt* stmt,
-  GCoSchedule* schedule, gqlite_callback cb, void* cbHandle)
-  :GPlan(networks, store, schedule)
+GQueryPlan::GQueryPlan(GContext* context, GQueryStmt* stmt, gqlite_callback cb, void* cbHandle)
+  :GPlan(context->_graph, context->_storage, context->_schedule)
   , _cb(cb), _handle(cbHandle)
 {
-  _scan = new GScanPlan(networks, store, stmt, schedule);
+  _scan = new GScanPlan(context, stmt);
 }
 
 GQueryPlan::~GQueryPlan()

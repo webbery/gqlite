@@ -14,6 +14,7 @@
 #include "base/lang/GQLExpression.h"
 #include "base/lang/VariableDecl.h"
 #include "base/system/Coroutine.h"
+#include "Schedule.h"
 
 // error code of parsing gql  
 #define GQL_GRAMMAR_ARRAY_FAIL    -256
@@ -105,15 +106,11 @@ private:
   struct PlanVisitor: public GVisitor {
     PlanList* _plans = nullptr;
     Chunk* _chunk = nullptr;
-    std::map<std::string, GVirtualNetwork*>& _vn;
-    GStorageEngine* _store;
-    GCoSchedule* _schedule;
-    GVM* _gvm;
+    GContext* _context;
     gqlite_callback _cb;
     void* _handle;
-    PlanVisitor(std::map<std::string, GVirtualNetwork*>& vn, GVM* gvm, GStorageEngine* store, 
-      GCoSchedule* schedule, gqlite_callback cb = nullptr, void* handle = nullptr)
-      :_vn(vn), _store(store), _handle(handle), _gvm(gvm), _schedule(schedule) {
+    PlanVisitor(GContext* context, gqlite_callback cb = nullptr, void* handle = nullptr)
+      :_context(context), _handle(handle) {
       _plans = new PlanList;
       _plans->_next = _plans;
       _plans->_parent = _plans;
@@ -151,11 +148,14 @@ private:
 
 private:
   PlanList* makePlans(GListNode* ast);
+  bool makePlans2(GListNode* ast);
   int executePlans(PlanList*);
   void cleanPlans(PlanList*);
 
 private:
   MemoryPool<char> _memory;
+
+  GSchedule* _schedule{nullptr};
 
   std::map<std::string, GVirtualNetwork*> _networks;
 

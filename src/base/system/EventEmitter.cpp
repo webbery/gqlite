@@ -1,5 +1,4 @@
 #include "base/system/EventEmitter.h"
-#include <iostream>
 #include <chrono>
 #include <thread>
 //

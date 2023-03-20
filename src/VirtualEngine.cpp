@@ -8,6 +8,7 @@
 #include "base/lang/visitor/VariantVisitor.h"
 #include "base/lang/visitor/ByteCodeVisitor.h"
 #include "base/system/exception/CompileException.h"
+#include "base/Future.h"
 #include "gqlite.h"
 #include "StorageEngine.h"
 #include "plan/PathPlan.h"
@@ -18,6 +19,7 @@
 #include "plan/QueryPlan.h"
 #include "plan/ScanPlan.h"
 #include "VirtualNetwork.h"
+#include "schedule/DefaultSchedule.h"
 
 #include <cstdint>
 
@@ -58,7 +60,6 @@ GVirtualEngine::GVirtualEngine(size_t memsize)
   _gvm = nullptr;
   _storage = nullptr;
   _graph = nullptr;
-  _schedule = new GCoSchedule();
 }
 
 GVirtualEngine::~GVirtualEngine() {
@@ -67,7 +68,7 @@ GVirtualEngine::~GVirtualEngine() {
     delete item.second;
   }
   if (_gvm) delete _gvm;
-  delete _schedule;
+  if (_schedule) delete _schedule;
 }
 
 void GVirtualEngine::initStorage(GStorageEngine* storage) {
@@ -99,13 +100,19 @@ void GVirtualEngine::cleanPlans(PlanList* plans) {
 
 GVirtualEngine::PlanList* GVirtualEngine::makePlans(GListNode* ast) {
   if (ast == nullptr) return nullptr;
-  PlanVisitor visitor(_networks, _gvm, _storage, _schedule, _result_callback, _handle);
+  if (_schedule) {
+    delete _schedule;
+    _schedule = new GDefaultSchedule(this);
+  }
+  PlanVisitor visitor(this, _result_callback, _handle);
   std::list<NodeType> ln;
   accept(ast, &visitor, ln);
   return visitor._plans;
 }
 
 int GVirtualEngine::executePlans(PlanList* plans) {
+  //auto future = _schedule->schedule();
+  
   int ret = ECode_Success;
   PlanList* cur = plans->_next;
   while (cur != plans)
@@ -163,40 +170,40 @@ void GVirtualEngine::PlanVisitor::add(GPlan* plan, bool threadable)
 }
 
 VisitFlow GVirtualEngine::PlanVisitor::apply(GUpsetStmt* stmt, std::list<NodeType>& path) {
-  GPlan* plan = new GUpsetPlan(_vn, _store, stmt, _schedule);
+  GPlan* plan = new GUpsetPlan(_context, stmt);
   add(plan);
   return VisitFlow::Children;
 }
 VisitFlow GVirtualEngine::PlanVisitor::apply(GCreateStmt* stmt, std::list<NodeType>& path)
 {
-  GPlan* plan = new GUtilPlan(_vn, _store, stmt);
+  GPlan* plan = new GUtilPlan(_context, stmt);
   add(plan);
   return VisitFlow::Children;
 }
 
 VisitFlow GVirtualEngine::PlanVisitor::apply(GDropStmt* stmt, std::list<NodeType>& path) {
-  GPlan* plan = new GUtilPlan(_vn, _store, stmt);
+  GPlan* plan = new GUtilPlan(_context, stmt);
   add(plan);
   return VisitFlow::Return;
 }
 
 VisitFlow GVirtualEngine::PlanVisitor::apply(GQueryStmt* stmt, std::list<NodeType>& path)
 {
-  GPlan* plan = new GQueryPlan(_vn, _store, stmt, _schedule, _cb, this->_handle);
+  GPlan* plan = new GQueryPlan(_context, stmt, _cb, this->_handle);
   add(plan);
   return VisitFlow::Return;
 }
 
 VisitFlow GVirtualEngine::PlanVisitor::apply(GDumpStmt* stmt, std::list<NodeType>& path)
 {
-  GPlan* plan = new GUtilPlan(_vn, _store, stmt);
+  GPlan* plan = new GUtilPlan(_context, stmt);
   add(plan);
   return VisitFlow::Return;
 }
 
 VisitFlow GVirtualEngine::PlanVisitor::apply(GRemoveStmt* stmt, std::list<NodeType>& path)
 {
-  GPlan* plan = new GRemovePlan(_vn, _store, stmt, _schedule);
+  GPlan* plan = new GRemovePlan(_context, stmt);
   add(plan);
   return VisitFlow::Return;
 }
@@ -206,7 +213,7 @@ VisitFlow GVirtualEngine::PlanVisitor::apply(GObjectFunction* stmt, std::list<No
 }
 
 VisitFlow GVirtualEngine::PlanVisitor::apply(GLambdaExpression* stmt, std::list<NodeType>& path) {
-  GByteCodeVisitor visitor(_gvm);
+  GByteCodeVisitor visitor(_context->_gvm);
   std::list<NodeType> ln;
   accept(stmt->block(), &visitor, ln);
   if (!visitor.hasReturn()) {
@@ -226,7 +233,7 @@ VisitFlow GVirtualEngine::PlanVisitor::apply(GReturnStmt* stmt, std::list<NodeTy
 }
 
 VisitFlow GVirtualEngine::PlanVisitor::apply(GWalkDeclaration* stmt, std::list<NodeType>& path) {
-  GPlan* plan = new GPathQuery(_vn, _store, nullptr, _schedule, _cb, this->_handle, "");
+  GPlan* plan = new GPathQuery(_context, nullptr, _cb, this->_handle, "");
   return VisitFlow::SkipCurrent;
 }
 

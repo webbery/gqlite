@@ -3,7 +3,6 @@
 #include <limits>
 #include <regex>
 #include <stdio.h>
-#include <iostream>
 #include <atomic>
 #include "gqlite.h"
 #include "gutil.h"

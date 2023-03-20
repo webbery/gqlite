@@ -3,14 +3,15 @@
 #include <mutex>
 #include <condition_variable>
 #include <list>
-#include "base/system/Coroutine.h"
 #include "walk/WalkFactory.h"
 #include "base/type.h"
+#include "schedule/DefaultSchedule.h"
 
 class GNode;
 
 class GEntityNode;
 class GAttributeNode;
+class GSchedule;
 
 class GEmptyHeuristic {
 public:
@@ -37,7 +38,7 @@ public:
     WalkStop
   };
 
-  GVirtualNetwork(GCoSchedule* schedule, size_t maxMem);
+  GVirtualNetwork(GSchedule* schedule, size_t maxMem);
   ~GVirtualNetwork();
 
   /**
@@ -84,13 +85,13 @@ public:
   template<typename Selector, typename DataLoader, typename Visitor>
   void visit(Selector& selector, Visitor visitor, DataLoader loader) {
 //     // wait for start、
-    _schedule->createCoroutine([loader, &isFinish = this->_visitFinish](GCoroutine* co) {
+    ((GDefaultSchedule*)_schedule)->addCoroutine([loader, &isFinish = this->_visitFinish](GCoroutine* co) {
       while (loader.load()) {
         co->yield();
       }
       isFinish = true;
     });
-    _schedule->createCoroutine([&selector, &vg = this->_vg, &isFinish = this->_visitFinish, visitor](GCoroutine* co) {
+    ((GDefaultSchedule*)_schedule)->addCoroutine([&selector, &vg = this->_vg, &isFinish = this->_visitFinish, visitor](GCoroutine* co) {
       selector.stand(vg);
       while (selector.walk(vg, visitor) & WalkResult::WR_Preload) {
         if (isFinish) break;
@@ -133,7 +134,7 @@ private:
   size_t _maxMemory;
   bool _visitFinish{false};
 
-  GCoSchedule* _schedule{nullptr};
+  GSchedule* _schedule{nullptr};
 
   std::vector<std::string> _groups;
 #if defined(_PRINT_FORMAT_)

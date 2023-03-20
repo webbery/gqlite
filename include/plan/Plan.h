@@ -1,4 +1,5 @@
 #pragma once
+#include "Context.h"
 #include "gqlite.h"
 #include <vector>
 #include <string>
@@ -25,10 +26,12 @@ enum class ExecuteStatus {
 class GVM;
 struct Chunk;
 struct Compiler;
-class GCoSchedule;
+class GDefaultSchedule;
+struct GContext;
+
 class GPlan {
 public:
-  GPlan(std::map<std::string, GVirtualNetwork*>& networks, GStorageEngine* store, GCoSchedule* schedule);
+  GPlan(GVirtualNetwork* networks, GStorageEngine* store, GDefaultSchedule* schedule);
   virtual ~GPlan();
   
   /** After Plan created, before Plan execute,
@@ -48,10 +51,10 @@ public:
   virtual void addCompiler(Compiler* compiler) { _compiler = compiler; }
 
 protected:
-  std::map<std::string, GVirtualNetwork*>& _networks;
+  std::map<std::string, GVirtualNetwork*> _network;
   GStorageEngine* _store;
   GPlan* _left;
   GPlan* _right;
   Compiler* _compiler;
-  GCoSchedule* _schedule;
+  GDefaultSchedule* _schedule;
 };

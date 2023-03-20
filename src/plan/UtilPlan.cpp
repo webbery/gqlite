@@ -1,4 +1,5 @@
 #include "plan/UtilPlan.h"
+#include "Context.h"
 #include "gqlite.h"
 #include "VirtualNetwork.h"
 #include "StorageEngine.h"
@@ -12,8 +13,8 @@
   if (ret != ECode_Success) return ret;\
 }
 
-GUtilPlan::GUtilPlan(std::map<std::string, GVirtualNetwork*>& vn, GStorageEngine* store, GCreateStmt* stmt)
-:GPlan(vn, store, nullptr) {
+GUtilPlan::GUtilPlan(GContext* context, GCreateStmt* stmt)
+:GPlan(context->_graph, context->_storage, nullptr) {
     _type = UtilType::Creation;
     _var = stmt->name();
     GListNode* groups = stmt->groups();
@@ -50,14 +51,14 @@ GUtilPlan::GUtilPlan(std::map<std::string, GVirtualNetwork*>& vn, GStorageEngine
     
 }
 
-GUtilPlan::GUtilPlan(std::map<std::string, GVirtualNetwork*>& vn, GStorageEngine* store, GDropStmt* stmt)
-:GPlan(vn, store, nullptr) {
+GUtilPlan::GUtilPlan(GContext* context, GDropStmt* stmt)
+:GPlan(context->_graph, context->_storage, context->_schedule) {
   _type = UtilType::Drop;
   _var = stmt->name();
 }
 
-GUtilPlan::GUtilPlan(std::map<std::string, GVirtualNetwork*>& vn, GStorageEngine* store, GDumpStmt* stmt)
-  : GPlan(vn, store, nullptr)
+GUtilPlan::GUtilPlan(GContext* context, GDumpStmt* stmt)
+:GPlan(context->_graph, context->_storage, context->_schedule)
 {
   _type = UtilType::Dump;
   _var = stmt->name();

@@ -153,7 +153,7 @@ public:
  * https://people.math.osu.edu/husen.1/teaching/571/random_walks.pdf
  */
 TEST_CASE("random walk algorithm") {
-  GCoSchedule schedule;
+  GDefaultSchedule schedule(nullptr);
   GVirtualNetwork* net = new GVirtualNetwork(&schedule, 10);
   std::function<void(uint64_t, const node_info&)> visitor = [](node_t, const node_info&) {};
   NodeLoader loader(net);
@@ -166,7 +166,7 @@ TEST_CASE("random walk algorithm") {
 }
 
  TEST_CASE("bread search first walk algorithm") {
-   GCoSchedule schedule;
+   GDefaultSchedule schedule(nullptr);
    GVirtualNetwork* net = new GVirtualNetwork(&schedule, 100);
    auto visitor = [](node_t, const node_info&) {};
    NodeLoader loader(net);
@@ -205,7 +205,7 @@ TEST_CASE("bread search first walk algorithm with native loader") {
 }
 
  TEST_CASE("A* walk algorithm") {
-   GCoSchedule schedule;
+   GDefaultSchedule schedule(nullptr);
    GVirtualNetwork* net = new GVirtualNetwork(&schedule, 10);
    auto visitor = [](node_t, const node_info&) {};
    RomaniaLoader loader;

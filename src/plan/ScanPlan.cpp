@@ -1,4 +1,5 @@
 #include "plan/ScanPlan.h"
+#include "Context.h"
 #include "base/lang/AST.h"
 #include "base/lang/ASTNode.h"
 #include "base/lang/QueryStmt.h"
@@ -20,8 +21,8 @@
 #include "base/gvm/GVM.h"
 #include "base/gvm/Compiler.h"
 
-GScanPlan::GScanPlan(std::map<std::string, GVirtualNetwork*>& networks, GStorageEngine* store, GQueryStmt* stmt, GCoSchedule* schedule)
-:GPlan(networks, store, schedule)
+GScanPlan::GScanPlan(GContext* context, GQueryStmt* stmt)
+:GPlan(context->_graph, context->_storage, context->_schedule)
 , _queryType(QueryType::SimpleScan)
 , _state(ScanState::Stop)
 {
@@ -30,7 +31,7 @@ GScanPlan::GScanPlan(std::map<std::string, GVirtualNetwork*>& networks, GStorage
     _graph = GetString(ptr);
   }
   else {
-    auto jsn = store->getSchema();
+    auto jsn = _store->getSchema();
     _graph = jsn[SCHEMA_GRAPH_NAME];
   }
 
@@ -39,12 +40,12 @@ GScanPlan::GScanPlan(std::map<std::string, GVirtualNetwork*>& networks, GStorage
   parseConditions(stmt->where());
 }
 
-GScanPlan::GScanPlan(std::map<std::string, GVirtualNetwork*>& networks, GStorageEngine* store, GListNode* condition, GCoSchedule* schedule, const std::string& group)
-  :GPlan(networks, store, schedule)
+GScanPlan::GScanPlan(GContext* context, GListNode* condition, const std::string& group)
+:GPlan(context->_graph, context->_storage, context->_schedule)
   , _queryType(QueryType::SimpleScan)
   ,_group(group)
 {
-  auto jsn = store->getSchema();
+  auto jsn = _store->getSchema();
   _graph = jsn[SCHEMA_GRAPH_NAME];
 
   _queries[0].push_back({ FLT_MAX, group });

@@ -3,6 +3,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <string>
+#include "schedule/DefaultSchedule.h"
 
 #if __SANITIZE_ADDRESS__
 #include <sanitizer/asan_interface.h>
@@ -19,7 +20,7 @@ extern "C" transfer_t  jump_fcontext( fcontext_t const to, void * vp);
 extern "C" fcontext_t  make_fcontext( void * sp, std::size_t size, void (* fn)( transfer_t) );
 
 void __coroutine_entry(transfer_t t) {
-  GCoSchedule* schedule = (GCoSchedule*)t.data;
+  GDefaultSchedule* schedule = (GDefaultSchedule*)t.data;
   int id = schedule->_current;
   schedule->_main = t.fctx;
   GCoroutine* c = schedule->_coroutines[id];
@@ -62,47 +63,10 @@ void GCoroutine::resume() {
 }
 
 void GCoroutine::yield() {
-  _status = Status::Suspend;
-  transfer_t t = jump_fcontext(_schedule->_main, nullptr);
-  _ctx = t.fctx;
-}
-
-GCoSchedule::GCoSchedule():_current(0) {
-}
-
-GCoSchedule::~GCoSchedule() {
-  assert(_coroutines.size() == 0);
-}
-
-void GCoSchedule::join() {
-}
-
-void GCoSchedule::run() {
-  while (!_coroutines.empty()) {
-    for (auto itr = _coroutines.begin(); itr != _coroutines.end(); ) {
-      if (itr->second->status() == GCoroutine::Status::Finish) {
-        delete itr->second;
-        itr = _coroutines.erase(itr);
-      }
-      else {
-        itr->second->resume();
-        ++itr;
-      }
-    }
+  if (_status == Status::Running) {
+    _status = Status::Suspend;
+    transfer_t t = jump_fcontext(_schedule->_main, nullptr);
+    _ctx = t.fctx;
   }
-}
-
-void GCoSchedule::init(GCoroutine* c) {
-  uint8_t id = 1;
-  if (_coroutines.size()) {
-    id = _coroutines.rbegin()->first + 1;
-  }
-  while (_coroutines.find(id) != _coroutines.end()) {
-    id += 1;
-  }
-  c->_id = id;
-  c->_status = GCoroutine::Status::Ready;
-  c->_schedule = this;
-  _coroutines[id] = c;
 }
 

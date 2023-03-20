@@ -1,5 +1,6 @@
 #include <thread>
 #include <future>
+#include "Context.h"
 #include "plan/UpsetPlan.h"
 #include "plan/ScanPlan.h"
 #include "StorageEngine.h"
@@ -9,14 +10,14 @@
 #include <fmt/color.h>
 #include "base/system/Coroutine.h"
 
-GUpsetPlan::GUpsetPlan(std::map<std::string, GVirtualNetwork*>& vn, GStorageEngine* store, GUpsetStmt* ast, GCoSchedule* schedule)
-:GPlan(vn, store, schedule)
+GUpsetPlan::GUpsetPlan(GContext* context, GUpsetStmt* ast)
+:GPlan(context->_graph, context->_storage, context->_schedule)
 ,_class(ast->name())
 ,_scan(nullptr)
 {
   GListNode* condition = ast->conditions();
   if (condition) {
-    _scan = new GScanPlan(vn, store, condition, _schedule, _class);
+    _scan = new GScanPlan(context, condition, _class);
   }
   UpsetVisitor visitor(*this);
   std::list<NodeType> ln;
@@ -148,10 +149,10 @@ void GUpsetPlan::addVectorIndex(const std::string& index, uint32_t id, const std
 
 GVirtualNetwork* GUpsetPlan::generateNetwork(const std::string& branch)
 {
-  if (!_networks[branch]) {
-    _networks[branch] = new GVirtualNetwork(_schedule, 1024);
+  if (!_network.count(branch)) {
+    _network[branch] = new GVirtualNetwork(_schedule, 1024);
   }
-  return _networks[branch];
+  return _network[branch];
 }
 
 bool GUpsetPlan::upsetIndex(const std::string& index, const std::string& value, const std::string& id)

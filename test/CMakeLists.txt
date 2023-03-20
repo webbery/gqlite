@@ -13,7 +13,10 @@ endif(UNIX)
 else()
 endif()
 
-file(GLOB_RECURSE ASM_COROUTINE_SOURCES "../src/**${GQLITE_CPU_ARCHITECHURE}_${GQLITE_TARGET_SYSTEM}_${GQLITE_ASM_COMPILER}.${GQLITE_ASM_SUFFIX}")
+set(ASM_COROUTINE_SOURCES "../src/base/system/fcontext/jump_${GQLITE_ASM_SUFFUX}"
+						"../src/base/system/fcontext/make_${GQLITE_ASM_SUFFUX}"
+)
+
 set(TEST_GRAMMAR_SOURCE ./grammar.cpp ${SYMBOLS_SOURCE})
 set(STORAGE_SOURCE
 	./storage.cpp
@@ -66,6 +69,7 @@ set(QUERY_SOURCE ./query.cpp
 	../src/walk/RandomWalk.cpp
 	../src/base/system/Platform.cpp
 	../src/base/system/Coroutine.cpp
+	../src/schedule/DefaultSchedule.cpp
 	${ASM_COROUTINE_SOURCES}
 	${SYMBOLS_SOURCE}
 )
@@ -117,6 +121,7 @@ set(BENCHMARK_SOURCE ./benchmark.cpp)
 
 set(COROUTINE_SOURCE ./coro.cpp
   ../src/base/system/Coroutine.cpp
+  ../src/schedule/DefaultSchedule.cpp
   ${SYMBOLS_SOURCE}
 )
 

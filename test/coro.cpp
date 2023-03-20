@@ -1,45 +1,26 @@
 #include <catch.hpp>
 #include "base/system/Coroutine.h"
-
-struct Test{
-  Test(GCoSchedule* s): _schedule(s) {}
-
-  void work() {
-    _schedule->createCoroutine([&](GCoroutine* co) {
-      printf("1\n");
-      for (int i = 1; i< 4; ++i) {
-        co->yield();
-        printf("%d\n", 2*i +1);
-      }
-    });
-    _schedule->createCoroutine([](GCoroutine* co) {
-      printf("2\n");
-      for (int i = 1; i< 4; ++i) {
-        co->yield();
-        printf("%d\n", 2*(i + 1));
-      }
-    });
-  }
-
-  GCoSchedule* _schedule;
-};
+#include "base/Promise.h"
+#include "base/Future.h"
+#include "schedule/DefaultSchedule.h"
 
 TEST_CASE("simple coroutine") {
-  GCoSchedule schedule;
-  schedule.createCoroutine([](GCoroutine* co) {
+  GDefaultSchedule schedule(nullptr);
+  schedule.addCoroutine([](GCoroutine* co) {
     for (int i = 1; i< 4; ++i) {
       co->yield();
       printf("%d\n", 2*i +1);
     }
+    return 1;
   });
-  schedule.createCoroutine([](GCoroutine* co) {
+  schedule.addCoroutine([](GCoroutine* co) {
     for (int i = 1; i< 4; ++i) {
       co->yield();
       printf("%d\n", 2*(i + 1));
     }
+      return 1;
   });
   schedule.run();
-  schedule.join();
 }
 
 // extern "C" transfer_t jump_fcontext( fcontext_t const to, void * vp);
@@ -53,13 +34,19 @@ TEST_CASE("simple coroutine") {
 //     jump_fcontext(transfer.fctx, NULL);
 // }
 
-// TEST_CASE("class coroutine") {
-//   char stack[STACK_SIZE];
-//     void* to_context = make_fcontext(stack + STACK_SIZE, STACK_SIZE, func);
-//     transfer_t transfer;
-//     printf("I am in main.\n");
-//     transfer = jump_fcontext(to_context, NULL);
-//     printf("I am in main again!\n");
-//     jump_fcontext(transfer.fctx, NULL);
-//     printf("End of main\n");
-// }
+TEST_CASE("promise") {
+  GDefaultSchedule schedule(nullptr);
+  auto p = schedule.async([]() {
+    printf("do work.\n");
+    return 0;
+  });
+  //auto future = p.getFuture();
+  //future.then([&p] (int v) {
+  //  printf("value: %d\n", v);
+  //  p.setValue(1);
+  //}).then([]() {
+  //   //printf("value next: %d\n", v);
+  //   return 0;
+  // }).get();
+  schedule.run();
+}

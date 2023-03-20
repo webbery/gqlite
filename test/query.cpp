@@ -8,11 +8,12 @@
 #include "base/DOT.h"
 #endif
 #include <catch.hpp>
+#include "schedule/DefaultSchedule.h"
 
 TEST_CASE("add operation") {
   const int dim[] = { 8/*, 32, 64, 128*/ };
   const int num_elements[] = { 80/*, 320, 1280, 5120*/ };
-  GCoSchedule schedule;
+  GDefaultSchedule schedule(nullptr);
   for (int elm_indx = 0; elm_indx < sizeof(num_elements) / sizeof(int); ++elm_indx) {
     for (int dim_indx = 0; dim_indx < sizeof(dim) / sizeof(int); ++dim_indx) {
       GStorageEngine* storage = new GStorageEngine();
@@ -41,7 +42,7 @@ TEST_CASE("add operation") {
 TEST_CASE("query operation") {
  const int dim = 2;
  const int num_elements = 20;
- GCoSchedule schedule;
+ GDefaultSchedule schedule(nullptr);
  GStorageEngine* storage = new GStorageEngine();
  GVirtualNetwork* net = new GVirtualNetwork(&schedule, 100);
  GHNSW* instance = new GHNSW(net, storage, "default", "hnsw", "hnsw_80_8");

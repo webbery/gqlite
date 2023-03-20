@@ -1,11 +1,11 @@
 #include "plan/PathPlan.h"
 #include "base/lang/ASTNode.h"
 #include "gqlite.h"
+#include "Context.h"
 
-GPathQuery::GPathQuery(std::map<std::string, GVirtualNetwork*>& network, GStorageEngine* store, GListNode* stmt,
-  GCoSchedule* schedule, gqlite_callback cb, void* cbHandle, const std::string& name)
-: GPlan(network, store, schedule){
-  _scan = new GScanPlan(network, store, stmt, schedule, name);
+GPathQuery::GPathQuery(GContext* context, GListNode* stmt, gqlite_callback cb, void* cbHandle, const std::string& name)
+: GPlan(context->_graph, context->_storage, context->_schedule){
+  _scan = new GScanPlan(context, stmt, name);
 }
 
 int GPathQuery::prepare() {

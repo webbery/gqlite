@@ -7,12 +7,14 @@ void init_result_nodes(gqlite_result& result)
 
 }
 
-GPlan::GPlan(std::map<std::string, GVirtualNetwork*>& networks, GStorageEngine* store, GCoSchedule* schedule)
+GPlan::GPlan(GVirtualNetwork* network, GStorageEngine* store, GDefaultSchedule* schedule)
 : _left(nullptr), _right(nullptr)
 , _compiler(nullptr)
 , _store(store)
-, _networks(networks)
-, _schedule(schedule) {}
+, _schedule(schedule) {
+  // make network is the first one
+  if (network) _network["\1"] = network;
+}
 
 GPlan::~GPlan() {
   if (_left) delete _left;

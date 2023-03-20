@@ -14,9 +14,9 @@ public:
     Drop,
     Dump,
   };
-  GUtilPlan(std::map<std::string, GVirtualNetwork*>& vn, GStorageEngine* store, GCreateStmt* ast);
-  GUtilPlan(std::map<std::string, GVirtualNetwork*>& vn, GStorageEngine* store, GDropStmt* ast);
-  GUtilPlan(std::map<std::string, GVirtualNetwork*>& vn, GStorageEngine* store, GDumpStmt* ast);
+  GUtilPlan(GContext* context, GCreateStmt* ast);
+  GUtilPlan(GContext* context, GDropStmt* ast);
+  GUtilPlan(GContext* context, GDumpStmt* ast);
   virtual int prepare();
   virtual int execute(GVM* gvm, const std::function<ExecuteStatus(KeyType, const std::string& key, nlohmann::json& value, int status)>&);
 

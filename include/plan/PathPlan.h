@@ -6,8 +6,7 @@
 
 class GPathQuery: public GPlan {
 public:
-  GPathQuery(std::map<std::string, GVirtualNetwork*>& network, GStorageEngine* store, GListNode* stmt,
-    GCoSchedule* schedule, gqlite_callback cb, void* cbHandle, const std::string& name);
+  GPathQuery(GContext* context, GListNode* stmt, gqlite_callback cb, void* cbHandle, const std::string& name);
 
   // construct start and end node
   virtual int prepare();

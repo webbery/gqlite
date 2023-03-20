@@ -2,9 +2,10 @@
 #include "VirtualNetwork.h"
 #include "Graph/Node.h"
 #include "Graph/EntityNode.h"
+#include "base/system/Coroutine.h"
 #include "gutil.h"
 
-GVirtualNetwork::GVirtualNetwork(GCoSchedule* schedule, size_t maxMem)
+GVirtualNetwork::GVirtualNetwork(GSchedule* schedule, size_t maxMem)
 :_maxMemory(maxMem), _schedule(schedule)
 {
 }

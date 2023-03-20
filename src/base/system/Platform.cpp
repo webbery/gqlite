@@ -1,7 +1,6 @@
 #include "base/system/Platform.h"
 #include <sys/stat.h>
 #include <errno.h>
-#include <iostream>
 #include <fmt/printf.h>
 #ifdef _WIN32
 #else

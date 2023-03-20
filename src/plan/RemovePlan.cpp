@@ -1,5 +1,6 @@
 #include "plan/RemovePlan.h"
 #include <stdio.h>
+#include "Context.h"
 #include "base/lang/RemoveStmt.h"
 #include "plan/ScanPlan.h"
 #include "StorageEngine.h"
@@ -21,11 +22,11 @@ namespace {
 
 }
 
-GRemovePlan::GRemovePlan(std::map<std::string, GVirtualNetwork*>& networks, GStorageEngine* store, GRemoveStmt* stmt, GCoSchedule* schedule)
-  :GPlan(networks, store, schedule)
+GRemovePlan::GRemovePlan(GContext* context, GRemoveStmt* stmt)
+  :GPlan(context->_graph, context->_storage, context->_schedule)
 {
   _group = stmt->name();
-  _scan = new GScanPlan(networks, _store, stmt->node(), schedule, _group);
+  _scan = new GScanPlan(context, stmt->node(), _group);
 }
 
 GRemovePlan::~GRemovePlan()

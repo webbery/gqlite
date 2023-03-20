@@ -1,7 +1,7 @@
 #pragma once
 
 class GVM;
-class GCoSchedule;
+class GDefaultSchedule;
 class GStorageEngine;
 class GVirtualNetwork;
 class GPlaneNode;
@@ -13,7 +13,7 @@ struct GContext {
   bool _threadable;
 
   GVM* _gvm;
-  GCoSchedule* _schedule;
+  GDefaultSchedule* _schedule;
   GStorageEngine* _storage;
   GVirtualNetwork* _graph;
 };
