@@ -80,7 +80,7 @@ namespace gql{
   public:
     template<typename F, typename ...Args>
     Executor(F&& f, Args... args) {
-      _base = new Arguments(std::forward<F>(f), args...);
+      _base = new Arguments<F, Args...>(std::forward<F>(f), args...);
     }
 
     ~Executor() {
@@ -128,8 +128,8 @@ public:
     return *this;
   }
   
-  Future<T> getFuture() {
-    return Future<T>(this->_core);
+  Future<T>&& getFuture() {
+    return std::move(Future<T>(this->_core));
   }
 
   template <typename F> void setInterruptHandler(F&& fn);
@@ -163,12 +163,10 @@ public:
 private:
   void clean() {
     this->_core = nullptr;
-    this->_schedule = nullptr;
   }
 
   void set(const Promise& other) {
     this->_core = other._core;
-    this->_schedule = other._schedule;
   }
 
 private:

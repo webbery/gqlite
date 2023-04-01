@@ -4,6 +4,7 @@
 #include <regex>
 #include <stdio.h>
 #include <atomic>
+#include <utility>
 #include "gqlite.h"
 #include "gutil.h"
 #include "mdbx.h"
@@ -12,6 +13,15 @@
 // #ifdef WIN32
 // #pragma comment(lib, BINARY_DIR "/" CMAKE_INTDIR "/zstd_static.lib")
 // #endif
+
+#if __cplusplus > 201700
+#include <filesystem>
+using namespace std;
+#elif __cplusplus > 201300
+#include <experimental/filesystem>
+using namespace std::experimental;
+#elif __cplusplus > 201103 
+#endif
 
 #define GRAPH_EXCEPTION_CATCH(expr) try{\
   expr;\
@@ -90,14 +100,14 @@ int GStorageEngine::open(const char* filename, StoreOption option) {
   if (option.mode == ReadWriteOption::read_only) {
     operator_param.mode = env::mode::readonly;
   }
-  std::filesystem::path p(filename);
+  filesystem::path p(filename);
   if (p.is_relative()) {
     if (!option.directory.empty()) {
-      p = std::filesystem::path(option.directory) / filename;
+      p = filesystem::path(option.directory) / filename;
     }
   }
   std::string fullpath = p.string();
-  if (p.has_parent_path() && !std::filesystem::exists(p.parent_path())) {
+  if (p.has_parent_path() && !filesystem::exists(p.parent_path())) {
     gql::create_directories(
 #if defined(__APPLE__) || defined(UNIX) || defined(__linux__)
       p.parent_path().c_str()
@@ -286,27 +296,27 @@ void GStorageEngine::tryInitAttributeType(nlohmann::json& attributes, const std:
     switch ((nlohmann::json::value_t)value) {
     case nlohmann::json::value_t::object:
       if (value.count(OBJECT_TYPE_NAME)) {
-        attributes[attr] = std::pair((AttributeKind)value[OBJECT_TYPE_NAME], index);
+        attributes[attr] = std::make_pair((AttributeKind)value[OBJECT_TYPE_NAME], index);
       }
       else {
-        attributes[attr] = std::pair(AttributeKind::String, index);
+        attributes[attr] = std::make_pair(AttributeKind::String, index);
       }
       break;
     case nlohmann::json::value_t::array:
       //attributes[attr] = std::pair(AttributeKind::A, index);
       //break;
     case nlohmann::json::value_t::string:
-      attributes[attr] = std::pair(AttributeKind::String, index);
+      attributes[attr] = std::make_pair(AttributeKind::String, index);
       break;
     case nlohmann::json::value_t::number_integer:
     case nlohmann::json::value_t::number_unsigned:
-      attributes[attr] = std::pair(AttributeKind::Integer, index);
+      attributes[attr] = std::make_pair(AttributeKind::Integer, index);
       break;
     case nlohmann::json::value_t::number_float:
-      attributes[attr] = std::pair(AttributeKind::Number, index);
+      attributes[attr] = std::make_pair(AttributeKind::Number, index);
       break;
     case nlohmann::json::value_t::binary:
-      attributes[attr] = std::pair(AttributeKind::Binary, index);
+      attributes[attr] = std::make_pair(AttributeKind::Binary, index);
       break;
     default:
       break;
@@ -397,7 +407,7 @@ int GStorageEngine::write(const std::string& mapname, const std::string& key, co
     //appendValue(info.second, info.first, value, data);
   }
   std::string data = value.dump();
-  return write(mapname, key, data.data(), data.size());
+  return write(mapname, key, (void*)data.data(), data.size());
 }
 
 int GStorageEngine::write(const std::string& mapname, uint64_t key, const nlohmann::json& value)
@@ -418,7 +428,7 @@ int GStorageEngine::write(const std::string& mapname, uint64_t key, const nlohma
     //appendValue(info.second, info.first, value, data);
   }
   std::string data = value.dump();
-  write(mapname, key, data.data(), data.size());
+  write(mapname, key, (void*)data.data(), data.size());
   return 0;
 }
 

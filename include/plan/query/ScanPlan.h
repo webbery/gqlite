@@ -1,5 +1,5 @@
 #pragma once
-#include "Plan.h"
+#include "plan/Plan.h"
 #include "Graph/GRAD.h"
 #include "base/lang/AST.h"
 #include <string>

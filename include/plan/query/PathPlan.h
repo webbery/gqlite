@@ -2,7 +2,7 @@
 #include "VirtualNetwork.h"
 #include "base/lang/ASTNode.h"
 #include "base/lang/WalkDeclaration.h"
-#include "plan/ScanPlan.h"
+#include "plan/query/ScanPlan.h"
 
 class GPathQuery: public GPlan {
 public:

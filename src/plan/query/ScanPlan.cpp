@@ -1,4 +1,4 @@
-#include "plan/ScanPlan.h"
+#include "plan/query/ScanPlan.h"
 #include "Context.h"
 #include "base/lang/AST.h"
 #include "base/lang/ASTNode.h"
@@ -9,7 +9,6 @@
 #include "base/system/Observer.h"
 #include "gqlite.h"
 #include "StorageEngine.h"
-#include <filesystem>
 #include <float.h>
 #include <fmt/core.h>
 #include <fmt/color.h>
@@ -20,6 +19,15 @@
 #include "base/math/Distance.h"
 #include "base/gvm/GVM.h"
 #include "base/gvm/Compiler.h"
+
+#if __cplusplus > 201700
+#include <filesystem>
+using namespace std;
+#elif __cplusplus > 201300
+#include <experimental/filesystem>
+using namespace std::experimental;
+#elif __cplusplus > 201103 
+#endif
 
 GScanPlan::GScanPlan(GContext* context, GQueryStmt* stmt)
 :GPlan(context->_graph, context->_storage, context->_schedule)
@@ -89,7 +97,7 @@ int GScanPlan::prepare()
 {
   if (_graph.empty()) return ECode_Graph_Not_Exist;
   std::string curDB = _store->getPath();
-  if (!std::filesystem::exists(curDB) || _graph != _store->getSchema()[SCHEMA_GRAPH_NAME]) {
+  if (!filesystem::exists(curDB) || _graph != _store->getSchema()[SCHEMA_GRAPH_NAME]) {
     return ECode_Graph_Not_Exist;
   }
   if (!_store->isMapExist(_group)) return ECode_Group_Not_Exist;

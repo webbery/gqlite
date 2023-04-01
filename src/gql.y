@@ -49,7 +49,7 @@ struct GListNode* INIT_STRING_AST(const char* key) {
 
 template<typename T>
 struct GListNode* INIT_NUMBER_AST(T v) {
-  GLiteral* number = new GLiteralNumber(v);
+  GLiteral* number = new GLiteralNumber<T>(v);
   return MakeNode(NodeType::Literal, number, nullptr);
 }
 

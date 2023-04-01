@@ -1,8 +1,8 @@
 #include <thread>
 #include <future>
 #include "Context.h"
-#include "plan/UpsetPlan.h"
-#include "plan/ScanPlan.h"
+#include "plan/mutate/UpsetPlan.h"
+#include "plan/query/ScanPlan.h"
 #include "StorageEngine.h"
 #include "VirtualNetwork.h"
 #include "gutil.h"
@@ -131,7 +131,7 @@ bool GUpsetPlan::upsetEdge()
   _store->tryInitKeyType(_class, KeyType::Edge);
   for (auto itr = _edges.begin(), end = _edges.end(); itr != end; ++itr) {
     std::string sid = gql::to_string(itr->first);
-    _store->write(_class, sid, itr->second.data(), itr->second.size());
+    _store->write(_class, sid, (void*)itr->second.data(), itr->second.size());
   }
   return ECode_Success;
 }
@@ -166,7 +166,7 @@ bool GUpsetPlan::upsetIndex(const std::string& index, const std::string& value, 
     data += datum + '\0';
   }
   data.pop_back();
-  _store->write(index, value, data.data(), data.size() * sizeof(char));
+  _store->write(index, value, (void*)data.data(), data.size() * sizeof(char));
   _store->updateIndexType(index, IndexType::Word);
   return true;
 }
@@ -206,7 +206,7 @@ bool GUpsetPlan::upsetIndex(const std::string& index, double value, const std::s
     data += datum + '\0';
   }
   data.pop_back();
-  _store->write(index, bin, data.data(), data.size() * sizeof(char));
+  _store->write(index, bin, (void*)data.data(), data.size() * sizeof(char));
   _store->updateIndexType(index, IndexType::Number);
   return true;
 }

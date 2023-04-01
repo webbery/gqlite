@@ -1,8 +1,8 @@
-#include "plan/RemovePlan.h"
+#include "plan/mutate/RemovePlan.h"
 #include <stdio.h>
 #include "Context.h"
 #include "base/lang/RemoveStmt.h"
-#include "plan/ScanPlan.h"
+#include "plan/query/ScanPlan.h"
 #include "StorageEngine.h"
 #include "gutil.h"
 

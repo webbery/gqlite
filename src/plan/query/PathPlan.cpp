@@ -1,4 +1,4 @@
-#include "plan/PathPlan.h"
+#include "plan/query/PathPlan.h"
 #include "base/lang/ASTNode.h"
 #include "gqlite.h"
 #include "Context.h"

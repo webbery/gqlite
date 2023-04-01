@@ -28,6 +28,7 @@ This is the expriments for testing abilities of graph database in ending device.
 	* 4.5. [Query](#Query)
 		* 4.5.1. [intrinct function](#intrinctfunction)
 		* 4.5.2. [condition](#condition)
+* 5. [Reference Paper](#ReferencePaper)
 
 <!-- vscode-markdown-toc-config
 	numbering=true
@@ -35,7 +36,6 @@ This is the expriments for testing abilities of graph database in ending device.
 	/vscode-markdown-toc-config -->
 <!-- /vscode-markdown-toc -->
 ##  1. <a name='Designed'></a>Designed
-In order to get more inflexibility, we try to implement graph database on this paper: GRAD: On Graph Database Modeling. But not strict.  
 Here is GQlite's framework:  
 ![framework](doc/framework.png)
 
@@ -121,25 +121,13 @@ Create a graph is simply use `create` keyword. The keyword of `group`, means tha
     create: 'movielens',
     group: [
         {movie: ['title', 'genres']},
-        {tag: ['user_id', 'tag', 'movie_id']},  // <-- relationship's property must write center if it is a edge
+        {tag: ['user_id', 'tag', 'movie_id'], index: ['tag']},  // <-- relationship's property must write center if it is a edge
         {rate: ['user_id', 'rate', 'movie_id']}
-    ],
-    index: 'tag',
+    ]
 };
 ```
-Here we create an index called `tag`. The `tag` will create revert index from `tag` to group `tag`'s id. Following create a index pair with key and value:
-```javascript
-{
-    create: 'movielens',
-    group: [
-        {movie: ['title', 'genres']},
-        {tag: ['user_id', 'movie_id', 'tag']},
-        {rate: ['user_id', 'movie_id', 'rate']}
-    ],
-    index: {tag: 'movie_id'},       // <-- index pair
-};
-```
-So after upset a new tag, the revert index will be added.
+Here we create an index called `tag`. The `tag` will create revert index from `tag` to group `tag`'s id.  
+So after upset a new tag, the revert index will be added.  
 ###  4.2. <a name='DataTypes'></a>Data Types
 Normaly, basic data type as follows:  
     **string**: 'string'  
@@ -289,10 +277,13 @@ show graph 'xxx'
 use graph 'xxx'
 ```
 
-## Papers  
+## 6. <a name='ReferencePaper'></a>Reference Papers  
 1. Yihan Sun, Daniel Ferizovic, Guy E. Belloch. PAM: Parallel Augmented Maps.  
 2. Laxman Dhulipala, Guy Blelloch, Yan Gu, Yihan Sun. PaC-trees: Supporting Parallel and Compressed Purely-Functional Collections.  
 3. Amine Ghrab, Oscar Romero, Sabri Skhiri etc. GRAD: On Graph Database Modeling.  
 4. [向量索引算法HNSW和NSG的比较](https://zhuanlan.zhihu.com/p/105594786)  
 5. Daniel Lemirea, Leonid Boytsov. Decoding billions of integers per second through vectorization.  
 6. Thorup Mikkel. Undirected single-source shortest paths with positive integer weights in linear time.  
+7. Xuanhua Shi, Xuan Luo, Junling Liang etc. Frog: Asynchronous Graph Processing on GPU with Hybrid Coloring Model.  
+8. Xuanhua Shi, Zhigao Zheng, Yongluan Zhou etc. Graph Processing on GPUs: A Survey.  
+9. Merrill Duane, Garland Michael, Grimshaw Andrew. High-Performance and Scalable GPU Graph Traversal.

@@ -1,5 +1,5 @@
 #pragma once
-#include "Plan.h"
+#include "plan/Plan.h"
 
 class GScanPlan;
 class GQueryStmt;

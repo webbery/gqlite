@@ -30,7 +30,7 @@ int GVirtualNetwork::addNode(node_t id, const std::vector<node_attr_t>& attr, co
   else {
     GMap<uint64_t, uint64_t>::node_attrs_t attrs(attr.begin(), attr.end());
     std::array< GMap<uint64_t, uint64_t>::edges_t, MAX_LAYER_SIZE> edges;
-    NodeStatus status = { false, false, false, false, NodeKind::Entity, level };
+    NodeStatus status = { false, false, false, NodeKind::Entity, level, 0, false };
     GMap<uint64_t, uint64_t>::node_collection collection = std::make_tuple(edges, attrs, value, status);
     // cover if exist
     nodes[id] = collection;
@@ -170,7 +170,7 @@ edge_t GVirtualNetwork::getEdgeID(node_t from, node_t to) const
   for (int8_t level = MAX_LAYER_SIZE - 1; level >= 0; --level) {
     auto& fromEdges = GetNodeConnectedEdges(_vg.nodes().at(from))[level];
     auto& toEdges = GetNodeConnectedEdges(_vg.nodes().at(to))[level];
-    std::set_intersection(fromEdges.begin(), fromEdges.end(), toEdges.begin(), toEdges.end(), std::insert_iterator(conns, conns.begin()));
+    std::set_intersection(fromEdges.begin(), fromEdges.end(), toEdges.begin(), toEdges.end(), std::insert_iterator<std::list<edge_t>>(conns, conns.begin()));
     if (conns.size()) return conns.front();
   }
   return (edge_t)GMap<uint64_t, uint64_t>::no_edge;

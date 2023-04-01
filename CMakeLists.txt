@@ -76,6 +76,7 @@ endif()
 set(GQLITE_ASM_SUFFUX ${GQLITE_CPU_ARCHITECHURE}_${GQLITE_ASM_ABI}_${GQLITE_ASM_BINFMT}_${GQLITE_ASSEMBLER}${GQLITE_ASM_EXT})
 
 set(CMAKE_CXX_STANDARD 17)
+# set(CXX_14_LINK_OPTION stdc++fs)
 IF (WIN32)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Zc:__cplusplus")
 enable_language(ASM_MASM)
@@ -133,24 +134,35 @@ add_definitions(-D_GLIBCXX_USE_CXX11_ABI=0)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -lrt -march=native -mfma -mavx -fopenmp")
 endif()
 
-if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-	include(CodeCoverage.cmake)
-	APPEND_COVERAGE_COMPILER_FLAGS()
-	setup_target_for_coverage_gcovr_xml(
-		${PROJECT_NAME}_coverage NAME coverage
-		EXCLUDE
-			"include/json.hpp"
-			"tool/*"
-			"include/gql.hpp"
-			"include/gql.cpp"
-			"tool/getopt.c"
-			"tool/getopt.h"
-			"test/uint.hpp"
-			"test/gramma.cpp"
-			"third_party/catch2/catch.hpp"
-			"include/base/parallel/pam/*"
-			"include/base/parallel/parlay/*"
-	)
+if (CMAKE_COMPILER_IS_GNUCC)
+	execute_process(COMMAND ${CMAKE_C_COMPILER} -dumpversion
+					OUTPUT_VARIABLE GCC_VERSION)
+	string(REGEX MATCHALL "[0-9]+" GCC_VERSION_COMPONENTS ${GCC_VERSION})
+	list(GET GCC_VERSION_COMPONENTS 0 GCC_MAJOR)
+	# list(GET GCC_VERSION_COMPONENTS 1 GCC_MINOR)
+endif()
+
+if(GCC_MAJOR VERSION_GREATER 6.0)
+	if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+		include(CodeCoverage.cmake)
+		APPEND_COVERAGE_COMPILER_FLAGS()
+		setup_target_for_coverage_gcovr_xml(
+			${PROJECT_NAME}_coverage NAME coverage
+			EXCLUDE
+				"include/json.hpp"
+				"tool/*"
+				"include/gql.hpp"
+				"include/gql.cpp"
+				"tool/getopt.c"
+				"tool/getopt.h"
+				"test/uint.hpp"
+				"test/gramma.cpp"
+				"third_party/catch2/catch.hpp"
+				"include/base/parallel/pam/*"
+				"include/base/parallel/parlay/*"
+		)
+	endif()
+else()
 endif()
 # ctest_coverage(BUILD test)
 ELSE ()
@@ -233,7 +245,7 @@ add_library(gqlite
 	${BASE_SOURCES} ${ASM_CONTEXT_SOURCES}
 )
 endif()
-target_link_libraries(gqlite mdbx-static fmt::fmt )
+target_link_libraries(gqlite mdbx-static fmt::fmt)
 target_compile_definitions(gqlite PUBLIC BOOST_CONTEXT_EXPORT=)
 
 if (WIN32)

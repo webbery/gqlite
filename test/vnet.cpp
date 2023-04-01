@@ -7,7 +7,7 @@
 #include "walk/RandomWalk.h"
 #include "walk/BidirectionWalk.h"
 #include "Loader.h"
-#include "plan/ScanPlan.h"
+#include "plan/query/ScanPlan.h"
 
 std::atomic_bool is_exit(false);
 

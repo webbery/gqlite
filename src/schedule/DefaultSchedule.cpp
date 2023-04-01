@@ -23,9 +23,9 @@ GDefaultSchedule::~GDefaultSchedule() {
   _cores.clear();
 }
 
-Future<int> GDefaultSchedule::schedule() {
+Future<int>&& GDefaultSchedule::schedule() {
   auto pi = async([]() {return 1; });
-  return pi.getFuture();
+  return std::move(pi.getFuture());
 }
 
 int GDefaultSchedule::buildPlanGraph(GPlaneNode* root, GPlaneNode* tail) {

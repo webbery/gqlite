@@ -11,7 +11,7 @@ public:
 
   virtual ~GSchedule() {}
 
-  virtual Future<int> schedule() = 0;
+  virtual Future<int>&& schedule() = 0;
 
   virtual bool init(GWorker* worker) = 0;
 

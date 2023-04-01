@@ -29,15 +29,6 @@ public:
   using node_attr_t = GMap<uint64_t, uint64_t>::node_attr_t;
   using node_literal_t = GMap<uint64_t, uint64_t>::node_literal_t;
 
-  enum class VNMessage {
-    NodeLoaded = 1,
-    LastNodeLoaded = 2,
-    WalkInterrupt = 3,    //
-    WalkStart = 4,
-    WalkPause,
-    WalkStop
-  };
-
   GVirtualNetwork(GSchedule* schedule, size_t maxMem);
   ~GVirtualNetwork();
 
@@ -137,6 +128,8 @@ private:
   GSchedule* _schedule{nullptr};
 
   std::vector<std::string> _groups;
+
+  float _degreeDestribution{0.8};
 #if defined(_PRINT_FORMAT_)
 public:
 #endif

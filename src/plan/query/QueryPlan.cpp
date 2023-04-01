@@ -1,6 +1,6 @@
-#include "plan/QueryPlan.h"
+#include "plan/query/QueryPlan.h"
 #include "Context.h"
-#include "plan/ScanPlan.h"
+#include "plan/query/ScanPlan.h"
 #include "StorageEngine.h"
 #include "gutil.h"
 #include "base/gvm/GVM.h"
@@ -14,7 +14,7 @@ namespace {
     else {
       vertex->type = gqlite_id_type::bytes;
       sID += "\0";
-      vertex->cid = sID.data();
+      vertex->cid = (char*)sID.data();
     }
     vertex->properties = nullptr;
   }

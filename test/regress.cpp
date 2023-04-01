@@ -10,12 +10,18 @@
 #define SPLASH_WORD "/"
 #endif
 #include <string>
-#include <filesystem>
 #include <fstream>
 #include "gqlite.h"
 #include "../tool/stdout.h"
 #include "base/Debug.h"
-
+#if __cplusplus > 201700
+#include <filesystem>
+using namespace std;
+#elif __cplusplus > 201300
+#include <experimental/filesystem>
+using namespace std::experimental;
+#elif __cplusplus > 201103 
+#endif
 #define REGRESS_VERSION   "0.1.0"
 
 static const char* help[] = {
@@ -106,10 +112,10 @@ int main(int argc, char** argv) {
 #ifdef __linux__
   init_coredump_capture();
 #endif
-  std::filesystem::path inputs = std::filesystem::current_path();
+  filesystem::path inputs = filesystem::current_path();
   if (g_inputdir != ".") inputs = g_inputdir;
   if (!inputs.is_absolute()) {
-    inputs = std::filesystem::absolute(inputs);
+    inputs = filesystem::absolute(inputs);
     g_inputdir = inputs.u8string();
   }
 
@@ -118,7 +124,7 @@ int main(int argc, char** argv) {
   int outfd = bengin_capture(outfile.c_str(), fp);
   gqlite* gHandle = nullptr;
   if (g_dbfile.size()) {
-    std::filesystem::path p(g_dbfile);
+    filesystem::path p(g_dbfile);
     if (p.is_relative()) {
       g_dbfile = g_inputdir + SPLASH_WORD + g_dbfile;
     }
@@ -128,7 +134,7 @@ int main(int argc, char** argv) {
   }
 #define LINE_MAX_SIZE 1024
   char gql[LINE_MAX_SIZE] = { 0 };
-  for (auto& file : std::filesystem::directory_iterator(inputs)) {
+  for (auto& file : filesystem::directory_iterator(inputs)) {
     std::string curfile = file.path().u8string();
     if (curfile.find("current.out") != std::string::npos || curfile.find("expect.out") != std::string::npos) continue;
     // load script
@@ -159,7 +165,7 @@ int main(int argc, char** argv) {
   std::string expect_file{ inputs.u8string() };
   
   expect_file = expect_file + SPLASH_WORD + "expect.out";
-  if (!std::filesystem::exists(expect_file) || !std::filesystem::exists(outfile)) return 0;
+  if (!filesystem::exists(expect_file) || !filesystem::exists(outfile)) return 0;
 #ifdef WIN32
   std::string cmd("fc /N ");
 #else

@@ -32,7 +32,7 @@ TEST_CASE("basic storage api") {
   engine.addMap("revert_index", KeyType::Byte);
   engine.addMap("revert_index", KeyType::Byte);
   std::string value("hello gqlite");
-  CHECK(ECode_Success == engine.write("revert_index", "key", value.data(), value.size()));
+  CHECK(ECode_Success == engine.write("revert_index", "key", (void*)value.data(), value.size()));
   std::string result;
   engine.read("revert_index", "key", result);
   CHECK(result == value);
@@ -49,7 +49,7 @@ TEST_CASE("cursor api") {
   int32_t key = 0;
   for (size_t idx = 1; idx < 50; ++idx) {
     std::string value = std::to_string(idx);
-    engine.write(propname, idx, value.data(), value.size());
+    engine.write(propname, idx, (void*)value.data(), value.size());
   }
   auto cursor = engine.getMapCursor(propname);
   mdbx::cursor::move_result result = cursor.to_first(false);
@@ -70,7 +70,7 @@ TEST_CASE("empty storage") {
   CHECK(engine.open("storage.db", opt) == ECode_Success);
   engine.addMap("index", KeyType::Byte);
   std::string value;
-  CHECK(ECode_Success == engine.write("index", "key", value.data(), value.size()));
+  CHECK(ECode_Success == engine.write("index", "key", (void*)value.data(), value.size()));
   std::string result;
   engine.read("index", "key", result);
   CHECK(result == value);
@@ -93,7 +93,7 @@ TEST_CASE("movielens") {
     char* movie_genres = strtok(nullptr, ",");
     std::string genres(movie_genres);
     std::string data = title + "," + genres;
-    engine.write("movie", id, data.data(), data.size());
+    engine.write("movie", id, (void*)data.data(), data.size());
     });
   std::string a_movie;
   engine.read("movie", 22, a_movie);

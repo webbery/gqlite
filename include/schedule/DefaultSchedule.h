@@ -40,7 +40,7 @@ public:
   GDefaultSchedule(GContext* context);
   ~GDefaultSchedule();
 
-  Future<int> schedule();
+  Future<int>&& schedule();
 
   template<typename F, class Ret = typename gql::function_traits<F>::return_type, typename ...Args>
   decltype(auto) async(F&& f, Args ...args) {

@@ -1,12 +1,20 @@
-#include "plan/UtilPlan.h"
+#include "plan/mutate/UtilPlan.h"
 #include "Context.h"
 #include "gqlite.h"
 #include "VirtualNetwork.h"
 #include "StorageEngine.h"
 #include "base/lang/AST.h"
-#include <filesystem>
 #include <fmt/printf.h>
 #include "gutil.h"
+
+#if __cplusplus > 201700
+#include <filesystem>
+using namespace std;
+#elif __cplusplus > 201300
+#include <experimental/filesystem>
+using namespace std::experimental;
+#elif __cplusplus > 201103 
+#endif
 
 #define CHECK_RETURN(expr) {\
   int ret = (expr);\
@@ -106,7 +114,7 @@ int GUtilPlan::execute(GVM*, const std::function<ExecuteStatus(KeyType, const st
   {
     std::string graph = std::get<std::string>(_var);
     _store->close();
-    if (std::filesystem::exists(graph)) {
+    if (filesystem::exists(graph)) {
       if (std::remove(graph.c_str())) {
         perror("drop");
         return ECode_DB_Drop_Fail;
