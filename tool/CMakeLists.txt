@@ -36,3 +36,10 @@ target_link_libraries(gqldump PUBLIC gqlite fmt-header-only ${CXX_14_LINK_OPTION
 
 add_test(NAME example_basketballplayer_prepare COMMAND l2lite -fngql -s../data/basketballplayer-2.X.ngql -o../test/basketballplayer-2.X/basketballplayer-2.X.gql
 	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+
+# add_custom_target(
+#   strip_binary strip -s -R .comment -R .gnu.version --strip-unneeded gql
+#   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tool
+#   COMMENT "strip gql ..."
+#   DEPENDS gql
+# )

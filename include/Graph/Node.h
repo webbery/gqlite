@@ -22,9 +22,6 @@ struct alignas(8) NodeStatus {
 
 class GNode {
 public:
-  using attr_t = uint8_t;
-  using node_t = uint32_t;
-
   virtual ~GNode() {}
 
   std::atomic<NodeStatus> _status;

@@ -5,6 +5,8 @@
 #include <stdio.h>
 #include <atomic>
 #include <utility>
+#include "Graph/EntityNode.h"
+#include "base/type.h"
 #include "gqlite.h"
 #include "gutil.h"
 #include "mdbx.h"
@@ -188,6 +190,11 @@ void GStorageEngine::initMap(StoreOption option)
 std::string GStorageEngine::getPath() const {
   return _curDBPath;
 }
+
+std::string GStorageEngine::getGroupName(group_t gid) const {
+  return _groupsName.at(gid);
+}
+
 
 void GStorageEngine::initDict(int compressLvl)
 {
@@ -651,4 +658,13 @@ std::vector<std::string> GStorageEngine::getIndexes() const
     v.emplace_back(itr.key());
   }
   return v;
+}
+
+int upsetVertex(GStorageEngine* storage, GEntityNode* entityNode) {
+  std::string groupName = storage->getGroupName(entityNode->gid());
+  return storage->write(groupName, entityNode->id(), entityNode->attributes());
+}
+
+int upsetEdge(GStorageEngine* storage, GEntityEdge* entityNode) {
+  
 }

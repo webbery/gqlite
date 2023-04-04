@@ -203,6 +203,7 @@ public:
 
     std::string getPath() const;
 
+    std::string getGroupName(group_t gid) const;
 private:
     /**
      * @brief check every attribute is init or not. If not, set index and its attribute's name.
@@ -226,6 +227,13 @@ private:
     std::map<std::thread::id, mdbx::txn_managed> _txns;
     using handle_t = std::map<std::string, mdbx::map_handle>;
     std::map<std::thread::id, handle_t> _mHandles;
+
+    /**
+     * group_t map to group name
+     */
+    std::unordered_map<group_t, std::string> _groupsName;
+    std::unordered_map<std::string, group_t> _groupsMap;
+
     /**
      * schema: {
      *   prop: [ {name: 'xx', type: undefined/str/number} ]
@@ -233,7 +241,7 @@ private:
      * prop contain current map information, include key type, attribute's name and its types.
      */
     nlohmann::json _schema;
-
+ 
     std::string _curDBPath;
 
     /**
@@ -243,3 +251,12 @@ private:
     std::unordered_map<std::string, uint8_t> _key2id;
     std::unordered_map<uint8_t, std::string> _id2key;
 };
+
+class GEntityNode;
+class GEntityEdge;
+int upsetVertex(GStorageEngine* storage, GEntityNode* entityNode);
+nlohmann::json getVertexAttributes(GStorageEngine* storage, group_t gid, node_t nid);
+std::list<node_t> getVertexNeighbors(GStorageEngine* storage, group_t gid, node_t nid);
+// https://betterprogramming.pub/native-graph-database-storage-7ed8ebabe6d8
+int upsetEdge(GStorageEngine* storage, GEntityEdge* entityNode);
+nlohmann::json getEdgeAttributes(GStorageEngine* storage, group_t gid, node_t nid);

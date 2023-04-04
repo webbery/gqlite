@@ -9,7 +9,6 @@
 
 class GNode;
 
-class GEntityNode;
 class GAttributeNode;
 class GSchedule;
 

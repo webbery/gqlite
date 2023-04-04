@@ -1,19 +1,22 @@
 #pragma once
+#include "base/type.h"
 #include "Node.h"
-#include "base/system/EventEmitter.h"
+#include "json.hpp"
+#include <list>
 
-class GVirtualNetwork;
 class GEntityNode: public GNode {
 public:
-  using group_t = uint8_t;
-  //GEntityNode(GEventEmitter& event);
-
   template<typename T>
   T value(attr_t attribute) {
     // AttributeKind kind = attributeKind(attribute);
   }
+
+  group_t gid() const { return _gid; }
+  const nlohmann::json& attributes() const { return _properties; }
+  node_t id() const { return _id; }
 private:
   node_t _id;
   group_t _gid;
-  //GEventEmitter& _event;
+  nlohmann::json _properties;
+  edge2_t _eid;
 };

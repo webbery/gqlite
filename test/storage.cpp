@@ -151,3 +151,11 @@ TEST_CASE("read_mode") {
   engine.read("tags", k, a_tag);
   CHECK(a_tag == "Heroic Bloodshed");
 }
+
+TEST_CASE("basketball-player") {
+  GStorageEngine engine;
+  StoreOption opt;
+  opt.compress = 1;
+  opt.mode = ReadWriteOption::read_write;
+  engine.open("basketball.db", opt);
+}
