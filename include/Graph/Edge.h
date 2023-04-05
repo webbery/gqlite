@@ -27,5 +27,5 @@ struct alignas(8) EdgeStatus {
 class GEdge {
 public:
   virtual ~GEdge() {}
-  std::atomic<EdgeStatus> _status;
+  EdgeStatus _status;
 };

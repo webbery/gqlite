@@ -1,4 +1,5 @@
 #include "gutil.h"
+#include "base/type.h"
 #include <string.h>
 #include <regex>
 #include <chrono>
@@ -95,10 +96,13 @@ namespace gql {
   {
     std::vector<std::string> result;
     auto first = str.begin();
-    for (auto itr = str.begin(); itr != str.end(); ++itr) {
+    for (auto itr = str.begin(); itr != str.end();) {
       if (*itr == delim) {
         result.push_back({ first, itr });
-        first = itr;
+        first = ++itr;
+      }
+      else {
+        ++itr;
       }
     }
     if (first != str.end()) {
@@ -307,4 +311,9 @@ namespace gql {
     to = get_value(eid._to_type, eid._value + eid._from_len, eid._len - eid._from_len);
   }
 
+  void get_from_to(const edge2_t& eid, Variant<std::string, uint64_t>& from, Variant<std::string, uint64_t>& to) {
+    auto&& id = to_edge_id(eid);
+    get_from_to(id, from, to);
+    release_edge_id(id);
+  }
 }

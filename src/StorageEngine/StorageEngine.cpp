@@ -1,11 +1,14 @@
 #include "StorageEngine.h"
 #include <cassert>
+#include <cstdint>
 #include <limits>
 #include <regex>
 #include <stdio.h>
 #include <atomic>
 #include <utility>
 #include "Graph/EntityNode.h"
+#include "Graph/EntityEdge.h"
+#include "base/Variant.h"
 #include "base/type.h"
 #include "gqlite.h"
 #include "gutil.h"
@@ -28,6 +31,7 @@ using namespace std::experimental;
 #define GRAPH_EXCEPTION_CATCH(expr) try{\
   expr;\
 }catch(std::exception& err) {}
+#define CHECK_RESULT(expr) {int ret = ECode_Success; if ((ret = expr) != ECode_Success) return ret;}
 #define DB_SCHEMA   "gql_schema"
 #define SCHEMA_BASIC  "basic"
 
@@ -78,6 +82,7 @@ namespace {
     if (txn.erase(map, k)) return 0;
     return -1;
   }
+
 }
 
 GStorageEngine::GStorageEngine() noexcept
@@ -195,6 +200,10 @@ std::string GStorageEngine::getGroupName(group_t gid) const {
   return _groupsName.at(gid);
 }
 
+group_t GStorageEngine::getGroupID(const std::string& name) const {
+  return _groupsMap.at(name);
+}
+
 
 void GStorageEngine::initDict(int compressLvl)
 {
@@ -233,6 +242,10 @@ void GStorageEngine::releaseDict()
 void GStorageEngine::addMap(const std::string& prop, KeyType type) {
   if (!isMapExist(prop)) {
     _schema[SCHEMA_CLASS][prop][SCHEMA_CLASS_KEY] = type;
+  }
+  if (!_groupsMap.count(prop)) {
+    _groupsMap[prop] = _groupsName.size() + 1;
+    _groupsName[_groupsName.size() + 1] = prop;
   }
 }
 
@@ -660,11 +673,127 @@ std::vector<std::string> GStorageEngine::getIndexes() const
   return v;
 }
 
-int upsetVertex(GStorageEngine* storage, GEntityNode* entityNode) {
-  std::string groupName = storage->getGroupName(entityNode->gid());
-  return storage->write(groupName, entityNode->id(), entityNode->attributes());
+void GStorageEngine::upsetNode(node_t id, GEntityNode* node) {
+  _nodes[id] = node;
 }
 
-int upsetEdge(GStorageEngine* storage, GEntityEdge* entityNode) {
+GEntityNode* GStorageEngine::getNode(node_t id) {
+  return _nodes[id];
+}
+
+int upsetVertex(GStorageEngine* storage, GEntityNode* entityNode) {
+  std::string groupName = storage->getGroupName(entityNode->gid());
+  int ret = storage->write(groupName, entityNode->id(), entityNode->attributes());
+  if (ret == ECode_Success)
+    storage->upsetNode(entityNode->id(), entityNode);
+  return ret;
+}
+
+int upsetEdge(GStorageEngine* storage, GEntityEdge* entityEdge) {
+  // https://betterprogramming.pub/native-graph-database-storage-7ed8ebabe6d8
+  auto&& eid = entityEdge->id();
+  auto&& edgeGroup = storage->getGroupName(entityEdge->gid());
+  Variant<std::string, uint64_t> src, dst;
+  gql::get_from_to(eid, src, dst);
+
+  auto lambdaSetNodeMap = [&src, storage] (GEntityNode* node, const edge2_t& edgeID) {
+    group_t gid = node->gid();
+    std::string groupName = storage->getGroupName(gid);
+    if (!node->isUpdate()) {
+      src.visit([&groupName, storage, &edgeID](std::string key) {
+          // new node
+          storage->write(groupName, key, (void*)edgeID.data(), edgeID.size());
+      },
+      [&groupName, storage, &edgeID](uint64_t key) {
+          // new node
+          storage->write(groupName, key, (void*)edgeID.data(), edgeID.size());
+      });
+      node->setUpdate(true);
+    }
+  };
+
+  auto srcNode = entityEdge->from();
+  auto dstNode = entityEdge->to();
+  if (EdgeChangedStatus::Latest == entityEdge->status()) {
+    lambdaSetNodeMap(srcNode, eid);
+    lambdaSetNodeMap(dstNode, eid);
+    
+    // update node's edge list
+    std::string src_prev_rid = srcNode->prev(eid);
+    std::string src_next_rid = srcNode->next(eid);
+    std::string dst_prev_rid = dstNode->prev(eid);
+    std::string dst_next_rid = dstNode->next(eid);
+    std::string data = src_prev_rid + "," + src_next_rid + "," + dst_prev_rid + "," + dst_next_rid;
+    storage->write(edgeGroup, eid, data.data(), data.size());
+    entityEdge->setUpdate(true);
+  }
   
+  // update connect node
+  auto lambdaUpdateEdge = [storage, &edgeGroup] (const edge2_t& eid, GEntityNode* node) {
+    auto nodeID = node->id();
+    auto& edgesID = node->edges();
+    for (auto& edgeID: edgesID) {
+      if (edgeID == eid)
+        continue;
+
+      std::string data;
+      storage->read(edgeGroup, edgeID, data);
+      auto&& rids = gql::split(data, ',');
+      assert(rids.size() == 4);
+      Variant<std::string, uint64_t> nodes[2];
+      gql::get_from_to(edgeID, nodes[0], nodes[1]);
+      auto node = storage->getNode(nodeID);
+      std::string prev_rid = node->prev(edgeID);
+      std::string next_rid = node->next(edgeID);
+      if (nodes[0].Get<node_t>() == nodeID) {
+        rids[0] = prev_rid;
+        rids[1] = next_rid;
+        data = rids[0] + "," + rids[1] + "," + rids[2] + "," + rids[3];
+        storage->write(edgeGroup, edgeID, data.data(), data.size());
+      }
+      else if (nodes[1].Get<node_t>() == nodeID) {
+        rids[2] = prev_rid;
+        rids[3] = next_rid;
+        data = rids[0] + "," + rids[1] + "," + rids[2] + "," + rids[3];
+        storage->write(edgeGroup, edgeID, data.data(), data.size());
+      }
+    }
+  };
+
+  // update connect edge
+  lambdaUpdateEdge(eid, srcNode);
+  lambdaUpdateEdge(eid, dstNode);
+  // update properties
+
+  return ECode_Success;
+}
+
+std::list<node_t> getVertexNeighbors(GStorageEngine* storage, group_t gid, node_t nid) {
+  std::list<node_t> neighbors;
+  return neighbors;
+}
+
+std::list<edge2_t> getVertexOutbound(GStorageEngine* storage, group_t edgeGroup, group_t nodeGroup, node_t nid) {
+  std::list<edge2_t> outbound;
+
+  auto&& edgeGroupName = storage->getGroupName(edgeGroup);
+  auto&& nodeGroupName = storage->getGroupName(nodeGroup);
+  std::string edgeID, startID;
+  storage->read(nodeGroupName, nid, edgeID);
+  startID = edgeID;
+  while (!edgeID.empty()) {
+    Variant<std::string, node_t> src, dst;
+    gql::get_from_to(edgeID, src, dst);
+    if (dst.Get<node_t>() == nid) {
+      outbound.push_back(edgeID);
+    }
+    std::string data;
+    storage->read(edgeGroupName, edgeID, data);
+    auto&& edges = gql::split(data, ',');
+    if (edges.size() == 0 || edges[3] == startID)
+      break;
+      
+    edgeID = edges[3];
+  }
+  return outbound;
 }

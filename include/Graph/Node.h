@@ -21,8 +21,8 @@ struct alignas(8) NodeStatus {
 };
 
 class GNode {
-public:
+protected:
   virtual ~GNode() {}
 
-  std::atomic<NodeStatus> _status;
+  NodeStatus _status;
 };

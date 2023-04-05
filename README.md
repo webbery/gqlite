@@ -286,4 +286,5 @@ use graph 'xxx'
 6. Thorup Mikkel. Undirected single-source shortest paths with positive integer weights in linear time.  
 7. Xuanhua Shi, Xuan Luo, Junling Liang etc. Frog: Asynchronous Graph Processing on GPU with Hybrid Coloring Model.  
 8. Xuanhua Shi, Zhigao Zheng, Yongluan Zhou etc. Graph Processing on GPUs: A Survey.  
-9. Merrill Duane, Garland Michael, Grimshaw Andrew. High-Performance and Scalable GPU Graph Traversal.
+9. Merrill Duane, Garland Michael, Grimshaw Andrew. High-Performance and Scalable GPU Graph Traversal.  
+10. Sakr Sherif, Pardede Eric. Graph Data Management: Techniques and Applications.  

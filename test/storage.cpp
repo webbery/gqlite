@@ -1,5 +1,9 @@
+#include "Graph/EntityEdge.h"
+#include "Graph/EntityNode.h"
 #include "StorageEngine.h"
+#include "base/type.h"
 #include "gqlite.h"
+#include "gutil.h"
 #include <cassert>
 #include <catch.hpp>
 #include <fstream>
@@ -152,10 +156,42 @@ TEST_CASE("read_mode") {
   CHECK(a_tag == "Heroic Bloodshed");
 }
 
-TEST_CASE("basketball-player") {
+TEST_CASE("native_storage_api") {
   GStorageEngine engine;
   StoreOption opt;
   opt.compress = 1;
   opt.mode = ReadWriteOption::read_write;
-  engine.open("basketball.db", opt);
+  CHECK(engine.open("native_api.db", opt) == ECode_Success);
+  engine.addMap("e:follow", KeyType::Uninitialize);
+  engine.addMap("v:user", KeyType::Uninitialize);
+  group_t egid = engine.getGroupID("e:follow");
+  group_t gid = engine.getGroupID("v:user");
+  CHECK(gid > 0);
+  node_t nid = 1;
+#define NODE_CNOUNT 4
+  GEntityNode* nodes[NODE_CNOUNT];
+  for (int i = 0; i < NODE_CNOUNT; ++i) {
+    nodes[i] = new GEntityNode(nid++, gid);
+    CHECK(upsetVertex(&engine, nodes[i]) == ECode_Success);
+  }
+
+  GEntityEdge* edges[4];
+  
+  edges[0] = new GEntityEdge(egid, nodes[0], nodes[1]);
+  upsetEdge(&engine, edges[0]);
+  edges[1] = new GEntityEdge(egid, nodes[0], nodes[2]);
+  upsetEdge(&engine, edges[1]);
+  edges[2] = new GEntityEdge(egid, nodes[1], nodes[2]);
+  upsetEdge(&engine, edges[2]);
+
+  auto&& outbounds = getVertexOutbound(&engine, egid, gid, 2);
+
+  for (int i = 0; i < 3; ++i) {
+    delete edges[i];
+  }
+  for (int i = 0; i < NODE_CNOUNT; ++i) {
+    delete nodes[i];
+  }
+
+  
 }
