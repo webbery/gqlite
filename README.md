@@ -10,7 +10,7 @@
   <img src="https://codecov.io/gh/webbery/gqlite/branch/master/graph/badge.svg?token=3S0K5GCIYC"/>
 </a>
 
-This is the expriments for testing abilities of graph database in ending device.  
+GQLite is a graph database for testing testing abilities in ending device.   
 
 <!-- vscode-markdown-toc -->
 * 1. [Designed](#Designed)
@@ -20,7 +20,7 @@ This is the expriments for testing abilities of graph database in ending device.
 	* 2.3. [windows](#windows)
 	* 2.4. [android](#android)
 * 3. [How to use in C/C++](#HowtouseinCC)
-* 4. [Graph Query Language](#GraphQueryLanguage)
+* 4. [Graph Query Language(Unstable)](#GraphQueryLanguage)
 	* 4.1. [Create Graph](#CreateGraph)
 	* 4.2. [Data Types](#DataTypes)
 	* 4.3. [Add Vertex & Edge](#AddVertexEdge)

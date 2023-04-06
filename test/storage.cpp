@@ -163,6 +163,8 @@ TEST_CASE("native_storage_api") {
   opt.mode = ReadWriteOption::read_write;
   CHECK(engine.open("native_api.db", opt) == ECode_Success);
   engine.addMap("e:follow", KeyType::Uninitialize);
+  engine.addMap("follow", KeyType::Uninitialize);
+  engine.addMap("user", KeyType::Uninitialize);
   engine.addMap("v:user", KeyType::Uninitialize);
   group_t egid = engine.getGroupID("e:follow");
   group_t gid = engine.getGroupID("v:user");
@@ -185,6 +187,10 @@ TEST_CASE("native_storage_api") {
   upsetEdge(&engine, edges[2]);
 
   auto&& outbounds = getVertexOutbound(&engine, egid, gid, 2);
+  printf("outbound size: %ld\n", outbounds.size());
+  for (auto& id: outbounds) {
+
+  }
 
   for (int i = 0; i < 3; ++i) {
     delete edges[i];

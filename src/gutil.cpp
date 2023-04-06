@@ -1,5 +1,6 @@
 #include "gutil.h"
 #include "base/type.h"
+#include <cassert>
 #include <string.h>
 #include <regex>
 #include <chrono>
@@ -231,6 +232,7 @@ namespace gql {
     edge_id eid = { 0 };
     memcpy(&eid, id.data(), 2);
     eid._value = (char*)malloc(eid._len);
+    assert(eid._len == id.size() - 2);
     memcpy(eid._value, id.data() + 2, eid._len);
     return eid;
   }
@@ -312,7 +314,7 @@ namespace gql {
   }
 
   void get_from_to(const edge2_t& eid, Variant<std::string, uint64_t>& from, Variant<std::string, uint64_t>& to) {
-    auto&& id = to_edge_id(eid);
+    auto id = to_edge_id(eid);
     get_from_to(id, from, to);
     release_edge_id(id);
   }

@@ -447,9 +447,11 @@ int GStorageEngine::write(const std::string& mapname, uint64_t key, const nlohma
     //std::pair<AttributeKind, uint8_t> info = attributes[attr];
     //appendValue(info.second, info.first, value, data);
   }
+  if (value.empty())
+    return 0;
+
   std::string data = value.dump();
-  write(mapname, key, (void*)data.data(), data.size());
-  return 0;
+  return write(mapname, key, (void*)data.data(), data.size());
 }
 
 int GStorageEngine::del(const std::string& mapname, uint64_t key, bool from)
@@ -683,7 +685,8 @@ GEntityNode* GStorageEngine::getNode(node_t id) {
 
 int upsetVertex(GStorageEngine* storage, GEntityNode* entityNode) {
   std::string groupName = storage->getGroupName(entityNode->gid());
-  int ret = storage->write(groupName, entityNode->id(), entityNode->attributes());
+  std::string name = groupName.substr(2);
+  int ret = storage->write(name, entityNode->id(), entityNode->attributes());
   if (ret == ECode_Success)
     storage->upsetNode(entityNode->id(), entityNode);
   return ret;
@@ -691,8 +694,8 @@ int upsetVertex(GStorageEngine* storage, GEntityNode* entityNode) {
 
 int upsetEdge(GStorageEngine* storage, GEntityEdge* entityEdge) {
   // https://betterprogramming.pub/native-graph-database-storage-7ed8ebabe6d8
-  auto&& eid = entityEdge->id();
-  auto&& edgeGroup = storage->getGroupName(entityEdge->gid());
+  auto eid = entityEdge->id();
+  auto edgeGroup = storage->getGroupName(entityEdge->gid());
   Variant<std::string, uint64_t> src, dst;
   gql::get_from_to(eid, src, dst);
 
@@ -724,7 +727,7 @@ int upsetEdge(GStorageEngine* storage, GEntityEdge* entityEdge) {
     std::string dst_prev_rid = dstNode->prev(eid);
     std::string dst_next_rid = dstNode->next(eid);
     std::string data = src_prev_rid + "," + src_next_rid + "," + dst_prev_rid + "," + dst_next_rid;
-    storage->write(edgeGroup, eid, data.data(), data.size());
+    storage->write(edgeGroup, eid, (void*)data.data(), data.size());
     entityEdge->setUpdate(true);
   }
   
@@ -749,13 +752,13 @@ int upsetEdge(GStorageEngine* storage, GEntityEdge* entityEdge) {
         rids[0] = prev_rid;
         rids[1] = next_rid;
         data = rids[0] + "," + rids[1] + "," + rids[2] + "," + rids[3];
-        storage->write(edgeGroup, edgeID, data.data(), data.size());
+        storage->write(edgeGroup, edgeID, (void*)data.data(), data.size());
       }
       else if (nodes[1].Get<node_t>() == nodeID) {
         rids[2] = prev_rid;
         rids[3] = next_rid;
         data = rids[0] + "," + rids[1] + "," + rids[2] + "," + rids[3];
-        storage->write(edgeGroup, edgeID, data.data(), data.size());
+        storage->write(edgeGroup, edgeID, (void*)data.data(), data.size());
       }
     }
   };
@@ -776,14 +779,15 @@ std::list<node_t> getVertexNeighbors(GStorageEngine* storage, group_t gid, node_
 std::list<edge2_t> getVertexOutbound(GStorageEngine* storage, group_t edgeGroup, group_t nodeGroup, node_t nid) {
   std::list<edge2_t> outbound;
 
-  auto&& edgeGroupName = storage->getGroupName(edgeGroup);
-  auto&& nodeGroupName = storage->getGroupName(nodeGroup);
+  auto edgeGroupName = storage->getGroupName(edgeGroup);
+  auto nodeGroupName = storage->getGroupName(nodeGroup);
   std::string edgeID, startID;
   storage->read(nodeGroupName, nid, edgeID);
   startID = edgeID;
-  while (!edgeID.empty()) {
+  while (!edgeID.empty() && edgeID.size()) {
     Variant<std::string, node_t> src, dst;
     gql::get_from_to(edgeID, src, dst);
+    printf("%ld, src %ld, dst %ld\n", nid, src.Get<node_t>(), dst.Get<node_t>());
     if (dst.Get<node_t>() == nid) {
       outbound.push_back(edgeID);
     }
