@@ -112,6 +112,15 @@ namespace gql {
     return result;
   }
 
+  std::string merge(const std::vector<std::string>& data, char delim) {
+      std::string s;
+      for (auto& datum : data) {
+          s += datum + delim;
+      }
+      if (s.size()) s.pop_back();
+      return s;
+  }
+
   std::string format(const char* fmt, ...) {
     va_list arg_ptr;
     va_start(arg_ptr, fmt);

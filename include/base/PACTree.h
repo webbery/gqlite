@@ -4,6 +4,7 @@
 #include <vector>
 #include <type_traits>
 #include <iostream>
+#include <algorithm>
 
 #if (defined __linux) && !(defined (ANDROID))
 #define _PURE_CXX _GLIBCXX_PURE
@@ -225,7 +226,7 @@ std::tuple<GPACNode<T>*, GPACNode<T>*, GPACNode<T>*> expose(GPACNode<T>* tree) {
 
     size_t deepth(node_ptr root) {
       if (!root || root == _header->_parent) return 0;
-      return std::max(deepth(static_cast<node_ptr>(root->_left)), deepth(static_cast<node_ptr>(root->_right))) + 1;
+      return (std::max)(deepth(static_cast<node_ptr>(root->_left)), deepth(static_cast<node_ptr>(root->_right))) + 1;
     }
 
     bool heavy(node_ptr left, node_ptr right) {

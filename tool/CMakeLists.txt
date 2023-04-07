@@ -1,7 +1,4 @@
 cmake_minimum_required(VERSION 3.0)
-project(GQLlite_Tool)
-
-set(CMAKE_CXX_STANDARD 14)
 
 include_directories(../include)
 
@@ -43,3 +40,4 @@ add_test(NAME example_basketballplayer_prepare COMMAND l2lite -fngql -s../data/b
 #   COMMENT "strip gql ..."
 #   DEPENDS gql
 # )
+install(TARGETS gql DESTINATION bin)

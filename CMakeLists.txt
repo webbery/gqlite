@@ -75,8 +75,8 @@ endif()
 
 set(GQLITE_ASM_SUFFUX ${GQLITE_CPU_ARCHITECHURE}_${GQLITE_ASM_ABI}_${GQLITE_ASM_BINFMT}_${GQLITE_ASSEMBLER}${GQLITE_ASM_EXT})
 
-set(CMAKE_CXX_STANDARD 14)
-set(CXX_14_LINK_OPTION stdc++fs)
+set(CMAKE_CXX_STANDARD 17)
+#set(CXX_14_LINK_OPTION stdc++fs)
 IF (WIN32)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Zc:__cplusplus")
 enable_language(ASM_MASM)
@@ -259,7 +259,6 @@ endif(WIN32)
 add_dependencies(gqlite generated_tokens generated_grammar)
 
 install(TARGETS gqlite DESTINATION lib)
-install(TARGETS gql DESTINATION bin)
 install(FILES include/gqlite.h DESTINATION include)
 # add_custom_command(
 #   TARGET gqlite
