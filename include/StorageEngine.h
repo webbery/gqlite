@@ -265,8 +265,15 @@ class GEntityNode;
 class GEntityEdge;
 int upsetVertex(GStorageEngine* storage, GEntityNode* entityNode);
 nlohmann::json getVertexAttributes(GStorageEngine* storage, group_t gid, node_t nid);
-std::list<node_t> getVertexNeighbors(GStorageEngine* storage, group_t gid, node_t nid);
+std::list<node_t> getVertexNeighbors(GStorageEngine* storage, group_t edgeGroup, group_t nodeGroup, node_t nid);
+
 std::list<edge2_t> getVertexOutbound(GStorageEngine* storage, group_t edgeGroup, group_t nodeGroup, node_t nid);
-std::list<edge2_t> getVertexInbound(GStorageEngine* storage, group_t gid, node_t nid);
+
+std::list<edge2_t> getVertexInbound(GStorageEngine* storage, group_t edgeGroup, group_t nodeGroup, node_t nid);
+
+edge2_t getNodePrev(GStorageEngine* storage, group_t edgeGroup, node_t nid, const edge2_t& eid);
+edge2_t getNodeNext(GStorageEngine* storage, group_t edgeGroup, node_t nid, const edge2_t& eid);
+
 int upsetEdge(GStorageEngine* storage, GEntityEdge* entityEdge);
+
 nlohmann::json getEdgeAttributes(GStorageEngine* storage, group_t gid, node_t nid);

@@ -318,4 +318,12 @@ namespace gql {
     get_from_to(id, from, to);
     release_edge_id(id);
   }
+
+  bool is_direction(const std::string& eid) {
+    auto id = to_edge_id(eid);
+    bool direct = id._direction;
+    release_edge_id(id);
+    return direct;
+  }
+
 }

@@ -186,11 +186,13 @@ TEST_CASE("native_storage_api") {
   edges[2] = new GEntityEdge(egid, nodes[1], nodes[2]);
   upsetEdge(&engine, edges[2]);
 
-  auto&& outbounds = getVertexOutbound(&engine, egid, gid, 2);
-  printf("outbound size: %ld\n", outbounds.size());
-  for (auto& id: outbounds) {
+  auto outbounds = getVertexOutbound(&engine, egid, gid, 2);
+  CHECK(outbounds.size() == 1);
+  auto neightbors = getVertexNeighbors(&engine, egid, gid, 2);
+  CHECK(neightbors.size() == 2);
+  auto inbounds = getVertexInbound(&engine, egid, gid, 2);
+  CHECK(inbounds.size() == 1);
 
-  }
 
   for (int i = 0; i < 3; ++i) {
     delete edges[i];

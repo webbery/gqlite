@@ -61,6 +61,7 @@ namespace gql {
   bool operator < (const edge_id& left, const edge_id& right);
   void get_from_to(const edge_id& eid, Variant<std::string, uint64_t>& from, Variant<std::string, uint64_t>& to);
   void get_from_to(const std::string& eid, Variant<std::string, uint64_t>& from, Variant<std::string, uint64_t>& to);
+  bool is_direction(const std::string& eid);
 
   std::wstring string2wstring(const std::string& str);
 
