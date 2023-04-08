@@ -27,8 +27,6 @@ public:
 
       _changed = EdgeChangedStatus::Latest;
 
-      from->add_edge(_id);
-      to->add_edge(_id);
       gql::release_edge_id(eid);
     }
 

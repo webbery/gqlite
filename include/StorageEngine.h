@@ -207,10 +207,6 @@ public:
     std::string getGroupName(group_t gid) const;
     group_t getGroupID(const std::string& name) const;
 
-    void upsetNode(node_t id, GEntityNode* node);
-
-    GEntityNode* getNode(node_t id);
-
 private:
     /**
      * @brief check every attribute is init or not. If not, set index and its attribute's name.
@@ -257,23 +253,25 @@ private:
     */
     std::unordered_map<std::string, uint8_t> _key2id;
     std::unordered_map<uint8_t, std::string> _id2key;
-
-    std::map<node_t, GEntityNode*> _nodes;
 };
 
 class GEntityNode;
 class GEntityEdge;
 int upsetVertex(GStorageEngine* storage, GEntityNode* entityNode);
+int deleteVertex(GStorageEngine* storage, const std::string& groupName, node_t nid);
+
 nlohmann::json getVertexAttributes(GStorageEngine* storage, group_t gid, node_t nid);
+
 std::list<node_t> getVertexNeighbors(GStorageEngine* storage, group_t edgeGroup, group_t nodeGroup, node_t nid);
 
 std::list<edge2_t> getVertexOutbound(GStorageEngine* storage, group_t edgeGroup, group_t nodeGroup, node_t nid);
 
 std::list<edge2_t> getVertexInbound(GStorageEngine* storage, group_t edgeGroup, group_t nodeGroup, node_t nid);
 
-edge2_t getNodePrev(GStorageEngine* storage, group_t edgeGroup, node_t nid, const edge2_t& eid);
-edge2_t getNodeNext(GStorageEngine* storage, group_t edgeGroup, node_t nid, const edge2_t& eid);
+edge2_t getNodePrev(GStorageEngine* storage, const std::string& edgeGroupName, node_t nid, const edge2_t& eid);
+edge2_t getNodeNext(GStorageEngine* storage, const std::string& edgeGroupName, node_t nid, const edge2_t& eid);
 
 int upsetEdge(GStorageEngine* storage, GEntityEdge* entityEdge);
+int deleteEdge(GStorageEngine* storage, const std::string& groupName, const edge2_t& eid);
 
 nlohmann::json getEdgeAttributes(GStorageEngine* storage, group_t gid, node_t nid);

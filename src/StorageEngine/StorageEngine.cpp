@@ -36,6 +36,11 @@ using namespace std::experimental;
 #define DB_SCHEMA   "gql_schema"
 #define SCHEMA_BASIC  "basic"
 
+#define SRC_PREV_INDEX  0
+#define SRC_NEXT_INDEX  1
+#define DST_PREV_INDEX  2
+#define DST_NEXT_INDEX  3
+
 using namespace mdbx;
 namespace {
   mdbx::slice get(mdbx::txn_managed& txn, mdbx::map_handle& map, const std::string& key)
@@ -98,6 +103,7 @@ namespace {
       storage->read(edgeGroupName, edgeID, data);
       auto edges = gql::split(data, ',');
 
+      printf("node %lld, edge %lld -> %lld\n", nodeID, src.Get<node_t>(), dst.Get<node_t>());
       int index = -1;
       if (src.Get<node_t>() == nodeID) {
         index = f(edges, edgeID, true);
@@ -106,7 +112,9 @@ namespace {
         index = f(edges, edgeID, false);
       }
 
-      if (index == -1)
+      gql::get_from_to(edges[index], src, dst);
+      printf("edge %ld -> %ld\n", src.Get<node_t>(), dst.Get<node_t>());
+      if (index == -1 || edges[index] == startID)
         break;
       edgeID = edges[index];
     }
@@ -703,19 +711,18 @@ std::vector<std::string> GStorageEngine::getIndexes() const
   return v;
 }
 
-void GStorageEngine::upsetNode(node_t id, GEntityNode* node) {
-  _nodes[id] = node;
-}
-
-GEntityNode* GStorageEngine::getNode(node_t id) {
-  return _nodes[id];
-}
-
 int upsetVertex(GStorageEngine* storage, GEntityNode* entityNode) {
   std::string groupName = storage->getGroupName(entityNode->gid());
   std::string name = groupName.substr(2);
   int ret = storage->write(name, entityNode->id(), entityNode->attributes());
   return ret;
+}
+
+int deleteVertex(GStorageEngine* storage, const std::string& groupName, node_t nid) {
+  // find all relation edges
+
+  // delete node
+  storage->del(groupName, nid);
 }
 
 int upsetEdge(GStorageEngine* storage, GEntityEdge* entityEdge) {
@@ -725,22 +732,42 @@ int upsetEdge(GStorageEngine* storage, GEntityEdge* entityEdge) {
   Variant<std::string, uint64_t> src, dst;
   gql::get_from_to(eid, src, dst);
 
-  auto lambdaSetNodeMap = [&src, storage] (GEntityNode* node, const edge2_t& edgeID) {
-    group_t gid = node->gid();
-    std::string groupName = storage->getGroupName(gid);
+  auto srcNode = entityEdge->from();
+  auto dstNode = entityEdge->to();
+
+  group_t gid = srcNode->gid();
+  std::string nodeGroup = storage->getGroupName(gid);
+
+  auto lambdaSetNodeMap = [storage, &nodeGroup] (GEntityNode* node, const edge2_t& edgeID) {
     // printf("node id: %ld\n", node->id());
     std::string data;
-    storage->read(groupName, node->id(), data);
+    storage->read(nodeGroup, node->id(), data);
     if (data.empty()) {
-      storage->write(groupName, node->id(), (void*)edgeID.data(), edgeID.size());
-      printf("write %s, key: %ld\n", groupName.c_str(), node->id());
+      storage->write(nodeGroup, node->id(), (void*)edgeID.data(), edgeID.size());
+      printf("write %s, key: %ld\n", nodeGroup.c_str(), node->id());
       return edgeID;
     }
     return data;
   };
 
-  auto srcNode = entityEdge->from();
-  auto dstNode = entityEdge->to();
+  auto debugInfo = [storage](std::string& group, const edge2_t& edgeID) {
+    std::string data;
+    storage->read(group, edgeID, data);
+    auto edges = gql::split(data, ',');
+    Variant<std::string, node_t> src, dst;
+    gql::get_from_to(edgeID, src, dst);
+    printf("cur %ld -> %ld\n", src.Get<node_t>(), dst.Get<node_t>());
+    gql::get_from_to(edges[SRC_PREV_INDEX], src, dst);
+    printf("src_prev %ld -> %ld\n", src.Get<node_t>(), dst.Get<node_t>());
+    gql::get_from_to(edges[SRC_NEXT_INDEX], src, dst);
+    printf("src_next % ld -> % ld\n", src.Get<node_t>(), dst.Get<node_t>());
+    gql::get_from_to(edges[DST_NEXT_INDEX], src, dst);
+    printf("dst_next % ld -> % ld\n", src.Get<node_t>(), dst.Get<node_t>());
+    gql::get_from_to(edges[DST_PREV_INDEX], src, dst);
+    printf("dst_prev % ld -> % ld\n", src.Get<node_t>(), dst.Get<node_t>());
+    printf("--------------\n");
+  };
+  
   if (EdgeChangedStatus::Latest == entityEdge->status()) {
     auto srcEdgeID = lambdaSetNodeMap(srcNode, eid);
     auto dstEdgeID = lambdaSetNodeMap(dstNode, eid);
@@ -750,73 +777,63 @@ int upsetEdge(GStorageEngine* storage, GEntityEdge* entityEdge) {
     node_t dstID = dstNode->id();
     
     std::string src_prev_rid, src_next_rid, dst_prev_rid, dst_next_rid;
-    // find first edge and change dst_prev_rid, find last edge and change src_next_rid
-    std::string edgeID, startID;
-    group_t gid = srcNode->gid();
-    std::string nodeGroupName = storage->getGroupName(gid);
-    storage->read(edgeGroup, srcEdgeID, edgeID);
-    if (edgeID.empty()) {
-        //src_prev_rid
-    }
-    startID = edgeID;
-    Variant<std::string, node_t> src, dst;
-    gql::get_from_to(edgeID, src, dst);
+    // initialize latest edge
+    src_next_rid = srcEdgeID == eid? srcEdgeID : getNodeNext(storage, edgeGroup, srcNode->id(), srcEdgeID);
+    src_prev_rid = srcEdgeID == eid? srcEdgeID : getNodePrev(storage, edgeGroup, srcNode->id(), srcEdgeID);
+    dst_next_rid = dstEdgeID == eid? dstEdgeID : getNodeNext(storage, edgeGroup, dstNode->id(), dstEdgeID);
+    dst_prev_rid = dstEdgeID == eid? dstEdgeID : getNodePrev(storage, edgeGroup, dstNode->id(), dstEdgeID);
 
-    if (dst.Get<node_t>() == srcID) {
-        std::string data;
-        storage->read(edgeGroup, edgeID, data);
-        auto edges = gql::split(data, ',');
-        edges[2] = eid;
-        auto updateData = gql::merge(edges, ',');
-        storage->write(edgeGroup, edgeID, updateData.data(), updateData.size());
-    }
-
-    std::string org_src_prev_rid = getNodePrev(storage, srcNode->gid(), srcID, eid);
-    std::string org_src_next_rid = getNodeNext(storage, srcNode->gid(), srcID, eid);
-
-    std::string org_dst_prev_rid = getNodePrev(storage, dstNode->gid(), dstNode->id(), eid);
-    std::string org_dst_next_rid = getNodeNext(storage, dstNode->gid(), dstNode->id(), eid);
-
+    //printf("cur %ld -> %ld\n", src.Get<node_t>(), dst.Get<node_t>());
+    //gql::get_from_to(src_next_rid, src, dst);
+    //printf("src_next %ld -> %ld\n", src.Get<node_t>(), dst.Get<node_t>());
+    //gql::get_from_to(src_prev_rid, src, dst);
+    //printf("src_prev % ld -> % ld\n", src.Get<node_t>(), dst.Get<node_t>());
+    //gql::get_from_to(dst_next_rid, src, dst);
+    //printf("dst_next % ld -> % ld\n", src.Get<node_t>(), dst.Get<node_t>());
+    //gql::get_from_to(dst_prev_rid, src, dst);
+    //printf("dst_prev % ld -> % ld\n", src.Get<node_t>(), dst.Get<node_t>());
     std::string data = src_prev_rid + "," + src_next_rid + "," + dst_prev_rid + "," + dst_next_rid;
     storage->write(edgeGroup, eid, (void*)data.data(), data.size());
-    entityEdge->setUpdate(true);
+    entityEdge->setChangedStatus(EdgeChangedStatus::NoneChanged);
   }
   
   // update connect node
-  auto lambdaUpdateEdge = [storage, &edgeGroup] (const edge2_t& eid, GEntityNode* node) {
-    auto nodeID = node->id();
-    auto& edgesID = node->edges();
-    for (auto& edgeID: edgesID) {
-      if (edgeID == eid)
-        continue;
+  auto lambdaUpdateEdge = [storage, &edgeGroup, &nodeGroup] (const edge2_t& eid, node_t nodeID) {
+    std::string edgeID;
+    storage->read(nodeGroup, nodeID, edgeID);
+    assert(!edgeID.empty());
 
-      std::string data;
-      storage->read(edgeGroup, edgeID, data);
-      auto&& rids = gql::split(data, ',');
-      assert(rids.size() == 4);
-      Variant<std::string, uint64_t> nodes[2];
-      gql::get_from_to(edgeID, nodes[0], nodes[1]);
-      auto node = storage->getNode(nodeID);
-      std::string prev_rid = node->prev(edgeID);
-      std::string next_rid = node->next(edgeID);
-      if (nodes[0].Get<node_t>() == nodeID) {
-        rids[0] = prev_rid;
-        rids[1] = next_rid;
-        data = rids[0] + "," + rids[1] + "," + rids[2] + "," + rids[3];
-        storage->write(edgeGroup, edgeID, (void*)data.data(), data.size());
-      }
-      else if (nodes[1].Get<node_t>() == nodeID) {
-        rids[2] = prev_rid;
-        rids[3] = next_rid;
-        data = rids[0] + "," + rids[1] + "," + rids[2] + "," + rids[3];
-        storage->write(edgeGroup, edgeID, (void*)data.data(), data.size());
+    std::string data;
+    storage->read(edgeGroup, edgeID, data);
+    assert(!data.empty());
+    auto edges = gql::split(data, ',');
+
+    Variant<std::string, node_t> src, dst;
+    gql::get_from_to(edgeID, src, dst);
+    if (src.Get<node_t>() == nodeID) {
+      edges[SRC_NEXT_INDEX] = eid;
+      if (edges[SRC_PREV_INDEX] == edgeID) { // only one edge in list
+        edges[SRC_PREV_INDEX] = eid;
       }
     }
+    else if (dst.Get<node_t>() == nodeID) {
+      edges[DST_PREV_INDEX] = eid;
+      if (edges[DST_NEXT_INDEX] == edgeID) { // only one edge in list
+        edges[DST_NEXT_INDEX] = eid;
+      }
+    }
+
+    data = gql::merge(edges, ',');
+    storage->write(edgeGroup, edgeID, data.data(), data.size());
+    return edgeID;
   };
 
   // update connect edge
-  lambdaUpdateEdge(eid, srcNode);
-  lambdaUpdateEdge(eid, dstNode);
+  auto updateSrcEdge = lambdaUpdateEdge(eid, srcNode->id());
+  debugInfo(edgeGroup, updateSrcEdge);
+  auto updateDstEdge = lambdaUpdateEdge(eid, dstNode->id());
+  debugInfo(edgeGroup, updateDstEdge);
+  
   // update properties
 
   return ECode_Success;
@@ -902,10 +919,9 @@ std::list<edge2_t> getVertexOutbound(GStorageEngine* storage, group_t edgeGroup,
 return outbound;
 }
 
-edge2_t getNodePrev(GStorageEngine* storage, group_t edgeGroup, node_t nid, const edge2_t& eid) {
+edge2_t getNodePrev(GStorageEngine* storage, const std::string& edgeGroupName, node_t nid, const edge2_t& eid) {
   Variant<std::string, node_t> src, dst;
   gql::get_from_to(eid, src, dst);
-  auto edgeGroupName = storage->getGroupName(edgeGroup);
   std::string data;
   storage->read(edgeGroupName, eid, data);
   if (data.empty()) {
@@ -921,10 +937,9 @@ edge2_t getNodePrev(GStorageEngine* storage, group_t edgeGroup, node_t nid, cons
   return "";
 }
 
-edge2_t getNodeNext(GStorageEngine* storage, group_t edgeGroup, node_t nid, const edge2_t& eid) {
+edge2_t getNodeNext(GStorageEngine* storage, const std::string& edgeGroupName, node_t nid, const edge2_t& eid) {
   Variant<std::string, node_t> src, dst;
   gql::get_from_to(eid, src, dst);
-  auto edgeGroupName = storage->getGroupName(edgeGroup);
   std::string data;
   storage->read(edgeGroupName, eid, data);
   if (data.empty()) {

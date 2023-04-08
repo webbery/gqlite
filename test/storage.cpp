@@ -193,6 +193,10 @@ TEST_CASE("native_storage_api") {
   auto inbounds = getVertexInbound(&engine, egid, gid, 2);
   CHECK(inbounds.size() == 1);
 
+  edges[3] = new GEntityEdge(egid, nodes[1], nodes[3]);
+  upsetEdge(&engine, edges[3]);
+  inbounds = getVertexInbound(&engine, egid, gid, 2);
+  CHECK(inbounds.size() == 2);
 
   for (int i = 0; i < 3; ++i) {
     delete edges[i];
