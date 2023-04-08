@@ -1,4 +1,6 @@
 #include "gutil.h"
+#include "base/type.h"
+#include <cassert>
 #include <string.h>
 #include <regex>
 #include <chrono>
@@ -95,16 +97,28 @@ namespace gql {
   {
     std::vector<std::string> result;
     auto first = str.begin();
-    for (auto itr = str.begin(); itr != str.end(); ++itr) {
+    for (auto itr = str.begin(); itr != str.end();) {
       if (*itr == delim) {
         result.push_back({ first, itr });
-        first = itr;
+        first = ++itr;
+      }
+      else {
+        ++itr;
       }
     }
     if (first != str.end()) {
       result.push_back({ first, str.end() });
     }
     return result;
+  }
+
+  std::string merge(const std::vector<std::string>& data, char delim) {
+      std::string s;
+      for (auto& datum : data) {
+          s += datum + delim;
+      }
+      if (s.size()) s.pop_back();
+      return s;
   }
 
   std::string format(const char* fmt, ...) {
@@ -227,6 +241,7 @@ namespace gql {
     edge_id eid = { 0 };
     memcpy(&eid, id.data(), 2);
     eid._value = (char*)malloc(eid._len);
+    assert(eid._len == id.size() - 2);
     memcpy(eid._value, id.data() + 2, eid._len);
     return eid;
   }
@@ -305,6 +320,19 @@ namespace gql {
     
     from = get_value(eid._from_type, eid._value, eid._from_len);
     to = get_value(eid._to_type, eid._value + eid._from_len, eid._len - eid._from_len);
+  }
+
+  void get_from_to(const edge2_t& eid, Variant<std::string, uint64_t>& from, Variant<std::string, uint64_t>& to) {
+    auto id = to_edge_id(eid);
+    get_from_to(id, from, to);
+    release_edge_id(id);
+  }
+
+  bool is_direction(const std::string& eid) {
+    auto id = to_edge_id(eid);
+    bool direct = id._direction;
+    release_edge_id(id);
+    return direct;
   }
 
 }

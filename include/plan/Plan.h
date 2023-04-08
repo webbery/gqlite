@@ -1,5 +1,6 @@
 #pragma once
 #include "Context.h"
+#include "base/lang/visitor/WalkVisitor.h"
 #include "gqlite.h"
 #include <vector>
 #include <string>
@@ -14,6 +15,13 @@ void init_result_info(gqlite_result& result, const std::vector<std::string>& inf
 void release_result_info(gqlite_result& result);
 void init_result_nodes(gqlite_result& result);
 void release_result_nodes(gqlite_result& result);
+
+enum class QueryType {
+  SimpleScan,     /**< scan database with/without simple condition */
+  NNSearch,       /**< use KNN search */
+  Match,          /**< subgraph match */
+  Inference,      /**< bayes network inference */
+};
 
 /**
  * Control plan execute status.

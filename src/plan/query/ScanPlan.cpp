@@ -103,7 +103,7 @@ int GScanPlan::prepare()
   if (!_store->isMapExist(_group)) return ECode_Group_Not_Exist;
   switch (_queryType)
   {
-  case GScanPlan::QueryType::SimpleScan:
+  case QueryType::SimpleScan:
   {
     // check if index exist
     for (int index = 0; index < (long)LogicalPredicate::Max; ++index) {
@@ -198,7 +198,7 @@ int GScanPlan::scan(const std::function<ExecuteStatus(KeyType, const std::string
         //printf("scan: %s\n", str.c_str());
         switch (_queryType)
         {
-        case GScanPlan::QueryType::SimpleScan:
+        case QueryType::SimpleScan:
         {
           gkey_t vKey = getKey(type, data.key);
           nlohmann::json jsn = nlohmann::json::parse(str);
@@ -220,11 +220,11 @@ int GScanPlan::scan(const std::function<ExecuteStatus(KeyType, const std::string
           
         }
         break;
-        case GScanPlan::QueryType::NNSearch:
+        case QueryType::NNSearch:
           break;
-        case GScanPlan::QueryType::Match:
+        case QueryType::Match:
           break;
-        case GScanPlan::QueryType::Inference:
+        case QueryType::Inference:
           break;
         default:
           break;

@@ -13,6 +13,7 @@
 class GQueryStmt;
 struct GListNode;
 class GScanPlan: public GPlan {
+protected:
   /**
    * Parse Stmt to Plan info list.
    * ScanPlan execute with plan info list.
@@ -22,13 +23,6 @@ class GScanPlan: public GPlan {
     std::string _group;
   };
   using ScanPlans = std::vector<PlanInfo>;
-
-  enum class QueryType {
-    SimpleScan,     /**< scan database with/without simple condition */
-    NNSearch,       /**< use KNN search */
-    Match,          /**< subgraph match */
-    Inference,      /**< bayes network inference */
-  };
 
   enum class ScanState {
     Stop,
@@ -52,7 +46,7 @@ public:
   void stop();
 
   //std::vector<std::string> groups() { return _queries; }
-private:
+protected:
   int scan(const std::function<ExecuteStatus(KeyType, const std::string& key, nlohmann::json& value, int status)>& cb);
   // scan indexes
   int scan();
@@ -106,7 +100,7 @@ private:
     VisitFlow apply(GLambdaExpression* stmt, std::list<NodeType>& path);
   };
 
-private:
+protected:
   /**
    * @brief A query type that mark difference query.
    *        SimpleScan: Only scan database. Index may be used.

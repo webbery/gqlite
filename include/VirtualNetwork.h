@@ -9,7 +9,6 @@
 
 class GNode;
 
-class GEntityNode;
 class GAttributeNode;
 class GSchedule;
 
@@ -129,7 +128,7 @@ private:
 
   std::vector<std::string> _groups;
 
-  float _degreeDestribution{0.8};
+  float _degreeDestribution{0.8f};
 #if defined(_PRINT_FORMAT_)
 public:
 #endif

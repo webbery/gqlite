@@ -10,7 +10,7 @@
   <img src="https://codecov.io/gh/webbery/gqlite/branch/master/graph/badge.svg?token=3S0K5GCIYC"/>
 </a>
 
-This is the expriments for testing abilities of graph database in ending device.  
+GQLite is a graph database for testing abilities in ending device. The target is to make a small, fast, light-weight graph database.    
 
 <!-- vscode-markdown-toc -->
 * 1. [Designed](#Designed)
@@ -20,7 +20,7 @@ This is the expriments for testing abilities of graph database in ending device.
 	* 2.3. [windows](#windows)
 	* 2.4. [android](#android)
 * 3. [How to use in C/C++](#HowtouseinCC)
-* 4. [Graph Query Language](#GraphQueryLanguage)
+* 4. [Graph Query Language(Unstable)](#GraphQueryLanguage)
 	* 4.1. [Create Graph](#CreateGraph)
 	* 4.2. [Data Types](#DataTypes)
 	* 4.3. [Add Vertex & Edge](#AddVertexEdge)
@@ -286,4 +286,5 @@ use graph 'xxx'
 6. Thorup Mikkel. Undirected single-source shortest paths with positive integer weights in linear time.  
 7. Xuanhua Shi, Xuan Luo, Junling Liang etc. Frog: Asynchronous Graph Processing on GPU with Hybrid Coloring Model.  
 8. Xuanhua Shi, Zhigao Zheng, Yongluan Zhou etc. Graph Processing on GPUs: A Survey.  
-9. Merrill Duane, Garland Michael, Grimshaw Andrew. High-Performance and Scalable GPU Graph Traversal.
+9. Merrill Duane, Garland Michael, Grimshaw Andrew. High-Performance and Scalable GPU Graph Traversal.  
+10. Sakr Sherif, Pardede Eric. Graph Data Management: Techniques and Applications.  

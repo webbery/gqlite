@@ -1,5 +1,6 @@
 #pragma once
 #include <stdint.h>
+#include <atomic>
 
 enum class EdgeKind: uint8_t {
   Entity,
@@ -26,4 +27,5 @@ struct alignas(8) EdgeStatus {
 class GEdge {
 public:
   virtual ~GEdge() {}
+  EdgeStatus _status;
 };

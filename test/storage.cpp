@@ -1,5 +1,9 @@
+#include "Graph/EntityEdge.h"
+#include "Graph/EntityNode.h"
 #include "StorageEngine.h"
+#include "base/type.h"
 #include "gqlite.h"
+#include "gutil.h"
 #include <cassert>
 #include <catch.hpp>
 #include <fstream>
@@ -150,4 +154,56 @@ TEST_CASE("read_mode") {
   k = ((uint64_t)610 << 16 | (uint64_t)168248);
   engine.read("tags", k, a_tag);
   CHECK(a_tag == "Heroic Bloodshed");
+}
+
+TEST_CASE("native_storage_api") {
+  GStorageEngine engine;
+  StoreOption opt;
+  opt.compress = 1;
+  opt.mode = ReadWriteOption::read_write;
+  CHECK(engine.open("native_api.db", opt) == ECode_Success);
+  engine.addMap("e:follow", KeyType::Uninitialize);
+  engine.addMap("follow", KeyType::Uninitialize);
+  engine.addMap("user", KeyType::Uninitialize);
+  engine.addMap("v:user", KeyType::Uninitialize);
+  group_t egid = engine.getGroupID("e:follow");
+  group_t gid = engine.getGroupID("v:user");
+  CHECK(gid > 0);
+  node_t nid = 1;
+#define NODE_CNOUNT 4
+  GEntityNode* nodes[NODE_CNOUNT];
+  for (int i = 0; i < NODE_CNOUNT; ++i) {
+    nodes[i] = new GEntityNode(nid++, gid);
+    CHECK(upsetVertex(&engine, nodes[i]) == ECode_Success);
+  }
+
+  GEntityEdge* edges[4];
+  
+  edges[0] = new GEntityEdge(egid, nodes[0], nodes[1]);
+  upsetEdge(&engine, edges[0]);
+  edges[1] = new GEntityEdge(egid, nodes[0], nodes[2]);
+  upsetEdge(&engine, edges[1]);
+  edges[2] = new GEntityEdge(egid, nodes[1], nodes[2]);
+  upsetEdge(&engine, edges[2]);
+
+  auto outbounds = getVertexOutbound(&engine, egid, gid, 2);
+  CHECK(outbounds.size() == 1);
+  auto neightbors = getVertexNeighbors(&engine, egid, gid, 2);
+  CHECK(neightbors.size() == 2);
+  auto inbounds = getVertexInbound(&engine, egid, gid, 2);
+  CHECK(inbounds.size() == 1);
+
+  edges[3] = new GEntityEdge(egid, nodes[1], nodes[3]);
+  upsetEdge(&engine, edges[3]);
+  inbounds = getVertexInbound(&engine, egid, gid, 2);
+  CHECK(inbounds.size() == 2);
+
+  for (int i = 0; i < 3; ++i) {
+    delete edges[i];
+  }
+  for (int i = 0; i < NODE_CNOUNT; ++i) {
+    delete nodes[i];
+  }
+
+  
 }

@@ -26,6 +26,7 @@ namespace gql {
   std::string replace_all(const std::string& input, const std::string& origin, const std::string& newer);
   std::vector<std::string> split(const char* str, const char* delim);
   std::vector<std::string> split(const std::string& str, char delim);
+  std::string merge(const std::vector<std::string>& data, char delim);
 
   std::string format(const char* fmt, ...);
 
@@ -60,6 +61,8 @@ namespace gql {
   bool operator == (const edge_id& left, const edge_id& right);
   bool operator < (const edge_id& left, const edge_id& right);
   void get_from_to(const edge_id& eid, Variant<std::string, uint64_t>& from, Variant<std::string, uint64_t>& to);
+  void get_from_to(const std::string& eid, Variant<std::string, uint64_t>& from, Variant<std::string, uint64_t>& to);
+  bool is_direction(const std::string& eid);
 
   std::wstring string2wstring(const std::string& str);
 

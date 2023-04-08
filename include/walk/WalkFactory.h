@@ -4,8 +4,6 @@
 #include "base/parallel/GraphModel.h"
 
 class GNode;
-class GEntityNode;
-class GAttributeNode;
 using virtual_graph_t = GMap<uint64_t, uint64_t>;
 using node_const_iterator = GMap<uint64_t, uint64_t>::pam_node::const_iterator;
 // using virtual_graph_t = GMap<GNode*, std::tuple<GEntityNode*, GAttributeNode*>>;
