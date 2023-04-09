@@ -198,7 +198,7 @@ TEST_CASE("native_storage_api") {
   inbounds = getVertexInbound(&engine, egid, gid, 2);
   CHECK(inbounds.size() == 2);
 
-  for (int i = 0; i < 3; ++i) {
+  for (int i = 0; i < 4; ++i) {
     delete edges[i];
   }
   for (int i = 0; i < NODE_CNOUNT; ++i) {
