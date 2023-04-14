@@ -7,16 +7,12 @@
 #include "base/type.h"
 #include "json.hpp"
 
-inline nlohmann::json string2internal_type(const std::string& s) {
-  nlohmann::json ret = s;
-  return ret;
-}
-
-inline AttributeKind getJsonKind(const nlohmann::json& item) {
-  return AttributeKind::String;
-}
-
 namespace gql {
   using vector_double = std::vector<double>;
   using vector_uint8 = std::vector<uint8_t>;
 }
+
+using gkey_t = Variant<std::string, uint64_t>;
+using attribute_t = Variant<std::string, double, gql::GDatetime, gql::vector_double, gql::GBinary, int, long, uint64_t,
+  gql::vector_uint8
+>;

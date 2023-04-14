@@ -82,7 +82,8 @@ private:
     std::string _key;           /** current read key */
     std::vector<attribute_t> _values; /** current read value in _key */
     //GUpsetPlan& _plan;
-    JSONVisitor(GUpsetPlan& plan) {}
+    bool _vertex;
+    JSONVisitor(bool vertex):_vertex(vertex) {}
 
     VisitFlow apply(GProperty* stmt, std::list<NodeType>& path) {
       add();
@@ -158,7 +159,7 @@ private:
         }
       }
       else {
-        if (_values.size() == 1) {
+        if (_values.size() == 1 && _vertex) {
           _values[0].visit(ATTRIBUTE_SET(_jsonify));
         }
       }

@@ -19,6 +19,8 @@
 #include "base/math/Distance.h"
 #include "base/gvm/GVM.h"
 #include "base/gvm/Compiler.h"
+#include "Graph/EntityEdge.h"
+#include "Graph/EntityNode.h"
 
 #if __cplusplus > 201700
 #include <filesystem>
@@ -69,15 +71,15 @@ GScanPlan::~GScanPlan()
   _observers.clear();
   for (int index = 0; index < (long)LogicalPredicate::Max; ++index) {
     auto& graphPattern = _where._patterns[index];
-    for (EntityNode* node : graphPattern._nodes) {
+    for (GEntityNode* node : graphPattern._nodes) {
       delete node;
     }
     graphPattern._nodes.clear();
 
-    std::set< EntityNode*> restNodes;
-    for (EntityEdge* edge : graphPattern._edges) {
-      if (edge->_start) restNodes.insert(edge->_start);
-      if (edge->_end) restNodes.insert(edge->_end);
+    std::set< GEntityNode*> restNodes;
+    for (GEntityEdge* edge : graphPattern._edges) {
+      if (edge->from()) restNodes.insert(edge->from());
+      if (edge->to()) restNodes.insert(edge->to());
       delete edge;
     }
     graphPattern._edges.clear();
@@ -110,10 +112,10 @@ int GScanPlan::prepare()
       ScanPlans plans;
       auto& pattern = _where._patterns[index];
       if (pattern._nodes.size()) {
-        auto begin = pattern._nodes[0]->_attrs.begin();
-        auto end = pattern._nodes[0]->_attrs.end();
+        auto begin = pattern._nodes[0]->attributes().begin();
+        auto end = pattern._nodes[0]->attributes().end();
         for (auto ptr = begin; ptr != end; ++ptr) {
-          plans.push_back({ 0, _group + ":" + *ptr});
+          plans.push_back({ 0, _group + ":" + ptr->first });
         }
       }
       plans.insert(plans.end(), _queries[index].begin(), _queries[index].end());
@@ -264,9 +266,9 @@ int GScanPlan::scan()
         int idx = 0;
         auto& andPattern = _where._patterns[index];
         if (andPattern._node_predicates.size()) {
-          auto& andAttr = andPattern._nodes[0]->_attrs;
+          auto& andAttr = andPattern._nodes[0]->attributes();
           for (auto ptr = andAttr.begin(), end = andAttr.end(); ptr != end; ++ptr, ++idx) {
-            if (*ptr == groupIndex) break;
+            if (ptr->first == groupIndex) break;
           }
           auto& predictsAnd = andPattern._node_predicates;
           for (auto itr = predictsAnd.begin(), end = predictsAnd.end(); itr != end; ++itr) {
@@ -362,8 +364,10 @@ void GScanPlan::parseConditions(GListNode* conditions)
     }
     else { // query type is simple scan
       if (visitor._attrs[i].size()) {
-        EntityNode* node = new EntityNode;
-        node->_attrs = visitor._attrs[i];
+        GEntityNode* node = new GEntityNode(0);
+        for (auto& attr : visitor._attrs[i]) {
+          node->setProperty(attr, {});
+        }
         _where._patterns[visitor._index[i]]._nodes.push_back(node);
       }
     }
@@ -426,10 +430,10 @@ bool GScanPlan::predictVertex(gkey_t key, nlohmann::json& row)
       Value res = _gvm->result();
     }
   }
-  std::vector<std::string>::iterator aitr;
+  std::map<std::string, attribute_t>::const_iterator aitr;
   for (int index = 0; index < (long)LogicalPredicate::Max; ++index) {
     if (_where._patterns[index]._nodes.size()) {
-      aitr = _where._patterns[index]._nodes[0]->_attrs.begin();
+      aitr = _where._patterns[index]._nodes[0]->attributes().begin();
     }
     auto& opPreds = _where._patterns[index]._node_predicates;
     for (auto predItr = opPreds.begin(), end = opPreds.end(); predItr != end; ++predItr) {
@@ -438,7 +442,7 @@ bool GScanPlan::predictVertex(gkey_t key, nlohmann::json& row)
           return op(key);
         },
         [&row, &aitr, this](std::function<bool(const attribute_t&)> op) {
-          auto value = row[*aitr];
+          auto value = row[aitr->first];
           bool ret = predict(op, value);
           ++aitr;
           return ret;
@@ -539,17 +543,19 @@ bool GScanPlan::predictEdge(gkey_t key, nlohmann::json& row)
     auto& edges = _where._patterns[index]._edges;
     for (auto itr = edges.begin(); itr != edges.end(); ++itr) {
       auto& edge = *itr;
-      if (eid._direction == edge->_direction) {
-        auto& start = edge->_start->_label;
-        auto& end = edge->_end->_label;
-        bool from_result = eid._from_type ? match_node(start, from.Get<std::string>()) : match_node_int(start, from.Get<uint64_t>());
-        bool to_result = eid._to_type ? match_node(end, to.Get<std::string>()) : match_node_int(end, to.Get<uint64_t>());
+      if (eid._direction == edge->direction()) {
+        auto& fromAttrs = edge->from()->attribute("label");
+        auto& toAttrs = edge->to()->attribute("label");
+        auto& start = fromAttrs.empty()? std::string() : fromAttrs.front();
+        auto& end = toAttrs.empty() ? std::string() : toAttrs.front();
+        bool from_result = eid._from_type ? match_node(start.Get<std::string>(), from.Get<std::string>()) : match_node_int(start.Get<std::string>(), from.Get<uint64_t>());
+        bool to_result = eid._to_type ? match_node(end.Get<std::string>(), to.Get<std::string>()) : match_node_int(end.Get<std::string>(), to.Get<uint64_t>());
 
         if (eid._direction == false) {
           // swap start and end
           if (!from_result || !to_result) {
-            from_result = eid._from_type ? match_node(end, from.Get<std::string>()) : match_node_int(end, from.Get<uint64_t>());
-            to_result = eid._to_type ? match_node(start, to.Get<std::string>()) : match_node_int(start, to.Get<uint64_t>());
+            from_result = eid._from_type ? match_node(end.Get<std::string>(), from.Get<std::string>()) : match_node_int(end.Get<std::string>(), from.Get<uint64_t>());
+            to_result = eid._to_type ? match_node(start.Get<std::string>(), to.Get<std::string>()) : match_node_int(start.Get<std::string>(), to.Get<uint64_t>());
           }
         }
         release_edge_id(eid);

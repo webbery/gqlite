@@ -5,34 +5,12 @@
 #include "base/Variant.h"
 #include "Type/GQLType.h"
 
-struct EntityNode;
+class GEntityNode;
+class GEntityEdge;
 struct AttributeNode;
 
-struct EntityEdge {
-  EntityNode* _start;
-  EntityNode* _end;
-  char* _label;
-  /**
-   * Super Edge when _extend is true
-   */
-  bool _extend;
-  bool _direction;
-};
-
-using gkey_t = Variant<std::string, uint64_t>;
-//using lambda_expr = 
-using attribute_t = Variant<std::string, double, gql::GDatetime, gql::vector_double, gql::GBinary, int, long, uint64_t,
-  gql::vector_uint8
->;
 using predicate_t = Variant<std::function<bool(const gkey_t&)>, std::function<bool(const attribute_t&)>>;
 using attr_node_t = std::string;
-
-struct EntityNode {
-  std::string _label;
-  EntityEdge* _edges;
-  size_t _esize;        /**< size of edges */
-  std::vector<attr_node_t> _attrs;
-};
 
 struct AttributeNode {
   std::string _name;
@@ -55,8 +33,8 @@ enum class LogicalPredicate {
 struct GraphPattern {
   using node_t = uint32_t;
 
-  std::vector<EntityNode*> _nodes;
-  std::vector<EntityEdge*> _edges;
+  std::vector<GEntityNode*> _nodes;
+  std::vector<GEntityEdge*> _edges;
 
   /**
    * Predicates index is response to _nodes's attributes index.

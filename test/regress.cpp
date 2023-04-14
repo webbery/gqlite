@@ -128,6 +128,7 @@ int main(int argc, char** argv) {
     if (p.is_relative()) {
       g_dbfile = g_inputdir + SPLASH_WORD + g_dbfile;
     }
+    remove(g_dbfile.c_str());
     gqlite_open(&gHandle, g_dbfile.c_str());
   } else {
     gqlite_open(&gHandle, nullptr);

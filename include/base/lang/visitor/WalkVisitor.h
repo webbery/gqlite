@@ -22,9 +22,9 @@ public:
 
   WalkType walkType() const { return _walkType; }
 private:
-  void makeEdgeCondition(GWalkDeclaration::Order order, EntityNode* start, EntityNode* end, bool direction);
+  void makeEdgeCondition(GWalkDeclaration::Order order, GEntityNode* start, GEntityNode* end, bool direction);
 
-  EntityNode* makeNodeCondition(const std::string& str);
+  GEntityNode* makeNodeCondition(const std::string& str);
 
 private:
   /**

@@ -72,6 +72,16 @@ struct StoreOption {
   ReadWriteOption mode;   /**< read write mode */
 };
 
+namespace gql {
+  const std::string& getKey(nlohmann::json::const_iterator& itr);
+  const std::string& getKey(std::multimap<std::string, attribute_t>::const_iterator& itr);
+
+  const nlohmann::json::const_iterator::value_type& getValue(nlohmann::json::const_iterator& itr);
+  const attribute_t& getValue(std::multimap<std::string, attribute_t>::const_iterator& itr);
+
+  std::string stringify(const nlohmann::json& data);
+  std::string stringify(const std::multimap<std::string, attribute_t>& data);
+}
 
 class GStorageEngine {
 public:
@@ -134,11 +144,41 @@ public:
     int read(const std::string& mapname, uint64_t from, uint64_t to, std::list<std::string>& value);
     int del(const std::string& mapname, uint64_t key);
 
-    int write(const std::string& mapname, const std::string& key, const nlohmann::json& value);
-    int write(const std::string& mapname, uint64_t key, const nlohmann::json& value);
-
     int del(const std::string& mapname, uint64_t key, bool from);
     int del(const std::string& mapname, const std::string& key, bool from);
+
+    template<typename Container>
+    int write(const std::string& prop, const std::string& key, const Container& values) {
+      TryInitStringType(prop);
+
+      auto& attributes = _schema[SCHEMA_CLASS][prop][SCHEMA_CLASS_VALUE];
+      // TODO: convert json to gqlite store format: attribute index(max value is 256), [if binary, here put size]data, index, data, ...
+      nlohmann::json store;
+      for (auto itr = values.begin(), end = values.end(); itr != end; ++itr)
+      {
+        const std::string& attr = gql::getKey(itr);
+        auto& val = gql::getValue(itr);
+        tryInitAttributeType(attributes, attr, val);
+      }
+      std::string data = gql::stringify(values);
+      return write(prop, key, (void*)data.data(), data.size());
+    }
+
+    template<typename Container>
+    int write(const std::string& mapname, uint64_t key, const Container& values) {
+      TryInitIntType(mapname);
+      auto& attributes = _schema[SCHEMA_CLASS][mapname][SCHEMA_CLASS_VALUE];
+      for (auto itr = values.begin(), end = values.end(); itr != end; ++itr) {
+        const std::string& attr = gql::getKey(itr);
+        auto& value = gql::getValue(itr);
+        tryInitAttributeType(attributes, attr, value);
+      }
+      if (values.empty())
+        return 0;
+
+      std::string data = gql::stringify(values);
+      return write(mapname, key, (void*)data.data(), data.size());
+    }
 
     /**
      * @brief parse a string to json which get from cursor
@@ -211,7 +251,9 @@ private:
     /**
      * @brief check every attribute is init or not. If not, set index and its attribute's name.
      */
-    void tryInitAttributeType(nlohmann::json& attributes, const std::string& attr, const nlohmann::json& value);
+  void tryInitAttributeType(nlohmann::json& attributes, const std::string& attr, const nlohmann::json& value);
+  void tryInitAttributeType(nlohmann::json& attributes, const std::string& attr, const attribute_t& value);
+
     void appendValue(uint8_t attrIndex, AttributeKind kind, const nlohmann::json& value, std::string& data);
     nlohmann::json getProp(const std::string& prop);
     mdbx::map_handle getOrCreateHandle(const std::string& prop, mdbx::key_mode mode);
@@ -224,6 +266,9 @@ private:
 
     void initDict(int compressLvl);
     void releaseDict();
+
+    void TryInitStringType(const std::string& mapname);
+    void TryInitIntType(const std::string& mapname);
 
 private:
     mdbx::env_managed _env;

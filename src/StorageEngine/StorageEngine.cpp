@@ -121,6 +121,56 @@ namespace {
   }
 }
 
+namespace gql {
+  const std::string& getKey(nlohmann::json::const_iterator& obj) {
+    return obj.key();
+  }
+
+  const std::string& getKey(std::multimap<std::string, attribute_t>::const_iterator& prop) {
+    return prop->first;
+  }
+
+  const nlohmann::json::const_iterator::value_type& getValue(nlohmann::json::const_iterator& itr) {
+    return itr.value();
+  }
+
+  const attribute_t& getValue(std::multimap<std::string, attribute_t>::const_iterator& itr) {
+    return itr->second;
+  }
+
+  std::string stringify(const nlohmann::json& data) {
+    return data.dump();
+  }
+
+  std::string stringify(const std::multimap<std::string, attribute_t>& data) {
+    nlohmann::json temp;
+    for (auto itr = data.begin(); itr != data.end(); ++itr) {
+      if (itr->first.empty())
+        continue;
+
+      itr->second.visit([&temp, itr](int value) {
+        temp[itr->first] = value;
+        },
+        [&temp, itr](long value) {
+          temp[itr->first] = value;
+        },
+        [&temp, itr](std::string value) {
+          temp[itr->first] = value;
+        },
+        [&temp, itr](gql::vector_uint8 value) {
+          temp[itr->first] = value;
+        },
+        [&temp, itr](uint64_t value) {
+          temp[itr->first] = value;
+        },
+        [&temp, itr](double value) {
+          temp[itr->first] = value;
+        });
+    }
+    return temp.dump();
+  }
+}
+
 GStorageEngine::GStorageEngine() noexcept
 {
 }
@@ -341,6 +391,24 @@ void GStorageEngine::tryInitKeyType(const std::string& prop, KeyType type)
   _schema[SCHEMA_CLASS][prop][SCHEMA_CLASS_KEY] = type;
 }
 
+void GStorageEngine::TryInitStringType(const std::string& prop) {
+  if (isMapExist(prop)) {
+    tryInitKeyType(prop, KeyType::Byte);
+  }
+  else if (isIndexExist(prop)) {
+    updateIndexType(prop, IndexType::Word);
+  }
+}
+
+void GStorageEngine::TryInitIntType(const std::string& prop) {
+  if (isMapExist(prop)) {
+    tryInitKeyType(prop, KeyType::Integer);
+  }
+  else if (isIndexExist(prop)) {
+    updateIndexType(prop, IndexType::Number);
+  }
+}
+
 void GStorageEngine::tryInitAttributeType(nlohmann::json& attributes, const std::string& attr, const nlohmann::json& value)
 {
   if (attributes.count(attr) == 0) {
@@ -377,6 +445,34 @@ void GStorageEngine::tryInitAttributeType(nlohmann::json& attributes, const std:
     default:
       break;
     }
+  }
+}
+
+void GStorageEngine::tryInitAttributeType(nlohmann::json& attributes, const std::string& attr, const attribute_t& value) {
+  if (attributes.count(attr) == 0) {
+    if (attributes.size() > 255) {
+      // throw error?
+      throw std::exception();
+    }
+    uint8_t index = attributes.size();
+    value.visit([index, &attributes, &attr](std::string) {
+      attributes[attr] = std::make_pair(AttributeKind::String, index);
+      },
+      [index, &attributes, &attr](double) {
+        attributes[attr] = std::make_pair(AttributeKind::Number, index);
+      },
+      [index, &attributes, &attr](int) {
+        attributes[attr] = std::make_pair(AttributeKind::Integer, index);
+      },
+      [index, &attributes, &attr](long) {
+        attributes[attr] = std::make_pair(AttributeKind::Integer, index);
+      },
+      [index, &attributes, &attr](uint64_t) {
+        attributes[attr] = std::make_pair(AttributeKind::Integer, index);
+      },
+      [index, &attributes, &attr](gql::vector_uint8) {
+        attributes[attr] = std::make_pair(AttributeKind::Binary, index);
+      });
   }
 }
 
@@ -425,12 +521,7 @@ mdbx::map_handle GStorageEngine::getOrCreateHandle(const std::string& prop, mdbx
 }
 
 int GStorageEngine::write(const std::string& prop, const std::string& key, void* value, size_t len) {
-  if (isMapExist(prop)) {
-    tryInitKeyType(prop, KeyType::Byte);
-  }
-  else if (isIndexExist(prop)) {
-    updateIndexType(prop, IndexType::Word);
-  }
+  TryInitStringType(prop);
   auto handle = getOrCreateHandle(prop, mdbx::key_mode::usual);
   thread_local auto id = std::this_thread::get_id();
 
@@ -443,52 +534,43 @@ int GStorageEngine::write(const std::string& prop, const std::string& key, void*
   return ECode_Fail;
 }
 
-int GStorageEngine::write(const std::string& mapname, const std::string& key, const nlohmann::json& value)
-{
-  if (isMapExist(mapname)) {
-    tryInitKeyType(mapname, KeyType::Byte);
-  }
-  else if (isIndexExist(mapname)) {
-    updateIndexType(mapname, IndexType::Word);
-  }
-  auto& attributes = _schema[SCHEMA_CLASS][mapname][SCHEMA_CLASS_VALUE];
-  // TODO: convert json to gqlite store format: attribute index(max value is 256), [if binary, here put size]data, index, data, ...
-  nlohmann::json store;
-  for (auto itr = value.begin(), end = value.end(); itr!=end;++itr)
-  {
-    const std::string& attr = itr.key();
-    auto& value = itr.value();
-    tryInitAttributeType(attributes, attr, value);
-    //std::pair<AttributeKind, uint8_t> info = attributes[attr];
-    //appendValue(info.second, info.first, value, data);
-  }
-  std::string data = value.dump();
-  return write(mapname, key, (void*)data.data(), data.size());
-}
-
-int GStorageEngine::write(const std::string& mapname, uint64_t key, const nlohmann::json& value)
-{
-  if (isMapExist(mapname)) {
-    tryInitKeyType(mapname, KeyType::Integer);
-  }
-  else if (isIndexExist(mapname)) {
-    updateIndexType(mapname, IndexType::Number);
-  }
-  auto& attributes = _schema[SCHEMA_CLASS][mapname][SCHEMA_CLASS_VALUE];
-  for (auto itr = value.begin(), end = value.end(); itr != end; ++itr) {
-    const std::string& attr = itr.key();
-    auto& value = itr.value();
-    std::string sv = value.dump();
-    tryInitAttributeType(attributes, attr, value);
-    //std::pair<AttributeKind, uint8_t> info = attributes[attr];
-    //appendValue(info.second, info.first, value, data);
-  }
-  if (value.empty())
-    return 0;
-
-  std::string data = value.dump();
-  return write(mapname, key, (void*)data.data(), data.size());
-}
+//int GStorageEngine::write(const std::string& mapname, const std::string& key, const nlohmann::json& value)
+//{
+//  TryInitStringType(mapname);
+//
+//  auto& attributes = _schema[SCHEMA_CLASS][mapname][SCHEMA_CLASS_VALUE];
+//  // TODO: convert json to gqlite store format: attribute index(max value is 256), [if binary, here put size]data, index, data, ...
+//  nlohmann::json store;
+//  for (auto itr = value.begin(), end = value.end(); itr!=end;++itr)
+//  {
+//    const std::string& attr = itr.key();
+//    auto& val = itr.value();
+//    tryInitAttributeType(attributes, attr, val);
+//    //std::pair<AttributeKind, uint8_t> info = attributes[attr];
+//    //appendValue(info.second, info.first, value, data);
+//  }
+//  std::string data = value.dump();
+//  return write(mapname, key, (void*)data.data(), data.size());
+//}
+//
+//int GStorageEngine::write(const std::string& mapname, uint64_t key, const nlohmann::json& value)
+//{
+//  TryInitIntType(mapname);
+//  auto& attributes = _schema[SCHEMA_CLASS][mapname][SCHEMA_CLASS_VALUE];
+//  for (auto itr = value.begin(), end = value.end(); itr != end; ++itr) {
+//    const std::string& attr = itr.key();
+//    auto& value = itr.value();
+//    std::string sv = value.dump();
+//    tryInitAttributeType(attributes, attr, value);
+//    //std::pair<AttributeKind, uint8_t> info = attributes[attr];
+//    //appendValue(info.second, info.first, value, data);
+//  }
+//  if (value.empty())
+//    return 0;
+//
+//  std::string data = value.dump();
+//  return write(mapname, key, (void*)data.data(), data.size());
+//}
 
 int GStorageEngine::del(const std::string& mapname, uint64_t key, bool from)
 {
@@ -608,12 +690,8 @@ int GStorageEngine::del(const std::string& mapname, uint64_t key)
 }
 
 int GStorageEngine::write(const std::string& prop, uint64_t key, void* value, size_t len) {
-  if (isMapExist(prop)) {
-    tryInitKeyType(prop, KeyType::Integer);
-  }
-  else if (isIndexExist(prop)) {
-    updateIndexType(prop, IndexType::Number);
-  }
+  TryInitIntType(prop);
+
   auto handle = getOrCreateHandle(prop, mdbx::key_mode::ordinal);
   // compress
   void* buffer = value;
@@ -784,15 +862,15 @@ int upsetEdge(GStorageEngine* storage, GEntityEdge* entityEdge) {
     dst_next_rid = dstEdgeID == eid? dstEdgeID : getNodeNext(storage, edgeGroup, dstNode->id(), dstEdgeID);
     dst_prev_rid = dstEdgeID == eid? dstEdgeID : getNodePrev(storage, edgeGroup, dstNode->id(), dstEdgeID);
 
-    //printf("cur %ld -> %ld\n", src.Get<node_t>(), dst.Get<node_t>());
-    //gql::get_from_to(src_next_rid, src, dst);
-    //printf("src_next %ld -> %ld\n", src.Get<node_t>(), dst.Get<node_t>());
-    //gql::get_from_to(src_prev_rid, src, dst);
-    //printf("src_prev % ld -> % ld\n", src.Get<node_t>(), dst.Get<node_t>());
-    //gql::get_from_to(dst_next_rid, src, dst);
-    //printf("dst_next % ld -> % ld\n", src.Get<node_t>(), dst.Get<node_t>());
-    //gql::get_from_to(dst_prev_rid, src, dst);
-    //printf("dst_prev % ld -> % ld\n", src.Get<node_t>(), dst.Get<node_t>());
+    printf("cur %ld -> %ld\n", src.Get<node_t>(), dst.Get<node_t>());
+    gql::get_from_to(src_next_rid, src, dst);
+    printf("src_next %ld -> %ld\n", src.Get<node_t>(), dst.Get<node_t>());
+    gql::get_from_to(src_prev_rid, src, dst);
+    printf("src_prev % ld -> % ld\n", src.Get<node_t>(), dst.Get<node_t>());
+    gql::get_from_to(dst_next_rid, src, dst);
+    printf("dst_next % ld -> % ld\n", src.Get<node_t>(), dst.Get<node_t>());
+    gql::get_from_to(dst_prev_rid, src, dst);
+    printf("dst_prev % ld -> % ld\n", src.Get<node_t>(), dst.Get<node_t>());
     std::string data = src_prev_rid + "," + src_next_rid + "," + dst_prev_rid + "," + dst_next_rid;
     storage->write(edgeGroup, eid, (void*)data.data(), data.size());
     entityEdge->setChangedStatus(EdgeChangedStatus::NoneChanged);
@@ -892,10 +970,10 @@ std::list<edge2_t> getVertexInbound(GStorageEngine* storage, group_t edgeGroup, 
     [&inbound](const vector<edge2_t>& edges, const edge2_t& edgeID, bool isSrc) {
       if (isSrc) {
           inbound.push_back(edgeID);
-          return 1;
+          return SRC_NEXT_INDEX;
       }
       else {
-          return 2;
+          return DST_PREV_INDEX;
       }
     });
   return inbound;
@@ -910,11 +988,11 @@ std::list<edge2_t> getVertexOutbound(GStorageEngine* storage, group_t edgeGroup,
   foreach(storage, nodeGroupName, edgeGroupName, nid,
     [&outbound](const vector<edge2_t>& edges, const edge2_t& edgeID, bool isSrc) {
         if (isSrc) {
-            return 0;
+            return SRC_PREV_INDEX;
         }
         else {
             outbound.push_back(edgeID);
-            return 3;
+            return DST_NEXT_INDEX;
         }
     });
 return outbound;

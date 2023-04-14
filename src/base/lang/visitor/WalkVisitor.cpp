@@ -4,6 +4,7 @@
 #include "base/lang/AST.h"
 #include "StorageEngine.h"
 #include "VirtualNetwork.h"
+#include "Graph/EntityEdge.h"
 #include "Loader.h"
 #include "walk/BSFWalk.h"
 
@@ -31,25 +32,27 @@ namespace gql {
 GWalkVisitor::GWalkVisitor(GraphPattern* pattern)
   :_graph(pattern), _walkType(WalkType::EdgeQuery) {}
 
-void GWalkVisitor::makeEdgeCondition(GWalkDeclaration::Order order, EntityNode* start, EntityNode* end, bool direction) {
-  EntityEdge* edge = new EntityEdge;
-  if (order == GWalkDeclaration::VertexEdge) {
-      edge->_start = start;
-      edge->_end = end;
-  }
-  edge->_direction = direction;
+void GWalkVisitor::makeEdgeCondition(GWalkDeclaration::Order order, GEntityNode* start, GEntityNode* end, bool direction) {
+  GEntityEdge* edge = new GEntityEdge(start, end);
+  //if (order == GWalkDeclaration::VertexEdge) {
+  //    edge->_start = start;
+  //    edge->_end = end;
+  //}
+  //edge->_direction = direction;
   _graph->_edges.push_back(edge);
 }
   
-EntityNode* GWalkVisitor::makeNodeCondition(const std::string& str) {
-  EntityNode* node = new EntityNode;
-  if (str != "*") node->_label = str;
+GEntityNode* GWalkVisitor::makeNodeCondition(const std::string& str) {
+  GEntityNode* node = new GEntityNode(0);
+  if (str != "*") {
+    node->setProperty("label", const_cast<std::string&>(str));
+  }
   return node;
 }
 
 VisitFlow GWalkVisitor::apply(GWalkDeclaration* walk, std::list<NodeType>& _) {
   auto order = walk->order();
-  EntityNode* node = nullptr;
+  GEntityNode* node = nullptr;
   auto ptr = walk->root();
   while (ptr) {
     auto element = ptr->_element;
@@ -72,8 +75,8 @@ VisitFlow GWalkVisitor::apply(GWalkDeclaration* walk, std::list<NodeType>& _) {
         if (edges.size()) {
           auto& lastEdge = edges.back();
           if (order == GWalkDeclaration::VertexEdge) {
-            if (lastEdge->_end) { lastEdge->_start = node; }
-            else lastEdge->_end = node;
+            if (lastEdge->to()) { lastEdge->setFrom(node); }
+            else lastEdge->setTo(node);
           } else {
             printf("TODO: order for edge -> vertex.");
           }
@@ -88,8 +91,8 @@ VisitFlow GWalkVisitor::apply(GWalkDeclaration* walk, std::list<NodeType>& _) {
 VisitFlow GWalkVisitor::apply(GEdgeDeclaration* stmt, std::list<NodeType>& path) {
   _walkType = WalkType::GraphMatch;
   if (stmt->from() && stmt->to()) {
-    EntityNode* start = makeNodeCondition(GetString(stmt->from()));
-    EntityNode* end = makeNodeCondition(GetString(stmt->to()));
+    GEntityNode* start = makeNodeCondition(GetString(stmt->from()));
+    GEntityNode* end = makeNodeCondition(GetString(stmt->to()));
     makeEdgeCondition(GWalkDeclaration::VertexEdge, start, end, stmt->direction() != "--");
     return VisitFlow::SkipCurrent;
   }

@@ -17,9 +17,9 @@ enum class EdgeChangedStatus {
 
 class GEntityEdge : public GEdge {
 public:
-  GEntityEdge(group_t gid, GEntityNode* from, GEntityNode* to)
+  GEntityEdge(GEntityNode* from, GEntityNode* to, bool direction = false, group_t gid = 0)
     :_gid(gid), _from(from), _to(to) {
-      gql::edge_id eid = gql::make_edge_id(false, from->id(), to->id());
+      gql::edge_id eid = gql::make_edge_id(direction, from?from->id():0, to?to->id():0);
       _id = gql::to_string(eid);
 
       _status.updated = false;
@@ -40,6 +40,9 @@ public:
   GEntityNode* from() { return _from; }
   GEntityNode* to() { return _to; }
 
+  void setFrom(GEntityNode* from) { _from = from; }
+  void setTo(GEntityNode* to) { _to = to; }
+
   void setChangedStatus(EdgeChangedStatus status) {
     _changed = status;
   }
@@ -48,6 +51,9 @@ public:
     _properties = properties;
     _changed = EdgeChangedStatus::PropertyChanged;
   }
+
+  bool direction() const { return _status.direction; }
+  bool direction() { return _status.direction; }
 
 private:
   edge2_t _id;  // edge_t

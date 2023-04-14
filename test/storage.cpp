@@ -157,6 +157,7 @@ TEST_CASE("read_mode") {
 }
 
 TEST_CASE("native_storage_api") {
+  remove("native_api.db");
   GStorageEngine engine;
   StoreOption opt;
   opt.compress = 1;
@@ -179,11 +180,11 @@ TEST_CASE("native_storage_api") {
 
   GEntityEdge* edges[4];
   
-  edges[0] = new GEntityEdge(egid, nodes[0], nodes[1]);
+  edges[0] = new GEntityEdge(nodes[0], nodes[1], true, egid);
   upsetEdge(&engine, edges[0]);
-  edges[1] = new GEntityEdge(egid, nodes[0], nodes[2]);
+  edges[1] = new GEntityEdge(nodes[0], nodes[2], true, egid);
   upsetEdge(&engine, edges[1]);
-  edges[2] = new GEntityEdge(egid, nodes[1], nodes[2]);
+  edges[2] = new GEntityEdge(nodes[1], nodes[2], true, egid);
   upsetEdge(&engine, edges[2]);
 
   auto outbounds = getVertexOutbound(&engine, egid, gid, 2);
@@ -193,7 +194,7 @@ TEST_CASE("native_storage_api") {
   auto inbounds = getVertexInbound(&engine, egid, gid, 2);
   CHECK(inbounds.size() == 1);
 
-  edges[3] = new GEntityEdge(egid, nodes[1], nodes[3]);
+  edges[3] = new GEntityEdge(nodes[1], nodes[3], true, egid);
   upsetEdge(&engine, edges[3]);
   inbounds = getVertexInbound(&engine, egid, gid, 2);
   CHECK(inbounds.size() == 2);
