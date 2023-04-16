@@ -190,7 +190,7 @@ private:
     }
     VisitFlow apply(GEdgeDeclaration* stmt, std::list<NodeType>& path);
 
-    gkey_t getLiteral(GListNode* node);
+    gql::key_t getLiteral(GListNode* node);
   };
 
   friend struct UpsetVisitor;
@@ -271,7 +271,7 @@ private:
   std::string _class;
   
   nlohmann::json _props;
-  std::map<gkey_t, nlohmann::json> _vertexes;
+  std::map<gql::key_t, nlohmann::json> _vertexes;
   std::map<gql::edge_id, std::string> _edges;
   std::vector<std::string> _indexes;
   // 

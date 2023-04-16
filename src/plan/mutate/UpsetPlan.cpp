@@ -88,14 +88,17 @@ int GUpsetPlan::execute(GVM* gvm, const std::function<ExecuteStatus(KeyType, con
 bool GUpsetPlan::upsetVertex()
 {
   KeyType type = _store->getKeyType(_class);
+  auto gid = _store->getGroupID(_class);
   for (auto itr = _vertexes.begin(), end = _vertexes.end(); itr != end; ++itr) {
     const auto& key = itr->first;
+    auto node = new GEntityNode(key, gid);
     int ret = key.visit(
       [&](std::string k) {
         if (type == KeyType::Integer) {
           fmt::print(fmt::fg(fmt::color::red), "ERROR: upset fail!\nInput key type is string, but require integer\n");
           return ECode_Fail;
         }
+        //::upsetVertex(_store, node);
         if (_store->write(_class, k, itr->second) != ECode_Success)
           return ECode_Fail;
         
@@ -121,6 +124,7 @@ bool GUpsetPlan::upsetVertex()
         }
         return ECode_Fail;
       });
+    delete node;
     if (ret != ECode_Success) return ret;
   }
   return ECode_Success;
@@ -214,8 +218,8 @@ bool GUpsetPlan::upsetIndex(const std::string& index, double value, const std::s
 VisitFlow GUpsetPlan::UpsetVisitor::apply(GEdgeDeclaration* stmt, std::list<NodeType>& path)
 {
   _plan._vertex = false;
-  gkey_t from = getLiteral(stmt->from());
-  gkey_t to = getLiteral(stmt->to());
+  gql::key_t from = getLiteral(stmt->from());
+  gql::key_t to = getLiteral(stmt->to());
   JSONVisitor jv(_plan._vertex);
   accept(stmt->value(), &jv, path);
   jv.add();
@@ -258,10 +262,10 @@ VisitFlow GUpsetPlan::UpsetVisitor::apply(GProperty* stmt, std::list<NodeType>& 
   return VisitFlow::SkipCurrent;
 }
 
-gkey_t GUpsetPlan::UpsetVisitor::getLiteral(GListNode* node)
+gql::key_t GUpsetPlan::UpsetVisitor::getLiteral(GListNode* node)
 {
   GLiteral* literal = (GLiteral*)(node->_value);
-  gkey_t k;
+  gql::key_t k;
   switch (literal->kind()) {
   case AttributeKind::Integer:
   case AttributeKind::Number:

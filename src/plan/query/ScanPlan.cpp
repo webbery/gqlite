@@ -202,7 +202,7 @@ int GScanPlan::scan(const std::function<ExecuteStatus(KeyType, const std::string
         {
         case QueryType::SimpleScan:
         {
-          gkey_t vKey = getKey(type, data.key);
+          gql::key_t vKey = getKey(type, data.key);
           nlohmann::json jsn = nlohmann::json::parse(str);
           try {
             if (_scanAll || (!_scanAll && predict(type, vKey, jsn))) {
@@ -364,7 +364,7 @@ void GScanPlan::parseConditions(GListNode* conditions)
     }
     else { // query type is simple scan
       if (visitor._attrs[i].size()) {
-        GEntityNode* node = new GEntityNode(0);
+        GEntityNode* node = new GEntityNode((uint64_t)0);
         for (auto& attr : visitor._attrs[i]) {
           node->setProperty(attr, {});
         }
@@ -393,9 +393,9 @@ bool GScanPlan::stopExit()
   return false;
 }
 
-gkey_t GScanPlan::getKey(KeyType type, mdbx::slice& slice)
+gql::key_t GScanPlan::getKey(KeyType type, mdbx::slice& slice)
 {
-  gkey_t vKey;
+  gql::key_t vKey;
   switch (type) {
   case KeyType::Byte:
   {
@@ -422,7 +422,7 @@ gkey_t GScanPlan::getKey(KeyType type, mdbx::slice& slice)
   return vKey;
 }
 
-bool GScanPlan::predictVertex(gkey_t key, nlohmann::json& row)
+bool GScanPlan::predictVertex(gql::key_t key, nlohmann::json& row)
 {
   bool result = true;
   if (_compiler) {
@@ -438,7 +438,7 @@ bool GScanPlan::predictVertex(gkey_t key, nlohmann::json& row)
     auto& opPreds = _where._patterns[index]._node_predicates;
     for (auto predItr = opPreds.begin(), end = opPreds.end(); predItr != end; ++predItr) {
       result &= (*predItr).visit(
-        [&key](std::function<bool(const gkey_t&)> op) {
+        [&key](std::function<bool(const gql::key_t&)> op) {
           return op(key);
         },
         [&row, &aitr, this](std::function<bool(const attribute_t&)> op) {
@@ -493,7 +493,7 @@ bool GScanPlan::predict(const std::function<bool(const attribute_t&)>& op, const
   return ret;
 }
 
-bool GScanPlan::predict(KeyType type, gkey_t key, nlohmann::json& row)
+bool GScanPlan::predict(KeyType type, gql::key_t key, nlohmann::json& row)
 {
   switch (type)
   {
@@ -521,7 +521,7 @@ void GScanPlan::initQueryGroups(const std::string& group) {
   }
 }
 
-bool GScanPlan::predictEdge(gkey_t key, nlohmann::json& row)
+bool GScanPlan::predictEdge(gql::key_t key, nlohmann::json& row)
 {
   auto match_node = [](const std::string node1, const std::string& node2) -> bool {
     // input is `*`, all nodes are correct
@@ -536,7 +536,7 @@ bool GScanPlan::predictEdge(gkey_t key, nlohmann::json& row)
     return value == node2;
   };
   gql::edge_id eid = gql::to_edge_id(key.Get<std::string>());
-  gkey_t from, to;
+  gql::key_t from, to;
   get_from_to(eid, from, to);
   std::vector<std::string>::iterator aitr;
   for (int index = 0; index < (long)LogicalPredicate::Max; ++index) {
@@ -544,8 +544,8 @@ bool GScanPlan::predictEdge(gkey_t key, nlohmann::json& row)
     for (auto itr = edges.begin(); itr != edges.end(); ++itr) {
       auto& edge = *itr;
       if (eid._direction == edge->direction()) {
-        auto& fromAttrs = edge->from()->attribute("label");
-        auto& toAttrs = edge->to()->attribute("label");
+        auto fromAttrs = edge->from()->attribute("label");
+        auto toAttrs = edge->to()->attribute("label");
         auto& start = fromAttrs.empty()? std::string() : fromAttrs.front();
         auto& end = toAttrs.empty() ? std::string() : toAttrs.front();
         bool from_result = eid._from_type ? match_node(start.Get<std::string>(), from.Get<std::string>()) : match_node_int(start.Get<std::string>(), from.Get<uint64_t>());
@@ -583,7 +583,7 @@ VisitFlow GScanPlan::PatternVisitor::apply(GVertexDeclaration* stmt, std::list<N
   if (!stmt->vertex()) {
     // equal id
     std::string key = GetString(stmt->key());
-    predicate_t pred = static_cast<std::function<bool(const gkey_t&)>>([key](const Variant<std::string, uint64_t>& input)->bool {
+    predicate_t pred = static_cast<std::function<bool(const gql::key_t&)>>([key](const Variant<std::string, uint64_t>& input)->bool {
       bool ret = input.visit([key](uint64_t i) -> bool {
         return key == std::to_string(i);
         },
@@ -671,7 +671,7 @@ VisitFlow GScanPlan::PatternVisitor::apply(GProperty* stmt, std::list<NodeType>&
   }
   else if (key == "id") {
     std::string value = GetString(stmt->value());
-    predicate_t pred = static_cast<std::function<bool(const gkey_t&)>>([value](const Variant<std::string, uint64_t>& input)->bool {
+    predicate_t pred = static_cast<std::function<bool(const gql::key_t&)>>([value](const Variant<std::string, uint64_t>& input)->bool {
       bool ret = input.visit([value](uint64_t i) -> bool {
         return value == std::to_string(i);
         },

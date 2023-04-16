@@ -12,5 +12,7 @@ TEST_CASE("bsf for cpu") {
   opt.mode = ReadWriteOption::read_write;
   CHECK(engine.open("./basketballplayer", opt) == ECode_Success);
 
+  // start from player114
 
+  // start from player150
 }

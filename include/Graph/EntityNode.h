@@ -4,7 +4,7 @@
 #include "json.hpp"
 #include <list>
 #include <stdexcept>
-#include "Type/GQLType.h"
+#include "gson.h"
 
 class GEntityNode: public GNode {
 public:
@@ -16,7 +16,7 @@ public:
   /**
   * If id is 0, it means empty node that have special mean. For example, a super node.
    */
-  GEntityNode(node_t id, group_t gid = 0): _id(id), _gid(gid) {
+  GEntityNode(gql::key_t id, group_t gid = 0): _id(id), _gid(gid) {
     _status.updated = false;
   }
 
@@ -24,15 +24,17 @@ public:
 
   group_t gid() const { return _gid; }
   const std::multimap<std::string, attribute_t>& attributes() const { return _attributes; }
-  node_t id() const { return _id; }
+  gql::key_t id() const { return _id; }
 
   bool isUpdate() { return _status.updated; }
 
   void setUpdate(bool update) { _status.updated = update; }
   
   void setProperty(const std::string& key, const attribute_t& value);
+
+  //void setAttributes(const nlohmann::json& value);
 private:
-  node_t _id;
+  gql::key_t _id;
   group_t _gid;
 
   std::string _label;

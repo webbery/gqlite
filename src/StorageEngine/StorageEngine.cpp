@@ -77,6 +77,17 @@ namespace {
     return txn.put(map, k, &value, MDBX_put_flags_t(mdbx::upsert));
   }
 
+  int put(mdbx::txn_managed& txn, mdbx::map_handle& map, const gql::key_t& key, mdbx::slice value) {
+      return key.visit([&map, &txn, &value](node_t id) {
+          mdbx::slice k(&id, sizeof(node_t));
+          return txn.put(map, k, &value, MDBX_put_flags_t(mdbx::upsert));
+          },
+          [&map, &txn, &value](const std::string id) {
+              mdbx::slice k(id.data(), id.size());
+              return txn.put(map, k, &value, MDBX_put_flags_t(mdbx::upsert));
+          });
+  }
+
   int del(mdbx::txn_managed& txn, mdbx::map_handle& map, uint64_t key) {
     mdbx::slice k(&key, sizeof(uint64_t));
     if (txn.erase(map, k)) return 0;
@@ -534,6 +545,19 @@ int GStorageEngine::write(const std::string& prop, const std::string& key, void*
   return ECode_Fail;
 }
 
+int GStorageEngine::write(const std::string& prop, const gql::key_t& key, void* value, size_t len) {
+    TryInitStringType(prop);
+    auto handle = getOrCreateHandle(prop, mdbx::key_mode::usual);
+    size_t cSize = len;
+    void* buffer = value;
+    mdbx::slice data(buffer, cSize);
+    thread_local auto tid = std::this_thread::get_id();
+    if (0 == ::put(_txns[tid], handle, key, data)) {
+        return ECode_Success;
+    }
+    return ECode_Fail;
+}
+
 //int GStorageEngine::write(const std::string& mapname, const std::string& key, const nlohmann::json& value)
 //{
 //  TryInitStringType(mapname);
@@ -629,6 +653,23 @@ int GStorageEngine::read(const std::string& prop, const std::string& key, std::s
   if (data.empty()) return ECode_DATUM_Not_Exist;
   value.assign((char*)data.data(), data.size());
   return ECode_Success;
+}
+
+int GStorageEngine::read(const std::string& prop, const gql::key_t& key, std::string& value) {
+    assert(isMapExist(prop) || isIndexExist(prop));
+    thread_local auto tid = std::this_thread::get_id();
+    mdbx::slice data;
+    key.visit([this, &prop, &data](node_t id) {
+        auto handle = getOrCreateHandle(prop, mdbx::key_mode::usual);
+        data = ::get(_txns[tid], handle, id);
+        },
+        [this, &prop, &data](const std::string id) {
+            auto handle = getOrCreateHandle(prop, mdbx::key_mode::usual);
+            data = ::get(_txns[tid], handle, id); 
+        });
+    if (data.empty()) return ECode_DATUM_Not_Exist;
+    value.assign((char*)data.data(), data.size());
+    return ECode_Success;
 }
 
 int GStorageEngine::read(const std::string& mapname, uint64_t from, uint64_t to, std::list<std::string>& value)
@@ -792,8 +833,13 @@ std::vector<std::string> GStorageEngine::getIndexes() const
 int upsetVertex(GStorageEngine* storage, GEntityNode* entityNode) {
   std::string groupName = storage->getGroupName(entityNode->gid());
   std::string name = groupName.substr(2);
-  int ret = storage->write(name, entityNode->id(), entityNode->attributes());
-  return ret;
+  auto nodeID = entityNode->id();
+  return nodeID.visit([storage, &name, entityNode](node_t id) {
+      return storage->write(name, id, entityNode->attributes());
+      },
+      [storage, &name, entityNode](const std::string id) {
+          return storage->write(name, id, entityNode->attributes());
+      });
 }
 
 int deleteVertex(GStorageEngine* storage, const std::string& groupName, node_t nid) {
@@ -817,13 +863,12 @@ int upsetEdge(GStorageEngine* storage, GEntityEdge* entityEdge) {
   group_t gid = srcNode->gid();
   std::string nodeGroup = storage->getGroupName(gid);
 
-  auto lambdaSetNodeMap = [storage, &nodeGroup] (GEntityNode* node, const edge2_t& edgeID) {
-    // printf("node id: %ld\n", node->id());
+  auto lambdaSetNodeMap = [storage, &nodeGroup] (const gql::key_t& nodeID, const edge2_t& edgeID) {
     std::string data;
-    storage->read(nodeGroup, node->id(), data);
+    storage->read(nodeGroup, nodeID, data);
     if (data.empty()) {
-      storage->write(nodeGroup, node->id(), (void*)edgeID.data(), edgeID.size());
-      printf("write %s, key: %ld\n", nodeGroup.c_str(), node->id());
+      storage->write(nodeGroup, nodeID, (void*)edgeID.data(), edgeID.size());
+      printf("write %s, key: %ld\n", nodeGroup.c_str(), nodeID);
       return edgeID;
     }
     return data;
@@ -848,12 +893,12 @@ int upsetEdge(GStorageEngine* storage, GEntityEdge* entityEdge) {
   };
   
   if (EdgeChangedStatus::Latest == entityEdge->status()) {
-    auto srcEdgeID = lambdaSetNodeMap(srcNode, eid);
-    auto dstEdgeID = lambdaSetNodeMap(dstNode, eid);
+    auto srcEdgeID = lambdaSetNodeMap(srcNode->id(), eid);
+    auto dstEdgeID = lambdaSetNodeMap(dstNode->id(), eid);
     
     // update node's edge list
-    node_t srcID = srcNode->id();
-    node_t dstID = dstNode->id();
+    auto srcID = srcNode->id();
+    auto dstID = dstNode->id();
     
     std::string src_prev_rid, src_next_rid, dst_prev_rid, dst_next_rid;
     // initialize latest edge
@@ -877,9 +922,14 @@ int upsetEdge(GStorageEngine* storage, GEntityEdge* entityEdge) {
   }
   
   // update connect node
-  auto lambdaUpdateEdge = [storage, &edgeGroup, &nodeGroup] (const edge2_t& eid, node_t nodeID) {
+  auto lambdaUpdateEdge = [storage, &edgeGroup, &nodeGroup] (const edge2_t& eid, const gql::key_t& nodeID) {
     std::string edgeID;
-    storage->read(nodeGroup, nodeID, edgeID);
+    nodeID.visit([&nodeGroup, &edgeID, storage](node_t id) {
+        storage->read(nodeGroup, id, edgeID);
+        },
+        [&nodeGroup, &edgeID, storage](const std::string id) {
+        storage->read(nodeGroup, id, edgeID);
+        });
     assert(!edgeID.empty());
 
     std::string data;
@@ -889,13 +939,13 @@ int upsetEdge(GStorageEngine* storage, GEntityEdge* entityEdge) {
 
     Variant<std::string, node_t> src, dst;
     gql::get_from_to(edgeID, src, dst);
-    if (src.Get<node_t>() == nodeID) {
+    if (src == nodeID) {
       edges[SRC_NEXT_INDEX] = eid;
       if (edges[SRC_PREV_INDEX] == edgeID) { // only one edge in list
         edges[SRC_PREV_INDEX] = eid;
       }
     }
-    else if (dst.Get<node_t>() == nodeID) {
+    else if (dst == nodeID) {
       edges[DST_PREV_INDEX] = eid;
       if (edges[DST_NEXT_INDEX] == edgeID) { // only one edge in list
         edges[DST_NEXT_INDEX] = eid;
@@ -998,7 +1048,7 @@ std::list<edge2_t> getVertexOutbound(GStorageEngine* storage, group_t edgeGroup,
 return outbound;
 }
 
-edge2_t getNodePrev(GStorageEngine* storage, const std::string& edgeGroupName, node_t nid, const edge2_t& eid) {
+edge2_t getNodePrev(GStorageEngine* storage, const std::string& edgeGroupName, const gql::key_t& nid, const edge2_t& eid) {
   Variant<std::string, node_t> src, dst;
   gql::get_from_to(eid, src, dst);
   std::string data;
@@ -1016,7 +1066,7 @@ edge2_t getNodePrev(GStorageEngine* storage, const std::string& edgeGroupName, n
   return "";
 }
 
-edge2_t getNodeNext(GStorageEngine* storage, const std::string& edgeGroupName, node_t nid, const edge2_t& eid) {
+edge2_t getNodeNext(GStorageEngine* storage, const std::string& edgeGroupName, const gql::key_t& nid, const edge2_t& eid) {
   Variant<std::string, node_t> src, dst;
   gql::get_from_to(eid, src, dst);
   std::string data;

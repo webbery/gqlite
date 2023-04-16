@@ -19,7 +19,7 @@ class GEntityEdge : public GEdge {
 public:
   GEntityEdge(GEntityNode* from, GEntityNode* to, bool direction = false, group_t gid = 0)
     :_gid(gid), _from(from), _to(to) {
-      gql::edge_id eid = gql::make_edge_id(direction, from?from->id():0, to?to->id():0);
+      gql::edge_id eid = gql::make_edge_id(direction, from?from->id():(uint64_t)0, to?to->id(): (uint64_t)0);
       _id = gql::to_string(eid);
 
       _status.updated = false;

@@ -61,10 +61,10 @@ protected:
 
   bool stopExit();
 
-  gkey_t getKey(KeyType type, mdbx::slice& slice);
-  bool predict(KeyType type, gkey_t key, nlohmann::json& row);
-  bool predictEdge(gkey_t key, nlohmann::json& row);
-  bool predictVertex(gkey_t key, nlohmann::json& row);
+  gql::key_t getKey(KeyType type, mdbx::slice& slice);
+  bool predict(KeyType type, gql::key_t key, nlohmann::json& row);
+  bool predictEdge(gql::key_t key, nlohmann::json& row);
+  bool predictVertex(gql::key_t key, nlohmann::json& row);
   bool predict(const std::function<bool(const attribute_t&)>& op, const nlohmann::json& attr)const;
 
   void initQueryGroups(const std::string& group);
@@ -150,6 +150,6 @@ protected:
   /**
    * save temp id that search from index
    */
-  std::list< gkey_t > _resultSet;
+  std::list< gql::key_t > _resultSet;
   GVM* _gvm;
 };

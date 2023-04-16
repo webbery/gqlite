@@ -43,7 +43,7 @@ void GWalkVisitor::makeEdgeCondition(GWalkDeclaration::Order order, GEntityNode*
 }
   
 GEntityNode* GWalkVisitor::makeNodeCondition(const std::string& str) {
-  GEntityNode* node = new GEntityNode(0);
+  GEntityNode* node = new GEntityNode((uint64_t)0);
   if (str != "*") {
     node->setProperty("label", const_cast<std::string&>(str));
   }

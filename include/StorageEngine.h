@@ -136,7 +136,9 @@ public:
      * @param value the attribute of node/edge
      */
     int write(const std::string& mapname, const std::string& key, void* value, size_t len);
+    int write(const std::string& mapname, const gql::key_t& key, void* value, size_t len);
     int read(const std::string& mapname, const std::string& key, std::string& value);
+    int read(const std::string& mapname, const gql::key_t& key, std::string& value);
     int del(const std::string& mapname, const std::string& key);
 
     int write(const std::string& mapname, uint64_t key, void* value, size_t len);
@@ -313,8 +315,8 @@ std::list<edge2_t> getVertexOutbound(GStorageEngine* storage, group_t edgeGroup,
 
 std::list<edge2_t> getVertexInbound(GStorageEngine* storage, group_t edgeGroup, group_t nodeGroup, node_t nid);
 
-edge2_t getNodePrev(GStorageEngine* storage, const std::string& edgeGroupName, node_t nid, const edge2_t& eid);
-edge2_t getNodeNext(GStorageEngine* storage, const std::string& edgeGroupName, node_t nid, const edge2_t& eid);
+edge2_t getNodePrev(GStorageEngine* storage, const std::string& edgeGroupName, const gql::key_t& nid, const edge2_t& eid);
+edge2_t getNodeNext(GStorageEngine* storage, const std::string& edgeGroupName, const gql::key_t& nid, const edge2_t& eid);
 
 int upsetEdge(GStorageEngine* storage, GEntityEdge* entityEdge);
 int deleteEdge(GStorageEngine* storage, const std::string& groupName, const edge2_t& eid);

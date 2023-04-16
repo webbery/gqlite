@@ -9,7 +9,7 @@ class GEntityNode;
 class GEntityEdge;
 struct AttributeNode;
 
-using predicate_t = Variant<std::function<bool(const gkey_t&)>, std::function<bool(const attribute_t&)>>;
+using predicate_t = Variant<std::function<bool(const gql::key_t&)>, std::function<bool(const attribute_t&)>>;
 using attr_node_t = std::string;
 
 struct AttributeNode {

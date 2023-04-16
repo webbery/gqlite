@@ -167,7 +167,7 @@ class Variant {
     _indx = IndexVisitor<typename std::remove_cv<U>::type, Types...>::value;
   }
 public:
-  Variant():_tindex(typeid(void)) {}
+  Variant():_tindex(typeid(void)),_indx(-1) {}
   ~Variant() {
     _Storage::Release(_tindex, &_data);
   }
@@ -176,7 +176,7 @@ public:
     ,_indx(other._indx)
     { _Storage::copy(other._tindex, &other._data, &_data); }
    
-  Variant(Variant&& other)
+  Variant(Variant&& other) noexcept
     :_tindex(other._tindex)
     ,_indx(other._indx)
     {
@@ -188,7 +188,7 @@ public:
       gql::IsContain<typename std::remove_reference<T>::type, Types...>::value
     >::type
   >
-  Variant(T&& value):_tindex(typeid(void)){
+  Variant(T&& value) noexcept :_tindex(typeid(void)){
     Set(value);
   }
 
@@ -204,8 +204,9 @@ public:
     return *this;
   }
   
-  Variant& operator = (Variant&& other) {
+  Variant& operator = (Variant&& other) noexcept {
     _tindex = other._tindex;
+    _indx = other._indx;
     _Storage::move(other._tindex, &other._data, &_data);
     return *this;
   }
